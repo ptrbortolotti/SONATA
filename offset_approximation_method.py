@@ -121,7 +121,7 @@ def BezierOffset_Error(parameters,X_Bezier,dist):
     m = Y_Bezier.Degree()   
     k = 2*max(m,n)
     nPoints = k+1
-    nPoints = 100                                #BUG: PROJECTION der equidistanten punkte von X auf Y. kann zu fehlern fueren, besonders wenn anzahl der Kontrollpunkte gering ist
+    nPoints = 100                                                               #BUG: PROJECTION der equidistanten punkte von X auf Y. kann zu fehlern fueren, besonders wenn anzahl der Kontrollpunkte gering ist
     #print("equidistant points:",nPoints)
 
     p = gp_Pnt2d()
@@ -152,7 +152,8 @@ def BezierOffset_Error(parameters,X_Bezier,dist):
             Distance = -Projection.LowerDistance()
         
         if radius > (2*dist):
-            dist_corr = radius - math.sqrt(radius**2 - 2*radius*dist)           #BUG: TODO: Strech if its an outside curve!!!!
+            dist_corr = radius - math.sqrt(radius**2 - 2*radius*dist)           #BUG: TODO: Differentiate outside and inside curves! Strech if its an outside curve!!!!
+            dist_corr = dist
         else: dist_corr =  radius           
             
         print (dist_corr)
@@ -282,7 +283,7 @@ curve0 = Geom2d_BezierCurve(array0)
 
 P1 = gp_Pnt2d(0, 0)
 P2 = gp_Pnt2d(12, 0)
-P3 = gp_Pnt2d(-20, 40)
+P3 = gp_Pnt2d(-20, 30)
 P4 = gp_Pnt2d(18, 10)
 P5 = gp_Pnt2d(20,10)
 P6 = gp_Pnt2d(12, 28)
