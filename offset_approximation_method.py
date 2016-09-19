@@ -6,6 +6,7 @@ import math
 from scipy.optimize import leastsq
   
 from OCC.gp import gp_Pnt2d, gp_Vec2d, gp_XY, gp_Lin2d, gp_Dir2d
+from OCC.GCE2d import  GCE2d_MakeSegment
 from OCC.TColgp import TColgp_Array1OfPnt2d
 from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline, Geom2dAPI_InterCurveCurve,Geom2dAPI_ProjectPointOnCurve
 from OCC.Geom2d import Geom2d_OffsetCurve, Geom2d_TrimmedCurve, Geom2d_Line, Geom2d_BezierCurve
@@ -121,11 +122,12 @@ def BezierOffset_Error(parameters,X_Bezier,dist):
     m = Y_Bezier.Degree()   
     k = 2*max(m,n)
     nPoints = k+1
-    nPoints = 100                                                               #BUG: PROJECTION der equidistanten punkte von X auf Y. kann zu fehlern fueren, besonders wenn anzahl der Kontrollpunkte gering ist
+    nPoints = 30                                                               #BUG: PROJECTION der equidistanten punkte von X auf Y. kann zu fehlern fueren, besonders wenn anzahl der Kontrollpunkte gering ist
     #print("equidistant points:",nPoints)
 
     p = gp_Pnt2d()
     v1 = gp_Vec2d()
+    v2 = gp_Vec2d()
     s = np.linspace(0,1,nPoints)
         
     #EXACT OFFSET:
@@ -136,13 +138,13 @@ def BezierOffset_Error(parameters,X_Bezier,dist):
     #OFFSET DISTANCE CORRECTION BY LEIHONG LI, for constant local area
     error = np.zeros(nPoints)
     for i,u in enumerate(s): 
-        X_Bezier.D1(u,p,v1)
+        X_Bezier.D2(u,p,v1,v2)
         normal = v1.GetNormal()
         #display.DisplayShape(p,color='MAGENTA')
         radius = radius_of_curve(X_Bezier,u)         
         Projection = Geom2dAPI_ProjectPointOnCurve(p,Y_Bezier.GetHandle())
         nearestP = Projection.NearestPoint()
-        dist_vec = gp_Vec2d (p, nearestP)#
+        dist_vec = gp_Vec2d (p, nearestP)
         Distance = Projection.LowerDistance()
         #print(Distance)
         #print(dist_vec.Magnitude())        
@@ -151,12 +153,28 @@ def BezierOffset_Error(parameters,X_Bezier,dist):
         if scalarproduct < 0:
             Distance = -Projection.LowerDistance()
         
-        if radius > (2*dist):
-            dist_corr = radius - math.sqrt(radius**2 - 2*radius*dist)           #BUG: TODO: Differentiate outside and inside curves! Strech if its an outside curve!!!!
-            dist_corr = dist
-        else: dist_corr =  radius           
-            
-        print (dist_corr)
+        print('Radius:',radius)
+        VexVsCave = normal.Dot(v2)*dist
+        if  VexVsCave > 0:  # CONCAVE: (Inside Curve)
+            if radius > (2*abs(dist)):
+                dist_corr = radius - math.sqrt(radius**2 - 2*radius*abs(dist))
+                #dist_corr = dist
+                print('Radius:',radius)  
+                print ('h0:',dist,';\th:',dist_corr)
+            else: 
+                dist_corr =  2*dist  
+        
+        else:   #CONVEX: (Outside curve)
+            if radius > (2*abs(dist)):
+                dist_corr = -radius + math.sqrt(radius**2 + 2*radius*abs(dist))
+                #dist_corr = dist
+                print('Radius:',radius)  
+                print ('h0:',dist,';\th:',dist_corr)
+            else: 
+                dist_corr = dist
+                
+        #print('Radius:',radius)    
+        #print ('h0:',dist,';\th:',dist_corr)
         error[i] = Distance-dist_corr 
         #display.DisplayShape(p,color='ORANGE')
         
@@ -168,6 +186,8 @@ def OffsetApprox(X_Bezier,dist):
     parameters = np.array([0.9,0.9,0.5,0.5])        #lambda_1,lambda_2,mu_1,mu_2
     x = leastsq(BezierOffset_Error, parameters, args=(X_Bezier,dist),full_output=1)
     Y_Bezier = BezierOffsetG2(x[0],X_Bezier, dist)
+    error = BezierOffset_Error(x[0],X_Bezier, dist)
+    print(error)
     return Y_Bezier
     
 def radius_of_curve(curve,u):
@@ -264,9 +284,9 @@ def BezierOffsetG2(parameters,X_Bezier,dist):
     #display_points_of_array(W,'BLUE')
     return Y_Bezier 
 
-    
-    
-    
+
+
+
     
 #============================================
 #SUBDIVIDED CUBIC BEZIER SPLINE APPROXIMATION
@@ -282,21 +302,21 @@ array0.SetValue(4, gp_Pnt2d(0, 3))
 curve0 = Geom2d_BezierCurve(array0)
 
 P1 = gp_Pnt2d(0, 0)
-P2 = gp_Pnt2d(12, 0)
-P3 = gp_Pnt2d(-20, 30)
-P4 = gp_Pnt2d(18, 10)
-P5 = gp_Pnt2d(20,10)
-P6 = gp_Pnt2d(12, 28)
-P7 = gp_Pnt2d(12, 22)
+P2 = gp_Pnt2d(1, 1)
+P3 = gp_Pnt2d(2, 4)
+P4 = gp_Pnt2d(8, 9)
+P5 = gp_Pnt2d(9, 16)
+P6 = gp_Pnt2d(5, 25)
+P7 = gp_Pnt2d(6, 36)
 
-array1 = TColgp_Array1OfPnt2d(1, 6)
+array1 = TColgp_Array1OfPnt2d(1, 7)
 array1.SetValue(1, P1)
 array1.SetValue(2, P2)
 array1.SetValue(3, P3)
 array1.SetValue(4, P4)
 array1.SetValue(5, P5)
 array1.SetValue(6, P6)
-#array1.SetValue(7, P7)
+array1.SetValue(7, P7)
 
 array2 = TColgp_Array1OfPnt2d(1, 4)
 array2.SetValue(1, P4)
@@ -313,21 +333,60 @@ display_points_of_array(array1,'GREEN')
 #display_points_of_array(array2,'BLUE')
 
 
+
+
+
+
+#============================================
+#FUCTION GET NORMAL VECTOR:
+#============================================    
+nPoints = 100                                                             
+dist = 1.2
+
+p = gp_Pnt2d()
+v1 = gp_Vec2d()
+v2 = gp_Vec2d()
+s = np.linspace(0,1,nPoints)
+    
+error = np.zeros(nPoints)
+for i,u in enumerate(s):  
+        curve1.D2(u,p,v1,v2)
+        normal = v1.GetNormal()
+        Line = gp_Lin2d(p,gp_Dir2d(normal) )
+        Normal_Segment = GCE2d_MakeSegment(Line, 0, dist)
+        display.DisplayShape(Normal_Segment.Value(), color='WHITE')
+        
+        Line = gp_Lin2d(p,gp_Dir2d(v2) )
+        Normal_Segment = GCE2d_MakeSegment(Line, 0, dist)
+        
+        scalarproduct = normal.Dot(v2)*dist
+        if  scalarproduct > 0:  # CONCAVE
+            display.DisplayShape(Normal_Segment.Value(), color='GREEN')
+        
+        else:   #CONVEX
+            display.DisplayShape(Normal_Segment.Value(), color='RED')
+            
+
+
+
+
+
+
+
 #=====================================================================
 # OFFSET CALCULATION - MAIN
 #=====================================================================
 
-dist = 1.6
 
 parameters = np.array([0.9,0.9,0.5,0.5])        #lambda_1,lambda_2,mu_1,mu_2
 #BezierOffsetG2(parameters,curve1,dist)
 #BezierOffset_Error(parameters,curve1,dist)
 OffsetG2 = OffsetApprox(curve1,dist)
-OffsetG2_2 = OffsetApprox(OffsetG2,dist)
-OffsetG2_3 = OffsetApprox(OffsetG2_2,dist)
+#OffsetG2_2 = OffsetApprox(OffsetG2,dist)
+#OffsetG2_3 = OffsetApprox(OffsetG2_2,dist)
 display.DisplayShape(OffsetG2, color='RED')
-display.DisplayShape(OffsetG2_2, color='ORANGE')
-display.DisplayShape(OffsetG2_3, color='GREEN')
+#display.DisplayShape(OffsetG2_2, color='ORANGE')
+#display.DisplayShape(OffsetG2_3, color='GREEN')
 #Xd_Bezier = Geom2d_OffsetCurve(curve1.GetHandle(), dist)
 #display.DisplayShape(Xd_Bezier, color='YELLOW')
 
