@@ -11,7 +11,7 @@ from scipy.interpolate import interp1d
 
 #Python OCC Libraries
 from OCC.gp import gp_Pnt, gp_Vec, gp_Pnt2d, gp_Pln, gp_Dir, gp_Trsf, gp_Ax1, gp_OX, gp_Ax3, gp_Ax2, gp_Circ, gp_OY
-from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline, Geom2dAPI_Interpolate 
+from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline, Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve 
 from OCC.GeomAPI import geomapi, GeomAPI_PointsToBSpline,GeomAPI_Interpolate
 from OCC.TColgp import TColgp_Array1OfPnt, TColgp_Array1OfPnt2d, TColgp_HArray1OfPnt2d
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge,BRepBuilderAPI_MakeWire 
@@ -33,7 +33,7 @@ from OCC.IFSelect import IFSelect_RetDone
 from core_geometry_utils import *
 from core_operations_utils import *
 from tab_definition import *
-
+from Intersect_and_trim_utils import trim_2dcurve_selfintersectingLoop
 
 
 #-------------------------------
@@ -63,7 +63,7 @@ airfoil = 'naca2410'
 display, start_display, add_menu, add_function_to_menu = init_display(backend_str=None, size=(1920,1080))
 # required for precise rendering of the circles
 display.Context.SetDeviationAngle(0.00001)      # 0.001 default
-display.Context.SetDeviationCoefficient(0.00005) # 0.001 default
+display.Context.SetDeviationCoefficient(0.00001) # 0.001 default
 
 
 #CREATE AXIS SYSTEM for Visualization
@@ -82,6 +82,7 @@ display.DisplayShape(h1,color='RED')
 display.DisplayShape(h2,color='GREEN')
 display.DisplayShape(h3,color='BLUE')
 
+###############################################################################
 
 #GET AIRFOIL POINTS AND PLACE THEM INTO AN NP.ARRAY called data   
 data = UIUCAirfoil(airfoil)
@@ -180,11 +181,17 @@ for j in range(0,num_of_layers):
     display.DisplayShape(geom_bspline, color='BLUE', update=True)
     offset_curves.append(geom_bspline)     
     geom_bspline = geom_bspline.GetHandle()
-    
-#Trim1 = Geom_TrimmedCurve(offset_curves[0].GetHandle(),0.4,0.6)
-#Trim2 = Geom_TrimmedCurve(offset_curves[1].GetHandle(),0.4,1.1)
-#
-#display.DisplayShape(Trim1, color='ORANGE')
+
+
+
+Offset1 = offset_curves[0]
+Inter = Geom2dAPI_InterCurveCurve(Offset1.GetHandle(), 1.0e-5)
+print('Number of Intersection Points:', Inter.NbPoints())
+#print('Number of tangetial Intersections:',Inter.NbSegments())
+InterP1 = Inter.Point(1)
+TrimmedWire = trim_2dcurve_selfintersectingLoop(InterP1)
+
+display.DisplayShape(TrimmedWire.Wire(), color='BLACK')
 #display.DisplayShape(Trim2, color='ORANGE')
 
 
