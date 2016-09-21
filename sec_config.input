@@ -10,7 +10,7 @@
 &DEFN Setup
 	NbOfWebs = 1														#Number of Webs (0=CSpar, 1=Dspar,...)							[int]							DEFAULT=0
 	BalanceWeight = True 												#True or False for Balance Weight								[boolean]						DEFAULT=FALSE
-	Airfoil = 'naca23012'												#Airfoil from DATABASE											[string]						DEFAULT='naca23012'
+	Airfoil = naca23012													#Airfoil from DATABASE											[string]						DEFAULT='naca23012'
 &END 
 
 
@@ -64,9 +64,9 @@
 #=================================Balance Weight Definition=============
 
 &DEFN BalanceWeight
-	XPos = 0.1															#[-]	X Position												[int]							NO DEFAULT VALUE						
-	YPos = 0.1															#[-]	Y Position												[int]							NO DEFAULT VALUE
-	D = 0.124															#[-]	Diameter of Balance Weight								[float]							NO DEFAULT VALUE
+	XPos = 0.1															#[-]	X Position												[float]							NO DEFAULT VALUE						
+	YPos = 0.1															#[-]	Y Position												[float]							NO DEFAULT VALUE
+	Diameter = 0.124															#[-]	Diameter of Balance Weight								[float]							NO DEFAULT VALUE
 	MatID = 1   														#[-]	Material ID												[int]							NO DEFAULT VALUE
 &END
 
