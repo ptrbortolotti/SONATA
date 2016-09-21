@@ -1,0 +1,72 @@
+#==============================SONATA-INPUT=============================
+#This file contains the input information for the structural design of the rotorblade crosssection
+#This is the first draft of the input file!
+#Author: Tobias Pflumm
+#Date:	09/21/2016
+
+
+#===============================SETUP===================================
+
+&DEFN Setup
+	NbOfWebs = 1														#Number of Webs (0=CSpar, 1=Dspar,...)							[int]							DEFAULT=0
+	BalanceWeight = True 												#True or False for Balance Weight								[boolean]						DEFAULT=FALSE
+	Airfoil = 'naca23012'												#Airfoil from DATABASE											[string]						DEFAULT='naca23012'
+&END 
+
+
+#===============================WEB DEFINITION==========================
+&DEFN Web
+	WebID = 1															#Web ID 														[int]													
+	Pos1 = 0.5															#first Position on Airfoil (between 0 and 1) 					[float]
+	Pos2 = 0.75															#second Position on Geometry (between 0 and 1) 					[float]
+&END
+
+#===============================COMPOSITE LAYUP DEFINITION==============
+
+&DEFN Skin
+	&DEFN Layup
+	#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
+	0.0			1.0		0.23			45					1		'Skin1'	
+	0.0			1.0		0.23			45					1		'Skin2'
+	&END
+&END
+
+
+&DEFN Seg
+	SegID = 0															#Segment ID															[int]
+	CoreMaterial = 	3													#give material id of core fillings in that segment					[int]
+
+	&DEFN Layup
+	#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
+	0.0			1.0		0.23			45					1		'String1'	
+	0.0			1.0		0.23			45					1		'String2'
+	0.4			0.6		0.60			0					2		'String1'
+	0.35		0.65	0.60			0					2		'String2'		
+	&END
+
+&END 
+
+
+&DEFN Seg
+	SegID = 1															#Segment ID															[int]
+	CoreMaterial = 	4													#give material id of core fillings in that segment					[int]
+
+	&DEFN Layup
+	#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
+	0.0			1.0		0.23			45					1		'Skin1'	
+	0.0			1.0		0.23			45					1		'Skin2'
+	0.4			0.6		0.60			0					2		'Spar1'
+	0.35		0.65	0.60			0					2		'Spar2'	
+	&END
+
+&END 
+
+#=================================Balance Weight Definition=============
+
+&DEFN BalanceWeight
+	XPos = 0.1															#[-]	X Position												[int]							NO DEFAULT VALUE						
+	YPos = 0.1															#[-]	Y Position												[int]							NO DEFAULT VALUE
+	D = 0.124															#[-]	Diameter of Balance Weight								[float]							NO DEFAULT VALUE
+	MatID = 1   														#[-]	Material ID												[int]							NO DEFAULT VALUE
+&END
+
