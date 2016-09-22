@@ -1,5 +1,14 @@
+#==============================READ SONATA2D - INPUT FILE =====================
+#This file provides the class and its function to read the input information for the structural design of the rotorblade crosssection
+# - The format must be according to the sec_config.input file. 
+# 
+#TBD:Include more checks for input format
+#TBD:Include Definition of an erosion protection    
+#
+#Author: Tobias Pflumm
+#Date:	09/21/2016
+#==============================================================================
 
-#UTILITY READ FUNCTIONS:
 
 def read_segment(STR,seg2find):
     str2find = '&DEFN '+seg2find
@@ -66,7 +75,7 @@ def read_layup(STR):
     temp = temp[first+len('\n'):last]
     
     list_temp = temp.split('\n')
-    NbOfLayers = temp.count('\n')+1             #The Number of Layers are the determined by the number of rows
+    NbOfLayers = temp.count('\n')+1                #The Number of Layers are the determined by the number of rows
     
     for j in range(0,NbOfLayers):  
         list_temp[j] = list_temp[j].split()
@@ -108,14 +117,14 @@ class section_config(object):
         #READ SETUP SEGMENT OF INPUT FILE
         SETUP_str,SETUP_start,SETUP_end = read_segment(STR,'Setup')  
         #print SETUP_str,SETUP_start,SETUP_end,'\n'
-        self.NbOfWebs = read_INTrowSTR(SETUP_str,'NbOfWebs')
-        self.BalanceWeight = read_BOOLrowSTR(SETUP_str,'BalanceWeight')
-        self.Airfoil = read_TXTrowSTR(SETUP_str,'Airfoil')
+        self.SETUP_NbOfWebs = read_INTrowSTR(SETUP_str,'NbOfWebs')
+        self.SETUP_BalanceWeight = read_BOOLrowSTR(SETUP_str,'BalanceWeight')
+        self.SETUP_Airfoil = read_TXTrowSTR(SETUP_str,'Airfoil')
                      
                      
         #======================================================================
         #CHECK and READ BALANCE WEIGHT DEFINITION!   
-        if self.BalanceWeight == True:
+        if self.SETUP_BalanceWeight == True:
             #READ Balance Weight Definition
             BW_str,BW_start,BW_end = read_segment(STR,'BalanceWeight')  
             #print BW_str,BW_start,BW_end,'\n'
@@ -127,12 +136,12 @@ class section_config(object):
     
         #======================================================================
         #CHECK and READ WEB DEFINITION!
-        if self.NbOfWebs != STR.count('&DEFN Web'):
+        if self.SETUP_NbOfWebs != STR.count('&DEFN Web'):
             print 'WARNING: Setup variable "NbOfWebs" is not equal to the number of web definitions'
             
-        if self.NbOfWebs > 0:
+        if self.SETUP_NbOfWebs > 0:
             #READ Balance Weight Definition
-            for j in range(0,self.NbOfWebs):    
+            for j in range(0,self.SETUP_NbOfWebs):    
                 WEB_str,WEB_start,WEB_end = read_segment(STR,'Web')              
         
                 self.WEB_ID.append(read_INTrowSTR(WEB_str,'WebID'))
@@ -171,28 +180,15 @@ class section_config(object):
         if (len(self.SEG_ID) > 1) and (not(len(set(self.SEG_ID)) == len(self.SEG_ID))):
             print 'WARNING: SEG IDs are not unique'        
         
-        if not(self.NbOfWebs == 0 and len(self.SEG_ID) == 1) and (not(self.NbOfWebs+2 == len(self.SEG_ID))):   
+        if not(self.SETUP_NbOfWebs == 0 and len(self.SEG_ID) == 1) and (not(self.SETUP_NbOfWebs+2 == len(self.SEG_ID))):   
             print 'WARNING: Make sure the number of Composite Layup Segments corresponds to your chosen number of Webs'
 
-    
-        
-        
-                
+
 #======================================================
 #       MAIN
 #======================================================
 if __name__ == '__main__':
     
-    filename = 'sec_config.input'
+    filename = 'sec_config_test.input'
     section1 = section_config()
     section1.read_config(filename)
-
-
-
-
-
-
-
-
-
-
