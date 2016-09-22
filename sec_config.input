@@ -4,7 +4,6 @@
 #Author: Tobias Pflumm
 #Date:	09/21/2016
 
-
 #===============================SETUP===================================
 
 &DEFN Setup
@@ -23,25 +22,16 @@
 
 #===============================COMPOSITE LAYUP DEFINITION==============
 
-&DEFN Skin
-	&DEFN Layup
-	#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
-	0.0			1.0		0.23			45					1		'Skin1'	
-	0.0			1.0		0.23			45					1		'Skin2'
-	&END
-&END
-
-
 &DEFN Seg
 	SegID = 0															#Segment ID															[int]
 	CoreMaterial = 	3													#give material id of core fillings in that segment					[int]
 
 	&DEFN Layup
 	#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
-	0.0			1.0		0.23			45					1		'String1'	
-	0.0			1.0		0.23			45					1		'String2'
-	0.4			0.6		0.60			0					2		'String1'
-	0.35		0.65	0.60			0					2		'String2'		
+	0.0			1.0		0.23			45					1		#String1	
+	0.0			1.0		0.23			45					1		#String2
+	0.4			0.6		0.60			0					2		#String1
+	0.35		0.65	0.60			0					2		#String2		
 	&END
 
 &END 
@@ -53,20 +43,35 @@
 
 	&DEFN Layup
 	#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
-	0.0			1.0		0.23			45					1		'Skin1'	
-	0.0			1.0		0.23			45					1		'Skin2'
-	0.4			0.6		0.60			0					2		'Spar1'
-	0.35		0.65	0.60			0					2		'Spar2'	
+	0.0			1.0		0.23			45					1		#Skin1
+	0.0			1.0		0.23			45					1		#Skin2
+	0.4			0.6		0.60			0					2		#Spar1
+	0.35		0.65	0.60			0					2		#Spar2	
 	&END
 
 &END 
+
+&DEFN Seg
+	SegID = 2															#Segment ID															[int]
+	CoreMaterial = 	4													#give material id of core fillings in that segment					[int]
+
+	&DEFN Layup
+	#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
+	0.0			1.0		0.23			45					1		#Skin1
+	0.0			1.0		0.23			45					1		#Skin2
+	0.4			0.6		0.60			0					2		#Spar1
+	0.35		0.65	0.60			0					2		#Spar2	
+	&END
+
+&END 
+
 
 #=================================Balance Weight Definition=============
 
 &DEFN BalanceWeight
 	XPos = 0.1															#[-]	X Position												[float]							NO DEFAULT VALUE						
 	YPos = 0.1															#[-]	Y Position												[float]							NO DEFAULT VALUE
-	Diameter = 0.124															#[-]	Diameter of Balance Weight								[float]							NO DEFAULT VALUE
+	Diameter = 0.124															#[-]	Diameter of Balance Weight						[float]							NO DEFAULT VALUE
 	MatID = 1   														#[-]	Material ID												[int]							NO DEFAULT VALUE
 &END
 

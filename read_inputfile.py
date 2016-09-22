@@ -1,6 +1,4 @@
 
-
-
 #UTILITY READ FUNCTIONS:
 
 def read_segment(STR,seg2find):
@@ -9,7 +7,7 @@ def read_segment(STR,seg2find):
     start2 = STR[start1+len(str2find)::].find('&DEFN')
     end1  = STR[start1+len(str2find)::].find('&END' )
     end = end1
-    if start2<end1:
+    if start2 > 0 and start2<end1:
         end  = STR[start1+len(str2find)+end1+len('&END')::].find('&END' )+start1+end1+2*len('&END')+len(str2find)
     else:
         end = start1+end1+len('&END')+len(str2find)
@@ -51,14 +49,48 @@ def read_TXTrowSTR(STR,STR2Find):
     temp = temp.split('=')[1]
     temp = temp.replace(" ", "")
     return temp 
+
+def read_layup(STR):
+    str2find = '&DEFN Layup'
+    start1 = STR.find(str2find)
+    start2 = STR[start1+len(str2find)::].find('&DEFN')
+    end1  = STR[start1+len(str2find)::].find('&END' )
+    end = end1
+    if start2 > 0 and start2<end1:
+        end  = STR[start1+len(str2find)+end1+len('&END')::].find('&END' )+start1+end1+2*len('&END')+len(str2find)
+    else:
+        end = start1+end1+len('&END')+len(str2find)
+    temp = STR[start1:end]
+    first = temp.find('\n')
+    last = temp.rfind('\n') 
+    temp = temp[first+len('\n'):last]
+    
+    list_temp = temp.split('\n')
+    NbOfLayers = temp.count('\n')+1             #The Number of Layers are the determined by the number of rows
+    
+    for j in range(0,NbOfLayers):  
+        list_temp[j] = list_temp[j].split()
+    
+    #CONVERT TABLE TO np.ARRAY
+    import numpy as np
+    x = np.asarray(list_temp)
+    nplayup = x[:,:5].astype(np.float)
+    
+    return nplayup
+    
     
 
 #================ SECTION-CONFIG OBJECT ========================================
 
 class section_config(object):
     def __init__(self):
-        pass
-    
+        self.WEB_ID = []
+        self.WEB_Pos1 = []
+        self.WEB_Pos2 = []
+        self.SEG_ID = []    
+        self.SEG_CoreMaterial = []
+        self.SEG_Layup = []
+        
     def read_config(self,filename):
 
         #READ FILE AND CLEAN UP COMMENTS, EMPTY LINES WITH SPACES AND NEWLINES
@@ -80,7 +112,9 @@ class section_config(object):
         self.BalanceWeight = read_BOOLrowSTR(SETUP_str,'BalanceWeight')
         self.Airfoil = read_TXTrowSTR(SETUP_str,'Airfoil')
                      
-                   
+                     
+        #======================================================================
+        #CHECK and READ BALANCE WEIGHT DEFINITION!   
         if self.BalanceWeight == True:
             #READ Balance Weight Definition
             BW_str,BW_start,BW_end = read_segment(STR,'BalanceWeight')  
@@ -89,21 +123,60 @@ class section_config(object):
             self.BW_XPos    = read_FLOATrowSTR(BW_str,'XPos')
             self.BW_YPos    = read_FLOATrowSTR(BW_str,'YPos')
             self.BW_Diameter= read_FLOATrowSTR(BW_str,'Diameter')
+    
+    
+        #======================================================================
+        #CHECK and READ WEB DEFINITION!
+        if self.NbOfWebs != STR.count('&DEFN Web'):
+            print 'WARNING: Setup variable "NbOfWebs" is not equal to the number of web definitions'
             
         if self.NbOfWebs > 0:
             #READ Balance Weight Definition
             for j in range(0,self.NbOfWebs):    
-                WEB_str,WEB_start,WEB_end = read_segment(STR,'Web')
-                print WEB_str
+                WEB_str,WEB_start,WEB_end = read_segment(STR,'Web')              
+        
+                self.WEB_ID.append(read_INTrowSTR(WEB_str,'WebID'))
+                self.WEB_Pos1.append(read_FLOATrowSTR(WEB_str,'Pos1'))
+                self.WEB_Pos2.append(read_FLOATrowSTR(WEB_str,'Pos2'))
+
                 #Replace Characters from WEB_start to WEB_end with whitspaces
                 for k in range(WEB_start,WEB_end):  
                     templist = list(STR)
                     templist[k] = ' '
                     STR = ''.join(templist)
-                WEB_str,WEB_start,WEB_end = read_segment(STR,'Web')      
-                print WEB_str
+                #WEB_str,WEB_start,WEB_end = read_segment(STR,'Web')      
                 
+        if (len(self.WEB_ID) > 1) and (len(set(self.WEB_ID)) == len(self.WEB_ID)):
+            print 'WARNING: WEB IDs are not unique!'
+  
+  
+        #======================================================================
+        #CHECK and READ SEGMENT COMPOSITE LAYUP DEFINITION!
+        SEG_str,SEG_start,SEG_end = read_segment(STR,'Seg')        
                 
+        while SEG_str!= '':         
+            self.SEG_ID.append(read_INTrowSTR(SEG_str,'SegID'))
+            self.SEG_CoreMaterial.append(read_INTrowSTR(SEG_str,'CoreMaterial'))
+            self.SEG_Layup.append(read_layup(SEG_str))
+            
+             #Replace Characters from SEG_start to SEG_end with whitspaces
+            for k in range(SEG_start,SEG_end):  
+                templist = list(STR)
+                templist[k] = ' '
+                STR = ''.join(templist)
+                
+            SEG_str,SEG_start,SEG_end = read_segment(STR,'Seg')       
+        
+        #CHECK FOR SOME INPUT MISTAKES:
+        if (len(self.SEG_ID) > 1) and (not(len(set(self.SEG_ID)) == len(self.SEG_ID))):
+            print 'WARNING: SEG IDs are not unique'        
+        
+        if not(self.NbOfWebs == 0 and len(self.SEG_ID) == 1) and (not(self.NbOfWebs+2 == len(self.SEG_ID))):   
+            print 'WARNING: Make sure the number of Composite Layup Segments corresponds to your chosen number of Webs'
+
+    
+        
+        
                 
 #======================================================
 #       MAIN
