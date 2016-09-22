@@ -71,7 +71,7 @@
 &DEFN BalanceWeight
 	XPos = 0.1															#[-]	X Position												[float]							NO DEFAULT VALUE						
 	YPos = 0.1															#[-]	Y Position												[float]							NO DEFAULT VALUE
-	Diameter = 0.124															#[-]	Diameter of Balance Weight						[float]							NO DEFAULT VALUE
+	Diameter = 0.124													#[-]	Diameter of Balance Weight						[float]							NO DEFAULT VALUE
 	MatID = 1   														#[-]	Material ID												[int]							NO DEFAULT VALUE
 &END
 
