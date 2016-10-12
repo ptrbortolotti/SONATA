@@ -1,11 +1,8 @@
-from StringIO import StringIO
 import matplotlib.pyplot as plt
 import numpy as np
 import requests
 import shapely.geometry as shp
 import math, random
-
-
 
 #Python OCC Libraries
 from OCC.gp import gp_Pnt, gp_Vec,  gp_Pln, gp_Dir, gp_Trsf, gp_Ax1, gp_OX, gp_Ax3, gp_Ax2, gp_Circ, gp_OY
@@ -18,6 +15,7 @@ from OCC.GeomAPI import geomapi, GeomAPI_PointsToBSpline,GeomAPI_Interpolate
 from OCC.TColgp import TColgp_Array1OfPnt, TColgp_Array1OfPnt2d, TColgp_HArray1OfPnt2d
 from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
 from OCC.GCPnts import GCPnts_QuasiUniformAbscissa
+from OCC.Display.SimpleGui import init_display
 
 from core_geometry_utils import *
 from core_operations_utils import *
@@ -36,7 +34,7 @@ def equiPnt_curve2d(curve,NbPoints):
              temp.append([Pnt.X(), Pnt.Y()])
     return np.array(temp)
 
-#TBD: use a maximum deviation do adapt equidistand point placement for refinement in high gradient regions.
+    #TBD: use a maximum deviation do adapt equidistand point placement for refinement in high gradient regions.
 
 
 def shp_parallel_offset(arrPts,dist):
@@ -48,19 +46,44 @@ def shp_parallel_offset(arrPts,dist):
     return offlinepts
 
 
+def unit_vector(vector):
+    return vector / np.linalg.norm(vector)
+    
+        
+def angle_between(v1, v2):
+    return np.degrees( math.atan2(np.linalg.norm(np.cross(v1,v2)), np.dot(v1,v2)))
 
 ###############################################################################
 #GET OUTER AIRFOIL DATA
 ###################################
 
+def shp_discreteoffset(curve,dist,NbPoints):
+    arrPnt = equiPnt_curve2d(curve,NbPoints)
+    #print arrPnt
+    offlinepts = shp_parallel_offset(arrPnt,dist)
+    
+    
+    #TBD: if there is a edge! split array! and construct two or more curves by interpolation!    
+    
+    #print offlinepts
+    harray = TColgp_HArray1OfPnt2d_from_nparray(np.transpose(offlinepts))
+    #print harray    
+    #print harray.Length()
+    anInterpolation = Geom2dAPI_Interpolate(harray.GetHandle(), False, 0.000001)           #Interpolate datapoints to bspline
+    anInterpolation.Perform()
+    #print anInterpolation.IsDone()                                               
+    bspline = anInterpolation.Curve().GetObject()
+    return bspline
+
+
+
 if __name__ == '__main__':
-      
+###############################################################################
     
     #def polygon_offset(curve): 
     airfoil = 'naca23012'  
     
-    AFURL = 'ah79100c.dat'
-    arrPnt = np.loadtxt(AFURL, skiprows=1)   
+
     
     data = UIUCAirfoil2d(airfoil)                                                       #Get Airfoil Data from Database 
     harray = TColgp_HArray1OfPnt2d_from_nparray(data)                                   #Put Data into Harray1OfPnt2d
@@ -69,29 +92,56 @@ if __name__ == '__main__':
     anInterpolation.Perform()                                               
     bspline = anInterpolation.Curve().GetObject()
     
-    #dist = -0.0025           
-    arrPnt = equiPnt_curve2d(bspline,2000)
+    dist = 0.0013
+    NbPoints = 2000
+
+    
+    
+    arrPnt = equiPnt_curve2d(bspline,1000)
+    plt.plot(*arrPnt.T, color='black', marker='.')
+        
+    
+    test = shp_discreteoffset(bspline,dist,NbPoints)
     
     #AFURL = 'ah79100c.dat'
     #arrPnt = np.loadtxt(AFURL, skiprows=1)   
-    plt.plot(*arrPnt.T, color='black', marker='.')
-    #offlinepts = shp_parallel_offset(arrPnt,dist)
-    #plt.plot(*offlinepts.T, color='red', marker='.')
-        
     
-    
-    dist = 0.0015
-    num_of_layers = 41
+    dist = 0.008
+    num_of_layers = 8
     for j in range(0,num_of_layers):
         print j
         offlinepts = shp_parallel_offset(arrPnt,dist)
-        plt.plot(*offlinepts.T, color='red')
+        plt.plot(*offlinepts.T, color='red', marker='.')
         arrPnt = offlinepts
-    
+#    
     #TBD: fill! => run loop until array  turns to zero!
     
-               
+    #offlinepts = np.array([[0,0],[1,0],[2,1],[3,2],[5,1]])
+    
+    for i in range(1,offlinepts.shape[0]-1):
+        v1 = offlinepts[i-1]-offlinepts[i]
+        v2 = offlinepts[i+1]-offlinepts[i]
+        print i, angle_between(v1,v2)
+        if abs(angle_between(v1,v2)) < 150:
+            print ("edge:", i, angle_between(v1,v2))
+            plt.plot(*offlinepts[i].T, color='green',marker='x')
+     
+    #CHECK IF POLYLINE IS A CLOSED CONTOUR AND IF THAT IS THE CASE, CHECK THE ANGLE!
+     
+    
+    #plt.plot(*offlinepts[0].T, color='BLUE',marker='>')
+    #plt.plot(*offlinepts[-1].T, color='CYAN',marker='s')
+    #vec1 = offlinepts[i]-offlinepts[0]         
+        #vec2 = offlinepts[2]-offlinepts[1]
+    
 
+    
+    #angle_between(vec1,vec2)
+    #print angle_between(vec1,vec2)*180/np.pi
+    
+    
+    
+    
 #    # Create a Polygon from the nx2 array in `afpts`
 #    afpoly = shp.Polygon(arrPnt)
 #    
@@ -122,6 +172,8 @@ if __name__ == '__main__':
 #    plt.plot(*noffafpolypts5.T, color='green', marker='.')
     plt.axis('equal')
     plt.show()
+        
+
 
 
     
