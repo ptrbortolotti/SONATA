@@ -87,9 +87,7 @@ else:
 #if not close it
 test = BRepCheck_Wire(tmp_wire.Wire())
 print test.Closed()     #Returns 0 for NoError
-                        #
-
-
+                        #Returns 27 for 
 
 
 

@@ -2,8 +2,8 @@
 #This file provides the class and its function to read the input information for the structural design of the rotorblade crosssection
 # - The format must be according to the sec_config.input file. 
 # 
-#TBD:Include more checks for input format
-#TBD:Include Definition of an erosion protection    
+#TBD: Include more checks for input format
+#TBD: Include Definition of an erosion protection   
 #
 #Author: Tobias Pflumm
 #Date:	09/21/2016
@@ -99,6 +99,8 @@ class section_config(object):
         self.SEG_ID = []    
         self.SEG_CoreMaterial = []
         self.SEG_Layup = []
+        self.SEG_Boundary_OCC = []      #Segment Boundaries in Opencascade format (TOPO_DSwire)
+        self.SEG_Boundary_DCT = []      #Segment Boundaries in discrete values (np.array) 
         
     def read_config(self,filename):
 
@@ -189,6 +191,6 @@ class section_config(object):
 #======================================================
 if __name__ == '__main__':
     
-    filename = 'sec_config_test.input'
+    filename = 'sec_config.input'
     section1 = section_config()
     section1.read_config(filename)

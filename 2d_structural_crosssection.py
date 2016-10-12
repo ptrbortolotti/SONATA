@@ -8,6 +8,7 @@ import numpy as np                                                              
 import matplotlib.pyplot as plt                                                 #python 2D plotting library
 from scipy.interpolate import interp1d
 from scipy.optimize import leastsq, broyden1, brentq, bisect, newton, fsolve,root                            # help in opening URL
+import shapely.geometry as shp
 
 #Python OCC Libraries
 from OCC.gp import gp_Pnt, gp_Vec,  gp_Pln, gp_Dir, gp_Trsf, gp_Ax1, gp_OX, gp_Ax3, gp_Ax2, gp_Circ, gp_OY
@@ -33,7 +34,7 @@ from core_geometry_utils import *
 from core_operations_utils import *
 from tab_definition import *
 from Intersect_and_trim_utils import trim_2dcurve_selfintersectingLoop
-
+from polygon_offset import *
 
 #-------------------------------
 #          FUNCTIONS
@@ -140,9 +141,14 @@ if __name__ == '__main__':
     LE_curve = Geom2d_TrimmedCurve(bspline.GetHandle(), u1, u2)
     LO_curve = Geom2d_TrimmedCurve(bspline.GetHandle(), u2, last)
     
+    test = shp_discreteoffset(LE_curve,0.036,1000)
+    
     display.DisplayShape(UP_curve, color='CYAN')
     display.DisplayShape(LE_curve , color='GREEN')
     display.DisplayShape(LO_curve, color='BLUE')
+    display.DisplayShape(test, color='YELLOW')    
+    
+    
     
     ###############################################################################
     #CREATE SKIN LAYER
