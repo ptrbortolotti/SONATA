@@ -171,17 +171,71 @@ else:
     
     
 #======================================================================
-#      C R E A T E   S E G.   C O O R D S.
+#      DETERMINE  S E G.   C O O R D S.
 #======================================================================
+'''  Determin Seg. Coords. -> create Layer -> Determine new. Seg. Coords, ...
+TBD: think of data structure to store information about layup, with all wires, lists of edges, and so on. 
+ TBD:     
+    
+
+neccesarry functions:   - find_innermost_boundary
+                        - gp_Pnt2d P= get_wire_point(TopoDS_Wire, std_real s)
+                        - std_real s = get_wire_coord(TopoDS_Wire, gp_Pnt2d P)
+                        - virtual_void = get_wire_D2 (TopoDS_Wire,std_real s, gp_Pnt2d P, gp_Vec2d V1, gp_Vec2d V2)
+                        - std_real L = get_wire_length(TopoDS_Wire)
+
+                        - trim2interval(real s1,real s2)
+                        - discretize            
+                         
+'''
+
 tmp_wire = section.SEG_Boundary_OCC[0]
+tmp_shape = wire.Shape()
+
+
+
+
+
+
+
+
+
+tmp_wire = section.SEG_Boundary_OCC[0]
+'GET LENGTH FROM u1 u2'
+tmp_shape = wire.Shape()
+TopoDS_Iterator	(	const TopoDS_Shape & 	S,
+const Standard_Boolean 	cumOri = Standard_True,
+const Standard_Boolean 	cumLoc = Standard_True 
+)	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+
+
+
+
 display.DisplayShape(wire.Wire(), color='WHITE')
 tmp_shape = wire.Shape()
-prop = GProp_GProps()
-test = brepgprop_LinearProperties(tmp_shape, prop)
+#prop = GProp_GProps()
+#test = brepgprop_LinearProperties(tmp_shape, prop)
 
-BRepAdaptor_Curve2d 
+#BRepAdaptor_Curve2d 
 
-wire.Shape()
+#wire.Shape()
 
 #======================================================================
 if section.SETUP_NbOfWebs>0:
@@ -216,7 +270,7 @@ print "STATUS:\t Exporting .STP and .IGS file Format"
 #plt.axis('equal')
 #plt.show()
 
-
-#display.FitAll()
-#start_display()
+display.set_bg_gradient_color(20,6,111,200,200,200)
+display.FitAll()
+start_display()
 #END    
