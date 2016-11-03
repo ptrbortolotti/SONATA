@@ -23,7 +23,10 @@ from OCC.gp import gp_Pnt2d, gp_Vec2d, gp_XY, gp_Lin2d, gp_Dir2d
 from OCC.TColgp import TColgp_Array1OfPnt, TColgp_Array1OfPnt2d, TColgp_HArray1OfPnt2d
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge,BRepBuilderAPI_MakeWire,BRepBuilderAPI_MakeFace
 from OCC.BRepOffsetAPI import BRepOffsetAPI_MakeOffset
-from OCC.Geom import Geom_Plane, Geom_TrimmedCurve
+from OCC.BRepLib import BRepLib_MakeFace 
+from OCC.BRep import BRep_Tool_Pnt
+from OCC.Geom import Geom_Plane, Geom_TrimmedCurve, Geom_RectangularTrimmedSurface
+from OCC.GeomAPI import GeomAPI_IntCS, GeomAPI_ExtremaCurveSurface
 from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline, Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve 
 from OCC.BRepCheck import BRepCheck_Wire
 from OCC.Display.SimpleGui import init_display
@@ -31,6 +34,7 @@ from OCC.BRepGProp import BRepGProp_EdgeTool,brepgprop
 from OCC.GProp import GProp_GProps
 from OCC.BRepAdaptor import BRepAdaptor_Curve2d, BRepAdaptor_Curve, 	BRepAdaptor_CompCurve
 from OCC.GCPnts import GCPnts_AbscissaPoint
+from OCC.IntCurvesFace import IntCurvesFace_Intersector
 
 from OCCUtils.Construct import (make_closed_polygon, make_n_sided,
                                 make_vertex, make_face, trim_wire,make_offset)
@@ -56,7 +60,7 @@ display.Context.SetDeviationCoefficient(0.000001) # 0.001 default
 #CREATE AXIS SYSTEM for Visualization
 COSY = gp_Ax3()	
 O  = gp_Pnt(0., 0., 0.)
-p1 = gp_Pnt(1.0,0.,0.)
+p1 = gp_Pnt(0.3,0.,0.)
 p2 = gp_Pnt(0.,0.1,0.)
 p3 = gp_Pnt(0.,0.,0.1)
 
@@ -194,6 +198,74 @@ if (0 < len(section.SEG_Boundary_DCT)) or (0 < len(section.SEG_Boundary_OCC)) :
 else:
     print "ERROR:\t No boundary defined for segment 0"
     
+#======================================================================
+#      DETERMINE  S E G.  with  ORIGIN:
+#====================================================================== 
+ 
+def set_BoundaryWire_to_Origin(TopoDS_wire):
+    '''
+    The Origin is determined by the most right Intersection Point of the X-Axis with the segment boundary 
+    '''   
+    Face = BRepLib_MakeFace(gp_Pln(gp_Pnt(0,0,0), gp_Dir(0,1,0)),-2,2,-2,2).Face()
+    tolerance=1e-10
+    intPnts = []
+    idx = 0
+    for edg in WireExplorer(TopoDS_wire).ordered_edges():       #Iterate over Wire! 
+        Adaptor = BRepAdaptor_Curve(edg)
+        First = Adaptor.FirstParameter()
+        Last = Adaptor.LastParameter()
+        Adaptor3d_HCurve = Adaptor.Trim(First,Last,tolerance)
+        intersection = IntCurvesFace_Intersector(Face, tolerance)
+        intersection.Perform(Adaptor3d_HCurve,First,Last)
+        if intersection.IsDone():
+            for j in range (1,intersection.NbPnt()+1):
+                XValue = intersection.Pnt(j).X()
+                W = intersection.WParameter(j)
+                intPnts.append([idx,W,XValue])
+        idx += 1   
+    
+            
+    #Determine Origin as point                 
+    IntPntsarray = np.asarray(intPnts)  #idx,W,XValue
+    OriEdgePnt = IntPntsarray[np.argmax(IntPntsarray[:,2]),:]                    
+     
+    
+    #Reorder Sequence of edges of wire
+    Owire =  BRepBuilderAPI_MakeWire()
+    idx = 0                 
+    for edg in WireExplorer(TopoDS_wire).ordered_edges():       #Iterate over Wire!        
+        if idx  == OriEdgePnt[0]:
+            Adaptor = BRepAdaptor_Curve(edg)
+            First = Adaptor.FirstParameter() 
+            Last =  Adaptor.LastParameter()
+            BSplineCurve1 = Adaptor.BSpline().GetObject()
+            BSplineCurve1.Segment(OriEdgePnt[1],Last)
+            BSplineCurve2 = Adaptor.BSpline().GetObject()
+            BSplineCurve2.Segment(First,OriEdgePnt[1])
+            tmp_edge1 = BRepBuilderAPI_MakeEdge(BSplineCurve1.GetHandle())
+            tmp_edge2 = BRepBuilderAPI_MakeEdge(BSplineCurve2.GetHandle())
+            Owire.Add(tmp_edge1.Edge())
+            
+        elif idx > OriEdgePnt[0]:
+            Owire.Add(edg)
+        
+        else:
+            None
+        idx += 1
+      
+        
+    idx = 0
+    for edg in WireExplorer(TopoDS_wire).ordered_edges():
+        if idx < OriEdgePnt[0]:
+            Owire.Add(edg)
+        else:
+            None
+        idx += 1
+           
+    Owire.Add(tmp_edge2.Edge())       
+    Owire.Build()
+
+    return Owire.Wire()
     
 #======================================================================
 #      DETERMINE  S E G.   C O O R D S.
@@ -213,6 +285,8 @@ neccesarry functions:   - find_innermost_boundary
                         - discretize            
                          
 '''
+
+
 def get_wire_length(TopoDS_wire):   #std_real L = get_wire_length(TopoDS_Wire)
     AdaptorComp = BRepAdaptor_CompCurve(TopoDS_wire, True)
     length = AdaptorComp.LastParameter()-AdaptorComp.FirstParameter()
@@ -287,13 +361,25 @@ def trim_wire_to_interval(TopoDS_wire, S1, S2):
          idx += 1
     return twire.Wire()
 
-  
     
-tmp_wire = section.SEG_Boundary_OCC[0]
+#======================================================================
+#      MAIN
+#======================================================================
+    
  
+tmp_wire = set_BoundaryWire_to_Origin(section.SEG_Boundary_OCC[0])
+Owire = tmp_wire
+AdaptorComp = BRepAdaptor_CompCurve(tmp_wire, True)
+
+
+   
+          
+#testwire = BRepBuilderAPI_MakeWire(tmp_edge1.Edge()).Wire()
+display.DisplayShape(get_wire_Pnt2d(Owire,0.00051))
+display.DisplayShape(get_wire_Pnt2d(Owire,1))             
+display.DisplayShape(Owire, color='BLUE') 
 S1 = 0.4
 S2 = 0.6  
-
 
 
 
@@ -303,59 +389,29 @@ twire = trim_wire_to_interval(tmp_wire,S1,S2)
 display.DisplayShape(pnt2d_S1)   
 display.DisplayShape(pnt2d_S2) 
 
+
+
+
     
-display.DisplayShape(tmp_wire, color='WHITE')
-display.DisplayShape(twire, color='ORANGE') 
+#display.DisplayShape(tmp_wire, color='WHITE')
+#display.DisplayShape(twire, color='ORANGE') 
+#display.DisplayShape(Owire.Wire(), color='RED') 
 
 
+   
 
 
-
-
-length = get_wire_length(tmp_wire) 
-AdaptorComp = BRepAdaptor_CompCurve(tmp_wire, True)
-tolerance=1e-10
-HAdaptorComp = AdaptorComp.Trim(S1*length,S2*length,tolerance)     
-test = HAdaptorComp.GetObject().GetCurve().BSpline()
-#BRepBuilderAPI_MakeEdge
-    
-
-#trim wire to interval (TopoDS_wire, S1, S2)
 
          
 
+
+
+
+
+
+
+
  
-#for edg in WireExplorer(TopoDS_wire).ordered_edges():       #Iterate over Wire!
-#    Adaptor = BRepAdaptor_Curve(edg)
-#    tolerance=1e-10
-#    length += GCPnts_AbscissaPoint().Length(Adaptor, tolerance)    
-
-    
-
-#for vtc in WireExplorer(tmp_wire).ordered_vertices():
-#    print vtc
-
-#Face = BRepBuilderAPI_MakeFace(gp_Pln(gp_Pnt(0,0,0),gp_Dir(0,0,1)),-10,10,-10,10)
-#F = Face.Face()
-#test = BRepAdaptor_Curve2d(edg,F)       #The Curve from BRepAdaptor allows to use an Edge of the BRep topology like a 3D curve.
-    
-
-
-
-#GCPnts_AbscissaPoint().Length(self.Adaptor, lbound, ubound, tolerance)
-    
-
-
-
-
-
-#tmp_shape = wire.Shape()
-#prop = GProp_GProps()
-#test = brepgprop_LinearProperties(tmp_shape, prop)
-
-#BRepAdaptor_Curve2d 
-
-#wire.Shape()
 
 ##======================================================================
 #if section.SETUP_NbOfWebs>0:
@@ -391,6 +447,7 @@ test = HAdaptorComp.GetObject().GetCurve().BSpline()
 #plt.show()
 
 display.set_bg_gradient_color(20,6,111,200,200,200)
+display.View_Top()
 display.FitAll()
 start_display()
 #END    
