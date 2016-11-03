@@ -21,13 +21,24 @@ from core_operations_utils import *
 from OCC.gp import gp_Pnt, gp_Vec,  gp_Pln, gp_Dir, gp_Trsf, gp_Ax1, gp_OX, gp_Ax3, gp_Ax2, gp_Circ, gp_OY
 from OCC.gp import gp_Pnt2d, gp_Vec2d, gp_XY, gp_Lin2d, gp_Dir2d
 from OCC.TColgp import TColgp_Array1OfPnt, TColgp_Array1OfPnt2d, TColgp_HArray1OfPnt2d
-from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge,BRepBuilderAPI_MakeWire 
-from OCC.Geom import Geom_Plane
+from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge,BRepBuilderAPI_MakeWire,BRepBuilderAPI_MakeFace
+from OCC.BRepOffsetAPI import BRepOffsetAPI_MakeOffset
+from OCC.Geom import Geom_Plane, Geom_TrimmedCurve
 from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline, Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve 
 from OCC.BRepCheck import BRepCheck_Wire
 from OCC.Display.SimpleGui import init_display
-from OCC.BRepGProp import brepgprop_LinearProperties
+from OCC.BRepGProp import BRepGProp_EdgeTool,brepgprop
 from OCC.GProp import GProp_GProps
+from OCC.BRepAdaptor import BRepAdaptor_Curve2d, BRepAdaptor_Curve, 	BRepAdaptor_CompCurve
+from OCC.GCPnts import GCPnts_AbscissaPoint
+
+from OCCUtils.Construct import (make_closed_polygon, make_n_sided,
+                                make_vertex, make_face, trim_wire,make_offset)
+from OCCUtils.Topology import WireExplorer, Topo
+from OCCUtils.base import GlobalProperties, BaseObject
+from OCCUtils.types_lut import ShapeToTopology
+
+
 #-------------------------------
 #          FUNCTIONS
 #-------------------------------
@@ -38,11 +49,25 @@ from OCC.GProp import GProp_GProps
 #======================================================
 #START    
 ###############################################################################
-display, start_display, add_menu, add_function_to_menu = init_display()
+display, start_display, add_menu, add_function_to_menu = init_display('wx')
 display.Context.SetDeviationAngle(0.000001)      # 0.001 default
 display.Context.SetDeviationCoefficient(0.000001) # 0.001 default
 
+#CREATE AXIS SYSTEM for Visualization
+COSY = gp_Ax3()	
+O  = gp_Pnt(0., 0., 0.)
+p1 = gp_Pnt(1.0,0.,0.)
+p2 = gp_Pnt(0.,0.1,0.)
+p3 = gp_Pnt(0.,0.,0.1)
 
+h1 = BRepBuilderAPI_MakeEdge(O,p1).Shape()
+h2 = BRepBuilderAPI_MakeEdge(O,p2).Shape()
+h3 = BRepBuilderAPI_MakeEdge(O,p3).Shape()
+
+display.DisplayShape(O,color='BLACK')
+display.DisplayShape(h1,color='RED')
+display.DisplayShape(h2,color='GREEN')
+display.DisplayShape(h3,color='BLUE')
 
 
 #======================================================================
@@ -122,7 +147,7 @@ if (0 < len(section.SEG_Boundary_DCT)) or (0 < len(section.SEG_Boundary_OCC)) :
         
         if NbCorners > 0:
             for i in range(0,NbCorners-1):
-                print i,corners[i]
+                #print i,corners[i]
                 DCT_Segments.append(DCT_data[corners[i]:corners[i+1]+1])
                 
                 
@@ -140,9 +165,9 @@ if (0 < len(section.SEG_Boundary_DCT)) or (0 < len(section.SEG_Boundary_OCC)) :
         
         wire = 	BRepBuilderAPI_MakeWire()
         for i,item in enumerate(DCT_Segments):
-            print i
+            #print i
             data = item.T
-            print data
+            #print data
             tmp_harray = TColgp_HArray1OfPnt2d_from_nparray(data)
             
             if NbCorners == 0:
@@ -184,52 +209,147 @@ neccesarry functions:   - find_innermost_boundary
                         - virtual_void = get_wire_D2 (TopoDS_Wire,std_real s, gp_Pnt2d P, gp_Vec2d V1, gp_Vec2d V2)
                         - std_real L = get_wire_length(TopoDS_Wire)
 
-                        - trim2interval(real s1,real s2)
+                        - TopoDS_Wire = trim_wire_to_interval(TopoDS_Wire, real S1,real S2)
                         - discretize            
                          
 '''
+def get_wire_length(TopoDS_wire):   #std_real L = get_wire_length(TopoDS_Wire)
+    AdaptorComp = BRepAdaptor_CompCurve(TopoDS_wire, True)
+    length = AdaptorComp.LastParameter()-AdaptorComp.FirstParameter()
+    return length
+  
+def get_wire_Pnt2d(TopoDS_wire, S):     #gp_Pnt2d P= get_wire_point(TopoDS_Wire, std_real s)
+    length = get_wire_length(TopoDS_wire)
+    AdaptorComp = BRepAdaptor_CompCurve(TopoDS_wire, True)
+    P = AdaptorComp.Value(S*length)
+    return gp_Pnt2d(P.X(),P.Y())
 
-tmp_wire = section.SEG_Boundary_OCC[0]
-tmp_shape = wire.Shape()
-
-
-
-
-
-
-
-
-
-tmp_wire = section.SEG_Boundary_OCC[0]
-'GET LENGTH FROM u1 u2'
-tmp_shape = wire.Shape()
-TopoDS_Iterator	(	const TopoDS_Shape & 	S,
-const Standard_Boolean 	cumOri = Standard_True,
-const Standard_Boolean 	cumLoc = Standard_True 
-)	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def get_wire_Pnt(TopoDS_wire, S):     #gp_Pnt2d P= get_wire_point(TopoDS_Wire, std_real s)
+    length = get_wire_length(TopoDS_wire)
+    AdaptorComp = BRepAdaptor_CompCurve(TopoDS_wire, True)
+    P = AdaptorComp.Value(S*length)
+    return P 
     
     
+def find_coordinate_on_ordered_edges(TopoDS_wire,S):
+    WireLength = get_wire_length(TopoDS_wire)      
+    CummLength = 0
+    tolerance=1e-10
+    idx = 0
+    for edg in WireExplorer(TopoDS_wire).ordered_edges():       #Iterate over Wire! 
+         Adaptor = BRepAdaptor_Curve(edg)
+         CummLength += GCPnts_AbscissaPoint().Length(Adaptor, tolerance)
+         if S*WireLength <= CummLength:
+             U0 = 0
+             dist = GCPnts_AbscissaPoint().Length(Adaptor, tolerance)-(CummLength-S*WireLength)
+             Test = GCPnts_AbscissaPoint(tolerance, Adaptor, dist, U0)
+             U = Test.Parameter()
+             break
+         idx += 1
+    return [idx,U]  #Return index of edge and parameter U on edge!
+
+
+def trim_wire_to_interval(TopoDS_wire, S1, S2):
+    twire =  BRepBuilderAPI_MakeWire()
+    para1 =  find_coordinate_on_ordered_edges(TopoDS_wire, S1)
+    para2 =  find_coordinate_on_ordered_edges(TopoDS_wire, S2)
+    idx = 0
+    for edg in WireExplorer(TopoDS_wire).ordered_edges():       #Iterate over Wire! 
+         Adaptor = BRepAdaptor_Curve(edg)
+         First = Adaptor.FirstParameter() 
+         Last =  Adaptor.LastParameter()
+         #CummLength += GCPnts_AbscissaPoint().Length(Adaptor, tolerance)
+         if para1[0] == idx and para2[0] != idx:
+             BSplineCurve = Adaptor.BSpline().GetObject()
+             BSplineCurve.Segment(para1[1],Last,)
+             tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve.GetHandle())
+             #display.DisplayShape(tmp_edge.Edge(), color='CYAN') 
+             twire.Add(tmp_edge.Edge())
+             
+         elif (para1[0] != idx and para2[0] != idx) and (para1[0] < idx and para2[0] > idx):
+             BSplineCurve = Adaptor.BSpline().GetObject()
+             tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve.GetHandle())
+             twire.Add(tmp_edge.Edge()) 
+             
+         elif para1[0] == idx and para2[0] == idx:
+             BSplineCurve = Adaptor.BSpline().GetObject()
+             BSplineCurve.Segment(para1[1],para2[1])
+             tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve.GetHandle())
+             twire.Add(tmp_edge.Edge())
+             break
+    
+         elif para1[0] != idx and para2[0] == idx:
+             BSplineCurve = Adaptor.BSpline().GetObject()
+             BSplineCurve.Segment(First,para2[1])
+             tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve.GetHandle())
+             twire.Add(tmp_edge.Edge())
+             break
+         idx += 1
+    return twire.Wire()
+
+  
+    
+tmp_wire = section.SEG_Boundary_OCC[0]
+ 
+S1 = 0.4
+S2 = 0.6  
 
 
 
 
-display.DisplayShape(wire.Wire(), color='WHITE')
-tmp_shape = wire.Shape()
+pnt2d_S1 = get_wire_Pnt2d(tmp_wire,S1)
+pnt2d_S2 = get_wire_Pnt2d(tmp_wire,S2)
+twire = trim_wire_to_interval(tmp_wire,S1,S2)
+display.DisplayShape(pnt2d_S1)   
+display.DisplayShape(pnt2d_S2) 
+
+    
+display.DisplayShape(tmp_wire, color='WHITE')
+display.DisplayShape(twire, color='ORANGE') 
+
+
+
+
+
+
+length = get_wire_length(tmp_wire) 
+AdaptorComp = BRepAdaptor_CompCurve(tmp_wire, True)
+tolerance=1e-10
+HAdaptorComp = AdaptorComp.Trim(S1*length,S2*length,tolerance)     
+test = HAdaptorComp.GetObject().GetCurve().BSpline()
+#BRepBuilderAPI_MakeEdge
+    
+
+#trim wire to interval (TopoDS_wire, S1, S2)
+
+         
+
+ 
+#for edg in WireExplorer(TopoDS_wire).ordered_edges():       #Iterate over Wire!
+#    Adaptor = BRepAdaptor_Curve(edg)
+#    tolerance=1e-10
+#    length += GCPnts_AbscissaPoint().Length(Adaptor, tolerance)    
+
+    
+
+#for vtc in WireExplorer(tmp_wire).ordered_vertices():
+#    print vtc
+
+#Face = BRepBuilderAPI_MakeFace(gp_Pln(gp_Pnt(0,0,0),gp_Dir(0,0,1)),-10,10,-10,10)
+#F = Face.Face()
+#test = BRepAdaptor_Curve2d(edg,F)       #The Curve from BRepAdaptor allows to use an Edge of the BRep topology like a 3D curve.
+    
+
+
+
+#GCPnts_AbscissaPoint().Length(self.Adaptor, lbound, ubound, tolerance)
+    
+
+
+
+
+
+#tmp_shape = wire.Shape()
 #prop = GProp_GProps()
 #test = brepgprop_LinearProperties(tmp_shape, prop)
 
@@ -237,28 +357,28 @@ tmp_shape = wire.Shape()
 
 #wire.Shape()
 
-#======================================================================
-if section.SETUP_NbOfWebs>0:
-    print "STATUS:\t Continue  Building Segments:"
-    
-else:
-    print "STATUS:\t Fill Segment 0 with Core"
-
-#======================================================================
-#Balance Weight
-if section.SETUP_BalanceWeight == True:
-    print "STATUS:\t Create Balanace Weight"
-    print "STATUS:\t Trim Geometry to Balance Weight"
-
-#======================================================================
-#Create MESH
-    
-
-
-#======================================================================
-#EXPORT
-print "STATUS:\t Exporting PATRAN file Format"
-print "STATUS:\t Exporting .STP and .IGS file Format"
+##======================================================================
+#if section.SETUP_NbOfWebs>0:
+#    print "STATUS:\t Continue  Building Segments:"
+#    
+#else:
+#    print "STATUS:\t Fill Segment 0 with Core"
+#
+##======================================================================
+##Balance Weight
+#if section.SETUP_BalanceWeight == True:
+#    print "STATUS:\t Create Balanace Weight"
+#    print "STATUS:\t Trim Geometry to Balance Weight"
+#
+##======================================================================
+##Create MESH
+#    
+#
+#
+##======================================================================
+##EXPORT
+#print "STATUS:\t Exporting PATRAN file Format"
+#print "STATUS:\t Exporting .STP and .IGS file Format"
 
 
 #======================================================================
