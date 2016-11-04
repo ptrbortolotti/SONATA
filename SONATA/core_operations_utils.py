@@ -28,7 +28,7 @@ from OCC.TopoDS import topods, TopoDS_Edge, TopoDS_Compound
 from OCC.Display.WebGl import x3dom_renderer
 from OCC.Display.SimpleGui import init_display
 
-from OCCUtils.Construct import make_loft
+#from OCCUtils.Construct import make_loft
 #-------------------------------
 #          FUNCTIONS
 #-------------------------------

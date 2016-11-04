@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Oct 11 13:36:27 2016
-
+THIS IS THE SONATA EXECUTION FILE!
 @author: TPflumm
 """
 
@@ -51,7 +50,9 @@ from OCCUtils.types_lut import ShapeToTopology
 #======================================================
 #       MAIN
 #======================================================
-#START    
+
+
+#DISPLAY CONFIGURATION  
 ###############################################################################
 display, start_display, add_menu, add_function_to_menu = init_display('wx')
 display.Context.SetDeviationAngle(0.000001)      # 0.001 default
@@ -370,6 +371,32 @@ def trim_wire_to_interval(TopoDS_wire, S1, S2):
 tmp_wire = set_BoundaryWire_to_Origin(section.SEG_Boundary_OCC[0])
 Owire = tmp_wire
 AdaptorComp = BRepAdaptor_CompCurve(tmp_wire, True)
+
+
+class layer(object):
+''' 
+The layer object is constructed from multiple BSplineCurveSegments. It is the basis for all future operations. 
+The object can be constructed from either a discrete formulation of point tables or from a existing 'TopoDS_Wire'.
+
+
+
+'''    
+    def __init__(self):
+        self.BSplineSegments = []       #List of Geom2d_BSplineCurve, Geom_BSplineCurve
+        self.Wire = []                  #Make Wire from BSplineSegments
+        self.Length = []
+        self.First = []
+        self.Last = []
+
+    #def build_wire(self):    
+    #def length(self):
+    #def Pnt2d(self,S):    
+    #def Pnt(self,S):
+    #def trim(S1,S2)
+    #def first()
+    #def last()
+    
+        
 
 
    
