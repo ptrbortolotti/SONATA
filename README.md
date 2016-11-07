@@ -5,7 +5,7 @@ SONATA contains the structural modelling part
 
 <a href="https://d3js.org"><img src="https://d3js.org/logo.svg" align="left" hspace="10" vspace="6"></a>
 
-**SONATA** is a python software for preprocessing of closed composite beam crossections.  It is using the Opencascade kernel with its pythonocc wrapper. SONATA helps the engineer to parameterize a closed composite rotor blade crossection with multiple spars. It is specifically designt to be suited for helicopter rotor blade crossections of the blade aerodynamic section and elastic blade root. SONATA combines visualization and inte with a data-driven approach to DOM manipulation, giving you the full capabilities of modern browsers and the freedom to design the right visual interface for your data.
+**SONATA** is a python software for preprocessing closed composite beam crossections for helicopter applications.  It is using the Opencascade kernel with its pythonocc wrapper. SONATA helps the engineer to parameterize a closed composite rotor blade crossection with multiple spars. It is specifically designt to be suited for helicopter rotor blade crossections of the blade aerodynamic section and elastic blade root. SONATA combines visualization and inte with a data-driven approach to DOM manipulation, giving you the full capabilities of modern browsers and the freedom to design the right visual interface for your data.
 
 ## Resources
 
