@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Oct 11 13:36:27 2016
-
+THIS IS THE SONATA EXECUTION FILE!
 @author: TPflumm
 """
 
@@ -14,7 +13,7 @@ import math
 import numpy as np       
 import matplotlib.pyplot as plt
 
-from read_inputfile import * 
+
 from core_geometry_utils import *
 from core_operations_utils import *
 
@@ -43,6 +42,7 @@ from OCCUtils.base import GlobalProperties, BaseObject
 from OCCUtils.types_lut import ShapeToTopology
 
 
+from read_inputfile import * 
 #-------------------------------
 #          FUNCTIONS
 #-------------------------------
@@ -51,7 +51,9 @@ from OCCUtils.types_lut import ShapeToTopology
 #======================================================
 #       MAIN
 #======================================================
-#START    
+
+
+#DISPLAY CONFIGURATION  
 ###############################################################################
 display, start_display, add_menu, add_function_to_menu = init_display('wx')
 display.Context.SetDeviationAngle(0.000001)      # 0.001 default
@@ -372,8 +374,7 @@ Owire = tmp_wire
 AdaptorComp = BRepAdaptor_CompCurve(tmp_wire, True)
 
 
-      
-        
+ 
         
 
 
