@@ -8,7 +8,8 @@
 #Author: Tobias Pflumm
 #Date:	09/21/2016
 #==============================================================================
-
+import numpy as np 
+import urllib2  
 
 def read_segment(STR,seg2find):
     str2find = '&DEFN '+seg2find
@@ -87,6 +88,59 @@ def read_layup(STR):
     
     return nplayup
     
+
+def UIUCAirfoil(name):
+    foil_dat_url = 'http://www.ae.illinois.edu/m-selig/ads/coord_seligFmt/%s.dat' % name
+    f = urllib2.urlopen(foil_dat_url)
+    temp_x = []
+    temp_y = []
+    temp_z = []
+    for line in f.readlines()[1:]:                                                                  # The first line contains info only
+        line = line.lstrip().rstrip().replace('    ', ' ').replace('   ', ' ').replace('  ', ' ')   # do some cleanup on the data (mostly dealing with spaces)
+        data = line.split(' ')   
+        temp_y.append(float(data[0]))                                                               # data[0] = x coord.
+        temp_z.append(float(data[1]))                                                               # data[1] = y coord.
+        temp_x.append(float(0))                                                                     # data[2] = z coord 
+    return np.array([temp_x,temp_y,temp_z])                                                         # return AirfoilCoordinate as np.arrray
+
+def UIUCAirfoil2d(name):
+    foil_dat_url = 'http://www.ae.illinois.edu/m-selig/ads/coord_seligFmt/%s.dat' % name
+    f = urllib2.urlopen(foil_dat_url)
+    temp_x = []
+    temp_y = []
+    for line in f.readlines()[1:]:                                                                  # The first line contains info only
+        line = line.lstrip().rstrip().replace('    ', ' ').replace('   ', ' ').replace('  ', ' ')   # do some cleanup on the data (mostly dealing with spaces)
+        data = line.split(' ')   
+        temp_x.append(float(data[0]))                                                               # data[0] = x coord.
+        temp_y.append(float(data[1]))                                                               # data[1] = y coord.
+    return np.array([temp_x,temp_y])    
+
+def AirfoilDat(name):
+    string = "%s" %(name)
+    f = open(string)
+    temp_x = []
+    temp_y = []
+    temp_z = []
+    for line in f.readlines()[1:]:                                                                  # The first line contains info only
+        line = line.lstrip().rstrip().replace('    ', ' ').replace('   ', ' ').replace('  ', ' ')   # do some cleanup on the data (mostly dealing with spaces)
+        data = line.split(' ')   
+        temp_y.append(float(data[0]))                                                               # data[0] = x coord.
+        temp_z.append(float(data[1]))                                                               # data[1] = y coord.
+        temp_x.append(float(0))                                                                     # data[2] = z coord 
+    return np.array([temp_x,temp_y,temp_z])                                                         # return AirfoilCoordinate as np.arrray    
+    
+def AirfoilDat2d(name):
+    string = "%s" %(name)
+    f = open(string)
+    temp_x = []
+    temp_y = []
+    for line in f.readlines()[1:]:                                                                  # The first line contains info only
+        line = line.lstrip().rstrip().replace('    ', ' ').replace('   ', ' ').replace('  ', ' ')   # do some cleanup on the data (mostly dealing with spaces)
+        data = line.split(' ')   
+        temp_x.append(float(data[0]))                                                             
+        temp_y.append(float(data[1]))                                                                                                       
+    return np.array([temp_x,temp_y])                                                                # return AirfoilCoordinate as np.arrray    
+
     
 
 #================ SECTION-CONFIG OBJECT ========================================
@@ -190,7 +244,6 @@ class section_config(object):
 #       MAIN
 #======================================================
 if __name__ == '__main__':
-    
     filename = 'sec_config.input'
     section1 = section_config()
     section1.read_config(filename)

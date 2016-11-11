@@ -1,56 +1,26 @@
-from OCC.gp import gp_Pnt2d
-from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
+#Basic Libraries:
+import numpy as np       
+
+#PythonOCC Libraries
+from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec
 from OCC.GCPnts import GCPnts_AbscissaPoint
+from OCC.BRepAdaptor import BRepAdaptor_CompCurve, BRepAdaptor_Curve
+from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge
+from OCC.BRepLib import BRepLib_MakeFace
+from OCC.IntCurvesFace import IntCurvesFace_Intersector
+from OCC.Geom import Geom_Plane
 
+#Own Libraries:
+from explorer import WireExplorer
 
-###############################################################################
-# BSpline and BSplineLst Utilities
-###############################################################################
-
-def get_BSpline_length(BSpline):
-    tolerance=1e-10
-    Adaptor = Geom2dAdaptor_Curve(BSpline.GetHandle())
-    Length = GCPnts_AbscissaPoint().Length(Adaptor, tolerance)
-    return Length
-
-def get_BSplineLst_length(BSplineLst):
-    #Return the cummulated length of the BSplineLst
-    CummLength = 0
-    for i,item in enumerate(BSplineLst):
-         CummLength += get_BSpline_length(item)
-    return CummLength  
-    
-
-def find_BSplineLst_coordinate(BSplineLst,S):
-    BSplineLstLength = get_BSplineLst_length(BSplineLst)      
-    CummLength = 0
-    tolerance=1e-10
-    for i,item in enumerate(BSplineLst):
-         Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
-         CummLength += get_BSpline_length(item)
-         if S*BSplineLstLength <= CummLength:
-             dist = GCPnts_AbscissaPoint().Length(Adaptor, tolerance)-(CummLength-S*BSplineLstLength)
-             tmp = GCPnts_AbscissaPoint(tolerance, Adaptor, dist, 0)
-             U = tmp.Parameter()
-             break
-    return [i,U]  #Return index of edge and parameter U on edge!
- 
-   
-def get_BSplineLst_Pnt2d(BSplineLst,S):
-    P = gp_Pnt2d()
-    [idx,U] = find_BSplineLst_coordinate(BSplineLst,S)
-    BSplineLst[idx].D0(U,P)
-    return P
-    
-    
 ###############################################################################
 # Wire Utilities
 ###############################################################################
-
 def get_wire_length(TopoDS_wire):   #std_real L = get_wire_length(TopoDS_Wire)
     AdaptorComp = BRepAdaptor_CompCurve(TopoDS_wire, True)
     length = AdaptorComp.LastParameter()-AdaptorComp.FirstParameter()
     return length
+  
   
 def get_wire_Pnt2d(TopoDS_wire, S):     #gp_Pnt2d P= get_wire_point(TopoDS_Wire, std_real s)
     length = get_wire_length(TopoDS_wire)
@@ -58,12 +28,14 @@ def get_wire_Pnt2d(TopoDS_wire, S):     #gp_Pnt2d P= get_wire_point(TopoDS_Wire,
     P = AdaptorComp.Value(S*length)
     return gp_Pnt2d(P.X(),P.Y())
 
+	
 def get_wire_Pnt(TopoDS_wire, S):     #gp_Pnt2d P= get_wire_point(TopoDS_Wire, std_real s)
     length = get_wire_length(TopoDS_wire)
     AdaptorComp = BRepAdaptor_CompCurve(TopoDS_wire, True)
     P = AdaptorComp.Value(S*length)
     return P 
     
+	
 def find_coordinate_on_ordered_edges(TopoDS_wire,S):
     WireLength = get_wire_length(TopoDS_wire)      
     CummLength = 0
@@ -82,7 +54,7 @@ def find_coordinate_on_ordered_edges(TopoDS_wire,S):
     return [idx,U]  #Return index of edge and parameter U on edge!
 
 
-def trim_wire_to_interval(TopoDS_wire, S1, S2):
+def trim_wire(TopoDS_wire, S1, S2):
     twire =  BRepBuilderAPI_MakeWire()
     para1 =  find_coordinate_on_ordered_edges(TopoDS_wire, S1)
     para2 =  find_coordinate_on_ordered_edges(TopoDS_wire, S2)
@@ -119,6 +91,17 @@ def trim_wire_to_interval(TopoDS_wire, S1, S2):
              break
          idx += 1
     return twire.Wire()
+
+    
+def build_wire_from_BSplineLst(BSplineLst): #Builds TopoDS_Wire from connecting BSplineSegments and returns it        
+    tmp_wire = 	BRepBuilderAPI_MakeWire()
+    for i,item in enumerate(BSplineLst):
+        P = gp_Pnt(0,0,0)
+        V = gp_Dir(gp_Vec(0,0,1))
+        Plane = Geom_Plane(P, V)
+        tmp_edge = BRepBuilderAPI_MakeEdge(item.GetHandle(),Plane.GetHandle())
+        tmp_wire.Add(tmp_edge.Edge())
+    return tmp_wire.Wire()
 
     
 def set_BoundaryWire_to_Origin(TopoDS_wire):
@@ -186,56 +169,4 @@ def set_BoundaryWire_to_Origin(TopoDS_wire):
     return Owire.Wire() 
     
 
-
-    
-def seg_boundary_from_dct(DCT_data,min_degree):
-    #Check if DCT_Definition is closed, if not: close it
-    if not np.array_equal(DCT_data[0],DCT_data[-1]):
-        print 'INFO:\t Closing open discrete boundary definition'
-        DCT_data = np.concatenate((DCT_data,DCT_data[0:1,:]),axis=0)
-        #section.SEG_Boundary_DCT[0] = DCT_data #update it to section definition            
-        
-    #Find corners and edges of data
-    DCT_angles = calc_DCT_angles(DCT_data)
-    
-    #Split DCT_data into steady segments 
-    #min_degree = 140   #allowed angle in discrete representation before starting to split
-    
-    corners = []
-    for i in range(0,DCT_angles.shape[0]):
-        if DCT_angles[i] < min_degree: 
-            corners.append(i)
-    NbCorners = np.size(corners)
-    
-    
-    DCT_Segments = []        
-    if NbCorners == 0:
-        DCT_Segments[0] = DCT_data
-    
-    if NbCorners > 0:
-        for i in range(0,NbCorners-1):
-            #print i,corners[i]
-            DCT_Segments.append(DCT_data[corners[i]:corners[i+1]+1])
-            
-            
-    #plt.plot(DCT_data[:,0],DCT_data[:,1], color='black', marker='.')
-    #for i in range(0,len(DCT_Segments)):
-    #    plt.plot(DCT_Segments[i][:,0],DCT_Segments[i][:,1],marker='o')
-       
-    list_of_bsplines = []
-    for i,item in enumerate(DCT_Segments):
-        #print i
-        data = item.T
-        #print data
-        tmp_harray = TColgp_HArray1OfPnt2d_from_nparray(data)
-        
-        if NbCorners == 0:
-            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), True, 0.0000001)             #Interpolate datapoints to bspline
-        else:     
-            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 0.0000001)             #Interpolate datapoints to bspline
-             
-        tmp_interpolation.Perform()                                               
-        tmp_bspline = tmp_interpolation.Curve().GetObject()
-        list_of_bsplines.append(tmp_bspline)
-        
-    return list_of_bsplines       
+      

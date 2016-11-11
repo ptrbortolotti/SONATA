@@ -2,89 +2,22 @@
 ## Note that this is adapted from pythonocc-Utils.
 ''' This Module describes all helpful utility functionalities of the code'''
 
-#-------------------------------
-#          H E A D E R
-#-------------------------------
-
+#Basic Libraries:
 import math 
 import numpy as np 
-import urllib2                                      
-
-
+                          
 #Python OCC Libraries
-from OCC.gp import gp_Pnt, gp_Vec, gp_Pnt2d, gp_Pln, gp_Dir, gp_Trsf,gp_Ax1, gp_OX, gp_Ax3
-from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline, Geom2dAPI_Interpolate 
-from OCC.GeomAPI import geomapi
-from OCC.TColgp import TColgp_Array1OfPnt, TColgp_Array1OfPnt2d, TColgp_HArray1OfPnt2d, TColgp_HArray1OfPnt 
-from OCC.BRepBuilderAPI import (BRepBuilderAPI_MakeEdge,
-                                BRepBuilderAPI_MakeVertex,
-                                BRepBuilderAPI_MakeWire,
-                                BRepBuilderAPI_Transform,
-                                BRepBuilderAPI_MakeFace)
-from OCC.BRepOffsetAPI import BRepOffsetAPI_ThruSections
-from OCC.Display.SimpleGui import init_display
-from OCC.TopoDS import topods, TopoDS_Edge, TopoDS_Compound
-from OCC.Display.WebGl import x3dom_renderer
+from OCC.gp import gp_Pnt, gp_Pnt2d, gp_Trsf
+from OCC.TColgp import (TColgp_Array1OfPnt, TColgp_Array1OfPnt2d, TColgp_HArray1OfPnt2d, 
+                        TColgp_HArray1OfPnt )
+from OCC.BRepBuilderAPI import (BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire,
+                                BRepBuilderAPI_Transform )
+from OCC.TopoDS import topods 
 
+#Own Modules:
 
-#-------------------------------
-#          FUNCTIONS
-#-------------------------------
-                                 
-
-
-def UIUCAirfoil(name):
-    foil_dat_url = 'http://www.ae.illinois.edu/m-selig/ads/coord_seligFmt/%s.dat' % name
-    f = urllib2.urlopen(foil_dat_url)
-    temp_x = []
-    temp_y = []
-    temp_z = []
-    for line in f.readlines()[1:]:                                                                  # The first line contains info only
-        line = line.lstrip().rstrip().replace('    ', ' ').replace('   ', ' ').replace('  ', ' ')   # do some cleanup on the data (mostly dealing with spaces)
-        data = line.split(' ')   
-        temp_y.append(float(data[0]))                                                               # data[0] = x coord.
-        temp_z.append(float(data[1]))                                                               # data[1] = y coord.
-        temp_x.append(float(0))                                                                     # data[2] = z coord 
-    return np.array([temp_x,temp_y,temp_z])                                                         # return AirfoilCoordinate as np.arrray
-
-def UIUCAirfoil2d(name):
-    foil_dat_url = 'http://www.ae.illinois.edu/m-selig/ads/coord_seligFmt/%s.dat' % name
-    f = urllib2.urlopen(foil_dat_url)
-    temp_x = []
-    temp_y = []
-    for line in f.readlines()[1:]:                                                                  # The first line contains info only
-        line = line.lstrip().rstrip().replace('    ', ' ').replace('   ', ' ').replace('  ', ' ')   # do some cleanup on the data (mostly dealing with spaces)
-        data = line.split(' ')   
-        temp_x.append(float(data[0]))                                                               # data[0] = x coord.
-        temp_y.append(float(data[1]))                                                               # data[1] = y coord.
-    return np.array([temp_x,temp_y])    
-
-def AirfoilDat(name):
-    string = "%s" %(name)
-    f = open(string)
-    temp_x = []
-    temp_y = []
-    temp_z = []
-    for line in f.readlines()[1:]:                                                                  # The first line contains info only
-        line = line.lstrip().rstrip().replace('    ', ' ').replace('   ', ' ').replace('  ', ' ')   # do some cleanup on the data (mostly dealing with spaces)
-        data = line.split(' ')   
-        temp_y.append(float(data[0]))                                                               # data[0] = x coord.
-        temp_z.append(float(data[1]))                                                               # data[1] = y coord.
-        temp_x.append(float(0))                                                                     # data[2] = z coord 
-    return np.array([temp_x,temp_y,temp_z])                                                         # return AirfoilCoordinate as np.arrray    
     
-def AirfoilDat2d(name):
-    string = "%s" %(name)
-    f = open(string)
-    temp_x = []
-    temp_y = []
-    for line in f.readlines()[1:]:                                                                  # The first line contains info only
-        line = line.lstrip().rstrip().replace('    ', ' ').replace('   ', ' ').replace('  ', ' ')   # do some cleanup on the data (mostly dealing with spaces)
-        data = line.split(' ')   
-        temp_x.append(float(data[0]))                                                             
-        temp_y.append(float(data[1]))                                                                                                       
-    return np.array([temp_x,temp_y])                                                                # return AirfoilCoordinate as np.arrray    
-
+#######################UTILITIE FUNCTIONS######################################    
 def np_array_to_gp_Pnt(array):              
     Pnt = gp_Pnt(array[0], array[1], array[2])
     return Pnt

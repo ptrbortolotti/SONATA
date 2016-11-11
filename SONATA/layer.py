@@ -1,48 +1,50 @@
+from BSplineLst_utils import get_BSplineLst_length, get_BSplineLst_Pnt2d
+
+
 class Layer(object):
     ''' 
     The layer object is constructed from multiple BSplineCurveSegments. It is the basis for all future operations. 
     The object can be constructed from either a discrete formulation of point tables or from an existing TopoDS_Wire.
     ''' 
    
-    def __init__(self): #gets called whenever we create a new instance of a class
-        self.BSplineSegments = []       #List of Geom2d_BSplineCurve, Geom_BSplineCurve
-        self.Wire = []                  #Make Wire from BSplineSegments
-        self.Length = []
-        self.First = []
-        self.Last = []
+    def __init__(self, BSplineLst, globalStart, globalEnd, thickness, Orientation = 0, MatID = 1): #gets called whenever we create a new instance of a class
+        self.BSplineLst = BSplineLst        #List of Geom2d_BSplineCurve, Geom_BSplineCurve
+        #self.Wire = []                      #Make Wire from BSplineSegments
+        #self.First = []			    #Starting Point in S coordinates
+        #self.Last = []				    #End Point in S Coordinates
         self.display_set = False
-        self.globalStart = []
-        self.globalEnd = []
-        self.thickness = []    #in
-        self.Orientation =[]
-        self.MaterialID = []
- 
+        self.globalStart = globalStart	    #Starting Point in S coordinates
+        self.globalEnd = globalEnd		    #End Point in S coordinates
+        self.thickness = thickness   	    #in
+        self.Orientation = Orientation
+        self.MatID = MatID
+        #self.DCTArrayIN = []		#Discrete point distribution over the layer from polygon offset
+        #self.DCTArrayOUT = []		#Discrete point distribution for the next layer from polygon offset	
+		
     #def __repr__(self): #we can tell Python how to prepresent an object of our calss (when using a print statement)
         #pass
             
-    def length(self): #Determine and return Legth of Layer self
-        pass
- 
-    def pnt(self,S): #Return, gp_Pnt of argument S of layer self  
-        pass
-    
-    def pnt2d(self,S): #Return, gp_Pnt2d of argument S of layer self  
-        pass
-    
+    def get_length(self): #Determine and return Legth of Layer self
+         self.length = get_BSplineLst_length(self.BSplineLst)
+         return self.length
+         
+    def get_pnt2d(self,S): #Return, gp_Pnt of argument S of layer self  
+        return get_BSplineLst_Pnt2d(self.BSplineLst,S)
+            
     def build_wire(self): #Builds TopoDS_Wire from connecting BSplineSegments and returns it  
         pass   
         
     def trim(self,S1,S2): #Trims layer between S1 and S2
         pass
     
-    def first():
+    def get_first():
         pass
     
-    def last():
+    def get_last():
         pass
     
  
-    def check():
+    def check_layer():
         pass
     
     def layer_from_wire(self,TopoDS_wire):
@@ -54,7 +56,6 @@ class Layer(object):
     def set_to_origin(self):
         pass
 
-    
     def show(self): #display the layer with pythonocc viewer module
         """
         TBD: renders the topological entity in the viewer: 

@@ -1,20 +1,13 @@
 import numpy as np
 
-from OCC.BRepAdaptor import BRepAdaptor_Curve, BRepAdaptor_CompCurve
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge,BRepBuilderAPI_MakeWire
-from OCC.BRepLib import BRepLib_MakeFace 
-from OCC.GCPnts import GCPnts_AbscissaPoint
 from OCC.Geom import Geom_Plane
-from OCC.Geom2dAPI import Geom2dAPI_Interpolate
 from OCC.gp import gp_Pnt, gp_Pnt2d, gp_Pln, gp_Dir, gp_Vec
-from OCC.IntCurvesFace import IntCurvesFace_Intersector
 
-from utils import (UIUCAirfoil2d, calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray,
-                   AirfoilDat2d)
-from explorer import WireExplorer
-from segment_utils import *
-  
-
+from utils import  calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray
+from BSplineLst_utils import get_BSpline_length, get_BSplineLst_length, find_BSplineLst_coordinate, get_BSplineLst_Pnt2d, trim_BSplineLst, seg_boundary_from_dct  
+from wire_utils import trim_wire, build_wire_from_BSplineLst
+from readinput import UIUCAirfoil2d, AirfoilDat2d
 class Segment(object):
     ''' 
     The Segment object is constructed from multiple Layers obejcts. 
@@ -31,36 +24,24 @@ class Segment(object):
         #pass
             
     def length(self): #Determine and return Legth of Segment self
-        pass
- 
+        self.length = get_BSpline_length(self.BSplineLst)
+        return self.length
+        
     def pnt(self,S): #Return, gp_Pnt of argument S of Segment self  
         pass
-    
+
     def pnt2d(self,S): #Return, gp_Pnt2d of argument S of Segment self  
-        pass
+        return get_BSplineLst_Pnt2d(self.BSplineLst,S)
     
-    def build_wire(self): #Builds TopoDS_Wire from connecting BSplineSegments and returns it        
-        tmp_wire = 	BRepBuilderAPI_MakeWire()
-        for i,item in enumerate(self.BSplineLst):
-            #Convert to 3D SPACE onto x,y plane
-            P = gp_Pnt(0,0,0)
-            V = gp_Dir(gp_Vec(0,0,1))
-            Plane = Geom_Plane(P, V)
-            tmp_edge = BRepBuilderAPI_MakeEdge(item.GetHandle(),Plane.GetHandle())
-            tmp_wire.Add(tmp_edge.Edge())
-            
-        self.wire = tmp_wire.Wire()
+    def build_wire(self): #Builds TopoDS_Wire from connecting BSplineSegments and returns it                  
+        self.wire = build_wire_from_BSplineLst(self.BSplineLst)
             
         
     def trim(self,S1,S2): #Trims layer between S1 and S2
-        pass
+        return trim_BSplineLst(self.BSplineLst, S1, S2)
     
-    def first():
-        pass
-    
-    def last():
-        pass
-    
+    def trim_SEGwire(self, S1, S2):
+        return trim_wire(self.wire, S1, S2)
  
     def check():
         pass
