@@ -36,7 +36,7 @@ from OCC.Geom2dAPI import Geom2dAPI_Interpolate
 
 #Own Libraries:
 from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray
-from BSplineLst_utils import  find_BSplineLst_coordinate, get_BSpline_length, get_BSplineLst_length
+from BSplineLst_utils import  find_BSplineLst_coordinate, get_BSpline_length, get_BSplineLst_length, get_BSplineLst_Pnt2d
 from wire_utils import build_wire_from_BSplineLst
 from layer import Layer
 
@@ -84,8 +84,8 @@ display.DisplayShape(Segment0.wire)
 display.DisplayShape(Trimmed_Wire2, color="GREEN")
 display.DisplayShape(Trimmed_Wire1, color="ORANGE")
 
-Layer0 = Layer(Segment0.BSplineLst,section.SEG_Layup[1][1][0],section.SEG_Layup[1][1][1],section.SEG_Layup[1][1][2],section.SEG_Layup[1][1][3],section.SEG_Layup[1][1][4])
-
+Layer0 = Layer(1002,Segment0.BSplineLst, section.SEG_Layup[1][1][0], section.SEG_Layup[1][1][1], section.SEG_Layup[1][1][2], section.SEG_Layup[1][1][3], section.SEG_Layup[1][1][4])
+print Layer0
 #Discretize_BSplineLst:
 
 def radius_of_curve(curve,u):
@@ -110,10 +110,10 @@ def curvature_of_curve(curve,u):
     return curvature 
 
 def discrete_stepsize(kappa):
-    beta = 0.8
-    stepsize = 1-beta*math.tanh(kappa)
+    min_step = 0.1
+    stretch = 4
+    stepsize = (1-(1-min_step)*math.tanh(kappa/stretch))
     return stepsize
-    
     
 def find_BSpline_coordinate(BSpline,s):
     # Be careful, s stands for the lenght coordinate of a single BSpline, while S represents the Global Coordinate!
@@ -125,15 +125,37 @@ def find_BSpline_coordinate(BSpline,s):
              U = tmp.Parameter()
     return U             
              
-
     
 Trimmed_BSplineLst_length = get_BSplineLst_length(Trimmed_BSplineLst)    
- 
 for i,item in enumerate(Trimmed_BSplineLst):
     BSpline_length = get_BSpline_length(item)
-    
-    
 
+    
+BSplineLst = Segment0.BSplineLst 
+BSplineLst = Trimmed_BSplineLst   
+S = 0
+accuracy = 100
+idx_old = 0
+while S <= 1:
+    pnt2d = get_BSplineLst_Pnt2d(BSplineLst,S)
+    #grab vertices!    
+    [idx,U] = find_BSplineLst_coordinate(BSplineLst,S)
+    if idx > idx_old:
+        BSpline = BSplineLst[idx_old]
+        pnt2d = BSpline.EndPoint()
+        display.DisplayShape(pnt2d, color = 'RED')
+               
+    else:  
+        BSpline = BSplineLst[idx]
+        BSplineLst_length = get_BSplineLst_length(BSplineLst)
+        print S, curvature_of_curve(BSpline,U)
+        display.DisplayShape(pnt2d)
+        S += BSplineLst_length/accuracy * discrete_stepsize(curvature_of_curve(BSpline,U))
+
+    idx_old = idx
+#grab last vertice    
+pnt2d = get_BSplineLst_Pnt2d(BSplineLst,1)    
+display.DisplayShape(pnt2d, color = 'RED')
 
 
 
