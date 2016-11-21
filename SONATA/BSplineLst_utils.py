@@ -22,15 +22,37 @@ def get_BSpline_length(BSpline):
     Adaptor = Geom2dAdaptor_Curve(BSpline.GetHandle())
     Length = GCPnts_AbscissaPoint().Length(Adaptor, tolerance)
     return Length
-
-	
+    
+    
+def copy_BSpline(BSpline):
+    BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(BSpline.Copy()).GetObject()
+    return BSplineCopy
+  
+    
+def copy_BSplineLst(BSplineLst):
+    copied_BSplineLst = []
+    for i,item in enumerate(BSplineLst):
+        copied_BSplineLst.append(copy_BSpline(item))
+    return copied_BSplineLst 
+    
+    
 def get_BSplineLst_length(BSplineLst):
     #Return the cummulated length of the BSplineLst
     CummLength = 0
     for i,item in enumerate(BSplineLst):
          CummLength += get_BSpline_length(item)
     return CummLength  
+
     
+def find_BSpline_coordinate(BSpline,s):
+    # Be careful, s stands for the lenght coordinate of a single BSpline, while S represents the Global Coordinate!
+    BSpline_length = get_BSpline_length(BSpline)
+    tolerance=1e-10
+    Adaptor = Geom2dAdaptor_Curve(BSpline.GetHandle())
+    if s <= BSpline_length:
+             tmp = GCPnts_AbscissaPoint(tolerance, Adaptor, s, 0)
+             u = tmp.Parameter()
+    return u                            
 
 def find_BSplineLst_coordinate(BSplineLst,S):
     BSplineLstLength = get_BSplineLst_length(BSplineLst)      
@@ -124,5 +146,7 @@ def seg_boundary_from_dct(DCT_data,min_degree):
         list_of_bsplines.append(tmp_bspline)
         
     return list_of_bsplines
+    
+
     
     

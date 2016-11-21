@@ -1,4 +1,4 @@
-from BSplineLst_utils import get_BSplineLst_length, get_BSplineLst_Pnt2d, trim_BSplineLst
+from BSplineLst_utils import get_BSplineLst_length, get_BSplineLst_Pnt2d, trim_BSplineLst, copy_BSplineLst
 from wire_utils import build_wire_from_BSplineLst
 
 class Layer(object):
@@ -27,7 +27,13 @@ class Layer(object):
         #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 
         return  str('LayerID: \tStart[-]: \tEnd[-]: \tthickness[mm]: \tOrientation[deg]: \tMatID \tName:\t\n' \
                     '%s, \t%s, \t%s, \t%s, \t\t%s, \t\t%s, \t%s, ' % (self.ID, self.globalStart, self.globalEnd, self.thickness, self.Orientation, self.MatID, self.name))
-                   
+        
+    def copy(self):
+        BSplineLstCopy =  copy_BSplineLst(self.BSplineLst)
+        namecopy = self.name + '_Copy'
+        LayerCopy = Layer(self.ID,BSplineLstCopy,self.globalStart,self.globalEnd,self.thickness, self.Orientation, self.MatID, namecopy)
+        return LayerCopy
+  
     def get_length(self): #Determine and return Legth of Layer self
          self.length = get_BSplineLst_length(self.BSplineLst)
          return self.length
@@ -40,7 +46,11 @@ class Layer(object):
         
     def trim(self,S1,S2): #Trims layer between S1 and S2
         return trim_BSplineLst(self.BSplineLst, S1, S2)
-    
+        
+    def trim_to_coords(self):
+        self.BSplineLst = trim_BSplineLst(self.BSplineLst, self.globalStart, self.globalEnd)
+        return self.BSplineLst
+            
     def get_first():
         pass
     
@@ -62,7 +72,6 @@ class Layer(object):
         #return the new layer
         pass    
 
-    
 
     def show(self): #display the layer with pythonocc viewer module
         """
@@ -73,7 +82,7 @@ class Layer(object):
         else:
             self.disp.DisplayShape(*args, **kwargs)
 
-    
+
     
    
 #execute the following code if this file is executed as __main__   

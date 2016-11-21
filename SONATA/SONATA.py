@@ -35,10 +35,12 @@ from OCC.Geom2dAPI import Geom2dAPI_Interpolate
 
 
 #Own Libraries:
-from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray
+from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, discrete_stepsize, curvature_of_curve
 from BSplineLst_utils import  find_BSplineLst_coordinate, get_BSpline_length, get_BSplineLst_length, get_BSplineLst_Pnt2d
 from wire_utils import build_wire_from_BSplineLst
 from layer import Layer
+from utils import getID
+
 
 ###############################################################################
 #                           M    A    I    N                                  #
@@ -53,78 +55,57 @@ display.Context.SetDeviationCoefficient(0.000001) # 0.001 default. Be careful to
 show_coordinate_system(display) #CREATE AXIS SYSTEM for Visualization
 
 
-
-
 #==========================
 #READ INPUT:
 print "STATUS:\t Read Input"
 filename = 'sec_config.input'
-section = section_config()
-section.read_config(filename)  
+Configuration = section_config(filename)
 
+#==========================                  
+#Initialize Segments and sort the according to ID 
+SegmentLst = []   #List of Segment Objects
+for i,item in enumerate(Configuration.SEG_ID):
+    if item == 0:
+        SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, airfoil = 'naca23012'))
+    else:
+        SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i]))
+
+sorted(SegmentLst, key=getID)
+        
 #==========================
 #Build Segment 0
-print "STATUS:\t Build Segment 0"
+tmp_Segment = SegmentLst[0]
+Layer1 = Layer(0001,SegmentLst[0].BSplineLst, tmp_Segment.Layup[0][0], tmp_Segment.Layup[0][1],tmp_Segment.Layup[0][2],tmp_Segment.Layup[0][3],tmp_Segment.Layup[0][4])
+Layer1.trim_to_coords()
 
-Segment0 = Segment()
-Segment0.BSplineLst_from_airfoil_database(section.SETUP_Airfoil, 150)
+
+#Trim Layer 1
+#Discretize Layer 1
+#Offset Layer 1
+#Rebuild Layer 1
+
+
+
+
+
+
+#=========================================================================
+S1 = 0.3
+S2 = 0.7
+
+Segment0 = SegmentLst[0]
 Segment0.build_wire()
 
-S1 = 0.4
-S2 = 0.6
-Trimmed_Wire1 = Segment0.trim_SEGwire(S1,S2)
-
-S1 = 0.3
-S2 = 0.9995
 Trimmed_BSplineLst = Segment0.trim(S1,S2)
 Trimmed_Wire2 = build_wire_from_BSplineLst(Trimmed_BSplineLst)
 
-#Segment0.build_wire() 
 display.DisplayShape(Segment0.wire)
 display.DisplayShape(Trimmed_Wire2, color="GREEN")
-display.DisplayShape(Trimmed_Wire1, color="ORANGE")
 
-Layer0 = Layer(1002,Segment0.BSplineLst, section.SEG_Layup[1][1][0], section.SEG_Layup[1][1][1], section.SEG_Layup[1][1][2], section.SEG_Layup[1][1][3], section.SEG_Layup[1][1][4])
-print Layer0
-#Discretize_BSplineLst:
 
-def radius_of_curve(curve,u):
-    p = gp_Pnt2d()
-    v1 = gp_Vec2d()
-    v2 = gp_Vec2d()
-    curve.D2(u,p,v1,v2)
-    eq1 = v1.Crossed(v2)      
-    eq2 = v1.Magnitude()
-    curvature = abs(eq1)/abs(eq2**3)
-    radius = 1/curvature
-    return radius
-    
-def curvature_of_curve(curve,u):
-    p = gp_Pnt2d()
-    v1 = gp_Vec2d()
-    v2 = gp_Vec2d()
-    curve.D2(u,p,v1,v2)
-    eq1 = v1.Crossed(v2)      
-    eq2 = v1.Magnitude()
-    curvature = abs(eq1)/abs(eq2**3)
-    return curvature 
 
-def discrete_stepsize(kappa):
-    min_step = 0.1
-    stretch = 4
-    stepsize = (1-(1-min_step)*math.tanh(kappa/stretch))
-    return stepsize
-    
-def find_BSpline_coordinate(BSpline,s):
-    # Be careful, s stands for the lenght coordinate of a single BSpline, while S represents the Global Coordinate!
-    BSpline_length = get_BSpline_length(BSpline)
-    tolerance=1e-10
-    Adaptor = Geom2dAdaptor_Curve(BSpline.GetHandle())
-    if s <= BSpline_length:
-             tmp = GCPnts_AbscissaPoint(tolerance, Adaptor, s, 0)
-             U = tmp.Parameter()
-    return U             
-             
+#Discretize_Layer:
+
     
 Trimmed_BSplineLst_length = get_BSplineLst_length(Trimmed_BSplineLst)    
 for i,item in enumerate(Trimmed_BSplineLst):
@@ -132,7 +113,24 @@ for i,item in enumerate(Trimmed_BSplineLst):
 
     
 BSplineLst = Segment0.BSplineLst 
-BSplineLst = Trimmed_BSplineLst   
+
+
+
+#Discretize Trimmed_BSplineLst
+BSplineLst = Trimmed_BSplineLst
+tmp_spline = BSplineLst[0]
+first = tmp_spline.FirstParameter()
+last = tmp_spline.LastParameter()
+
+#the_get_BSplineLst_Point function must get the start and end arguments of the Spline!
+pnt2d = get_BSplineLst_Pnt2d(BSplineLst,0.99)
+display.DisplayShape(pnt2d, color = 'BLUE')
+
+
+
+S1 = 0.3
+S2 = 0.7 
+
 S = 0
 accuracy = 100
 idx_old = 0
@@ -148,15 +146,14 @@ while S <= 1:
     else:  
         BSpline = BSplineLst[idx]
         BSplineLst_length = get_BSplineLst_length(BSplineLst)
-        print S, curvature_of_curve(BSpline,U)
-        display.DisplayShape(pnt2d)
+        #print S, curvature_of_curve(BSpline,U)
+        #display.DisplayShape(pnt2d)
         S += BSplineLst_length/accuracy * discrete_stepsize(curvature_of_curve(BSpline,U))
 
     idx_old = idx
 #grab last vertice    
 pnt2d = get_BSplineLst_Pnt2d(BSplineLst,1)    
 display.DisplayShape(pnt2d, color = 'RED')
-
 
 
 

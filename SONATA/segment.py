@@ -14,22 +14,38 @@ class Segment(object):
     Each Segment has one Segment boundary.
     ''' 
    
-    def __init__(self): #gets called whenever we create a new instance of a class
-        self.dct   = []
-        self.BSplineLst  = []
-        self.wire  = []
+    def __init__(self, ID = 0, **kwargs): #gets called whenever we create a new instance of a class
+        ''' Initialize with BSplineLst:             Segment(item, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=True,  Boundary = BSplineLst)
+            Initialize with airfoil database:       Segment(item, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, airfoil = 'naca23012')
+            Initialize from file:                   Segment(item, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, filename = 'naca23012.dat')   
+        #empty initialization with no Boundary: Segment(item, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i])'''
+        self.BSplineLst = None
+        self.ID = ID
+        self.Layup = kwargs.get('Layup') 
+        self.CoreMaterial = kwargs.get('CoreMaterial') 
+        self.OCC = kwargs.get('OCC')
 
+        if self.OCC == True:
+            self.BSplineLst = kwargs.get('Boundary')
 
-    #def __repr__(self): #we can tell Python how to prepresent an object of our calss (when using a print statement)
-        #pass
-            
-    def length(self): #Determine and return Legth of Segment self
-        self.length = get_BSpline_length(self.BSplineLst)
-        return self.length
+        elif self.OCC == False:
+            if kwargs.get('airfoil') != None:
+                self.BSplineLst = self.BSplineLst_from_airfoil_database(kwargs.get('airfoil'),140) 
+                
+            elif kwargs.get('filename') != None:
+                self.BSplineLst = self.BSplineLst_from_file(self,kwargs.get('filename'),140)  
+                
+        #self.wire  = []
+        self.LayerLst = []
+
+    def __repr__(self):
+        return '{}: {}'.format(self.__class__.__name__,self.ID) 
+       
+                  
+    def get_length(self): #Determine and return Legth of Layer self
+         self.length = get_BSplineLst_length(self.BSplineLst)
+         return self.length
         
-    def pnt(self,S): #Return, gp_Pnt of argument S of Segment self  
-        pass
-
     def pnt2d(self,S): #Return, gp_Pnt2d of argument S of Segment self  
         return get_BSplineLst_Pnt2d(self.BSplineLst,S)
     
@@ -41,11 +57,8 @@ class Segment(object):
     
     def trim_SEGwire(self, S1, S2):
         return trim_wire(self.wire, S1, S2)
- 
-    def check():
-        pass
-              
-    
+        
+
     def BSplineLst_from_airfoil_database(self,string,min_degree=140):
         '''
         string: 'naca23012'
@@ -53,7 +66,8 @@ class Segment(object):
         '''
         DCT_data = UIUCAirfoil2d(string).T
         self.BSplineLst = seg_boundary_from_dct(DCT_data,min_degree)
-       
+        return seg_boundary_from_dct(DCT_data,min_degree)
+ 
             
     def BSplineLst_from_file(self,filename,min_degree=140):
         '''
@@ -62,6 +76,7 @@ class Segment(object):
         '''
         DCT_data = AirfoilDat2d(filename).T
         self.BSplineLst = seg_boundary_from_dct(DCT_data)
+        return seg_boundary_from_dct(DCT_data)
         
     
     def set_to_origin(self):

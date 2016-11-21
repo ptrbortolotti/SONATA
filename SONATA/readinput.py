@@ -146,7 +146,8 @@ def AirfoilDat2d(name):
 #================ SECTION-CONFIG OBJECT ========================================
 
 class section_config(object):
-    def __init__(self):
+    
+    def __init__(self, filename):
         self.WEB_ID = []
         self.WEB_Pos1 = []
         self.WEB_Pos2 = []
@@ -155,6 +156,7 @@ class section_config(object):
         self.SEG_Layup = []
         self.SEG_Boundary_OCC = []      #Segment Boundaries in Opencascade format (TOPO_DSwire)
         self.SEG_Boundary_DCT = []      #Segment Boundaries in discrete values (np.array) 
+        self.read_config(filename)
         
     def read_config(self,filename):
 

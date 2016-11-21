@@ -7,7 +7,7 @@ import math
 import numpy as np 
                           
 #Python OCC Libraries
-from OCC.gp import gp_Pnt, gp_Pnt2d, gp_Trsf
+from OCC.gp import gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec2d
 from OCC.TColgp import (TColgp_Array1OfPnt, TColgp_Array1OfPnt2d, TColgp_HArray1OfPnt2d, 
                         TColgp_HArray1OfPnt )
 from OCC.BRepBuilderAPI import (BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire,
@@ -157,6 +157,35 @@ def calc_DCT_angles(DCT_data):
         temp.append(calc_angle_between(v1,v2))
     return np.array(temp)
     
+    
+def radius_of_curve(curve,u):
+    p = gp_Pnt2d()
+    v1 = gp_Vec2d()
+    v2 = gp_Vec2d()
+    curve.D2(u,p,v1,v2)
+    eq1 = v1.Crossed(v2)      
+    eq2 = v1.Magnitude()
+    curvature = abs(eq1)/abs(eq2**3)
+    radius = 1/curvature
+    return radius
+    
+def curvature_of_curve(curve,u):
+    p = gp_Pnt2d()
+    v1 = gp_Vec2d()
+    v2 = gp_Vec2d()
+    curve.D2(u,p,v1,v2)
+    eq1 = v1.Crossed(v2)      
+    eq2 = v1.Magnitude()
+    curvature = abs(eq1)/abs(eq2**3)
+    return curvature 
+
+def discrete_stepsize(kappa):
+    min_step = 0.1
+    stretch = 4
+    stepsize = (1-(1-min_step)*math.tanh(kappa/stretch))
+    return stepsize
+        
+    
 def gp_Pnt2d_to_npArray(Ptn2d):
         vector = np.array([Ptn2d.X(),Ptn2d.Y()])
         return vector
@@ -172,3 +201,6 @@ def np_GetNormal2d(Vec2d):
 def npArray_to_gp_Pnt2d(vector):
         Pnt2d = gp_Pnt2d(vector[0],vector[1])
         return Pnt2d     
+        
+def getID(custom):
+    return custom.ID        
