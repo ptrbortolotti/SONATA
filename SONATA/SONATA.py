@@ -8,6 +8,7 @@ THIS IS THE SONATA EXECUTION FILE!
 import math
 import numpy as np       
 import matplotlib.pyplot as plt
+import shapely.geometry as shp
 
 #Third Party Libaries: OCC Libraries
 from OCC.Display.SimpleGui import init_display
@@ -36,10 +37,11 @@ from OCC.Geom2dAPI import Geom2dAPI_Interpolate
 
 #Own Libraries:
 from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, discrete_stepsize, curvature_of_curve
-from BSplineLst_utils import  find_BSplineLst_coordinate, get_BSpline_length, get_BSplineLst_length, get_BSplineLst_Pnt2d
+from BSplineLst_utils import  find_BSplineLst_coordinate, get_BSpline_length, get_BSplineLst_length, get_BSplineLst_Pnt2d, discretize_BSplineLst
 from wire_utils import build_wire_from_BSplineLst
 from layer import Layer
-from utils import getID
+from utils import getID, Pnt2dLst_to_npArray
+from offset import shp_parallel_offset
 
 
 ###############################################################################
@@ -76,7 +78,7 @@ sorted(SegmentLst, key=getID)
 #Build Segment 0
 tmp_Segment = SegmentLst[0]
 Layer1 = Layer(0001,SegmentLst[0].BSplineLst, tmp_Segment.Layup[0][0], tmp_Segment.Layup[0][1],tmp_Segment.Layup[0][2],tmp_Segment.Layup[0][3],tmp_Segment.Layup[0][4])
-Layer1.trim_to_coords()
+#Layer1.trim_to_coords()
 
 
 #Trim Layer 1
@@ -90,73 +92,40 @@ Layer1.trim_to_coords()
 
 
 #=========================================================================
-S1 = 0.3
-S2 = 0.7
-
 Segment0 = SegmentLst[0]
 Segment0.build_wire()
 
-Trimmed_BSplineLst = Segment0.trim(S1,S2)
+S1 = 0.46
+S2 = 0.48
+
+Trimmed_BSplineLst = Segment0.trim(S1,S2,0,1)
 Trimmed_Wire2 = build_wire_from_BSplineLst(Trimmed_BSplineLst)
 
 display.DisplayShape(Segment0.wire)
 display.DisplayShape(Trimmed_Wire2, color="GREEN")
 
 
-
-#Discretize_Layer:
-
-    
-Trimmed_BSplineLst_length = get_BSplineLst_length(Trimmed_BSplineLst)    
-for i,item in enumerate(Trimmed_BSplineLst):
-    BSpline_length = get_BSpline_length(item)
-
-    
-BSplineLst = Segment0.BSplineLst 
+npArray = discretize_BSplineLst(Trimmed_BSplineLst,S1,S2,100)
+offlinepts = shp_parallel_offset(npArray,0.006)
+plt.plot(*npArray.T, color='black', marker='.')
+plt.plot(*offlinepts.T, color='red', marker='.')
 
 
 
-#Discretize Trimmed_BSplineLst
-BSplineLst = Trimmed_BSplineLst
-tmp_spline = BSplineLst[0]
-first = tmp_spline.FirstParameter()
-last = tmp_spline.LastParameter()
-
-#the_get_BSplineLst_Point function must get the start and end arguments of the Spline!
-pnt2d = get_BSplineLst_Pnt2d(BSplineLst,0.99)
-display.DisplayShape(pnt2d, color = 'BLUE')
 
 
 
-S1 = 0.3
-S2 = 0.7 
-
-S = 0
-accuracy = 100
-idx_old = 0
-while S <= 1:
-    pnt2d = get_BSplineLst_Pnt2d(BSplineLst,S)
-    #grab vertices!    
-    [idx,U] = find_BSplineLst_coordinate(BSplineLst,S)
-    if idx > idx_old:
-        BSpline = BSplineLst[idx_old]
-        pnt2d = BSpline.EndPoint()
-        display.DisplayShape(pnt2d, color = 'RED')
-               
-    else:  
-        BSpline = BSplineLst[idx]
-        BSplineLst_length = get_BSplineLst_length(BSplineLst)
-        #print S, curvature_of_curve(BSpline,U)
-        #display.DisplayShape(pnt2d)
-        S += BSplineLst_length/accuracy * discrete_stepsize(curvature_of_curve(BSpline,U))
-
-    idx_old = idx
-#grab last vertice    
-pnt2d = get_BSplineLst_Pnt2d(BSplineLst,1)    
-display.DisplayShape(pnt2d, color = 'RED')
 
 
 
+
+
+
+#pnt2d = get_BSplineLst_Pnt2d(Segment0.BSplineLst,0.399,0,1)
+#display.DisplayShape(pnt2d, color = 'CYAN')
+
+#pnt2d = get_BSplineLst_Pnt2d(Trimmed_BSplineLst,0.995,S1,S2)
+#display.DisplayShape(pnt2d, color = 'BLUE')
 
 
 
@@ -174,7 +143,9 @@ display.DisplayShape(pnt2d, color = 'RED')
 #======================================================================
 #PLOT
 
-
+plt.axis('equal')
+plt.show()
+        
 
 display.set_bg_gradient_color(20,6,111,200,200,200)
 display.View_Top()

@@ -82,7 +82,6 @@ def read_layup(STR):
         list_temp[j] = list_temp[j].split()
     
     #CONVERT TABLE TO np.ARRAY
-    import numpy as np
     x = np.asarray(list_temp)
     nplayup = x[:,:5].astype(np.float)
     

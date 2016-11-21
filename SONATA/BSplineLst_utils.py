@@ -9,7 +9,7 @@ from OCC.Geom2dAPI import Geom2dAPI_Interpolate
 from OCC.Geom2d import Handle_Geom2d_BSplineCurve_DownCast
 
 #Own Libraries:
-from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray
+from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_to_npArray, discrete_stepsize, curvature_of_curve
 
 
 ###############################################################################
@@ -19,8 +19,10 @@ from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray
 
 def get_BSpline_length(BSpline):
     tolerance=1e-10
+    first = BSpline.FirstParameter()
+    last = BSpline.LastParameter()
     Adaptor = Geom2dAdaptor_Curve(BSpline.GetHandle())
-    Length = GCPnts_AbscissaPoint().Length(Adaptor, tolerance)
+    Length = GCPnts_AbscissaPoint().Length(Adaptor, first, last, tolerance)
     return Length
     
     
@@ -54,32 +56,39 @@ def find_BSpline_coordinate(BSpline,s):
              u = tmp.Parameter()
     return u                            
 
-def find_BSplineLst_coordinate(BSplineLst,S):
-    BSplineLstLength = get_BSplineLst_length(BSplineLst)      
+def find_BSplineLst_coordinate(BSplineLst,S, start, end):
+    BSplineLstLength = get_BSplineLst_length(BSplineLst)
+    x = BSplineLstLength*(S-start)/(end-start)
     CummLength = 0
     tolerance=1e-10
+    #print 'S: '+ str(S)
     for i,item in enumerate(BSplineLst):
-         Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
-         CummLength += get_BSpline_length(item)
-         if S*BSplineLstLength <= CummLength:
-             dist = GCPnts_AbscissaPoint().Length(Adaptor, tolerance)-(CummLength-S*BSplineLstLength)
-             tmp = GCPnts_AbscissaPoint(tolerance, Adaptor, dist, 0)
+        first = item.FirstParameter()
+        last = item.LastParameter()
+        #print 'first:  ' , str(item.FirstParameter())
+        #print 'last:  '  , str(item.LastParameter())
+        Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
+        CummLength += get_BSpline_length(item)
+        if x <= CummLength:
+             dist = x - (CummLength - GCPnts_AbscissaPoint().Length(Adaptor, first, last, tolerance))
+             tmp = GCPnts_AbscissaPoint(tolerance, Adaptor, dist, first)
              U = tmp.Parameter()
              break
+    #print 'idx: '+ str(i) + '     U: '+ str(U) 
     return [i,U]  #Return index of edge and parameter U on edge!
  
-   
-def get_BSplineLst_Pnt2d(BSplineLst,S):
+  
+def get_BSplineLst_Pnt2d(BSplineLst,S, start, end):
     P = gp_Pnt2d()
-    [idx,U] = find_BSplineLst_coordinate(BSplineLst,S)
+    [idx,U] = find_BSplineLst_coordinate(BSplineLst,S, start, end)
     BSplineLst[idx].D0(U,P)
     return P
 	
 	
-def trim_BSplineLst(BSplineLst, S1, S2):
+def trim_BSplineLst(BSplineLst, S1, S2, start, end):
     trimmed_BSplineLst = []
-    para1 =  find_BSplineLst_coordinate(BSplineLst, S1)
-    para2 =  find_BSplineLst_coordinate(BSplineLst, S2)
+    para1 =  find_BSplineLst_coordinate(BSplineLst, S1, start, end)
+    para2 =  find_BSplineLst_coordinate(BSplineLst, S2, start, end)
     for i,item in enumerate(BSplineLst):       
          First = item.FirstParameter() 
          Last =  item.LastParameter() 
@@ -148,5 +157,31 @@ def seg_boundary_from_dct(DCT_data,min_degree):
     return list_of_bsplines
     
 
-    
-    
+
+def discretize_BSplineLst(BSplineLst,start,end,accuracy=100):
+    #Discretize_Layer:
+    Pnt2dLst = []
+    S = start
+    idx_old = 0
+    while S <= end:
+        pnt2d = get_BSplineLst_Pnt2d(BSplineLst,S,start,end)
+        Pnt2dLst.append(pnt2d)
+        
+        #grab vertices!    
+        [idx,U] = find_BSplineLst_coordinate(BSplineLst,S,start,end)
+        if idx > idx_old:
+            BSpline = BSplineLst[idx_old]
+            pnt2d = BSpline.EndPoint()
+            Pnt2dLst.append(pnt2d)
+                   
+        else:  
+            BSpline = BSplineLst[idx]
+            BSplineLst_length = get_BSplineLst_length(BSplineLst)
+            S += BSplineLst_length/accuracy * discrete_stepsize(curvature_of_curve(BSpline,U))
+        idx_old = idx
+        
+    #grab last vertice    
+    pnt2d = get_BSplineLst_Pnt2d(BSplineLst,end, start,end)
+    Pnt2dLst.append(pnt2d)
+    npArray = Pnt2dLst_to_npArray(Pnt2dLst)
+    return npArray

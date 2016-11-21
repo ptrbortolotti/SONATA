@@ -185,6 +185,12 @@ def discrete_stepsize(kappa):
     stepsize = (1-(1-min_step)*math.tanh(kappa/stretch))
     return stepsize
         
+
+def Pnt2dLst_to_npArray(Pnt2dLst):
+    lst_tmp = []
+    for i,item in enumerate(Pnt2dLst):
+        lst_tmp.append([item.X(),item.Y()])
+    return np.asarray(lst_tmp)
     
 def gp_Pnt2d_to_npArray(Ptn2d):
         vector = np.array([Ptn2d.X(),Ptn2d.Y()])

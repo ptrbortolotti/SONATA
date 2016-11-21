@@ -52,8 +52,8 @@ class Segment(object):
     def build_wire(self): #Builds TopoDS_Wire from connecting BSplineSegments and returns it                  
         self.wire = build_wire_from_BSplineLst(self.BSplineLst)           
         
-    def trim(self,S1,S2): #Trims layer between S1 and S2
-        return trim_BSplineLst(self.BSplineLst, S1, S2)
+    def trim(self,S1,S2, start, end): #Trims layer between S1 and S2
+        return trim_BSplineLst(self.BSplineLst, S1, S2, start, end)
     
     def trim_SEGwire(self, S1, S2):
         return trim_wire(self.wire, S1, S2)
