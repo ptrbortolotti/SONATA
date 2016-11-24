@@ -5,7 +5,10 @@ from OCC.Geom import Geom_Plane
 from OCC.gp import gp_Pnt, gp_Pnt2d, gp_Pln, gp_Dir, gp_Vec
 
 from utils import  calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray
-from BSplineLst_utils import get_BSpline_length, get_BSplineLst_length, find_BSplineLst_coordinate, get_BSplineLst_Pnt2d, trim_BSplineLst, seg_boundary_from_dct  
+from BSplineLst_utils import get_BSpline_length, get_BSplineLst_length, \
+                            find_BSplineLst_coordinate, get_BSplineLst_Pnt2d, \
+                            trim_BSplineLst, seg_boundary_from_dct, set_BSplineLst_to_Origin, \
+                            copy_BSplineLst
 from wire_utils import trim_wire, build_wire_from_BSplineLst
 from readinput import UIUCAirfoil2d, AirfoilDat2d
 class Segment(object):
@@ -15,32 +18,36 @@ class Segment(object):
     ''' 
    
     def __init__(self, ID = 0, **kwargs): #gets called whenever we create a new instance of a class
-        ''' Initialize with BSplineLst:             Segment(item, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=True,  Boundary = BSplineLst)
-            Initialize with airfoil database:       Segment(item, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, airfoil = 'naca23012')
-            Initialize from file:                   Segment(item, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, filename = 'naca23012.dat')   
+        ''' Initialize with BSplineLst:             Segment(ID, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=True, Boundary = BSplineLst)
+            Initialize with airfoil database:       Segment(ID, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, airfoil = 'naca23012')
+            Initialize from file:                   Segment(ID, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, filename = 'naca23012.dat')   
         #empty initialization with no Boundary: Segment(item, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i])'''
         self.BSplineLst = None
         self.ID = ID
         self.Layup = kwargs.get('Layup') 
         self.CoreMaterial = kwargs.get('CoreMaterial') 
         self.OCC = kwargs.get('OCC')
-
-        if self.OCC == True:
-            self.BSplineLst = kwargs.get('Boundary')
-
-        elif self.OCC == False:
-            if kwargs.get('airfoil') != None:
-                self.BSplineLst = self.BSplineLst_from_airfoil_database(kwargs.get('airfoil'),140) 
-                
-            elif kwargs.get('filename') != None:
-                self.BSplineLst = self.BSplineLst_from_file(self,kwargs.get('filename'),140)  
-                
         #self.wire  = []
         self.LayerLst = []
 
+        if self.OCC == True:
+            self.BSplineLst = kwargs.get('Boundary')
+            #self.BSplineLst = set_BSplineLst_to_Origin(BSplineLst_tmp)
+            
+        elif self.OCC == False:
+            if kwargs.get('airfoil') != None:
+               BSplineLst_tmp = self.BSplineLst_from_airfoil_database(kwargs.get('airfoil'),140) 
+            elif kwargs.get('filename') != None:
+                BSplineLst_tmp = self.BSplineLst_from_file(self,kwargs.get('filename'),140)  
+            self.BSplineLst = set_BSplineLst_to_Origin(BSplineLst_tmp)
+
     def __repr__(self):
         return '{}: {}'.format(self.__class__.__name__,self.ID) 
-       
+    
+    def copy(self):
+        BSplineLstCopy =  copy_BSplineLst(self.BSplineLst)
+        SegmentCopy = Segment(self.ID, Layup = self.Layup, CoreMaterial = self.CoreMaterial, OCC = True, Boundary = BSplineLstCopy)
+        return SegmentCopy
                   
     def get_length(self): #Determine and return Legth of Layer self
          self.length = get_BSplineLst_length(self.BSplineLst)

@@ -18,6 +18,20 @@ from OCC.TopoDS import topods
 
     
 #######################UTILITIE FUNCTIONS######################################    
+
+def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+    """
+    rel_tol: is the relative tolerance -- it is the amount of error allowed, relative to the larger absolute value of a or b. For
+    example, to set a tolerance of 5%, pass tol=0.05. The default tolerance is 1e-9, which assures that the two values are the same
+    within about 9 decimal digits. rel_tol must be greater than 0.0
+    
+    abs_tol: is a minimum absolute tolerance level -- useful for comparisons near zero.
+    The name, isclose, is selected for consistency with the existing isnan and isinf .
+    """ 
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
+
+
 def np_array_to_gp_Pnt(array):              
     Pnt = gp_Pnt(array[0], array[1], array[2])
     return Pnt
@@ -142,21 +156,38 @@ def calc_angle_between(v1, v2):
     '''Returns the angle in degree between vectors 'v1' and 'v2'''
     return np.degrees(math.atan2(np.linalg.norm(np.cross(v1,v2)), np.dot(v1,v2)))
 
+    
 def calc_DCT_angles(DCT_data):
     temp = []
-    for i in range(0,DCT_data.shape[0]):
-        if i == 0: #first point
-            v1 = DCT_data[i-2]-DCT_data[i] 
-            v2 = DCT_data[i+1]-DCT_data[i]
-        elif i == DCT_data.shape[0]-1: #last point
-            v1 = DCT_data[i-1]-DCT_data[i] 
-            v2 = DCT_data[1]-DCT_data[i]
-        else:
-            v1 = DCT_data[i-1]-DCT_data[i]
-            v2 = DCT_data[i+1]-DCT_data[i]
-        temp.append(calc_angle_between(v1,v2))
+    if np.array_equal(DCT_data[0],DCT_data[-1]): #closed
+        for i in range(0,DCT_data.shape[0]):
+            if i == 0: #first point
+                v1 = DCT_data[i-2]-DCT_data[i] 
+                v2 = DCT_data[i+1]-DCT_data[i]
+            elif i == DCT_data.shape[0]-1: #last point
+                v1 = DCT_data[i-1]-DCT_data[i] 
+                v2 = DCT_data[1]-DCT_data[i]
+            else:
+                v1 = DCT_data[i-1]-DCT_data[i]
+                v2 = DCT_data[i+1]-DCT_data[i]
+            temp.append(calc_angle_between(v1,v2))
+    
+    else:
+        for i in range(0,DCT_data.shape[0]):
+            if i == 0: #first point
+                v2 = DCT_data[i+1]-DCT_data[i]
+                v1 = -v2
+            elif i == DCT_data.shape[0]-1: #last point
+                v1 = DCT_data[i-1]-DCT_data[i] 
+                v2 = -v1
+            else:
+                v1 = DCT_data[i-1]-DCT_data[i]
+                v2 = DCT_data[i+1]-DCT_data[i]
+            temp.append(calc_angle_between(v1,v2))
+            
     return np.array(temp)
     
+
     
 def radius_of_curve(curve,u):
     p = gp_Pnt2d()
