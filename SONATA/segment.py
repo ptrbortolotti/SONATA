@@ -38,7 +38,7 @@ class Segment(object):
             if kwargs.get('airfoil') != None:
                BSplineLst_tmp = self.BSplineLst_from_airfoil_database(kwargs.get('airfoil'),140) 
             elif kwargs.get('filename') != None:
-                BSplineLst_tmp = self.BSplineLst_from_file(self,kwargs.get('filename'),140)  
+                BSplineLst_tmp = self.BSplineLst_from_file(kwargs.get('filename'),140)  
             self.BSplineLst = set_BSplineLst_to_Origin(BSplineLst_tmp)
 
     def __repr__(self):
@@ -82,8 +82,8 @@ class Segment(object):
         min_degree: allowed angle in discrete representation before starting to split default
         '''
         DCT_data = AirfoilDat2d(filename).T
-        self.BSplineLst = seg_boundary_from_dct(DCT_data)
-        return seg_boundary_from_dct(DCT_data)
+        self.BSplineLst = seg_boundary_from_dct(DCT_data,min_degree)
+        return seg_boundary_from_dct(DCT_data,min_degree)
         
     
     def set_to_origin(self):

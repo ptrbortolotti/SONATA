@@ -6,7 +6,9 @@ Created on Mon Nov 21 15:37:44 2016
 """
 import numpy as np       
 import shapely.geometry as shp
+import matplotlib.pyplot as plt
 
+fig = plt.figure()
 
 def shp_parallel_offset(arrPts,dist):
 #OFFSET ALGORITHM
@@ -15,6 +17,7 @@ def shp_parallel_offset(arrPts,dist):
     res = 16 #resolution
     join_style = 1 #( 1:round,2:mitre,3:bevels)
     offset = line.parallel_offset(dist,side,res,join_style)
+    #print type(offset)
     
     if isinstance(offset,shp.MultiLineString):    
         parts = hasattr(offset, 'geoms') and offset or [offset]
@@ -23,18 +26,19 @@ def shp_parallel_offset(arrPts,dist):
                 x, y= part.xy
                 data = np.vstack((x,y))
                 data = data.T
-       
+                
     elif isinstance(offset,shp.LineString):                 
         data = np.array(offset.coords)
     #plt.plot(*offlinepts.T, color='red', marker='.')
     
     else:
         data = np.array(offset.coords)
-    print type(offset)
-    
+    plt.axis('equal')
+    plt.show()
+        
     return data
 
-    
+
 '''
 Multiple Part Offset!!!
 

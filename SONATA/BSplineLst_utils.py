@@ -5,12 +5,12 @@ from scipy.optimize import leastsq
 #PythonOCC Libraries
 from OCC.gp import gp_Pnt2d, gp_Dir2d
 from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
-from OCC.GCPnts import GCPnts_AbscissaPoint
+from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection
 from OCC.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve
 from OCC.Geom2d import Handle_Geom2d_BSplineCurve_DownCast, Geom2d_Line
 
 #Own Libraries:
-from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_to_npArray, discrete_stepsize, curvature_of_curve, isclose
+from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_to_npArray, discrete_stepsize, curvature_of_curve, isclose, unique_rows
 
 
 ###############################################################################
@@ -99,10 +99,48 @@ def get_BSplineLst_Pnt2d(BSplineLst,S, start, end):
     
 	
 def trim_BSplineLst(BSplineLst, S1, S2, start, end):
-    if S1 == start and S2 == end:
+    if S1 > S2:
+        trimmed_BSplineLst = []
+        para1 =  find_BSplineLst_coordinate(BSplineLst, S1, start, end)
+        para2 =  find_BSplineLst_coordinate(BSplineLst, S2, start, end)
+        for i,item in enumerate(BSplineLst):
+            First = item.FirstParameter() 
+            Last =  item.LastParameter()
+            if para1[0] == i and para2[0] != i: #Okay
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy.Segment(para1[1],Last)
+                 trimmed_BSplineLst.append(BSplineCopy)
+                 
+            elif (para1[0] != i and para2[0] != i) and (para1[0] > i and para2[0] > i):
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy.Segment(First,Last)
+                 trimmed_BSplineLst.append(BSplineCopy)
+                 
+            elif (para1[0] != i and para2[0] != i) and (para1[0] < i and para2[0] < i):
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy.Segment(First,Last)
+                 trimmed_BSplineLst.append(BSplineCopy)
+                 
+            elif para1[0] == i and para2[0] == i: #Okay
+                 BSplineCopy1 = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy1.Segment(para1[1],Last)
+                 trimmed_BSplineLst.append(BSplineCopy1)
+                 BSplineCopy2 = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy2.Segment(First,para2[1])
+                 trimmed_BSplineLst.append(BSplineCopy2)
+                 break
+        
+            elif para1[0] != i and para2[0] == i: #Okay
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy.Segment(First,para2[1])
+                 trimmed_BSplineLst.append(BSplineCopy)
+                 break
+             
+
+    elif S1 == start and S2 == end:
         trimmed_BSplineLst = copy_BSplineLst(BSplineLst)
     
-    else:
+    elif S2 > S1:
         trimmed_BSplineLst = []
         para1 =  find_BSplineLst_coordinate(BSplineLst, S1, start, end)
         para2 =  find_BSplineLst_coordinate(BSplineLst, S2, start, end)
@@ -147,9 +185,9 @@ def seg_boundary_from_dct(DCT_data,min_degree):
             corners.append(i)
     NbCorners = np.size(corners)
         
-    DCT_Segments = []        
+    DCT_Segments = []
     if NbCorners == 0:
-        DCT_Segments[0] = DCT_data
+        DCT_Segments.append(DCT_data)
     
     if NbCorners > 0:
         for i in range(0,NbCorners-1):
@@ -163,7 +201,8 @@ def seg_boundary_from_dct(DCT_data,min_degree):
         #print data
         tmp_harray = TColgp_HArray1OfPnt2d_from_nparray(data)
         if NbCorners == 0:
-            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), True, 0.0000001)             #Interpolate datapoints to bspline
+            #tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), True, 0.0000001)             #Interpolate datapoints to bspline
+            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 0.0000001)             #Interpolate datapoints to bspline
         else:     
             tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 0.0000001)             #Interpolate datapoints to bspline
         tmp_interpolation.Perform()                                               
@@ -171,10 +210,24 @@ def seg_boundary_from_dct(DCT_data,min_degree):
         list_of_bsplines.append(tmp_bspline)
         
     return list_of_bsplines
+
+def discretize_BSplineLst(BSplineLst,Deflection=0.00001):
+    Pnt2dLst = []
+    for i,item in enumerate(BSplineLst):
+        Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
+        discretization = GCPnts_QuasiUniformDeflection(Adaptor,Deflection,4)	#GeomAbs_Shape Continuity: 1=C0, 2=G1, 3=C1, 3=G2,... 
+        NbPoints = discretization.NbPoints()
+        for j in range(1, NbPoints+1):
+            Pnt = discretization.Value(j)
+            Pnt2dLst.append(Pnt)
+        
+    a = Pnt2dLst_to_npArray(Pnt2dLst)
+    b = np.around(a,10) # Evenly round to the given number of decimals. 
+    npArray = unique_rows(b) # Remove possible doubles! 
+    return npArray
     
 
-def discretize_BSplineLst(BSplineLst,start,end,accuracy=100):
-    #Discretize_Layer:
+def discretize_BSplineLst_v2(BSplineLst,accuracy=100):
     Pnt2dLst = []
     BSplineLst_length = get_BSplineLst_length(BSplineLst)
      
@@ -196,6 +249,44 @@ def discretize_BSplineLst(BSplineLst,start,end,accuracy=100):
     npArray = Pnt2dLst_to_npArray(Pnt2dLst)
     return npArray
     
+def discretize_BSplineLst_v3(BSplineLst,start,end,accuracy=100):
+    Pnt2dLst = []
+    S = start
+    idx_old = 0
+    while S <= end:
+        pnt2d = get_BSplineLst_Pnt2d(BSplineLst,S,start,end)
+        Pnt2dLst.append(pnt2d)
+        
+        #grab vertices!    
+        [idx,U] = find_BSplineLst_coordinate(BSplineLst,S,start,end)
+        if idx > idx_old:
+            BSpline = BSplineLst[idx_old]
+            pnt2d = BSpline.EndPoint()
+            Pnt2dLst.append(pnt2d)
+                   
+        else:  
+            BSpline = BSplineLst[idx]
+            BSplineLst_length = get_BSplineLst_length(BSplineLst)
+            S += BSplineLst_length/accuracy * discrete_stepsize(curvature_of_curve(BSpline,U))
+        idx_old = idx 
+        
+        
+    #grab last corner if last edge is very small   
+    [idx,U] = find_BSplineLst_coordinate(BSplineLst,end,start,end)
+    if idx>idx_old:
+            BSpline = BSplineLst[idx_old]
+            pnt2d = BSpline.EndPoint()
+            Pnt2dLst.append(pnt2d)
+    
+    #grab last vertice  
+    pnt2d = get_BSplineLst_Pnt2d(BSplineLst,end, start,end)
+    Pnt2dLst.append(pnt2d)
+    npArray = Pnt2dLst_to_npArray(Pnt2dLst)
+    return npArray
+        
+    
+
+          
     
 def BSplineLst_from_dct(DCT_data,min_degree=140):
            
@@ -289,16 +380,23 @@ def set_BSplineLst_to_Origin(BSplineLst):
      
     #Reorder Sequence of BSplines of BSplinesLst
     OBSplineLst =  []
+    CorrectOrigin = False
               
     for i,item in enumerate(BSplineLst):     
         if i  == OriEdgePnt[0]:
             First = item.FirstParameter() 
             Last =  item.LastParameter()
-            BSplineCurve1 = copy_BSpline(item)
-            BSplineCurve1.Segment(OriEdgePnt[1],Last)
-            BSplineCurve2 = copy_BSpline(item)
-            BSplineCurve2.Segment(First,OriEdgePnt[1])
-            OBSplineLst.append(BSplineCurve1)
+            if isclose(OriEdgePnt[1],First) == False:
+                CorrectOrigin = False
+                BSplineCurve1 = copy_BSpline(item)
+                BSplineCurve1.Segment(OriEdgePnt[1],Last)
+                BSplineCurve2 = copy_BSpline(item)
+                BSplineCurve2.Segment(First,OriEdgePnt[1])
+                OBSplineLst.append(BSplineCurve1)
+            else:
+                OBSplineLst.append(item)
+                CorrectOrigin = True
+                
         elif i > OriEdgePnt[0]:
             OBSplineLst.append(item)
         else:
@@ -309,6 +407,9 @@ def set_BSplineLst_to_Origin(BSplineLst):
             OBSplineLst.append(item)
         else:
             None
-
-    OBSplineLst.append(BSplineCurve2)     
+            
+    if CorrectOrigin == False:
+        OBSplineLst.append(BSplineCurve2)    
+    else: None
+    
     return OBSplineLst

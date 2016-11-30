@@ -18,6 +18,11 @@ from OCC.TopoDS import topods
 
     
 #######################UTILITIE FUNCTIONS######################################    
+def unique_rows(a):
+    a = np.ascontiguousarray(a)
+    unique_a,idx = np.unique(a.view([('', a.dtype)]*a.shape[1]),return_index = True)
+    unique_a = unique_a[np.argsort(idx)]
+    return unique_a.view(a.dtype).reshape((unique_a.shape[0], a.shape[1]))
 
 def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
     """

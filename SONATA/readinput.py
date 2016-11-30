@@ -135,7 +135,8 @@ def AirfoilDat2d(name):
     temp_y = []
     for line in f.readlines()[1:]:                                                                  # The first line contains info only
         line = line.lstrip().rstrip().replace('    ', ' ').replace('   ', ' ').replace('  ', ' ')   # do some cleanup on the data (mostly dealing with spaces)
-        data = line.split(' ')   
+        line = line.replace('\t', ' ')   # do some cleanup on the data (mostly dealing with spaces)
+        data = line.split(' ')
         temp_x.append(float(data[0]))                                                             
         temp_y.append(float(data[1]))                                                                                                       
     return np.array([temp_x,temp_y])                                                                # return AirfoilCoordinate as np.arrray    
