@@ -53,9 +53,9 @@ def exit(event=None):
 def show_coordinate_system(display):
     '''CREATE AXIS SYSTEM for Visualization'''
     O  = gp_Pnt(0., 0., 0.)
-    p1 = gp_Pnt(0.1,0.,0.)
-    p2 = gp_Pnt(0.,0.1,0.)
-    p3 = gp_Pnt(0.,0.,0.1)
+    p1 = gp_Pnt(0.088,0.,0.)
+    p2 = gp_Pnt(0.,0.088,0.)
+    p3 = gp_Pnt(0.,0.,0.088)
     
     h1 = BRepBuilderAPI_MakeEdge(O,p1).Shape()
     h2 = BRepBuilderAPI_MakeEdge(O,p2).Shape()

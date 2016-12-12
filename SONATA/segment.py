@@ -36,9 +36,9 @@ class Segment(object):
             
         elif self.OCC == False:
             if kwargs.get('airfoil') != None:
-               BSplineLst_tmp = self.BSplineLst_from_airfoil_database(kwargs.get('airfoil'),140) 
+               BSplineLst_tmp = self.BSplineLst_from_airfoil_database(kwargs.get('airfoil'),30) 
             elif kwargs.get('filename') != None:
-                BSplineLst_tmp = self.BSplineLst_from_file(kwargs.get('filename'),140)  
+                BSplineLst_tmp = self.BSplineLst_from_file(kwargs.get('filename'),30)  
             self.BSplineLst = set_BSplineLst_to_Origin(BSplineLst_tmp)
 
     def __repr__(self):
@@ -66,24 +66,23 @@ class Segment(object):
         return trim_wire(self.wire, S1, S2)
         
 
-    def BSplineLst_from_airfoil_database(self,string,min_degree=140):
+    def BSplineLst_from_airfoil_database(self,string,angular_deflection=30):
         '''
         string: 'naca23012'
-        min_degree: allowed angle in discrete representation before starting to split
+        angular deflection: allowed angluar deflection in discrete representation before starting to split
         '''
         DCT_data = UIUCAirfoil2d(string).T
-        self.BSplineLst = seg_boundary_from_dct(DCT_data,min_degree)
-        return seg_boundary_from_dct(DCT_data,min_degree)
- 
-            
-    def BSplineLst_from_file(self,filename,min_degree=140):
+        self.BSplineLst = seg_boundary_from_dct(DCT_data,angular_deflection)
+        return seg_boundary_from_dct(DCT_data,angular_deflection)
+                                     
+    def BSplineLst_from_file(self,filename,angular_deflection=30):
         '''
         filename: 'naca23012.dat'
-        min_degree: allowed angle in discrete representation before starting to split default
+        angular_deflection allowed angular deflection in discrete representation before starting to split default
         '''
         DCT_data = AirfoilDat2d(filename).T
-        self.BSplineLst = seg_boundary_from_dct(DCT_data,min_degree)
-        return seg_boundary_from_dct(DCT_data,min_degree)
+        self.BSplineLst = seg_boundary_from_dct(DCT_data,angular_deflection)
+        return seg_boundary_from_dct(DCT_data,angular_deflection)
         
     
     def set_to_origin(self):

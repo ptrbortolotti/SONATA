@@ -27,34 +27,57 @@ import numpy as np
 #PythonOCC Libraries
 from OCC.gp import gp_Pnt2d,  gp_Trsf2d, gp_Vec2d
 from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
+from OCC.TColgp import TColgp_HArray1OfPnt2d, TColgp_Array1OfPnt2d
 from OCC.Geom2d import Geom2d_TrimmedCurve 
-from OCC.Geom2dAPI import Geom2dAPI_InterCurveCurve
-from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection
+from OCC.Geom2dAPI import Geom2dAPI_InterCurveCurve, Geom2dAPI_Interpolate, Geom2dAPI_PointsToBSpline
+from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection, GCPnts_TangentialDeflection
 from OCC.Geom2dAPI import Geom2dAPI_Interpolate
-
+from OCC.Graphic3d import (Graphic3d_EF_PDF,
+                           Graphic3d_EF_SVG,
+                           Graphic3d_EF_TEX,
+                           Graphic3d_EF_PostScript,
+                           Graphic3d_EF_EnhPostScript)
 
 #Own Libraries:
 from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, discrete_stepsize, curvature_of_curve
 from BSplineLst_utils import find_BSplineLst_coordinate, get_BSpline_length, get_BSplineLst_length, \
                             get_BSplineLst_Pnt2d, discretize_BSplineLst, BSplineLst_from_dct, copy_BSpline, \
-                            findPnt_on_2dcurve, set_BSplineLst_to_Origin, seg_boundary_from_dct, copy_BSplineLst
+                            findPnt_on_2dcurve, set_BSplineLst_to_Origin, seg_boundary_from_dct, copy_BSplineLst,\
+                            trim_BSplineLst
 from wire_utils import build_wire_from_BSplineLst
 from layer import Layer
-from utils import getID, Pnt2dLst_to_npArray
+from utils import getID, Pnt2dLst_to_npArray,unique_rows, P2Pdistance, point2d_list_to_TColgp_HArray1OfPnt2d
 from offset import shp_parallel_offset
 from readinput import UIUCAirfoil2d, AirfoilDat2d
 
 ###############################################################################
 #                           M    A    I    N                                  #
 ###############################################################################
+def export_to_PDF(event=None):
+    f.Export('torus_export.pdf', Graphic3d_EF_PDF)
 
+
+def export_to_SVG(event=None):
+    f.Export('torus_export.svg', Graphic3d_EF_SVG)
+
+
+def export_to_PS(event=None):
+    f.Export('torus_export.ps', Graphic3d_EF_PostScript)
+
+
+def export_to_EnhPS(event=None):
+    f.Export('torus_export_enh.ps', Graphic3d_EF_EnhPostScript)
+
+
+def export_to_TEX(event=None):
+    f.Export('torus_export.tex', Graphic3d_EF_TEX)
 
 #==========================
 #DISPLAY CONFIG:
 display, start_display, add_menu, add_function_to_menu = init_display('wx')
 display.Context.SetDeviationAngle(0.000001)       # 0.001 default. Be careful to scale it to the problem.
 display.Context.SetDeviationCoefficient(0.000001) # 0.001 default. Be careful to scale it to the problem. 
-show_coordinate_system(display) #CREATE AXIS SYSTEM for Visualization
+#show_coordinate_system(display) #CREATE AXIS SYSTEM for Visualization
 
 
 #==========================
@@ -69,7 +92,7 @@ SegmentLst = []   #List of Segment Objects
 for i,item in enumerate(Configuration.SEG_ID):
     if item == 0:
         #SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, airfoil = 'naca23012'))
-        SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, filename = 'AREA_R230.dat'))
+        SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, filename = 'AREA_R250.dat'))
     else:
         SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i]))
 
@@ -81,42 +104,102 @@ sorted(SegmentLst, key=getID)
 #Layer1 = Layer(0001,SegmentLst[0].BSplineLst, tmp_Segment.Layup[0][0], tmp_Segment.Layup[0][1],tmp_Segment.Layup[0][2],tmp_Segment.Layup[0][3],tmp_Segment.Layup[0][4])
 #Layer1.trim_to_coords()
 
-
 #=========================================================================
 Segment0 = SegmentLst[0].copy()
 Segment0.build_wire()
 
-S1 = 0
-S2 = 0.8
-
+S1 = 0.4
+S2 = 0.6
 
 Trimmed_BSplineLst = Segment0.trim(S1,S2,0,1)
 Trimmed_Wire2 = build_wire_from_BSplineLst(Trimmed_BSplineLst)
-npArray = discretize_BSplineLst(Trimmed_BSplineLst,1e-05)   
-offlinepts = shp_parallel_offset(npArray,0.0024)
-offlinepts2 = shp_parallel_offset(offlinepts,0.0024)
-OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
-OffsetBSplineLst2 = BSplineLst_from_dct(offlinepts2)
-#display.DisplayShape(OffsetBSplineLst[0],  color="ORANGE")
-#display.DisplayShape(OffsetBSplineLst[1],  color="YELLOW")
 
+npArray = discretize_BSplineLst(Trimmed_BSplineLst,1e-05)   
+offlinepts = shp_parallel_offset(npArray,0.02)
+OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
+
+
+StartPnt1 = get_BSplineLst_Pnt2d(Trimmed_BSplineLst,S1,S1,S2)
+EndPnt1 = get_BSplineLst_Pnt2d(Trimmed_BSplineLst,S2,S1,S2)
+display.DisplayShape(StartPnt1, color="RED")
+display.DisplayShape(EndPnt1, color="YELLOW")
+
+
+
+StartPnt2 = get_BSplineLst_Pnt2d(OffsetBSplineLst,S1,S1,S2)
+EndPnt2 = get_BSplineLst_Pnt2d(OffsetBSplineLst,S2,S1,S2)
+display.DisplayShape(StartPnt2, color="RED")
+display.DisplayShape(EndPnt2, color="YELLOW")
+
+Pnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S1+0.005,S1,S2)
+display.DisplayShape(Pnt, color="CYAN")
+
+# the first 
+array = TColgp_Array1OfPnt2d(1, 2)
+array.SetValue(1, StartPnt1)
+array.SetValue(2, StartPnt2)
+tmp_bspline1 = Geom2dAPI_PointsToBSpline(array).Curve().GetObject()
+
+
+# the second 
+array = TColgp_Array1OfPnt2d(1, 2)
+array.SetValue(1, EndPnt2)
+array.SetValue(2, EndPnt1)
+tmp_bspline2 = Geom2dAPI_PointsToBSpline(array).Curve().GetObject()
+
+
+Trimm1 = SegmentLst[0].copy()
+Trimm2 = SegmentLst[0].copy()
+Trimm1 = Trimm1.trim(0,S1,0,1)
+Trimm2 = Trimm2.trim(S2,1,0,1)
+
+OffsetBSplineLst.insert(0,tmp_bspline1)
+OffsetBSplineLst.append(tmp_bspline2)
+
+newList =  OffsetBSplineLst + Trimm2 + Trimm1
+
+
+plt.figure(1)
 plt.plot(*npArray.T, color='green', marker='.')
 plt.plot(*offlinepts.T, color='blue', marker='.')
-plt.plot(*offlinepts2.T, color='red', marker='.')
 plt.axis('equal')
 plt.show()
         
 OffsetWire = build_wire_from_BSplineLst(OffsetBSplineLst)
-OffsetWire2 = build_wire_from_BSplineLst(OffsetBSplineLst2)
+newBoundary = build_wire_from_BSplineLst(newList)
 
 display.DisplayShape(Segment0.wire)
 display.DisplayShape(Trimmed_Wire2, color="GREEN")
 display.DisplayShape(OffsetWire, color="BLUE")
-display.DisplayShape(OffsetWire2, color="RED")
+display.DisplayShape(newBoundary, color="CYAN", update=True)
 
-Pnt = get_BSplineLst_Pnt2d(Segment0.BSplineLst,0.2,0,1)
-display.DisplayShape(Pnt, color="ORANGE")
 
+
+#SECOND LAYER TEST
+copynewList = copy_BSplineLst(newList)
+
+S1 = 0
+S2 = 0.2
+Trimmed_BSplineLst = trim_BSplineLst(copynewList,S1,S2,0,1)
+Trimmed_Wire3 = build_wire_from_BSplineLst(Trimmed_BSplineLst)
+npArray = discretize_BSplineLst(Trimmed_BSplineLst,1e-05)   
+offlinepts = shp_parallel_offset(npArray,0.005)
+OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
+OffsetWire2 = build_wire_from_BSplineLst(OffsetBSplineLst)
+
+
+plt.figure(2)
+plt.plot(*npArray.T, color='green', marker='.')
+plt.plot(*offlinepts.T, color='blue', marker='.')
+plt.axis('equal')
+plt.show()
+        
+#display.DisplayShape(OffsetBSplineLst[0],  color="ORANGE")
+#display.DisplayShape(OffsetBSplineLst[1],  color="YELLOW")
+
+
+display.DisplayShape(Trimmed_Wire3, color="GREEN")
+display.DisplayShape(OffsetWire2, color="BLUE")
 
 #CHECK OFFSET BSPlineLst intersects original bounding BSplineLst:
 #OrgBSplineLst = Segment0.BSplineLst
@@ -158,10 +241,19 @@ display.DisplayShape(Pnt, color="ORANGE")
 
 #======================================================================
 #PLOT
+f = display.View.View().GetObject()
 
 
 
 display.set_bg_gradient_color(20,6,111,200,200,200)
+add_menu('screencapture')
+add_function_to_menu('screencapture', export_to_PDF)
+add_function_to_menu('screencapture', export_to_SVG)
+add_function_to_menu('screencapture', export_to_PS)
+add_function_to_menu('screencapture', export_to_EnhPS)
+add_function_to_menu('screencapture', export_to_TEX)
 display.View_Top()
 display.FitAll()
+
+  
 start_display()

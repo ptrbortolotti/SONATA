@@ -10,7 +10,9 @@ from OCC.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve
 from OCC.Geom2d import Handle_Geom2d_BSplineCurve_DownCast, Geom2d_Line
 
 #Own Libraries:
-from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_to_npArray, discrete_stepsize, curvature_of_curve, isclose, unique_rows
+from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_to_npArray, \
+                    discrete_stepsize, curvature_of_curve, isclose, unique_rows, \
+                    P2Pdistance
 
 
 ###############################################################################
@@ -171,7 +173,7 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
     return trimmed_BSplineLst		
 
     
-def seg_boundary_from_dct(DCT_data,min_degree):
+def seg_boundary_from_dct(DCT_data,angular_deflection = 30):
     #Check if DCT_Definition is closed, if not: close it
     if not np.array_equal(DCT_data[0],DCT_data[-1]):
         print 'INFO:\t Closing open discrete boundary definition'
@@ -181,18 +183,19 @@ def seg_boundary_from_dct(DCT_data,min_degree):
     DCT_angles = calc_DCT_angles(DCT_data)
     corners = []
     for i in range(0,DCT_angles.shape[0]):
-        if DCT_angles[i] < min_degree: 
+        if DCT_angles[i] < (180 - angular_deflection) or DCT_angles[i] > (180 + angular_deflection): 
             corners.append(i)
     NbCorners = np.size(corners)
-        
+    
+    #Segment by Corners    
     DCT_Segments = []
     if NbCorners == 0:
         DCT_Segments.append(DCT_data)
-    
     if NbCorners > 0:
         for i in range(0,NbCorners-1):
             #print i,corners[i]
             DCT_Segments.append(DCT_data[corners[i]:corners[i+1]+1])
+                           
                   
     list_of_bsplines = []
     for i,item in enumerate(DCT_Segments):
@@ -223,82 +226,35 @@ def discretize_BSplineLst(BSplineLst,Deflection=0.00001):
         
     a = Pnt2dLst_to_npArray(Pnt2dLst)
     b = np.around(a,10) # Evenly round to the given number of decimals. 
+    
+    #check if it is closed:
+    if np.array_equal(b[0],b[-1]):
+        closed = True
+    else: closed = False
+
     npArray = unique_rows(b) # Remove possible doubles! 
-    return npArray
     
+    if closed:
+        npArray = np.vstack((npArray,b[0]))
+    else: None
 
-def discretize_BSplineLst_v2(BSplineLst,accuracy=100):
-    Pnt2dLst = []
-    BSplineLst_length = get_BSplineLst_length(BSplineLst)
-     
-    for i,item in enumerate(BSplineLst):
-        BSpline_length = get_BSpline_length(item)
-        s = 0
-        while s < BSpline_length:
-            if s == 0:
-                Pnt2dLst.append(item.StartPoint()) 
-            else:
-                u = find_BSpline_coordinate(item,s)
-                P = gp_Pnt2d()
-                item.D0(u,P)
-                Pnt2dLst.append(P)
-            s += BSplineLst_length/accuracy * discrete_stepsize(curvature_of_curve(item,s))
-            
-    #Get last Point:     
-    Pnt2dLst.append(BSplineLst[-1].EndPoint())    
-    npArray = Pnt2dLst_to_npArray(Pnt2dLst)
     return npArray
     
-def discretize_BSplineLst_v3(BSplineLst,start,end,accuracy=100):
-    Pnt2dLst = []
-    S = start
-    idx_old = 0
-    while S <= end:
-        pnt2d = get_BSplineLst_Pnt2d(BSplineLst,S,start,end)
-        Pnt2dLst.append(pnt2d)
-        
-        #grab vertices!    
-        [idx,U] = find_BSplineLst_coordinate(BSplineLst,S,start,end)
-        if idx > idx_old:
-            BSpline = BSplineLst[idx_old]
-            pnt2d = BSpline.EndPoint()
-            Pnt2dLst.append(pnt2d)
-                   
-        else:  
-            BSpline = BSplineLst[idx]
-            BSplineLst_length = get_BSplineLst_length(BSplineLst)
-            S += BSplineLst_length/accuracy * discrete_stepsize(curvature_of_curve(BSpline,U))
-        idx_old = idx 
-        
-        
-    #grab last corner if last edge is very small   
-    [idx,U] = find_BSplineLst_coordinate(BSplineLst,end,start,end)
-    if idx>idx_old:
-            BSpline = BSplineLst[idx_old]
-            pnt2d = BSpline.EndPoint()
-            Pnt2dLst.append(pnt2d)
+         
     
-    #grab last vertice  
-    pnt2d = get_BSplineLst_Pnt2d(BSplineLst,end, start,end)
-    Pnt2dLst.append(pnt2d)
-    npArray = Pnt2dLst_to_npArray(Pnt2dLst)
-    return npArray
-        
-    
-
-          
-    
-def BSplineLst_from_dct(DCT_data,min_degree=140):
+def BSplineLst_from_dct(DCT_data,angular_deflection=30):
            
     #Find corners and edges of data
     DCT_angles = calc_DCT_angles(DCT_data)
     corners = []
     for i in range(0,DCT_angles.shape[0]):
-        if DCT_angles[i] < min_degree: 
+        if DCT_angles[i] < (180 - angular_deflection) or DCT_angles[i] > (180 + angular_deflection): 
             corners.append(i)
     NbCorners = np.size(corners)
     
+    
     #Segmenting data according to corners    
+    #====================================
     DCT_Segments = [] 
     
     #Closed:       
@@ -337,15 +293,15 @@ def BSplineLst_from_dct(DCT_data,min_degree=140):
                     DCT_Segments.append(DCT_data[corners[i]:corners[i+1]+1])             
             DCT_Segments.append(DCT_data[corners[-1]:])         #last segment
 
-            
+    
     list_of_bsplines = []
     for i,item in enumerate(DCT_Segments):
         data = item.T
         tmp_harray = TColgp_HArray1OfPnt2d_from_nparray(data)
         if closed == True and NbCorners == 0:
-            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), True, 0.0000001)             #Interpolate datapoints to bspline   
+            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 1e-06)             #Interpolate datapoints to bspline   
         else:
-            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 0.0000001)             #Interpolate datapoints to bspline
+            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 1e-06)             #Interpolate datapoints to bspline
             
         tmp_interpolation.Perform()                              
         tmp_bspline = tmp_interpolation.Curve().GetObject()
