@@ -1,63 +1,101 @@
-##Copyright 2015 Thomas Paviot (tpaviot@gmail.com)
-##
-##This file is part of pythonOCC.
-##
-##pythonOCC is free software: you can redistribute it and/or modify
-##it under the terms of the GNU Lesser General Public License as published by
-##the Free Software Foundation, either version 3 of the License, or
-##(at your option) any later version.
-##
-##pythonOCC is distributed in the hope that it will be useful,
-##but WITHOUT ANY WARRANTY; without even the implied warranty of
-##MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##GNU Lesser General Public License for more details.
-##
-##You should have received a copy of the GNU Lesser General Public License
-##along with pythonOCC.  If not, see <http://www.gnu.org/licenses/>.
-
-from OCC.Display.SimpleGui import init_display
-from OCC.BRepPrimAPI import BRepPrimAPI_MakeTorus
-from OCC.Graphic3d import (Graphic3d_EF_PDF,
-                           Graphic3d_EF_SVG,
-                           Graphic3d_EF_TEX,
-                           Graphic3d_EF_PostScript,
-                           Graphic3d_EF_EnhPostScript)
-
-display, start_display, add_menu, add_function_to_menu = init_display('wx')
-my_box = BRepPrimAPI_MakeTorus(40., 20.).Shape()
-
-display.DisplayShape(my_box, update=True)
-f = display.View.View().GetObject()
-
-#-------------------------------------------------------------------------------
-# for this example to work, pythonocc / OCE needs to be built with the gl2ps lib
-#-------------------------------------------------------------------------------
-
-def export_to_PDF(event=None):
-    f.Export('torus_export.pdf', Graphic3d_EF_PDF)
+import numpy as np
+import matplotlib.pyplot as plt
 
 
-def export_to_SVG(event=None):
-    f.Export('torus_export.svg', Graphic3d_EF_SVG)
+
+def timelines(y, xstart, xstop, c='b'):
+    """Plot timelines at y from xstart to xstop with given color."""   
+    if xstart > xstop:
+        plt.hlines(y,0,xstop, colors=c, lw=4)
+        plt.hlines(y,xstart,1,colors=c,lw=4)
+    else:
+        plt.hlines(y, xstart, xstop,colors=c, lw=4)
+    
+    #plt.vlines(xstart, y+0.03, y-0.03,  lw=2)
+    #plt.vlines(xstop, y+0.03, y-0.03,  lw=2)
 
 
-def export_to_PS(event=None):
-    f.Export('torus_export.ps', Graphic3d_EF_PostScript)
+Layup = np.array([[  0.  ,   1.  ,   0.23 , 45.  ,   1.  ],
+                  [  0.   ,  1.  ,   0.23 , 45.  ,   1.  ],
+                  [  0.3  ,  0.7  ,  0.6  , 45.  ,   2.  ],
+                  [  0.05 ,  0.6 ,  0.6  , 45.  ,   2.  ],
+                  [  0.85  , 0.2  ,  0.6  , 45.  ,   2.  ],
+                  [  0.9 ,  0.4 ,  0.6  , 45.  ,   2.  ],
+                  [  0.20 ,  0.532,  0.6  , 45.  ,   2.  ],
+                  [  0.25 ,  0.3 ,  0.6  , 45.  ,   2.  ]],  dtype='float_')
 
 
-def export_to_EnhPS(event=None):
-    f.Export('torus_export_enh.ps', Graphic3d_EF_EnhPostScript)
+
+#DETERMINE BOUNDING DEF FOR LAYER 9 
+LayerNb = int(np.size(Layup,0))
+Projection =  np.array([Layup[7][0], Layup[7][1], 7]) #Start with the layer below
+for i in range(LayerNb-1,-1,-1):
+    print i
+    s1 = Layup[i][0]
+    e1 = Layup[i][1]
+    s2 = Layup[i-1][0]
+    e2 = Layup[i-1][1]
+    
+    
+    if (s1<e1 and s2<e2):
+        #1. Possibility: No Overlap
+        if s2>=e1:
+            a = np.array([s2, e2, i-1])
+            Projection = np.vstack((Projection, a))
+            
+        #2. Possibility: REAR Overlap
+        elif (s2>=s1 and s2<=e1):
+            a = np.array([e1, e2, i-1])
+            Projection = np.vstack((Projection, a))
+        
+        #3. Possibility: FRONT Overlap
+        elif (s2<=s1 and e2<=e1):
+            a = np.array([s2, s1, i-1])
+            Projection = np.vstack((Projection, a))
+           
+        #4. Possibility: Full Overlap
+        elif (s2<=s1 and e2>=e1):
+            a = np.array([s2, s1, i-1])
+            b = np.array([e1, e2, i-1])
+            Projection = np.vstack((Projection, a, b))
+
+    elif (s1<e1 and s2>e2):    
+        #1. Possibility: No Overlap 
+        if s2>=e1 and e2<=s1:
+            a = np.array([s2, 1, i-1])
+            b = np.array([0, e2, i-1])
+            Projection = np.vstack((Projection, a, b))
+            
+        
+        
+        
+        
+        
+        
+        
+    start = Layup[i][0],
+    end = Layup[i][1]
+    a = np.array([Layup[i][0], Layup[i][1], i])
+
+    
 
 
-def export_to_TEX(event=None):
-    f.Export('torus_export.tex', Graphic3d_EF_TEX)
 
 
-if __name__ == '__main__':
-    add_menu('screencapture')
-    add_function_to_menu('screencapture', export_to_PDF)
-    add_function_to_menu('screencapture', export_to_SVG)
-    add_function_to_menu('screencapture', export_to_PS)
-    add_function_to_menu('screencapture', export_to_EnhPS)
-    add_function_to_menu('screencapture', export_to_TEX)
-    start_display()
+
+
+
+
+plt.figure(1)
+color=iter(plt.cm.Paired(np.linspace(0,1,10)))
+for i,item in enumerate(Layup):
+    c=next(color)
+    timelines(i+1,item[0],item[1],c)
+    
+plt.xlim(0,1)
+plt.ylim(0,i+2)
+plt.ylabel('Layer')    
+plt.xlabel('Coordinate')
+plt.show()
+
+

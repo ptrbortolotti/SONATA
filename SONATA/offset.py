@@ -37,7 +37,7 @@ def shp_parallel_offset(arrPts,dist):
      #Interpolate Large spaces! 
     seg_P2Plength = []
     cumm_length = 0
-    Resolution = 400
+    Resolution = 800
     
     for j in range(0,len(data)-1):
         seg_P2Plength.append(P2Pdistance(data[j],data[j+1]))

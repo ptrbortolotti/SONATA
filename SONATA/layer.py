@@ -7,19 +7,21 @@ class Layer(object):
     The object can be constructed from either a discrete formulation of point tables or from an existing TopoDS_Wire.
     ''' 
    
-    def __init__(self, ID, BSplineLst, globalStart, globalEnd, thickness, Orientation = 0, MatID = 1, name='DEFAULT'): #gets called whenever we create a new instance of a class
-        self.BSplineLst = BSplineLst        #List of Geom2d_BSplineCurve, Geom_BSplineCurve
-        self.ID = ID                        # Segment 1, Layer 29,
+    def __init__(self, ID, Bounding_BSplineLst, globalStart, globalEnd, thickness, Orientation = 0, MatID = 1, name='DEFAULT', cutoff_style= 1, join_style = 1):
+        self.Bounding_BSplineLst = Bounding_BSplineLst        #List of Geom2d_BSplineCurve, Geom_BSplineCurve
+        self.ID = ["%04d" % ID]                                         #  First single Digit: SegmentNb, Last 3 Digits: LayerNb; e.g.: 1029, Segment1, Layer29
         self.name = name
-        #self.wire = []                      #Make Wire from BSplineSegments
-        #self.First = []			    #Starting Point in S coordinates
-        #self.Last = []				    #End Point in S Coordinates
+        #self.wire = []                                     #Make Wire from BSplineSegments
+        #self.First = []			                     #Starting Point in S coordinates
+        #self.Last = []				                 #End Point in S Coordinates
         self.display_set = False
-        self.globalStart = globalStart	    #Starting Point in S coordinates
-        self.globalEnd = globalEnd		    #End Point in S coordinates
-        self.thickness = thickness   	    #in
+        self.globalStart = globalStart	                         #Starting Point in S coordinates
+        self.globalEnd = globalEnd		                        #End Point in S coordinates
+        self.thickness = thickness   	                      #in
         self.Orientation = Orientation
         self.MatID = MatID
+        self.cutoff_style = cutoff_style   #cutoff_style (step, linear, smooth_bezier)
+        self.join_style = join_style       #offset algorithm join_style = 1#( 1:round,2:mitre,3:bevels)
         #self.DCTArrayIN = []		#Discrete point distribution over the layer from polygon offset
         #self.DCTArrayOUT = []		#Discrete point distribution for the next layer from polygon offset	
     
@@ -44,11 +46,11 @@ class Layer(object):
     def build_wire(self): #Builds TopoDS_Wire from connecting BSplineSegments and returns it  
         self.wire = build_wire_from_BSplineLst(self.BSplineLst)   
         
-    def trim(self,S1,S2): #Trims layer between S1 and S2
-        return trim_BSplineLst(self.BSplineLst, S1, S2)
+    def trim(self,S1,S2,start, end): #Trims layer between S1 and S2
+        return trim_BSplineLst(self.BSplineLst, S1, S2,  start, end)
         
     def trim_to_coords(self):
-        self.BSplineLst = trim_BSplineLst(self.BSplineLst, self.globalStart, self.globalEnd)
+        self.BSplineLst = trim_BSplineLst(self.BSplineLst, self.globalStart, self.globalEnd,  start, end)
         return self.BSplineLst
             
     def get_first():
