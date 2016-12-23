@@ -11,7 +11,7 @@ from utils import calc_DCT_angles, P2Pdistance
 
 
 def shp_parallel_offset(arrPts,dist):
-#OFFSET ALGORITHM
+    #OFFSET ALGORITHM
     side = 'left'    
     line = shp.LineString(arrPts)
     res = 16 #resolution
@@ -80,6 +80,13 @@ def shp_parallel_offset(arrPts,dist):
     return data
 
 
+    
+
+#==============================================================================       
+if __name__ == '__main__': 
+    None
+#    for i,item in enumerate(projection):
+#        timelines(0,item[0],item[1],color[int(item[2])])
                
 #    plt.figure(2)        
 #    plt.plot(*arrPts.T, color='black', marker='.')
@@ -114,4 +121,3 @@ def shp_parallel_offset(arrPts,dist):
         
 #    plt.axis('equal')
 #    plt.show()    
-#        

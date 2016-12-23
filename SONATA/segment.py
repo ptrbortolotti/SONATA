@@ -11,6 +11,7 @@ from BSplineLst_utils import get_BSpline_length, get_BSplineLst_length, \
                             copy_BSplineLst
 from wire_utils import trim_wire, build_wire_from_BSplineLst
 from readinput import UIUCAirfoil2d, AirfoilDat2d
+from projection import layup_to_projection
 class Segment(object):
     ''' 
     The Segment object is constructed from multiple Layers obejcts. 
@@ -41,6 +42,8 @@ class Segment(object):
                 BSplineLst_tmp = self.BSplineLst_from_file(kwargs.get('filename'),30)  
             self.BSplineLst = set_BSplineLst_to_Origin(BSplineLst_tmp)
 
+        self.Projection = layup_to_projection(self.Layup)
+    
     def __repr__(self):
         return '{}: {}'.format(self.__class__.__name__,self.ID) 
     

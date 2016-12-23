@@ -54,24 +54,6 @@ def export_to_TIFF(event=None):
 def exit(event=None):
     sys.exit()
 
-def export_to_PDF(f,event=None):
-    f.Export('SONATA_export.pdf', Graphic3d_EF_PDF)
-    pass
-
-def export_to_SVG(event=None):
-    f.Export('SONATA_export.svg', Graphic3d_EF_SVG)
-
-
-def export_to_PS(event=None):
-    f.Export('SONATA_export.ps', Graphic3d_EF_PostScript)
-
-
-def export_to_EnhPS(event=None):
-    f.Export('SONATA_export_enh.ps', Graphic3d_EF_EnhPostScript)
-
-
-def export_to_TEX(event=None):
-    f.Export('SONATA_export.tex', Graphic3d_EF_TEX)
 
 def exit(event=None):
     sys.exit()
