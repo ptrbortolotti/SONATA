@@ -10,6 +10,7 @@
 	NbOfWebs = 1														#Number of Webs (0=CSpar, 1=Dspar,...)							[int]							DEFAULT=0
 	BalanceWeight = True 												#True or False for Balance Weight								[boolean]						DEFAULT=FALSE
 	Airfoil = naca23012													#Airfoil from DATABASE											[string]						DEFAULT='naca23012'
+	chord = 100 														#100
 &END 
 
 

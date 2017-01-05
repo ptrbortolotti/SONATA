@@ -139,7 +139,7 @@ def layup_to_projection(Layup):
     c = np.c_[a,b]  
     clean_layup = np.insert(c,0, np.array((0,1,0)),0)
     tmp = clean_layup[[0]]
-    print clean_layup
+    #print clean_layup
     
     #Iterate over Layup
     projectionlist =  []
@@ -147,6 +147,7 @@ def layup_to_projection(Layup):
         begin   = float(clean_layup[i][0])
         end     = float(clean_layup[i][1])  
         tmp = projection_of_layers(tmp,begin,end)
+        tmp = tmp[np.lexsort(np.fliplr(tmp).T)]
         projectionlist.append(tmp)
 
     return projectionlist        

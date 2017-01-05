@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 from utils import calc_DCT_angles, P2Pdistance
 
 
-def shp_parallel_offset(arrPts,dist):
+def shp_parallel_offset(arrPts,dist,join_style=1):
     #OFFSET ALGORITHM
+    #join_style = 1#( 1:round,2:mitre,3:bevels)
     side = 'left'    
     line = shp.LineString(arrPts)
     res = 16 #resolution
-    join_style = 1#( 1:round,2:mitre,3:bevels)
     offset = line.parallel_offset(dist,side,res,join_style)
     #print type(offset)
     

@@ -1,5 +1,7 @@
-from BSplineLst_utils import get_BSplineLst_length, get_BSplineLst_Pnt2d, trim_BSplineLst, copy_BSplineLst
+from BSplineLst_utils import get_BSplineLst_length, get_BSplineLst_Pnt2d, trim_BSplineLst, copy_BSplineLst, BSplineLst_from_dct, discretize_BSplineLst
 from wire_utils import build_wire_from_BSplineLst
+from cutoff import cutoff_layer
+from offset import shp_parallel_offset
 
 class Layer(object):
     ''' 
@@ -7,21 +9,40 @@ class Layer(object):
     The object can be constructed from either a discrete formulation of point tables or from an existing TopoDS_Wire.
     ''' 
    
-    def __init__(self, ID, Bounding_BSplineLst, globalStart, globalEnd, thickness, Orientation = 0, MatID = 1, name='DEFAULT', cutoff_style= 1, join_style = 1):
-        self.Bounding_BSplineLst = Bounding_BSplineLst        #List of Geom2d_BSplineCurve, Geom_BSplineCurve
-        self.ID = ["%04d" % ID]                                         #  First single Digit: SegmentNb, Last 3 Digits: LayerNb; e.g.: 1029, Segment1, Layer29
-        self.name = name
-        #self.wire = []                                     #Make Wire from BSplineSegments
-        #self.First = []			                     #Starting Point in S coordinates
-        #self.Last = []				                 #End Point in S Coordinates
-        self.display_set = False
-        self.globalStart = globalStart	                         #Starting Point in S coordinates
-        self.globalEnd = globalEnd		                        #End Point in S coordinates
+    def __init__(self, ID, Boundary_BSplineLst, globalStart, globalEnd, thickness, Orientation = 0, MatID = 1, **kwargs):
+        self.ID = ["%04d" % ID] 	                            #First single Digit: SegmentNb, Last 3 Digits: LayerNb; e.g.: 1029, Segment1, Layer29
+        self.Boundary_BSplineLst = Boundary_BSplineLst        #List of Geom2d_BSplineCurve, Geom_BSplineCurve
+        self.S1 = globalStart	                      #Starting Point in S coordinates
+        self.S2 = globalEnd		                      #End Point in S coordinates
         self.thickness = thickness   	                      #in
         self.Orientation = Orientation
         self.MatID = MatID
-        self.cutoff_style = cutoff_style   #cutoff_style (step, linear, smooth_bezier)
-        self.join_style = join_style       #offset algorithm join_style = 1#( 1:round,2:mitre,3:bevels)
+        
+        #KWARGS:
+        if kwargs.get('name') == None:
+             self.name = 'DEFAULT'                             
+        else:
+            self.name = kwargs.get('name')
+        
+        if (kwargs.get('cutoff_style') == None) or (type(kwargs.get('cutoff_style')) is not int):   #cutoff_style (step, linear, smooth_bezier)
+             self.cutoff_style = 2                             
+        else:
+            self.cutoff_style = kwargs.get('cutoff_style')      
+        
+        
+        if (kwargs.get('join_style') == None) or (type(kwargs.get('join_style')) is not int):      #offset algorithm join_style = 1#( 1:round,2:mitre,3:bevels)
+             self.join_style = 1                             
+        else:
+            self.join_style = kwargs.get('join_style')          
+            
+        
+        if (kwargs.get('discrete_deflection') == None) or (type(kwargs.get('discrete_deflection')) is not float):      #offset algorithm join_style = 1#( 1:round,2:mitre,3:bevels)
+             self.discrete_deflection = 1e-06                            
+        else:
+            self.discrete_deflection = kwargs.get('discrete_deflection')          
+
+        #self.wire = []                                     #Make Wire from BSplineSegments
+        #self.display_set = False
         #self.DCTArrayIN = []		#Discrete point distribution over the layer from polygon offset
         #self.DCTArrayOUT = []		#Discrete point distribution for the next layer from polygon offset	
     
@@ -53,8 +74,13 @@ class Layer(object):
         self.BSplineLst = trim_BSplineLst(self.BSplineLst, self.globalStart, self.globalEnd,  start, end)
         return self.BSplineLst
             
-    def get_first():
-        pass
+    def build_layer(self):
+        Trimmed_BSplineLst = trim_BSplineLst(self.Boundary_BSplineLst, self.S1, self.S2, 0, 1)
+        npArray = discretize_BSplineLst(Trimmed_BSplineLst,self.discrete_deflection)   
+        offlinepts = shp_parallel_offset(npArray,self.thickness,self.join_style)
+        OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
+        OffsetBSplineLst = cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,self.S1,self.S2,self.cutoff_style)
+        self.BSplineLst = OffsetBSplineLst
     
     def get_last():
         pass
@@ -68,12 +94,6 @@ class Layer(object):
     
     def layer_from_dctData(self,dctData):
         pass    
-    
-    
-    def offset(self):
-        #return the new layer
-        pass    
-
 
     def show(self): #display the layer with pythonocc viewer module
         """

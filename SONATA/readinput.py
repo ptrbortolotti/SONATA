@@ -178,7 +178,7 @@ class section_config(object):
         self.SETUP_NbOfWebs = read_INTrowSTR(SETUP_str,'NbOfWebs')
         self.SETUP_BalanceWeight = read_BOOLrowSTR(SETUP_str,'BalanceWeight')
         self.SETUP_Airfoil = read_TXTrowSTR(SETUP_str,'Airfoil')
-                     
+        self.SETUP_chord = read_FLOATrowSTR(SETUP_str,'chord')             
                      
         #======================================================================
         #CHECK and READ BALANCE WEIGHT DEFINITION!   

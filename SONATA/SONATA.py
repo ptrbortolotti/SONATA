@@ -28,8 +28,9 @@ import numpy as np
 from OCC.gp import gp_Pnt2d,  gp_Trsf2d, gp_Vec2d
 from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
 from OCC.TColgp import TColgp_HArray1OfPnt2d, TColgp_Array1OfPnt2d
-from OCC.Geom2d import Geom2d_TrimmedCurve 
+from OCC.Geom2d import Geom2d_TrimmedCurve, Geom2d_BezierCurve
 from OCC.Geom2dAPI import Geom2dAPI_InterCurveCurve, Geom2dAPI_Interpolate, Geom2dAPI_PointsToBSpline
+from OCC.Geom2dConvert import geom2dconvert_CurveToBSplineCurve
 from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection, GCPnts_TangentialDeflection
 from OCC.Geom2dAPI import Geom2dAPI_Interpolate
 from OCC.Graphic3d import (Graphic3d_EF_PDF,
@@ -43,13 +44,13 @@ from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, discrete_
 from BSplineLst_utils import find_BSplineLst_coordinate, get_BSpline_length, get_BSplineLst_length, \
                             get_BSplineLst_Pnt2d, discretize_BSplineLst, BSplineLst_from_dct, copy_BSpline, \
                             findPnt_on_2dcurve, set_BSplineLst_to_Origin, seg_boundary_from_dct, copy_BSplineLst,\
-                            trim_BSplineLst
+                            trim_BSplineLst, get_BSplineLst_D2
 from wire_utils import build_wire_from_BSplineLst
 from layer import Layer
-from utils import getID, Pnt2dLst_to_npArray,unique_rows, P2Pdistance, point2d_list_to_TColgp_HArray1OfPnt2d
+from utils import getID, Pnt2dLst_to_npArray,unique_rows, P2Pdistance, point2d_list_to_TColgp_HArray1OfPnt2d, point2d_list_to_TColgp_Array1OfPnt2d
 from offset import shp_parallel_offset
 from readinput import UIUCAirfoil2d, AirfoilDat2d
-
+from cutoff import cutoff_layer
 
 
 
@@ -99,8 +100,8 @@ def print_xy_click(shp, *kwargs):
 #==========================
 #DISPLAY CONFIG:
 display, start_display, add_menu, add_function_to_menu = init_display('wx')
-display.Context.SetDeviationAngle(0.000001)       # 0.001 default. Be careful to scale it to the problem.
-display.Context.SetDeviationCoefficient(0.000001) # 0.001 default. Be careful to scale it to the problem. 
+display.Context.SetDeviationAngle(0.0000002)       # 0.001 default. Be careful to scale it to the problem.
+display.Context.SetDeviationCoefficient(0.0000002) # 0.001 default. Be careful to scale it to the problem. 
 #show_coordinate_system(display) #CREATE AXIS SYSTEM for Visualization
 
 
@@ -109,82 +110,79 @@ display.Context.SetDeviationCoefficient(0.000001) # 0.001 default. Be careful to
 print "STATUS:\t Read Input"
 filename = 'sec_config.input'
 Configuration = section_config(filename)
-
+Configuration.SEG_Layup[0][:,2] =  Configuration.SEG_Layup[0][:,2]/Configuration.SETUP_chord
 #==========================                  
 #Initialize Segments and sort the according to ID 
 SegmentLst = []   #List of Segment Objects
 for i,item in enumerate(Configuration.SEG_ID):
     if item == 0:
         #SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, airfoil = 'naca23012'))
-        SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, filename = 'cross.dat'))
+        SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, filename = 'AREA_R250.dat'))
     else:
         SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i]))
 sorted(SegmentLst, key=getID)
         
 #==========================
 #Build Segment 0
-tmp_Segment = SegmentLst[0].copy()
-test = tmp_Segment.Projection
-Layer1 = Layer(0004,SegmentLst[0].BSplineLst, tmp_Segment.Layup[0][0], tmp_Segment.Layup[0][1],tmp_Segment.Layup[0][2],tmp_Segment.Layup[0][3],tmp_Segment.Layup[0][4])
+Segment0 = SegmentLst[0].copy()
+test = Segment0.Projection
 
 
+Layer1 = Layer(1,SegmentLst[0].BSplineLst, Segment0.Layup[0][0], Segment0.Layup[0][1],Segment0.Layup[0][2],Segment0.Layup[0][3],Segment0.Layup[0][4],cutoff_style= 1.24, join_style=1, name = 'Skin Layer 1')
+#Layer2 = Layer(0002,Boundary2)
+print Layer1.cutoff_style
 #=========================================================================
 
 Segment0 = SegmentLst[0].copy()
 Segment0.build_wire()
+LayerLst = []
+Layup = Segment0.Layup
 
-S1 = 0.3
-S2 = 0.5
 
-Trimmed_BSplineLst = Segment0.trim(S1,S2,0,1)
-Trimmed_Wire2 = build_wire_from_BSplineLst(Trimmed_BSplineLst)
 
-npArray = discretize_BSplineLst(Trimmed_BSplineLst,1e-06)   
-offlinepts = shp_parallel_offset(npArray,0.005)
-OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
-
-#def cutoff_layer(BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=0):
-#cutoff_style: 0 straight, 1 linear, 2 Bezier
-cutoff_style = 0
+for i in range(1,5):
+    print "i:",i
+    
+    #get_boundary_layer
+    if i == 1:
+        Boundary_BSplineLst = Segment0.BSplineLst
+    
+    else:
+        layup_projection = Segment0.Projection[i-2]
+        Boundary_BSplineLst = []
+        for j,item in enumerate(layup_projection):
+            Boundary_to_trim = copy_BSplineLst(LayerLst[int(item[2])-1].Boundary_BSplineLst)
+ 
+            if item[2]==i:
+                Boundary_BSplineLst += LayerLst[int(item[2])-1].BSplineLst
+            else:
+                Boundary_BSplineLst += trim_BSplineLst(Boundary_to_trim, item[0], item[1], 0, 1)
+    
+            #print int(item[2])-1
+            #Wire = build_wire_from_BSplineLst(Trimmed)          
+            #display.DisplayShape(Wire, color="YELLOW")
+              
+   
+    #CREATE LAYER Object
+    tmp_Layer = Layer(i,Boundary_BSplineLst, Segment0.Layup[i-1][0], Segment0.Layup[i-1][1],Segment0.Layup[i-1][2],Segment0.Layup[i-1][3],Segment0.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
+    tmp_Layer.build_layer() 
+    LayerLst.append(tmp_Layer)     
+    OffsetBSplineLst = tmp_Layer.BSplineLst
+    S1 = tmp_Layer.S1
+    S2 = tmp_Layer.S2
+    OffsetWire = build_wire_from_BSplineLst(OffsetBSplineLst)
+    display.DisplayShape(OffsetWire, color="BLUE")
+    
+    
+    
+    
+    
+    
+    
 #check if OffsetBSplineLst is closed:
 Offset_StartPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S1,S1,S2)
 Offset_EndPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S2,S1,S2)
-
-Org_StartPnt = get_BSplineLst_Pnt2d(Trimmed_BSplineLst,S1,S1,S2)
-Org_EndPnt = get_BSplineLst_Pnt2d(Trimmed_BSplineLst,S2,S1,S2)
-
 if not Offset_StartPnt.IsEqual(Offset_EndPnt, 1e-9):
-    if cutoff_style == 0:
-        Offset_StartPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S1,S1,S2)
-        Offset_EndPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S2,S1,S2)
-                   
-    elif cutoff_style == 1:
-        OffsetBSplineLst = trim_BSplineLst(OffsetBSplineLst, S1+0.003, S2-0.003, S1, S2)
-        Offset_StartPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S1,S1,S2)
-        Offset_EndPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S2,S1,S2)
-        
-    elif cutoff_style == 2:
-        pass
-    
-    display.DisplayShape(Org_StartPnt, color="RED")
-    display.DisplayShape(Org_EndPnt, color="YELLOW")
-    display.DisplayShape(Offset_StartPnt, color="RED")
-    display.DisplayShape(Offset_EndPnt, color="YELLOW")     
-    
-    # the first 
-    array = TColgp_Array1OfPnt2d(1, 2)
-    array.SetValue(1, Org_StartPnt)
-    array.SetValue(2, Offset_StartPnt)
-    tmp_bspline1 = Geom2dAPI_PointsToBSpline(array).Curve().GetObject()
-    
-    # the second 
-    array = TColgp_Array1OfPnt2d(1, 2)
-    array.SetValue(1, Offset_EndPnt)
-    array.SetValue(2, Org_EndPnt)
-    tmp_bspline2 = Geom2dAPI_PointsToBSpline(array).Curve().GetObject()
-    
-    
-    
     Trimm1 = SegmentLst[0].copy()
     Trimm2 = SegmentLst[0].copy()
     if S1>0:
@@ -195,17 +193,14 @@ if not Offset_StartPnt.IsEqual(Offset_EndPnt, 1e-9):
         Trimm2 = Trimm2.trim(S2,1,0,1)
     else:
         Trimm2 = []
-    
-    OffsetBSplineLst.insert(0,tmp_bspline1)
-    OffsetBSplineLst.append(tmp_bspline2)
-    
+
     newList =  Trimm1 + OffsetBSplineLst + Trimm2
     
-  
+
 else:
     newList = OffsetBSplineLst
-#    return OffsetBSplineLst
-  
+
+
 
 
 
@@ -221,7 +216,7 @@ newBoundary = build_wire_from_BSplineLst(newList)
 
 display.DisplayShape(Segment0.wire)
 #display.DisplayShape(Trimmed_Wire2, color="GREEN")
-display.DisplayShape(OffsetWire, color="BLUE")
+#display.DisplayShape(OffsetWire, color="BLUE")
 #display.DisplayShape(newBoundary, color="CYAN", update=True)
 
 

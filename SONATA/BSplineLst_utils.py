@@ -3,7 +3,7 @@ import numpy as np
 from scipy.optimize import leastsq
 
 #PythonOCC Libraries
-from OCC.gp import gp_Pnt2d, gp_Dir2d
+from OCC.gp import gp_Pnt2d, gp_Dir2d, gp_Vec2d
 from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
 from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection
 from OCC.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve
@@ -96,9 +96,15 @@ def get_BSplineLst_Pnt2d(BSplineLst,S, start, end):
     [idx,U] = find_BSplineLst_coordinate(BSplineLst,S, start, end)
     BSplineLst[idx].D0(U,P)
     return P
-	
-    
-    
+
+def get_BSplineLst_D2(BSplineLst,S, start, end):
+    P = gp_Pnt2d()
+    V1 = gp_Vec2d()
+    V2 = gp_Vec2d()
+    [idx,U] = find_BSplineLst_coordinate(BSplineLst,S, start, end)
+    BSplineLst[idx].D2(U,P,V1,V2)
+    return P,V1,V2
+
 	
 def trim_BSplineLst(BSplineLst, S1, S2, start, end):
     if S1 > S2:
