@@ -26,6 +26,8 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
                 x, y= part.xy
                 data = np.vstack((x,y))
                 data = data.T
+            else:
+                print "ERROR: A multilinestring has been created by shp_parallel_offset that is not closed"
                 
     elif isinstance(offset,shp.LineString):                 
         data = np.array(offset.coords)
@@ -34,10 +36,10 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
     else:
         data = np.array(offset.coords)
     
-     #Interpolate Large spaces! 
+    #Interpolate Large spaces! 
     seg_P2Plength = []
     cumm_length = 0
-    Resolution = 800
+    Resolution = 200
     
     for j in range(0,len(data)-1):
         seg_P2Plength.append(P2Pdistance(data[j],data[j+1]))
@@ -77,6 +79,13 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
         else:
             Refinement = False   
 
+    plt.figure(2)
+    plt.clf()         
+    plt.plot(*arrPts.T, color='black', marker='.')
+    plt.plot(*data.T, color='red', marker='.')
+    plt.axis('equal')  
+    plt.show()   
+    
     return data
 
 
@@ -90,7 +99,7 @@ if __name__ == '__main__':
                
 #    plt.figure(2)        
 #    plt.plot(*arrPts.T, color='black', marker='.')
-#    plt.plot(*data.T, color='red', marker='.')        
+    #plt.plot(*data.T, color='red', marker='.')        
     
 
     
@@ -119,5 +128,5 @@ if __name__ == '__main__':
 #        plt.plot(*P1.T, color='GREEN', marker='o')     
 #        plt.plot(*P2.T, color='BLUE', marker='o')    
         
-#    plt.axis('equal')
+#    
 #    plt.show()    

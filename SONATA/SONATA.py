@@ -33,6 +33,7 @@ from OCC.Geom2dAPI import Geom2dAPI_InterCurveCurve, Geom2dAPI_Interpolate, Geom
 from OCC.Geom2dConvert import geom2dconvert_CurveToBSplineCurve
 from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection, GCPnts_TangentialDeflection
 from OCC.Geom2dAPI import Geom2dAPI_Interpolate
+from OCC.Quantity import Quantity_Color, Quantity_NOC_PINK,  Quantity_NOC_AZURE, Quantity_NOC_PURPLE 
 from OCC.Graphic3d import (Graphic3d_EF_PDF,
                            Graphic3d_EF_SVG,
                            Graphic3d_EF_TEX,
@@ -107,7 +108,7 @@ display.Context.SetDeviationCoefficient(0.0000002) # 0.001 default. Be careful t
 
 #==========================
 #READ INPUT:
-print "STATUS:\t Read Input"
+print "STATUS:\t Reading Input"
 filename = 'sec_config.input'
 Configuration = section_config(filename)
 Configuration.SEG_Layup[0][:,2] =  Configuration.SEG_Layup[0][:,2]/Configuration.SETUP_chord
@@ -125,81 +126,48 @@ sorted(SegmentLst, key=getID)
 #==========================
 #Build Segment 0
 Segment0 = SegmentLst[0].copy()
-test = Segment0.Projection
-
-
-Layer1 = Layer(1,SegmentLst[0].BSplineLst, Segment0.Layup[0][0], Segment0.Layup[0][1],Segment0.Layup[0][2],Segment0.Layup[0][3],Segment0.Layup[0][4],cutoff_style= 1.24, join_style=1, name = 'Skin Layer 1')
-#Layer2 = Layer(0002,Boundary2)
-print Layer1.cutoff_style
-#=========================================================================
-
-Segment0 = SegmentLst[0].copy()
 Segment0.build_wire()
 LayerLst = []
 Layup = Segment0.Layup
 
-
-
-for i in range(1,5):
-    print "i:",i
-    
+#len(Layup)+1
+for i in range(1,len(Layup)+1):
+    print "STATUS:\t Building Segment 0, Layer: ",i
+    new_Boundary_BSplineLst = []
     #get_boundary_layer
     if i == 1:
-        Boundary_BSplineLst = Segment0.BSplineLst
+        new_Boundary_BSplineLst = Segment0.BSplineLst
     
     else:
-        layup_projection = Segment0.Projection[i-2]
-        Boundary_BSplineLst = []
-        for j,item in enumerate(layup_projection):
-            Boundary_to_trim = copy_BSplineLst(LayerLst[int(item[2])-1].Boundary_BSplineLst)
- 
-            if item[2]==i:
-                Boundary_BSplineLst += LayerLst[int(item[2])-1].BSplineLst
-            else:
-                Boundary_BSplineLst += trim_BSplineLst(Boundary_to_trim, item[0], item[1], 0, 1)
-    
-            #print int(item[2])-1
-            #Wire = build_wire_from_BSplineLst(Trimmed)          
-            #display.DisplayShape(Wire, color="YELLOW")
-              
-   
+        new_Boundary_BSplineLst += trim_BSplineLst(LayerLst[-1].Boundary_BSplineLst, 0, LayerLst[-1].S1, 0, 1)  #start und ende der lage
+        new_Boundary_BSplineLst += copy_BSplineLst(LayerLst[-1].BSplineLst)
+        new_Boundary_BSplineLst += trim_BSplineLst(LayerLst[-1].Boundary_BSplineLst, LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
+            
+        new_Boundary_BSplineLst = set_BSplineLst_to_Origin(new_Boundary_BSplineLst)
+
     #CREATE LAYER Object
-    tmp_Layer = Layer(i,Boundary_BSplineLst, Segment0.Layup[i-1][0], Segment0.Layup[i-1][1],Segment0.Layup[i-1][2],Segment0.Layup[i-1][3],Segment0.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
+    tmp_Layer = Layer(i,new_Boundary_BSplineLst, Segment0.Layup[i-1][0], Segment0.Layup[i-1][1],Segment0.Layup[i-1][2],Segment0.Layup[i-1][3],Segment0.Layup[i-1][4],cutoff_style= 1, join_style=1, name = 'test')   
     tmp_Layer.build_layer() 
+    tmp_Layer.build_wire()
     LayerLst.append(tmp_Layer)     
-    OffsetBSplineLst = tmp_Layer.BSplineLst
-    S1 = tmp_Layer.S1
-    S2 = tmp_Layer.S2
-    OffsetWire = build_wire_from_BSplineLst(OffsetBSplineLst)
-    display.DisplayShape(OffsetWire, color="BLUE")
-    
-    
-    
-    
-    
-    
-    
-#check if OffsetBSplineLst is closed:
-Offset_StartPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S1,S1,S2)
-Offset_EndPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S2,S1,S2)
-if not Offset_StartPnt.IsEqual(Offset_EndPnt, 1e-9):
-    Trimm1 = SegmentLst[0].copy()
-    Trimm2 = SegmentLst[0].copy()
-    if S1>0:
-        Trimm1 = Trimm1.trim(0,S1,0,1)
-    else: 
-        Trimm1 = []
-    if S2<1:
-        Trimm2 = Trimm2.trim(S2,1,0,1)
-    else:
-        Trimm2 = []
+    pnt2d = get_BSplineLst_Pnt2d(tmp_Layer.Boundary_BSplineLst,0,0,1)
+    display.DisplayShape(pnt2d)
 
-    newList =  Trimm1 + OffsetBSplineLst + Trimm2
+j = 0
+for i,item in enumerate(LayerLst):
+    [R,G,B,T] =  plt.cm.jet(j*51)
+    display.DisplayColoredShape(item.wire, Quantity_Color(R, G, B, 0))
+    Boundary_BSplineLst = item.Boundary_BSplineLst
+    Wire = build_wire_from_BSplineLst(Boundary_BSplineLst)    
+    #display.DisplayColoredShape(Wire, Quantity_Color(R, G, B, 0))
+    j = j+1;
+    if j>5:
+        j = 0
+    #item.get_pnt2d(0,)
     
-
-else:
-    newList = OffsetBSplineLst
-
+    
+    
+    
 
 
 
@@ -211,8 +179,8 @@ else:
 #plt.axis('equal')
 #plt.show()
         
-OffsetWire = build_wire_from_BSplineLst(OffsetBSplineLst)
-newBoundary = build_wire_from_BSplineLst(newList)
+#OffsetWire = build_wire_from_BSplineLst(OffsetBSplineLst)
+#newBoundary = build_wire_from_BSplineLst(newList)
 
 display.DisplayShape(Segment0.wire)
 #display.DisplayShape(Trimmed_Wire2, color="GREEN")

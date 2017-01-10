@@ -31,10 +31,15 @@
 	#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
 	0.0			1.0		0.23			45					1		#String1	
 	0.0			1.0		0.23			45					1		#String2
-	0.4			0.6		0.60			45					2		#String1
-	0.35		0.65	0.60			45					2		#String2
-	0.3			0.8		0.60			45					2		#String2
-	0.35		0.65	0.60			45					2		#String2	
+	0.2			0.8		0.60			45					2		#String1
+	0.3			0.7		0.60			45					2		#String2
+	0.4			0.5		0.30			45					2		#String2
+	0.25		0.8		0.60			45					2		#String2
+	0.0			1.0		0.50			45					2		#String2
+	0.0			1.0		0.50			45					2		#String2
+	0.33		0.75	0.40			45					2		#String2
+	0.1			0.90	0.20			45					2		#String2
+	0.1			0.90	0.20			45					2		#String2
 	&END
 
 &END 

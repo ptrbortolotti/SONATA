@@ -37,7 +37,7 @@ class Layer(object):
             
         
         if (kwargs.get('discrete_deflection') == None) or (type(kwargs.get('discrete_deflection')) is not float):      #offset algorithm join_style = 1#( 1:round,2:mitre,3:bevels)
-             self.discrete_deflection = 1e-06                            
+             self.discrete_deflection = 1e-05                            
         else:
             self.discrete_deflection = kwargs.get('discrete_deflection')          
 
@@ -48,8 +48,8 @@ class Layer(object):
     
     def __str__(self): 
         #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 
-        return  str('LayerID: \tStart[-]: \tEnd[-]: \tthickness[mm]: \tOrientation[deg]: \tMatID \tName:\t\n' \
-                    '%s, \t%s, \t%s, \t%s, \t\t%s, \t\t%s, \t%s, ' % (self.ID, self.globalStart, self.globalEnd, self.thickness, self.Orientation, self.MatID, self.name))
+        return  str('LayerID: \tStart[-]: \tEnd[-]: \tthickness[-]: \tOrientation[deg]: \tMatID \tName:\t\n' \
+                    '%s, \t%s, \t%s, \t%s, \t\t%s, \t\t%s, \t%s, ' % (self.ID, self.S1, self.S2, self.thickness, self.Orientation, self.MatID, self.name))
         
     def copy(self):
         BSplineLstCopy =  copy_BSplineLst(self.BSplineLst)
@@ -61,8 +61,8 @@ class Layer(object):
          self.length = get_BSplineLst_length(self.BSplineLst)
          return self.length
          
-    def get_pnt2d(self,S): #Return, gp_Pnt of argument S of layer self  
-        return get_BSplineLst_Pnt2d(self.BSplineLst,S)
+    def get_pnt2d(self,S,start,end): #Return, gp_Pnt of argument S of layer self  
+        return get_BSplineLst_Pnt2d(self.BSplineLst,S,start,end)
             
     def build_wire(self): #Builds TopoDS_Wire from connecting BSplineSegments and returns it  
         self.wire = build_wire_from_BSplineLst(self.BSplineLst)   

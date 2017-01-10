@@ -6,7 +6,7 @@ from scipy.optimize import leastsq
 from OCC.gp import gp_Pnt2d, gp_Dir2d, gp_Vec2d
 from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
 from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection
-from OCC.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve
+from OCC.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve, Geom2dAPI_ProjectPointOnCurve
 from OCC.Geom2d import Handle_Geom2d_BSplineCurve_DownCast, Geom2d_Line
 
 #Own Libraries:
@@ -18,18 +18,9 @@ from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_
 ###############################################################################
 # BSpline and BSplineLst Utilities
 ###############################################################################
-def findPnt_on_2dcurve(Pnt,curve,u0=0):
-    def Pnt_Distance(u,Pnt):
-        u = float(u[0])
-        p = gp_Pnt2d()
-        curve.D0(u,p)
-        error = p.Distance(Pnt)
-        return error
-    
-    y = leastsq(Pnt_Distance,u0,args=(Pnt))
-    #error = Pnt_Distance(y,Pnt)
-    #print('u:',float(y[0]),'Error:', error)
-    u = float(y[0])
+def findPnt_on_2dcurve(Pnt2d,Curve2d):
+    projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,Curve2d)
+    u = projection.LowerDistanceParameter()
     return u
 
 def get_BSpline_length(BSpline):
@@ -147,6 +138,9 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
 
     elif S1 == start and S2 == end:
         trimmed_BSplineLst = copy_BSplineLst(BSplineLst)
+        
+    elif S2 == start or S1 == S2:
+        trimmed_BSplineLst = []
     
     elif S2 > S1:
         trimmed_BSplineLst = []
@@ -248,7 +242,7 @@ def discretize_BSplineLst(BSplineLst,Deflection=0.00001):
     
          
     
-def BSplineLst_from_dct(DCT_data,angular_deflection=30):
+def BSplineLst_from_dct(DCT_data,angular_deflection=20):
            
     #Find corners and edges of data
     DCT_angles = calc_DCT_angles(DCT_data)
@@ -333,7 +327,7 @@ def set_BSplineLst_to_Origin(BSplineLst):
         for j in range(1,intersection.NbPoints()+1):
                 IntPnt = intersection.Point(j)
                 XValue = IntPnt.X()
-                u = findPnt_on_2dcurve(IntPnt,item)
+                u = findPnt_on_2dcurve(IntPnt,item.GetHandle())
                 IntPnts.append([i,u,XValue])
                 
     #Determine Origin as point                 
