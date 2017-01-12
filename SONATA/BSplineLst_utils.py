@@ -100,6 +100,8 @@ def get_BSplineLst_D2(BSplineLst,S, start, end):
 def trim_BSplineLst(BSplineLst, S1, S2, start, end):
     if S1 > S2:
         trimmed_BSplineLst = []
+        front_BSplineLst = []
+        rear_BSplineLst = []
         para1 =  find_BSplineLst_coordinate(BSplineLst, S1, start, end)
         para2 =  find_BSplineLst_coordinate(BSplineLst, S2, start, end)
         for i,item in enumerate(BSplineLst):
@@ -108,17 +110,17 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
             if para1[0] == i and para2[0] != i: #Okay
                  BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
                  BSplineCopy.Segment(para1[1],Last)
-                 trimmed_BSplineLst.append(BSplineCopy)
+                 rear_BSplineLst.append(BSplineCopy)
                  
             elif (para1[0] != i and para2[0] != i) and (para1[0] > i and para2[0] > i):
                  BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
                  BSplineCopy.Segment(First,Last)
-                 trimmed_BSplineLst.append(BSplineCopy)
+                 front_BSplineLst.append(BSplineCopy)
                  
             elif (para1[0] != i and para2[0] != i) and (para1[0] < i and para2[0] < i):
                  BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
                  BSplineCopy.Segment(First,Last)
-                 trimmed_BSplineLst.append(BSplineCopy)
+                 rear_BSplineLst.append(BSplineCopy)
                  
             elif para1[0] == i and para2[0] == i: #Okay
                  BSplineCopy1 = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
@@ -132,8 +134,17 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
             elif para1[0] != i and para2[0] == i: #Okay
                  BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
                  BSplineCopy.Segment(First,para2[1])
-                 trimmed_BSplineLst.append(BSplineCopy)
-                 break
+                 front_BSplineLst.append(BSplineCopy)
+                 #break
+        
+        if front_BSplineLst and rear_BSplineLst:
+            trimmed_BSplineLst =  rear_BSplineLst + front_BSplineLst
+        
+        elif front_BSplineLst and not rear_BSplineLst:
+            trimmed_BSplineLst = front_BSplineLst
+            
+        elif not front_BSplineLst and rear_BSplineLst:
+            trimmed_BSplineLst = rear_BSplineLst 
              
 
     elif S1 == start and S2 == end:
@@ -242,7 +253,7 @@ def discretize_BSplineLst(BSplineLst,Deflection=0.00001):
     
          
     
-def BSplineLst_from_dct(DCT_data,angular_deflection=20):
+def BSplineLst_from_dct(DCT_data,angular_deflection=15):
            
     #Find corners and edges of data
     DCT_angles = calc_DCT_angles(DCT_data)

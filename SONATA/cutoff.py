@@ -30,6 +30,11 @@ def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
     
     dist = Org_StartPnt.Distance(Offset_StartPnt) #layer thickness
     
+    if S1>S2:
+        S1, S2 = S2, S1
+            
+    cutoff_depth = 1.05*dist  
+        
     #check if OffsetBSplineLst is closed:
     if not Offset_StartPnt.IsEqual(Offset_EndPnt, 1e-9):
         if cutoff_style == 0: # STEP-CUTOFF
@@ -40,7 +45,7 @@ def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
             End_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([Offset_EndPnt,Org_EndPnt])).Curve().GetObject()
                        
         elif cutoff_style == 1: #LINEAR-CUTOFF
-            cutoff_depth = 1.1*dist
+            #cutoff_depth = 1.05*dist
             OffsetBSplineLst = trim_BSplineLst(OffsetBSplineLst, S1+cutoff_depth, S2-cutoff_depth, S1, S2)
             Offset_StartPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S1,S1,S2)
             Offset_EndPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S2,S1,S2)
@@ -49,7 +54,7 @@ def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
             End_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([Offset_EndPnt,Org_EndPnt])).Curve().GetObject()
         
         elif cutoff_style == 2: #ROUND-CUTOFF
-            cutoff_depth = 1.1*dist
+            #cutoff_depth = 1.05*dist
             OffsetBSplineLst = trim_BSplineLst(OffsetBSplineLst, S1+cutoff_depth, S2-cutoff_depth, S1, S2)
             Org_StartPnt, Org_V1Start, Org_V2Start = get_BSplineLst_D2(Trimmed_BSplineLst,S1,S1,S2)
             Org_EndPnt,  Org_V1End, Org_V2End = get_BSplineLst_D2(Trimmed_BSplineLst,S2,S1,S2)
@@ -74,7 +79,7 @@ def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
             End_bspline = geom2dconvert_CurveToBSplineCurve(End_Bezier.GetHandle()).GetObject() 
             
         elif cutoff_style == 3: #BEZIER-CUTOFF
-            cutoff_depth = 1.1*dist
+            #cutoff_depth = 1.05*dist
             OffsetBSplineLst = trim_BSplineLst(OffsetBSplineLst, S1+cutoff_depth, S2-cutoff_depth, S1, S2)
             Org_StartPnt, Org_V1Start, Org_V2Start = get_BSplineLst_D2(Trimmed_BSplineLst,S1,S1,S2)
             Org_EndPnt,  Org_V1End, Org_V2End = get_BSplineLst_D2(Trimmed_BSplineLst,S2,S1,S2)

@@ -12,6 +12,7 @@ from BSplineLst_utils import get_BSpline_length, get_BSplineLst_length, \
 from wire_utils import trim_wire, build_wire_from_BSplineLst
 from readinput import UIUCAirfoil2d, AirfoilDat2d
 from projection import layup_to_projection
+from layer import Layer
 class Segment(object):
     ''' 
     The Segment object is constructed from multiple Layers obejcts. 
@@ -46,6 +47,28 @@ class Segment(object):
     
     def __repr__(self):
         return '{}: {}'.format(self.__class__.__name__,self.ID) 
+        
+    def build_layers(self):
+      
+        for i in range(1,len(self.Layup)+1):
+            print "STATUS:\t Building Segment %d, Layer: %d" % (self.ID,i)
+            new_Boundary_BSplineLst = []
+            #get_boundary_layer
+            if i == 1:
+                new_Boundary_BSplineLst = self.BSplineLst
+            
+            else:
+                new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, 0, self.LayerLst[-1].S1, 0, 1)  #start und ende der lage
+                new_Boundary_BSplineLst += copy_BSplineLst(self.LayerLst[-1].BSplineLst)
+                new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, self.LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
+                   
+                new_Boundary_BSplineLst = set_BSplineLst_to_Origin(new_Boundary_BSplineLst)
+        
+            #CREATE LAYER Object
+            tmp_Layer = Layer(i,new_Boundary_BSplineLst, self.Layup[i-1][0], self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],self.Layup[i-1][4],cutoff_style= 1, join_style=1, name = 'test')   
+            tmp_Layer.build_layer() 
+            tmp_Layer.build_wire()
+            self.LayerLst.append(tmp_Layer)     
     
     def copy(self):
         BSplineLstCopy =  copy_BSplineLst(self.BSplineLst)

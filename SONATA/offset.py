@@ -27,7 +27,7 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
                 data = np.vstack((x,y))
                 data = data.T
             else:
-                print "ERROR: A multilinestring has been created by shp_parallel_offset that is not closed"
+                print "ERROR: \t A multilinestring has been created by shp_parallel_offset that is not closed!"
                 
     elif isinstance(offset,shp.LineString):                 
         data = np.array(offset.coords)
@@ -39,7 +39,7 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
     #Interpolate Large spaces! 
     seg_P2Plength = []
     cumm_length = 0
-    Resolution = 200
+    Resolution = 180
     
     for j in range(0,len(data)-1):
         seg_P2Plength.append(P2Pdistance(data[j],data[j+1]))
@@ -85,6 +85,7 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
     plt.plot(*data.T, color='red', marker='.')
     plt.axis('equal')  
     plt.show()   
+    
     
     return data
 
