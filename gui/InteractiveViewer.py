@@ -440,7 +440,7 @@ class AppFrame(wx.Frame):
         b = browser.Browser(self.notebook, url)
         self.browser = b
         help_icon = CreateMaskedBitmap(os.path.join(THISPATH, 'icons', 'help.png'), 16, 16)
-        self.notebook.AddPage(b, "Help", True, help_icon)
+        self.notebook.AddPage(b, "Help", True)
         
     def _createpythonshell(self):
         intronote = "Interactive Python Shell for pythonOCC."
@@ -450,7 +450,7 @@ class AppFrame(wx.Frame):
         if sys.platform=='win32':
             py.interp.locals["display"] = self.canva._3dDisplay
         py_icon = CreateMaskedBitmap(os.path.join(THISPATH, 'icons', 'py.png'), 16, 16)
-        self.notebook.AddPage(py, "Python shell", True, py_icon)
+        self.notebook.AddPage(py, "Python shell", True)
         self.pyshell = py
         
     def View_Top(self, event):
@@ -614,8 +614,8 @@ class AppFrame(wx.Frame):
         self.filehistory.AddFileToHistory(fname)
     
 if __name__=="__main__":
-    app = wx.PySimpleApp()
-    wx.InitAllImageHandlers()
+    app = wx.App(False)
+    #wx.InitAllImageHandlers()
     frame = AppFrame(None)
     if sys.platform=='win32':
         frame.Show(True)

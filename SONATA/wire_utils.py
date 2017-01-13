@@ -10,6 +10,7 @@ from OCC.BRepLib import BRepLib_MakeFace
 from OCC.IntCurvesFace import IntCurvesFace_Intersector
 from OCC.Geom import Geom_Plane
 
+
 #Own Libraries:
 from explorer import WireExplorer
 
