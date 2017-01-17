@@ -122,7 +122,7 @@ if __name__ == '__main__':
     display.Context.SetDeviationCoefficient(0.00001) # 0.001 default. Be careful to scale it to the problem. 
     display.set_bg_gradient_color(20,6,111,200,200,200)
     
-    filename = 'AREA_Blatt_L.stl'
+    filename = 'AREA_Blatt_L.stp'
     aResShape = load_3D(filename) 
     display.DisplayShape(aResShape, color=None, transparency=0.7, update=True)
     
@@ -160,14 +160,14 @@ if __name__ == '__main__':
         Plane = Geom_Plane(P, D)
         tmp_edge = BRepBuilderAPI_MakeEdge(item.GetHandle())
         #print tmp_edge.IsDone()
-        display.DisplayShape(tmp_edge.Edge())
-        TopTools_EdgeLst.Append(tmp_edge.Edge())
+        #display.DisplayShape(tmp_edge.Edge())
+        #TopTools_EdgeLst.Append(tmp_edge.Edge())
         
     #wire = BRepBuilderAPI_MakeWire()
     #wire.Add(TopTools_EdgeLst)
     #wire.Build()
     #display.DisplayShape(wire.Wire())
-    #wire = wire.Wire()
+   #wire = wire.Wire()
     
     #print "WIRE CLOSED: " + str(wire.Closed())
     #transformedwire = build_wire_from_BSplineLst(BSplineLst)     

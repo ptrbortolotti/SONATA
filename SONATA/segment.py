@@ -109,19 +109,12 @@ class Segment(object):
         DCT_data = AirfoilDat2d(filename).T
         self.BSplineLst = seg_boundary_from_dct(DCT_data,angular_deflection)
         return seg_boundary_from_dct(DCT_data,angular_deflection)
-        
-    
-    def set_to_origin(self):
-        pass
-
-    
-    def show(self): #display the layer with pythonocc viewer module
-        """
-        TBD: renders the topological entity in the viewer: 
-        """
-#        if not self.display_set:
-#            display.Display()(self, *args, **kwargs)
-#        else:
-#            self.disp.DisplayShape(*args, **kwargs)
-
             
+    def determine_final_boundary(self):
+        new_Boundary_BSplineLst = []
+        new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, 0, self.LayerLst[-1].S1, 0, 1)  #start und ende der lage
+        new_Boundary_BSplineLst += copy_BSplineLst(self.LayerLst[-1].BSplineLst)
+        new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, self.LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
+        new_Boundary_BSplineLst = set_BSplineLst_to_Origin(new_Boundary_BSplineLst)
+        self.final_Boundary_BSplineLst = new_Boundary_BSplineLst
+        

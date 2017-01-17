@@ -436,7 +436,8 @@ class AppFrame(wx.Frame):
             self._createpythonshell()
 
     def _createbrowser(self):
-        url = os.path.join(THISPATH, "doc", "index.html")
+        #url = os.path.join(THISPATH, "doc", "index.html")
+        url = os.path.join('http://www.spiegel.de/politik/deutschland/npd-verbotsverfahren-gruener-justizsenator-dirk-behrendt-haelt-parteiverbote-fuer-nutzlos-a-1130192.html')
         b = browser.Browser(self.notebook, url)
         self.browser = b
         help_icon = CreateMaskedBitmap(os.path.join(THISPATH, 'icons', 'help.png'), 16, 16)

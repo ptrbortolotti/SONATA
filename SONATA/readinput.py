@@ -10,6 +10,7 @@
 #==============================================================================
 import numpy as np 
 import urllib2  
+from utils import allunique
 
 def read_segment(STR,seg2find):
     str2find = '&DEFN '+seg2find
@@ -195,7 +196,7 @@ class section_config(object):
         #======================================================================
         #CHECK and READ WEB DEFINITION!
         if self.SETUP_NbOfWebs != STR.count('&DEFN Web'):
-            print 'WARNING: Setup variable "NbOfWebs" is not equal to the number of web definitions'
+            print 'WARNING: \t Setup variable "NbOfWebs" is not equal to the number of web definitions'
             
         if self.SETUP_NbOfWebs > 0:
             #READ Balance Weight Definition
@@ -213,8 +214,8 @@ class section_config(object):
                     STR = ''.join(templist)
                 #WEB_str,WEB_start,WEB_end = read_segment(STR,'Web')      
                 
-        if (len(self.WEB_ID) > 1) and (len(set(self.WEB_ID)) == len(self.WEB_ID)):
-            print 'WARNING: WEB IDs are not unique!'
+        if not allunique(self.WEB_ID):
+            print 'WARNING: \t WEB IDs are not unique!'
   
   
         #======================================================================
@@ -235,11 +236,11 @@ class section_config(object):
             SEG_str,SEG_start,SEG_end = read_segment(STR,'Seg')       
         
         #CHECK FOR SOME INPUT MISTAKES:
-        if (len(self.SEG_ID) > 1) and (not(len(set(self.SEG_ID)) == len(self.SEG_ID))):
-            print 'WARNING: SEG IDs are not unique'        
+        if not allunique(self.SEG_ID):
+            print 'WARNING: \t SEG IDs are not unique'        
         
         if not(self.SETUP_NbOfWebs == 0 and len(self.SEG_ID) == 1) and (not(self.SETUP_NbOfWebs+2 == len(self.SEG_ID))):   
-            print 'WARNING: Make sure the number of Composite Layup Segments corresponds to your chosen number of Webs'
+            print 'WARNING: \t The number of segments does not corresponds to the number of Webs'
 
 
 #======================================================

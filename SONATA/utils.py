@@ -24,7 +24,11 @@ def partition(alist, indices):
 def P2Pdistance(P1,P2):
    """Calculates the distance between two 2D Points"""
    return math.sqrt((P1[0]-P2[0])**2+(P1[1]-P2[1])**2)
-    
+ 
+def allunique(x):
+    seen = set()
+    return not any(i in seen or seen.add(i) for i in x)
+   
 def unique_rows(a):
     a = np.ascontiguousarray(a)
     unique_a,idx = np.unique(a.view([('', a.dtype)]*a.shape[1]),return_index = True)
