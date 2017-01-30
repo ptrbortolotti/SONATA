@@ -320,10 +320,6 @@ if __name__ == '__main__':
     R = 1223
     BSplineLst = stp3d_to_2dBSplineLst(aResShape,R)
 
-        
-    #for i,item in enumerate(BSplineLst):
-        #display.DisplayShape(item)
-    
     #Transform BSplineLst to SONATA Coordinates
     wire = build_wire_from_BSplineLst(BSplineLst)
     rotwire1 = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,0,1)),math.pi/2)
@@ -344,48 +340,6 @@ if __name__ == '__main__':
 #TODO: def import_2d_stp(filename)
 
 
-#
-#    Pln = gp_Pln(P, D)
-#    face = BRepBuilderAPI_MakeFace(Pln,).Shape()
-#    display_face = BRepBuilderAPI_MakeFace(Pln,- 100., 100., -120., 120).Shape()
-#    TopoDS_Face = TopoDS.topods().Face(face)
-#    
-#    # Computes Shape/Plane intersection
-#    section = BRepAlgoAPI_Section(aResShape, face, False)       
-#    section.Approximation(True)
-#    section.Build()
-#    
-#    ex = TopExp_Explorer(section.Shape(),6,7) #Search for Edges(6), Exclude Vertices(7)
-#    results = []
-#    NbEdges = 0 
-#    while ex.More():
-#        edge = TopoDS.topods().Edge(ex.Current())
-#        results.append(edge)
-#        NbEdges += 1
-#        ex.Next()
-#    
-#    BSplineLst = []
-#    for edg in results:
-#        Adaptor = BRepAdaptor_Curve(edg,TopoDS_Face)
-#        BSplineLst.append(Adaptor.BSpline().GetObject())
-#       
-#    TopTools_EdgeLst = TopTools_ListOfShape()
-#    tmp_wire = 	BRepBuilderAPI_MakeWire()
-#    for i,item in enumerate(BSplineLst):
-#        Plane = Geom_Plane(P, D)
-#        tmp_edge = BRepBuilderAPI_MakeEdge(item.GetHandle())
-#        #print tmp_edge.IsDone()
-#        #display.DisplayShape(tmp_edge.Edge())
-#        TopTools_EdgeLst.Append(tmp_edge.Edge())
-#        
-#    wire = BRepBuilderAPI_MakeWire()
-#    wire.Add(TopTools_EdgeLst)
-#    wire.Build()
-#    display.DisplayShape(wire.Wire())
-#    #wire = wire.Wire()
-#    
-#    #print "WIRE CLOSED: " + str(wire.Closed())
-    #transformedwire = build_wire_from_BSplineLst(BSplineLst)         
 
 # =============================================================================
 #            DISPLAY
@@ -393,13 +347,6 @@ if __name__ == '__main__':
 
     f = display.View.View().GetObject()
     
-    #display.DisplayShape(gp_Pnt(500,0,0))
-    #display.DisplayShape(wire)
-    #display.DisplayShape(display_face, color="BLUE", transparency=0.8, update=True)
-    #display.DisplayShape(transformedwire)
-    #display.DisplayShape(section.Shape(),color="BLACK")
-    #display.DisplayShape(section2.Shape(),color="GREEN")
-    #display.register_select_callback(print_xy_click)
     display.set_bg_gradient_color(20,6,111,200,200,200)
     add_menu('screencapture')
     add_function_to_menu('screencapture', export_to_PDF)
