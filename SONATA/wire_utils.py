@@ -2,14 +2,15 @@
 import numpy as np       
 
 #PythonOCC Libraries
-from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec
+from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf
 from OCC.GCPnts import GCPnts_AbscissaPoint
 from OCC.BRepAdaptor import BRepAdaptor_CompCurve, BRepAdaptor_Curve
-from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge
+from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge, BRepBuilderAPI_Transform
 from OCC.BRepLib import BRepLib_MakeFace
 from OCC.IntCurvesFace import IntCurvesFace_Intersector
 from OCC.Geom import Geom_Plane
-
+from OCC.TopTools import TopTools_ListIteratorOfListOfShape, TopTools_ListOfShape
+from OCC.TopoDS import topods
 
 #Own Libraries:
 from explorer import WireExplorer
@@ -36,6 +37,32 @@ def get_wire_Pnt(TopoDS_wire, S):     #gp_Pnt2d P= get_wire_point(TopoDS_Wire, s
     P = AdaptorComp.Value(S*length)
     return P 
     
+
+def rotate_wire(wire,ax1,angle):    #for top
+    aTrsf = gp_Trsf()    
+    aTrsf.SetRotation(ax1,angle)
+    aBRespTrsf = BRepBuilderAPI_Transform(wire, aTrsf)
+    RotatedWire = aBRespTrsf.Shape()    
+    rotWire = topods.Wire(RotatedWire)
+    return rotWire
+
+
+def translate_wire(wire,gp_Pnt1,gp_Pnt2):
+    aTrsf = gp_Trsf()
+    aTrsf.SetTranslation(gp_Pnt1,gp_Pnt2)
+    aBRespTrsf = BRepBuilderAPI_Transform(wire, aTrsf)
+    atraslatedShape = aBRespTrsf.Shape()
+    translateWire = topods.Wire(atraslatedShape)
+    return translateWire
+
+def scale_wire(wire,gp_Pnt1,factor):
+    aTrsf = gp_Trsf()
+    aTrsf.SetScale(gp_Pnt1,factor)
+    aBRespTrsf = BRepBuilderAPI_Transform(wire, aTrsf)
+    aScaledShape = aBRespTrsf.Shape()
+    scaledWire = topods.Wire(aScaledShape)
+    return scaledWire
+
 	
 def find_coordinate_on_ordered_edges(TopoDS_wire,S):
     WireLength = get_wire_length(TopoDS_wire)      
@@ -94,15 +121,32 @@ def trim_wire(TopoDS_wire, S1, S2):
     return twire.Wire()
 
     
+#def build_wire_from_BSplineLst(BSplineLst): #Builds TopoDS_Wire from connecting BSplineSegments and returns it        
+#    tmp_wire = 	BRepBuilderAPI_MakeWire()
+#    for i,item in enumerate(BSplineLst):
+#        P = gp_Pnt(0,0,0)
+#        V = gp_Dir(gp_Vec(0,0,1))
+#        Plane = Geom_Plane(P, V)
+#        tmp_edge = BRepBuilderAPI_MakeEdge(item.GetHandle(),Plane.GetHandle())
+#        tmp_wire.Add(tmp_edge.Edge())
+#    return tmp_wire.Wire()
+
+
 def build_wire_from_BSplineLst(BSplineLst): #Builds TopoDS_Wire from connecting BSplineSegments and returns it        
-    tmp_wire = 	BRepBuilderAPI_MakeWire()
+    P = gp_Pnt(0,0,0)
+    V = gp_Dir(gp_Vec(0,0,1))
+    Plane = Geom_Plane(P, V)          
+    TopTools_EdgeLst = TopTools_ListOfShape()
     for i,item in enumerate(BSplineLst):
-        P = gp_Pnt(0,0,0)
-        V = gp_Dir(gp_Vec(0,0,1))
-        Plane = Geom_Plane(P, V)
         tmp_edge = BRepBuilderAPI_MakeEdge(item.GetHandle(),Plane.GetHandle())
-        tmp_wire.Add(tmp_edge.Edge())
-    return tmp_wire.Wire()
+        #print tmp_edge.IsDone()
+        TopTools_EdgeLst.Append(tmp_edge.Edge())
+        
+    wire = BRepBuilderAPI_MakeWire()
+    wire.Add(TopTools_EdgeLst)
+    wire.Build()
+    return wire.Wire()
+
 
     
 def set_BoundaryWire_to_Origin(TopoDS_wire):

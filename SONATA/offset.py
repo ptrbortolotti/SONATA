@@ -79,12 +79,12 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
         else:
             Refinement = False   
 
-#    plt.figure(2)
-#    plt.clf()         
-#    plt.plot(*arrPts.T, color='black', marker='.')
-#    plt.plot(*data.T, color='red', marker='.')
-#    plt.axis('equal')  
-#    plt.show()   
+    plt.figure(2)
+    plt.clf()         
+    plt.plot(*arrPts.T, color='black', marker='.')
+    plt.plot(*data.T, color='red', marker='.')
+    plt.axis('equal')  
+    plt.show()   
     
     
     return data

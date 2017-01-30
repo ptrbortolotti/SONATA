@@ -178,8 +178,13 @@ class section_config(object):
         #print SETUP_str,SETUP_start,SETUP_end,'\n'
         self.SETUP_NbOfWebs = read_INTrowSTR(SETUP_str,'NbOfWebs')
         self.SETUP_BalanceWeight = read_BOOLrowSTR(SETUP_str,'BalanceWeight')
-        self.SETUP_Airfoil = read_TXTrowSTR(SETUP_str,'Airfoil')
-        self.SETUP_chord = read_FLOATrowSTR(SETUP_str,'chord')             
+        self.SETUP_input_type = read_INTrowSTR(SETUP_str,'input_type')
+        self.SETUP_datasource = read_TXTrowSTR(SETUP_str,'datasource')
+        self.SETUP_scale_factor = read_FLOATrowSTR(SETUP_str,'scale_factor')
+        
+        #self.SETUP_Airfoil = read_TXTrowSTR(SETUP_str,'Airfoil')
+        #self.SETUP_chord = read_FLOATrowSTR(SETUP_str,'chord')
+                                            
                      
         #======================================================================
         #CHECK and READ BALANCE WEIGHT DEFINITION!   
@@ -248,5 +253,4 @@ class section_config(object):
 #======================================================
 if __name__ == '__main__':
     filename = 'sec_config.input'
-    section1 = section_config()
-    section1.read_config(filename)
+    section1 = section_config(filename)

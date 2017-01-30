@@ -102,6 +102,13 @@ def find_BSplineLst_coordinate(BSplineLst,S, start, end):
     #print 'idx: '+ str(i) + '     U: '+ str(U) 
     return [i,U]  #Return index of edge and parameter U on edge!
 
+
+def reverse_BSplineLst(BSplineLst):
+    BSplineLst = list(reversed(BSplineLst))
+    for i, item in enumerate(BSplineLst):
+        item.Reverse()
+    return BSplineLst
+
   
 def get_BSplineLst_Pnt2d(BSplineLst,S, start, end):
     P = gp_Pnt2d()

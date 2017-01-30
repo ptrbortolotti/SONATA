@@ -2,13 +2,14 @@ import numpy as np
 
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge,BRepBuilderAPI_MakeWire
 from OCC.Geom import Geom_Plane
+from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
 from OCC.gp import gp_Pnt, gp_Pnt2d, gp_Pln, gp_Dir, gp_Vec
 
-from utils import  calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray
+from utils import  calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, point2d_list_to_TColgp_Array1OfPnt2d
 from BSplineLst_utils import get_BSpline_length, get_BSplineLst_length, \
                             find_BSplineLst_coordinate, get_BSplineLst_Pnt2d, \
                             trim_BSplineLst, seg_boundary_from_dct, set_BSplineLst_to_Origin, \
-                            copy_BSplineLst
+                            copy_BSplineLst, trim_BSplineLst_by_Pnt2d
 from wire_utils import trim_wire, build_wire_from_BSplineLst
 from readinput import UIUCAirfoil2d, AirfoilDat2d
 from projection import layup_to_projection
@@ -99,7 +100,7 @@ class Segment(object):
         '''
         DCT_data = UIUCAirfoil2d(string).T
         self.BSplineLst = seg_boundary_from_dct(DCT_data,angular_deflection)
-        return seg_boundary_from_dct(DCT_data,angular_deflection)
+        return self.BSplineLst 
                                      
     def BSplineLst_from_file(self,filename,angular_deflection=30):
         '''
@@ -117,4 +118,50 @@ class Segment(object):
         new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, self.LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
         new_Boundary_BSplineLst = set_BSplineLst_to_Origin(new_Boundary_BSplineLst)
         self.final_Boundary_BSplineLst = new_Boundary_BSplineLst
+        
+    def build_segment_boundary_from_WebLst(self,WebLst,Segment0_final_Boundary_BSplineLst):
+        """Input has to be a complete WebLst"""
+        print 'STATUS: \t Building Segment Boundaries %s' %(self.ID)
+        NbOfWebs = len(WebLst)
+        i = self.ID - 1    
+            
+        if self.ID == 0:
+            None
+        
+        if self.ID == 1:
+            #CREATE SEGMENT BOUNDARY 1
+            P1 = WebLst[i].IntPnts_Pnt2d[0]
+            P2 = WebLst[i].IntPnts_Pnt2d[1]
+            trimmed_Boundary = trim_BSplineLst_by_Pnt2d(Segment0_final_Boundary_BSplineLst,P1,P2)
+            Boundary_WEB_BSplineLst = [Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([P2,P1])).Curve().GetObject()]
+            Boundary_BSplineLst = trimmed_Boundary + Boundary_WEB_BSplineLst                                  
+            Boundary_BSplineLst = set_BSplineLst_to_Origin(Boundary_BSplineLst)
+            self.BSplineLst = Boundary_BSplineLst
+            self.build_wire()   
+            
+        elif self.ID == NbOfWebs+1:
+            #CREATE LAST BOUNDARY
+            P1 = WebLst[i-1].IntPnts_Pnt2d[0]
+            P2 = WebLst[i-1].IntPnts_Pnt2d[1]
+            trimmed_Boundary = trim_BSplineLst_by_Pnt2d(Segment0_final_Boundary_BSplineLst,P2,P1)
+            Boundary_WEB_BSplineLst = [Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([P1,P2])).Curve().GetObject()]
+            Boundary_BSplineLst = trimmed_Boundary + Boundary_WEB_BSplineLst                                  
+            Boundary_BSplineLst = set_BSplineLst_to_Origin(Boundary_BSplineLst)
+            self.BSplineLst = Boundary_BSplineLst
+            self.build_wire()   
+            
+        else:
+            #CREATE INTERMEDIATE BOUNDARIES
+            P1 = WebLst[i-1].IntPnts_Pnt2d[0]
+            P2 = WebLst[i-1].IntPnts_Pnt2d[1]
+            P3 = WebLst[i].IntPnts_Pnt2d[0]
+            P4 = WebLst[i].IntPnts_Pnt2d[1]
+            Boundary_WEB_BSplineLst_1 = [Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([P1,P2])).Curve().GetObject()]
+            Boundary_WEB_BSplineLst_2 = [Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([P4,P3])).Curve().GetObject()]
+            trimmed_Boundary1 = trim_BSplineLst_by_Pnt2d(Segment0_final_Boundary_BSplineLst,P3,P1)
+            trimmed_Boundary2 = trim_BSplineLst_by_Pnt2d(Segment0_final_Boundary_BSplineLst,P2,P4)
+            Boundary_BSplineLst = trimmed_Boundary1 + Boundary_WEB_BSplineLst_1 + trimmed_Boundary2 + Boundary_WEB_BSplineLst_2
+            Boundary_BSplineLst = set_BSplineLst_to_Origin(Boundary_BSplineLst)
+            self.BSplineLst = Boundary_BSplineLst
+            self.build_wire()
         

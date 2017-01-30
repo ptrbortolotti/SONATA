@@ -24,4 +24,5 @@ class Web(object):
         
         #Intersect Segment0_Boundary_BSplineLst with self.BSpline
         [self.IntPnts,self.IntPnts_Pnt2d] = intersect_BSplineLst_with_BSpline(self.Segment0_Boundary_BSplineLst,self.BSpline_Line)
-                
+        
+        

@@ -36,24 +36,36 @@ def init_viewer():
     add_function_to_menu('screencapture', exit)              
     return display    
 
-def export_to_BMP(event=None):
-    display.View.Dump('./capture_bmp.bmp')
     
+def export_to_PDF(display,f,event=None):
+    display.set_bg_gradient_color(255,255,255,255,255,255)
+    f.Export('SONATA_export.pdf', Graphic3d_EF_PDF)
+    display.set_bg_gradient_color(20,6,111,200,200,200)
     
-def export_to_PNG(event=None):
-    display.View.Dump('./capture_png.png')
-    
-    
-def export_to_JPEG(event=None):
-    display.View.Dump('./capture_jpeg.jpeg')
-    
-    
-def export_to_TIFF(event=None):
-    display.View.Dump('./capture_tiff.tiff')
+def export_to_SVG(event=None):
+    display.set_bg_gradient_color(255,255,255,255,255,255)
+    f.Export('SONATA_export.svg', Graphic3d_EF_SVG)
+    display.set_bg_gradient_color(20,6,111,200,200,200)
 
-def exit(event=None):
-    sys.exit()
+def export_to_PS(event=None):
+    display.set_bg_gradient_color(255,255,255,255,255,255)
+    f.Export('SONATA_export.ps', Graphic3d_EF_PostScript)
+    display.set_bg_gradient_color(20,6,111,200,200,200)
 
+def export_to_EnhPS(event=None):
+    display.set_bg_gradient_color(255,255,255,255,255,255)
+    f.Export('SONATA_export_enh.ps', Graphic3d_EF_EnhPostScript)
+    display.set_bg_gradient_color(20,6,111,200,200,200)
+
+def export_to_TEX(event=None):
+    display.set_bg_gradient_color(255,255,255,255,255,255)
+    f.Export('SONATA_export.tex', Graphic3d_EF_TEX)
+    display.set_bg_gradient_color(20,6,111,200,200,200)
+
+def print_xy_click(SHP, *kwargs):
+    for shape in SHP:
+        print("Shape selected: ", shape)
+    print(kwargs)
 
 def exit(event=None):
     sys.exit()
@@ -79,6 +91,8 @@ def display_points_of_array(array,display):
     for j in range(array.Lower(),array.Upper()+1):
         p = array.Value(j)
         display.DisplayShape(p, update=False)         
-                                              
+                    
+
+                          
 if __name__ == '__main__':   
     pass
