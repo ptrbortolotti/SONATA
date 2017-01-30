@@ -236,6 +236,7 @@ def stp3d_to_2dBSplineLst(TopoDS_Shape, R):
     Pnt = gp_Pnt(R,0,0)
     Pln = gp_Pln(Pnt, Dir)
     face = BRepBuilderAPI_MakeFace(Pln).Shape()
+
     TopoDS_Face = TopoDS.topods().Face(face)
     
     # Computes Shape/Plane intersection
@@ -264,6 +265,9 @@ def stp3d_to_2dBSplineLst(TopoDS_Shape, R):
         elif Adaptor.GetType() == 6: #BSplineCurve
             BSplineLst.append(Adaptor.BSpline().GetObject())
     
+    
+    display_face = BRepBuilderAPI_MakeFace(Pln,- 100., 100., -120., 120).Shape()
+    display.DisplayShape(display_face, color="BLACK", transparency=0.8, update=True)
 
     return BSplineLst    
     
@@ -316,7 +320,6 @@ if __name__ == '__main__':
     #=====================
     #IMPORT 3D Step File and Slice it a Radial Station
     #=====================
-   
     R = 1223
     BSplineLst = stp3d_to_2dBSplineLst(aResShape,R)
 
@@ -325,15 +328,11 @@ if __name__ == '__main__':
     rotwire1 = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,0,1)),math.pi/2)
     rotwire2 = rotate_wire(rotwire1,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,1,0)),math.pi)
     print "WIRE CLOSED: " + str(rotwire2.Closed())
+    
+    
+    #DISPLAY
     display.DisplayShape(rotwire2)
     
-    Dir = gp_Dir(1., 0., 0.) 
-    Pnt = gp_Pnt(R,0,0)
-    Pln = gp_Pln(Pnt, Dir)
-    face = BRepBuilderAPI_MakeFace(Pln,).Shape()
-    display_face = BRepBuilderAPI_MakeFace(Pln,- 100., 100., -120., 120).Shape()
-    display.DisplayShape(display_face, color="BLACK", transparency=0.8, update=True)
-
 
 #TODO: Wire_to_BSplineLst
 #TODO: def import_3d_stp(filename,R)
