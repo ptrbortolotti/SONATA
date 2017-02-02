@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import shapely.geometry as shp
 from scipy.optimize import leastsq
+import datetime
 
 #Third Party Libaries: OCC Libraries
 from OCC.Display.SimpleGui import init_display
@@ -61,7 +62,7 @@ from offset import shp_parallel_offset
 from readinput import UIUCAirfoil2d, AirfoilDat2d
 from cutoff import cutoff_layer
 from weight import Weight
-
+from CADinput import import_2d_stp, import_3d_stp
 
 def export_to_PDF(event=None):
     display.set_bg_gradient_color(255,255,255,255,255,255)
@@ -77,7 +78,7 @@ def export_to_SVG(event=None):
     i = 0
     while os.path.exists('capture_svg%s.svg' % i):
         i += 1
-    f.Export('capture_svg%s.svg' % i, Graphic3d_EF_SVG)
+    f.Export('capture_svg_%s.svg' % i, Graphic3d_EF_SVG)
     print "EXPORT: \t Screencapture exported to capture_svg%s.svg" % i
     display.set_bg_gradient_color(20,6,111,200,200,200)
     
@@ -167,7 +168,7 @@ display.Context.SetDeviationCoefficient(0.000001) # 0.001 default. Be careful to
 
 #==========================
 #READ INPUT:
-print "STATUS:\t Reading Input"
+print "STATUS:\t Reading Crossection Configuration File"
 filename = 'sec_config.input'
 Configuration = section_config(filename)
 
@@ -179,24 +180,24 @@ for i, item in enumerate(Configuration.SEG_Layup):
 #Initialize Segments and sort the according to ID 
 SegmentLst = []   #List of Segment Objects
 for i,item in enumerate(Configuration.SEG_ID):
-    if item == 0:
-        
-        if Configuration.SETUP_input_type == 0:
+    if item == 0:        
+        if Configuration.SETUP_input_type == 0:   #0) Airfoil from UIUC Database  --- naca23012
             SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, airfoil = Configuration.SETUP_datasource))
         
-        elif Configuration.SETUP_input_type == 1:
+        elif Configuration.SETUP_input_type == 1: #1) Geometry from .dat file --- AREA_R250.dat
             SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, filename = Configuration.SETUP_datasource))
         
-        elif Configuration.SETUP_input_type == 2:
-            None    #2)2d .step or .iges --- AREA_R250.stp
+        elif Configuration.SETUP_input_type == 2: #2)2d .step or .iges  --- AREA_R230.stp
+            BSplineLst = import_2d_stp(Configuration.SETUP_datasource,True)
+            SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=True, Boundary = BSplineLst))
         
-        elif Configuration.SETUP_input_type == 3:
-            None    #3)3D .step or .iges and radial station of crosssection --- AREA_Blade.stp, R=250
+        elif Configuration.SETUP_input_type == 3: #3)3D .step or .iges and radial station of crosssection --- AREA_Blade.stp, R=250
+            BSplineLst = import_3d_stp(Configuration.SETUP_datasource,Configuration.SETUP_radial_station,False)
+            SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=True, Boundary = BSplineLst))  
 
         else:
-            None
-    
-        
+            print 'ERROR: \t WRONG input_type'
+ 
     else:
         SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i]))
 sorted(SegmentLst, key=getID)  
@@ -204,6 +205,8 @@ sorted(SegmentLst, key=getID)
 # ============================================================================= 
 #               Build SEGMENT 0:
 # =============================================================================
+
+
 SegmentLst[0].build_wire()
 SegmentLst[0].build_layers()
 SegmentLst[0].determine_final_boundary()    #Determine Boundary from Segment 0:
@@ -229,20 +232,17 @@ for i,seg in enumerate(SegmentLst[1:],start=1):
     seg.build_segment_boundary_from_WebLst(WebLst,SegmentLst[0].final_Boundary_BSplineLst)
     seg.build_layers()
 
-    
-# ============================================================================= 
+
+#============================================================================= 
 #               Balance Weight
 # =============================================================================
 print 'STATUS: \t Building Balance Weight'   
 BW = Weight(0,Configuration.BW_XPos,Configuration.BW_YPos,Configuration.BW_Diameter,Configuration.BW_MatID)
-    
-    
 
     
 # ============================================================================= 
 #               DISPLAY and EXPORT to STEP_AP203 ::
 # =============================================================================
-
 # initialize the STEP exporter
 step_writer = STEPControl_Writer()
 Interface_Static_SetCVal("write.step.schema", "AP203")
@@ -258,6 +258,7 @@ for i,seg in enumerate(SegmentLst):
         [R,G,B,T] =  plt.cm.jet(k*50)
         
         if i==0:
+            #None
             display.DisplayColoredShape(layer.wire, Quantity_Color(R, G, B, 0),update=True)
             #display.DisplayShape(layer.wire, color="BLACK")
         elif i==1:

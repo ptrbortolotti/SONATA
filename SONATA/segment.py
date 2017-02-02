@@ -66,7 +66,7 @@ class Segment(object):
                 new_Boundary_BSplineLst = set_BSplineLst_to_Origin(new_Boundary_BSplineLst)
         
             #CREATE LAYER Object
-            tmp_Layer = Layer(i,new_Boundary_BSplineLst, self.Layup[i-1][0], self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],self.Layup[i-1][4],cutoff_style= 1, join_style=1, name = 'test')   
+            tmp_Layer = Layer(i,new_Boundary_BSplineLst, self.Layup[i-1][0], self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],self.Layup[i-1][4],cutoff_style= 2, join_style=1, discrete_deflection = 1e-03 , name = 'test')   
             tmp_Layer.build_layer() 
             tmp_Layer.build_wire()
             self.LayerLst.append(tmp_Layer)     

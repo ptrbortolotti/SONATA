@@ -7,6 +7,7 @@ from OCC.GCPnts import GCPnts_AbscissaPoint
 from OCC.BRepAdaptor import BRepAdaptor_CompCurve, BRepAdaptor_Curve
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge, BRepBuilderAPI_Transform
 from OCC.BRepLib import BRepLib_MakeFace
+from OCC.BRepTools import BRepTools_WireExplorer
 from OCC.IntCurvesFace import IntCurvesFace_Intersector
 from OCC.Geom import Geom_Plane
 from OCC.TopTools import TopTools_ListIteratorOfListOfShape, TopTools_ListOfShape
@@ -18,6 +19,15 @@ from explorer import WireExplorer
 ###############################################################################
 # Wire Utilities
 ###############################################################################
+def NbEdges_in_wire(Wire):
+    ex = BRepTools_WireExplorer(Wire)
+    counter = 0
+    while ex.More():
+        counter +=1
+        ex.Next()
+    return counter
+
+
 def get_wire_length(TopoDS_wire):   #std_real L = get_wire_length(TopoDS_Wire)
     AdaptorComp = BRepAdaptor_CompCurve(TopoDS_wire, True)
     length = AdaptorComp.LastParameter()-AdaptorComp.FirstParameter()

@@ -180,6 +180,8 @@ class section_config(object):
         self.SETUP_BalanceWeight = read_BOOLrowSTR(SETUP_str,'BalanceWeight')
         self.SETUP_input_type = read_INTrowSTR(SETUP_str,'input_type')
         self.SETUP_datasource = read_TXTrowSTR(SETUP_str,'datasource')
+        if self.SETUP_input_type == 3:
+            self.SETUP_radial_station = read_FLOATrowSTR(SETUP_str,'radial_station')
         self.SETUP_scale_factor = read_FLOATrowSTR(SETUP_str,'scale_factor')
         
         #self.SETUP_Airfoil = read_TXTrowSTR(SETUP_str,'Airfoil')

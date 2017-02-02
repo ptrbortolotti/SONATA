@@ -221,14 +221,23 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
                  trimmed_BSplineLst.append(BSplineCopy)
                  break
         
+#NOTE: Somehow the execption if para2 is close to Last doesn't work properly!!!!!!!     
+#             elif para1[0] != i and para2[0] == i:
+#                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+#                 if isclose(para2[1],Last):
+#                     trimmed_BSplineLst.append(BSplineCopy)
+#                 else:
+#                     BSplineCopy.Segment(First,para2[1])
+#                 trimmed_BSplineLst.append(BSplineCopy)
+#                 break
+             
              elif para1[0] != i and para2[0] == i:
                  BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
-                 if isclose(para2[1],Last):
-                     trimmed_BSplineLst.append(BSplineCopy)
-                 else:
-                     BSplineCopy.Segment(First,para2[1])
+                 BSplineCopy.Segment(First,para2[1])
                  trimmed_BSplineLst.append(BSplineCopy)
                  break
+                
+                
     return trimmed_BSplineLst		
 
 
@@ -383,6 +392,8 @@ def discretize_BSplineLst(BSplineLst,Deflection=0.00001):
     if np.array_equal(b[0],b[-1]):
         closed = True
     else: closed = False
+    
+    print 'Closed: ',closed
 
     npArray = unique_rows(b) # Remove possible doubles! 
     
@@ -494,17 +505,23 @@ def set_BSplineLst_to_Origin(BSplineLst):
         if i  == OriEdgePnt[0]:
             First = item.FirstParameter() 
             Last =  item.LastParameter()
-            if isclose(OriEdgePnt[1],First) == False:
+            
+            if isclose(OriEdgePnt[1],First) == True:
+                OBSplineLst.append(item)
+                CorrectOrigin = True
+            
+            elif isclose(OriEdgePnt[1],Last) == True:
+                CorrectOrigin = False
+                BSplineCurve2 = item
+            
+            else: 
                 CorrectOrigin = False
                 BSplineCurve1 = copy_BSpline(item)
                 BSplineCurve1.Segment(OriEdgePnt[1],Last)
                 BSplineCurve2 = copy_BSpline(item)
                 BSplineCurve2.Segment(First,OriEdgePnt[1])
                 OBSplineLst.append(BSplineCurve1)
-            else:
-                OBSplineLst.append(item)
-                CorrectOrigin = True
-                
+   
         elif i > OriEdgePnt[0]:
             OBSplineLst.append(item)
         else:

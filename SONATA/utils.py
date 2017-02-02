@@ -35,7 +35,7 @@ def unique_rows(a):
     unique_a = unique_a[np.argsort(idx)]
     return unique_a.view(a.dtype).reshape((unique_a.shape[0], a.shape[1]))
 
-def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+def isclose(a, b, rel_tol=1e-09, abs_tol=1e-09):
     """
     rel_tol: is the relative tolerance -- it is the amount of error allowed, relative to the larger absolute value of a or b. For
     example, to set a tolerance of 5%, pass tol=0.05. The default tolerance is 1e-9, which assures that the two values are the same
