@@ -188,11 +188,11 @@ for i,item in enumerate(Configuration.SEG_ID):
             SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, filename = Configuration.SETUP_datasource))
         
         elif Configuration.SETUP_input_type == 2: #2)2d .step or .iges  --- AREA_R230.stp
-            BSplineLst = import_2d_stp(Configuration.SETUP_datasource,True)
+            BSplineLst = import_2d_stp(Configuration.SETUP_datasource)
             SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=True, Boundary = BSplineLst))
         
         elif Configuration.SETUP_input_type == 3: #3)3D .step or .iges and radial station of crosssection --- AREA_Blade.stp, R=250
-            BSplineLst = import_3d_stp(Configuration.SETUP_datasource,Configuration.SETUP_radial_station,False)
+            BSplineLst = import_3d_stp(Configuration.SETUP_datasource,Configuration.SETUP_radial_station)
             SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=True, Boundary = BSplineLst))  
 
         else:
@@ -236,8 +236,9 @@ for i,seg in enumerate(SegmentLst[1:],start=1):
 #============================================================================= 
 #               Balance Weight
 # =============================================================================
-print 'STATUS: \t Building Balance Weight'   
-BW = Weight(0,Configuration.BW_XPos,Configuration.BW_YPos,Configuration.BW_Diameter,Configuration.BW_MatID)
+if Configuration.SETUP_BalanceWeight == True:
+    print 'STATUS: \t Building Balance Weight'   
+    BW = Weight(0,Configuration.BW_XPos,Configuration.BW_YPos,Configuration.BW_Diameter,Configuration.BW_MatID)
 
     
 # ============================================================================= 

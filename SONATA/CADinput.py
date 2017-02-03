@@ -40,14 +40,14 @@ from OCC.TopoDS import topods
 from OCC.ShapeAnalysis import ShapeAnalysis_Wire, ShapeAnalysis_WireOrder
 from OCC.ShapeFix import ShapeFix_Wire
 
-from wire_utils import build_wire_from_BSplineLst,rotate_wire, translate_wire, NbEdges_in_wire
+from wire_utils import build_wire_from_BSplineLst,rotate_wire, translate_wire, NbEdges_in_wire, Unique_EdgeLst, Wire_Orientation
 from explorer import WireExplorer
-from utils import point2d_list_to_TColgp_HArray1OfPnt2d
+from utils import point2d_list_to_TColgp_HArray1OfPnt2d, Pnt2dLst_to_npArray, PolygonArea
 from BSplineLst_utils import get_BSpline_length, get_BSplineLst_length, \
                             find_BSplineLst_coordinate, get_BSplineLst_Pnt2d, \
                             trim_BSplineLst, seg_boundary_from_dct, set_BSplineLst_to_Origin, \
                             copy_BSplineLst, trim_BSplineLst_by_Pnt2d, copy_BSpline, \
-                            reverse_BSplineLst
+                            reverse_BSplineLst, BSplineLst_Orientation
 
 def export_to_PDF(event=None):
     display.set_bg_gradient_color(255,255,255,255,255,255)
@@ -207,8 +207,7 @@ def EdgeLst_to_Wire(EdgeLst):
 #            filter_orientation_seq.append(i)
 #    EdgeLst = filter_orientation_seq
     
-    
-    
+ 
     pool = EdgeLst
     wire = BRepBuilderAPI_MakeWire()
     idx_pool = []
@@ -245,16 +244,18 @@ def EdgeLst_to_Wire(EdgeLst):
     #Build final_Wire according to order_sheme
     for i,item in enumerate(order_sheme):
             final_wire.Add(pool[item])
-    
+
     #wire = BRepBuilderAPI_MakeWire()
     #wire.Add(TopTools_EdgeLst)
     final_wire.Build()
     
-    #print NbEdges_in_wire(wire.Wire())
+    #print NbEdges_in_wire(final_wire.Wire())
     
     if final_wire.Error() == 0:
-        #print 'No error occurred. The wire is correctly built.'
         None
+        #print 'No error occurred. The wire is correctly built.'
+        
+        
     return final_wire.Wire()
 
 
@@ -307,20 +308,6 @@ def wire_to_BSplineLst(wire):
     return BSplineLst    
 
 
-
-def stp2d_to_wire(TopoDS_Shape):
-    ex = TopExp_Explorer(TopoDS_Shape,6,7) #Search for Edges(6), Exclude Vertices(7)
-    EdgeLst = []
-    while ex.More():
-        edge = TopoDS.topods().Edge(ex.Current())
-        EdgeLst.append(edge)
-        #print "is null?", bool(edge.IsNull())
-        ex.Next()
-   
-    wire = EdgeLst_to_Wire(EdgeLst)
-    return wire
-    
-    
 def order_BSplineLst_Head2Tail(BSplineLst,rel_tol=1e-07):    
     #Order BSplineLst Head-to-Tail
     NbSplines = len(BSplineLst)
@@ -334,6 +321,27 @@ def order_BSplineLst_Head2Tail(BSplineLst,rel_tol=1e-07):
             
     return BSplineLst    
 
+
+
+def stp2d_to_wire(TopoDS_Shape):
+    ex = TopExp_Explorer(TopoDS_Shape,6,7) #Search for Edges(6), Exclude Vertices(7)
+    EdgeLst = []
+    counter = 0
+    while ex.More():
+        edge = TopoDS.topods().Edge(ex.Current())
+        EdgeLst.append(edge)
+        counter += 1
+        #print "is null?", bool(edge.IsNull())
+        #display.DisplayShape(edge)
+        ex.Next()
+    #print counter
+    #NonUniques = Unique_EdgeLst(EdgeLst)
+    wire = EdgeLst_to_Wire(EdgeLst)    
+       
+    #print wire.Closed()
+    return wire
+    
+    
 
 def stp3d_to_wire(TopoDS_Shape, R):
     #Define the Point and direction of the slicing plane
@@ -363,51 +371,99 @@ def stp3d_to_wire(TopoDS_Shape, R):
     #display_face = BRepBuilderAPI_MakeFace(Pln,- 100., 100., -120., 120).Shape()
     #display.DisplayShape(display_face, color="BLACK", transparency=0.8, update=True)
     return Wire
+   
     
 
-def import_2d_stp(filename,reverse=False):
+def import_2d_stp(filename):
+    '''
+    The 2D Shape must given in SONATA Coordinates!
+    '''
     aResShape = load_3D(filename) 
     wire = stp2d_to_wire(aResShape)
-    
-    #Transform wire to SONATA Crosssection Coordinates
-    #wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,1,0)),math.pi/2)
-    #wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,0,1)),math.pi/2)
-    
     BSplineLst = wire_to_BSplineLst(wire)
+
+    BSplineLst = order_BSplineLst_Head2Tail(BSplineLst)
     
-    if reverse==True:
-        BSplineLst = reverse_BSplineLst(BSplineLst)          
+    if BSplineLst_Orientation(BSplineLst) == False:
+        BSplineLst = reverse_BSplineLst(BSplineLst)  
+    
+    #TODO: Rotate x-Axis to determine Origin
+    BSplineLst = set_BSplineLst_to_Origin(BSplineLst) 
     BSplineLst = order_BSplineLst_Head2Tail(BSplineLst)
-    BSplineLst = set_BSplineLst_to_Origin(BSplineLst)
-    BSplineLst = order_BSplineLst_Head2Tail(BSplineLst)
+
+    print 'STATUS: \t IMPORT_3d_STP'
+    print 'STATUS: \t CHECK ClosedWire: \t\t ', str(wire.Closed())
+    print 'STATUS: \t CHECK Head2Tail: \t\t ', Check_BSplineLst_Head2Tail(BSplineLst)
+    print 'STATUS: \t CHECK Counterclockwise: \t ', BSplineLst_Orientation(BSplineLst)
     return BSplineLst
 
-def import_3d_stp(filename,R,reverse=False):
-    aResShape = load_3D(filename) 
-    wire = stp3d_to_wire(aResShape,R)
 
+
+def import_3d_stp(filename,R):
+    '''
+    The 3D Shape must given in Rotorblade Coordinates!
+    '''
+    print 'STATUS: \t IMPORT_3d_STP'
+    aResShape = load_3D(filename) 
+    wire = stp3d_to_wire(aResShape,R)   
+    print 'STATUS: \t CHECK ClosedWire: \t\t ', str(wire.Closed())
+    
+    print 'STATUS: \t Transform wire to SONATA Crosssection Coordinates'
     #Transform wire to SONATA Crosssection Coordinates
     wire = translate_wire(wire,gp_Pnt(R,0,0),gp_Pnt(0,0,0))
     wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,1,0)),math.pi/2)
     wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,0,1)),math.pi/2)
     
-    print "STATUS: \t IMPORT_3d_STP - WIRE CLOSED: " + str(wire.Closed())
-    
+    print 'STATUS: \t Transform wire to SONATA BSplineLst'
     BSplineLst = wire_to_BSplineLst(wire)
     
-    #TODO: Scale and Rotate Wire to ProfileCoordinates
+    print 'STATUS: \t Order BSplineLst Head2Tail'
+    BSplineLst = order_BSplineLst_Head2Tail(BSplineLst)
     
-    if reverse==True:
+    print 'STATUS: \t Check Orientation and Reverse it if Necessary'
+    if BSplineLst_Orientation(BSplineLst,11) == False:                      #TODO: VERY SLOW CHANGE THE Get_Pnt2d from BSplineLst function to something else!!!!
+        print 'Reversing BSplineLst'
         BSplineLst = reverse_BSplineLst(BSplineLst)  
     
-    BSplineLst = order_BSplineLst_Head2Tail(BSplineLst)
+    #TODO: Rotate x-Axis to determine Origin
+    print 'STATUS: \t Set BSplineLst to Origin'
     BSplineLst = set_BSplineLst_to_Origin(BSplineLst) 
     BSplineLst = order_BSplineLst_Head2Tail(BSplineLst)
+    
+
+    print 'STATUS: \t CHECK Head2Tail: \t\t ', Check_BSplineLst_Head2Tail(BSplineLst)
+    print 'STATUS: \t CHECK Counterclockwise: \t ', BSplineLst_Orientation(BSplineLst,11)
     
     return BSplineLst
 
 
+def Check_BSplineLst_Head2Tail(BSplineLst):
+    Head2Tail = True
+    lin_tol=1e-07
+    NbSplines = len(BSplineLst)
+    for i, item in enumerate(BSplineLst[:NbSplines-1]):
+        EP1 = item.EndPoint()
+        SP2 = BSplineLst[i+1].StartPoint()
+        if not EP1.IsEqual(SP2,lin_tol):
+           #display.DisplayShape(item,color='RED')
+           Head2Tail = False
+        else:
+            None
+            #display.DisplayShape(item,color='BLUE')
+    
+    
+    EP1 = BSplineLst[0].StartPoint()
+    SP2 = BSplineLst[-1].EndPoint()
+    if not EP1.IsEqual(SP2,lin_tol):
+        #display.DisplayShape(BSplineLst[-1],color='RED')
+        Head2Tail = False
+    else:
+        None
+        #display.DisplayShape(BSplineLst[-1],color='BLUE')        
+    
+    return Head2Tail
 
+    
 
 
 # =============================================================================
@@ -437,52 +493,30 @@ if __name__ == '__main__':
     #=====================
     #IMPORT 2D Step File
     #=====================
-    #BSplineLst = import_2d_stp('AREA_R230.stp',True)
+    #BSplineLst = import_2d_stp('AREA_R230.stp')
     #BSplineLst = set_BSplineLst_to_Origin(BSplineLst)
     #for i,item in enumerate(BSplineLst):
        #display.DisplayShape(item) 
 
-    #aResShape = load_3D('AREA_R250.stp') 
-    #display.DisplayShape(aResShape, color=None, transparency=0.7, update=True)
+    #aResShape = load_3D('AREA_R230.stp') 
+    #display.DisplayShape(aResShape)
     #transformedwire = build_wire_from_BSplineLst(BSplineLst)
     #display.DisplayShape(transformedwire,color='BLUE')  
 
     #=====================
     #IMPORT 3D Step File and Slice it a Radial Station
     #=====================
-    BSplineLst = import_3d_stp('AREA_Blatt_L.stp',119)
-       
-
-    #Check BSplineLst Head-to-Tail
-    lin_tol=1e-07
-    NbSplines = len(BSplineLst)
-    for i, item in enumerate(BSplineLst[:NbSplines-1]):
-        EP1 = item.EndPoint()
-        SP2 = BSplineLst[i+1].StartPoint()
-        if not EP1.IsEqual(SP2,lin_tol):
-           display.DisplayShape(item,color='RED')
-        else:
-            display.DisplayShape(item,color='BLUE')
-    
-    
-    EP1 = BSplineLst[0].StartPoint()
-    SP2 = BSplineLst[-1].EndPoint()
-    if not EP1.IsEqual(SP2,lin_tol):
-        display.DisplayShape(BSplineLst[-1],color='RED')
-    else:
-        display.DisplayShape(BSplineLst[-1],color='BLUE')        
-
+    BSplineLst = import_3d_stp('AREA_Blatt_L.stp',230)
     
 #    for i,item in enumerate(BSplineLst):
 #        [R,G,B,T] =  plt.cm.jet(i*10)
 #        display.DisplayColoredShape(item, Quantity_Color(R, G, B, 0),update=True)
     
     
-    aResShape = load_3D('AREA_Blatt_L.stp') 
-    display.DisplayShape(aResShape, color=None, transparency=0.7, update=True)
+    #aResShape = load_3D('AREA_Blatt_L.stp') 
+    #display.DisplayShape(aResShape, color=None, transparency=0.7, update=True)
     Wire = build_wire_from_BSplineLst(BSplineLst)
     display.DisplayShape(Wire,color="BLUE")
-    
 
 
 # DISPLAY

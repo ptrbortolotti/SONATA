@@ -47,6 +47,20 @@ def isclose(a, b, rel_tol=1e-09, abs_tol=1e-09):
     return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 
+def PolygonArea(corners):
+    ''' Area of Polygon using Shoelace formula
+    http://en.wikipedia.org/wiki/Shoelace_formula
+     corners must be ordered in clockwise or counter-clockwise direction
+    '''
+    n = len(corners) # of corners
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += corners[i][0] * corners[j][1]
+        area -= corners[j][0] * corners[i][1]
+    area = area / 2.0
+    return area
+
 def np_array_to_gp_Pnt(array):              
     Pnt = gp_Pnt(array[0], array[1], array[2])
     return Pnt

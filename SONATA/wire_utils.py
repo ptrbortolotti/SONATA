@@ -1,5 +1,6 @@
 #Basic Libraries:
 import numpy as np       
+import matplotlib.pyplot as plt
 
 #PythonOCC Libraries
 from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf
@@ -15,10 +16,57 @@ from OCC.TopoDS import topods
 
 #Own Libraries:
 from explorer import WireExplorer
+from utils import Pnt2dLst_to_npArray, PolygonArea
 
 ###############################################################################
 # Wire Utilities
 ###############################################################################
+
+def Unique_EdgeLst(EdgeLst):
+    Preci = 1e-3
+    BSplineLst3D = []
+    NonUniques = []
+    for edg in EdgeLst:
+        Adaptor = BRepAdaptor_Curve(edg)
+        BSplineLst3D.append(Adaptor.BSpline().GetObject())
+    
+    for i,bspline in enumerate(BSplineLst3D):
+        for j,item in enumerate(BSplineLst3D):
+            if bspline.IsEqual(item.GetHandle(),Preci) and i!=j:
+                NonUniques.append(j)
+                
+    return NonUniques
+        
+def Wire_Orientation(wire, NbPoints=31):
+    #Place Equidistant Points on BSplineLst:
+    #VERY SLOW
+    a = np.linspace(0.0, 1.0, num=NbPoints, endpoint=True)
+    Pnt2dLst = []
+    for s in a:
+        Pnt2d = get_wire_Pnt2d(wire,s)
+        Pnt2dLst.append(Pnt2d)
+    b = Pnt2dLst_to_npArray(Pnt2dLst)
+    
+    
+    plt.figure(3)
+    plt.clf()         
+    plt.plot(*b.T, color='black', marker='.')
+    plt.axis('equal')  
+    plt.show()   
+    
+    
+    
+    #Calculate of Polygon.
+    area = PolygonArea(b)
+    #print area
+    if area > 0: #counter-clockwise=True
+        return True
+    elif area < 0: #clockwise=False
+        return False
+    else: return None
+
+      
+
 def NbEdges_in_wire(Wire):
     ex = BRepTools_WireExplorer(Wire)
     counter = 0

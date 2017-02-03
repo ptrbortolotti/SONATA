@@ -12,7 +12,7 @@ from OCC.Geom2d import Handle_Geom2d_BSplineCurve_DownCast, Geom2d_Line
 #Own Libraries:
 from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_to_npArray, \
                     discrete_stepsize, curvature_of_curve, isclose, unique_rows, \
-                    P2Pdistance
+                    P2Pdistance, PolygonArea
 
 
 ###############################################################################
@@ -140,6 +140,22 @@ def intersect_BSplineLst_with_BSpline(BSplineLst,BSpline):
 
     
 
+def BSplineLst_Orientation(BSplineLst, NbPoints=31):   
+    #Place Equidistant Points on BSplineLst:
+    a = np.linspace(0.0, 1.0, num=NbPoints, endpoint=True)
+    Pnt2dLst = []
+    for s in a:
+        Pnt2dLst.append(get_BSplineLst_Pnt2d(BSplineLst,s, 0, 1))
+    b = Pnt2dLst_to_npArray(Pnt2dLst)
+    
+    #Calculate of Polygon.
+    area = PolygonArea(b)
+    #print area
+    if area > 0: #counter-clockwise=True
+        return True
+    elif area < 0: #clockwise=False
+        return False
+    else: return None
     
     
 def trim_BSplineLst(BSplineLst, S1, S2, start, end):
@@ -393,7 +409,7 @@ def discretize_BSplineLst(BSplineLst,Deflection=0.00001):
         closed = True
     else: closed = False
     
-    print 'Closed: ',closed
+    #print 'Closed: ',closed
 
     npArray = unique_rows(b) # Remove possible doubles! 
     
