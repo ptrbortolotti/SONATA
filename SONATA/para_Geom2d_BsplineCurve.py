@@ -49,8 +49,23 @@ class Para_Geom2d_BSplineCurve(object):
                 
         return Geom2d_BSplineCurve(Poles, Weights, Knots, Multiplicities, Degree, Periodic)
         
-    
-    
+
+def ParaLst_from_BSplineLst(BSplineLst):
+    Para_BSplineLst = []
+    for item in BSplineLst:
+        Para_BSpline = Para_Geom2d_BSplineCurve(item)
+        Para_BSplineLst.append(Para_BSpline)
+
+    return Para_BSplineLst
+
+def BSplineLst_from_ParaLst(ParaLst):
+    BSplineLst = []
+    for item in ParaLst:
+        BSplineLst.append(item.BSplineCurve2d())
+
+    return BSplineLst
+
+
 # =============================================================================
 #            IF __MAIN__
 # =============================================================================  

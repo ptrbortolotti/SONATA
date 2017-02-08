@@ -17,10 +17,18 @@ from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_
                     discrete_stepsize, curvature_of_curve, isclose, unique_rows, \
                     P2Pdistance, PolygonArea, TColgp_Array1OfPnt2d_from_nparray
 
+from para_Geom2d_BsplineCurve import Para_Geom2d_BSplineCurve
 
 ###############################################################################
 # BSpline and BSplineLst Utilities
 ###############################################################################
+
+
+
+ 
+
+
+
 def findPnt_on_2dcurve(Pnt2d,Curve2d):
     projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,Curve2d)
     u = projection.LowerDistanceParameter()

@@ -14,6 +14,8 @@ from wire_utils import trim_wire, build_wire_from_BSplineLst
 from readinput import UIUCAirfoil2d, AirfoilDat2d
 from projection import layup_to_projection
 from layer import Layer
+from para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
+
 class Segment(object):
     ''' 
     The Segment object is constructed from multiple Layers obejcts. 
@@ -49,7 +51,22 @@ class Segment(object):
     
     def __repr__(self):
         return '{}: {}'.format(self.__class__.__name__,self.ID) 
-        
+    
+
+    def __getstate__(self):
+        """Return state values to be pickled."""
+        self.Para_BSplineLst = ParaLst_from_BSplineLst(self.BSplineLst)
+        return (self.ID, self.Layup, self.CoreMaterial, self.OCC, self.Theta, self.scale_factor, self.LayerLst, self.Para_BSplineLst)   
+    
+    
+    def __setstate__(self, state):
+        """Restore state from the unpickled state values."""
+        self.ID, self.Layup, self.CoreMaterial, self.OCC, self.Theta, self.scale_factor, self.LayerLst, self.Para_BSplineLst = state
+        self.BSplineLst = BSplineLst_from_ParaLst(self.Para_BSplineLst)
+
+
+
+    
     def build_layers(self):
       
         for i in range(1,len(self.Layup)+1):

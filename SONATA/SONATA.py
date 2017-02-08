@@ -12,21 +12,11 @@ import matplotlib.pyplot as plt
 import shapely.geometry as shp
 from scipy.optimize import leastsq
 import datetime
-
-#Third Party Libaries: OCC Libraries
-from OCC.Display.SimpleGui import init_display
-
-#Own Modules:
-from readinput import section_config 
-from display import show_coordinate_system
-from segment import Segment
-from layer import Layer
-
-
-#Basic Libraries:
-import numpy as np
+import pickle
 
 #PythonOCC Libraries
+from OCC.Display.SimpleGui import init_display
+from OCC.AIS import AIS_Shape
 from OCC.gp import gp_Pnt2d,  gp_Trsf2d, gp_Vec2d, gp_Pnt
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
 from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
@@ -50,11 +40,16 @@ from OCC.IFSelect import IFSelect_RetDone
 
 
 #Own Libraries:
+from readinput import section_config 
+from display import show_coordinate_system
+from segment import Segment
+from layer import Layer
 from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, discrete_stepsize, curvature_of_curve
 from BSplineLst_utils import find_BSplineLst_coordinate, get_BSpline_length, get_BSplineLst_length, \
                             get_BSplineLst_Pnt2d, discretize_BSplineLst, BSplineLst_from_dct, copy_BSpline, \
                             findPnt_on_2dcurve, set_BSplineLst_to_Origin, seg_boundary_from_dct, copy_BSplineLst,\
                             trim_BSplineLst, get_BSplineLst_D2, trim_BSplineLst_by_Pnt2d, intersect_BSplineLst_with_BSpline
+                            
 from wire_utils import build_wire_from_BSplineLst
 from layer import Layer
 from web import Web
@@ -200,7 +195,7 @@ for i,item in enumerate(Configuration.SEG_ID):
             print 'ERROR: \t WRONG input_type'
  
     else:
-        SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i]))
+        SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i],Theta = Configuration.SETUP_Theta))
 sorted(SegmentLst, key=getID)  
 
 # ============================================================================= 
@@ -243,18 +238,33 @@ if Configuration.SETUP_BalanceWeight == True:
 # ============================================================================= 
 #               DISPLAY and EXPORT to STEP_AP203 ::
 # =============================================================================
+
+def display_custome_shape(shape,linewidth,transparency,RGB):
+    s = shape
+    ais_shp = AIS_Shape(s)
+    ais_shp.SetWidth(linewidth)
+    ais_shp.SetTransparency(transparency)
+    ais_shp.SetColor(Quantity_Color(RGB[0], RGB[1], RGB[2], 0))
+    ais_context = display.GetContext().GetObject()
+    ais_context.Display(ais_shp.GetHandle())
+    return None
+
 # initialize the STEP exporter
 step_writer = STEPControl_Writer()
 Interface_Static_SetCVal("write.step.schema", "AP203")
 
 
 # transfer shapes and display them in the viewer
-display.DisplayShape(SegmentLst[0].wire, color="BLACK")
+#display.DisplayShape(SegmentLst[0].wire, color="BLACK")
+display_custome_shape(SegmentLst[0].wire,2,0,[0,0,0])
 
+
+
+display.DisplayShape(SegmentLst[0].BSplineLst[0].StartPoint())
 
 #step_writer.Transfer(SegmentLst[0].wire, STEPControl_AsIs)
 for i,seg in enumerate(SegmentLst):
-    display.DisplayShape(seg.wire, color="BLACK")
+    display_custome_shape(seg.wire,2,0,[0,0,0])
     k = 0
     for j,layer in enumerate(seg.LayerLst):
         [R,G,B,T] =  plt.cm.jet(k*50)
@@ -285,6 +295,18 @@ for i,seg in enumerate(SegmentLst):
 #status = step_writer.Write("SONATA.stp")    
 #assert(status == IFSelect_RetDone)
 
+# ============================================================================= 
+#               SAVE THE The SegmentLst as pickle:
+# =============================================================================
+output_filename = filename.replace('.input', '.pkl')
+
+with open(output_filename, 'wb') as output:
+    pickle.dump(SegmentLst, output, protocol=pickle.HIGHEST_PROTOCOL)
+
+with open(output_filename, 'rb') as handle:
+    b = pickle.load(handle)
+
+#print output.closed
 
 # ============================================================================= 
 #               MESH THE TOPOLOGY ::

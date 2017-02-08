@@ -74,6 +74,23 @@ def np_array_to_gp_Pnt(array):
     Pnt = gp_Pnt(array[0], array[1], array[2])
     return Pnt
 
+
+def TColgp_Array1OfPnt2d_to_array(TColgp_Array1OfPnt2d):
+    tmp = [] 
+    Lower = TColgp_Array1OfPnt2d.Lower()
+    Upper = TColgp_Array1OfPnt2d.Upper()
+    for x in range(Lower,Upper+1):
+        tmp.append([TColgp_Array1OfPnt2d.Value(x).X(),TColgp_Array1OfPnt2d.Value(x).Y()])
+    return np.asarray(tmp)
+
+def TColStd_to_array(TColStd):
+    tmp = [] 
+    Lower = TColStd.Lower()
+    Upper = TColStd.Upper()
+    for x in range(Lower,Upper+1):
+        tmp.append(TColStd.Value(x))
+    return np.asarray(tmp)
+
 def TColgp_HArray1OfPnt_from_nparray(data):
     #Create TColgp_HArray1OfPnt from np.array															
     # data[0] = x coord,  data[1] = y coord,  data[2] = z coord 
@@ -118,6 +135,8 @@ def _Tcol_dim_1(li, _type):
     for n, i in enumerate(li):
         pts.SetValue(n, i)
     return pts
+
+
 
 def create_list_of_2Dpoints(data):                                             #CREATE OCC array of Points
     pts_2d = []

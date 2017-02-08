@@ -126,8 +126,8 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
     plt.plot(*arrPts[0].T, color='green', marker='o')
     plt.plot(*arrPts[-1].T, color='purple', marker='o')
     plt.plot(*data.T, color='red', marker='.')
-    plt.plot(*data[0].T, color='green', marker='x')
-    plt.plot(*data[-1].T, color='purple', marker='x')
+    plt.plot(*data[0].T, color='green', marker='>')
+    plt.plot(*data[-1].T, color='purple', marker='>')
     plt.axis('equal')  
     plt.show()   
     

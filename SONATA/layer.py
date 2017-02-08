@@ -1,7 +1,8 @@
-from BSplineLst_utils import get_BSplineLst_length, get_BSplineLst_Pnt2d, trim_BSplineLst, copy_BSplineLst, BSplineLst_from_dct, discretize_BSplineLst
+from BSplineLst_utils import get_BSplineLst_length, get_BSplineLst_Pnt2d, trim_BSplineLst, copy_BSplineLst, BSplineLst_from_dct, discretize_BSplineLst 
 from wire_utils import build_wire_from_BSplineLst
 from cutoff import cutoff_layer
 from offset import shp_parallel_offset
+from para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
 
 class Layer(object):
     ''' 
@@ -45,6 +46,25 @@ class Layer(object):
         #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 
         return  str('LayerID: \tStart[-]: \tEnd[-]: \tthickness[-]: \tOrientation[deg]: \tMatID \tName:\t\n' \
                     '%s, \t%s, \t%s, \t%s, \t\t%s, \t\t%s, \t%s, ' % (self.ID, self.S1, self.S2, self.thickness, self.Orientation, self.MatID, self.name))
+     
+        
+    def __getstate__(self):
+        """Return state values to be pickled."""
+
+        self.Para_BSplineLst = ParaLst_from_BSplineLst(self.BSplineLst)
+        self.Para_Boundary_BSplineLst = ParaLst_from_BSplineLst(self.Boundary_BSplineLst)
+        
+        return (self.ID, self.S1, self.S2, self.thickness, self.Orientation, self.MatID, self.Para_Boundary_BSplineLst, self.Para_BSplineLst)   
+    
+    
+    def __setstate__(self, state):
+        """Restore state from the unpickled state values."""
+        self.ID, self.S1, self.S2, self.thickness, self.Orientation, self.MatID, self.Para_Boundary_BSplineLst, self.Para_BSplineLst = state
+        
+        self.Boundary_BSplineLst = BSplineLst_from_ParaLst(self.Para_Boundary_BSplineLst)
+        self.BSplineLst = BSplineLst_from_ParaLst(self.Para_BSplineLst)
+
+
         
     def copy(self):
         BSplineLstCopy =  copy_BSplineLst(self.BSplineLst)
@@ -76,6 +96,7 @@ class Layer(object):
         OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
         OffsetBSplineLst = cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,self.S1,self.S2,self.cutoff_style)
         self.BSplineLst = OffsetBSplineLst
+
     
     def get_last():
         pass

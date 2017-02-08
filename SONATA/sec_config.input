@@ -19,9 +19,9 @@
 	BalanceWeight = False 				#True or False for Balance Weight			[boolean]		DEFAULT=FALSE
 	input_type = 3						#0) Airfoil from UIUC Database; 1) Geometry from .dat file; 2)2d .step or .iges 3)3D .step or .iges and radial station of crosssection 	[int] DEFAULT=0	
 	datasource =  AREA_Blatt_L.stp				#0)	naca23012					1) AREA_R250.dat			2)AREA_R230.stp	 	3)AREA_Blatt_L.stp							[string] DEFAULT=NONE
-	radial_station = 150				#Radial station of crosssection. Only necessary for input type 3. [float]	Default=NONE
+	radial_station = 250				#Radial station of crosssection. Only necessary for input type 3. [float]	Default=NONE
 	scale_factor = 1	 				#use as reference scale factor				[float] 		DEFAULT=1
-	Theta = 3.2							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
+	Theta = 6.2							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
 &END 
 
 
@@ -120,4 +120,3 @@
 	Diameter = 0.0405					#	Diameter of Balance Weight [mm]		[float]				NO DEFAULT VALUE
 	MatID = 1   						#   Material ID							[int]				NO DEFAULT VALUE
 &END
-
