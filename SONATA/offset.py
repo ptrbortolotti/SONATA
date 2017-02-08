@@ -7,39 +7,61 @@ Created on Mon Nov 21 15:37:44 2016
 import numpy as np       
 import shapely.geometry as shp
 import matplotlib.pyplot as plt
-from utils import calc_DCT_angles, P2Pdistance
+from utils import calc_DCT_angles, P2Pdistance, isclose,unique_rows,Polygon_orientation
 
 
 def shp_parallel_offset(arrPts,dist,join_style=1):
     #OFFSET ALGORITHM
     #join_style = 1#( 1:round,2:mitre,3:bevels)
+    
     side = 'left'    
-    line = shp.LineString(arrPts)
     res = 16 #resolution
-    offset = line.parallel_offset(dist,side,res,join_style)
-    #print type(offset)
+    closed = None
     
-    if isinstance(offset,shp.MultiLineString):    
-        parts = hasattr(offset, 'geoms') and offset or [offset]
-        for part in parts:
-            if part.is_closed:
-                x, y= part.xy
-                data = np.vstack((x,y))
-                data = data.T
-            else:
-                print "ERROR: \t A multilinestring has been created by shp_parallel_offset that is not closed!"
-                
-    elif isinstance(offset,shp.LineString):                 
-        data = np.array(offset.coords)
     
+    
+    #==============SHAPELY-OFFSET ALGORITHM====================================
+    if P2Pdistance(arrPts[0],arrPts[-1])<=1e-6:
+        closed = True
+        afpoly = shp.Polygon(arrPts)
+        noffafpoly = afpoly.buffer(-dist)  # Inward offset
+        data = np.array(noffafpoly.exterior)
     
     else:
-        data = np.array(offset.coords)
+        closed = False
+        line = shp.LineString(arrPts)
+        offset = line.parallel_offset(dist,side,res,join_style)
+        
+        if isinstance(offset,shp.MultiLineString):    
+            parts = hasattr(offset, 'geoms') and offset or [offset]
+            for part in parts:
+                if part.is_closed:
+                    x, y= part.xy
+                    data = np.vstack((x,y))
+                    data = data.T
+                else:
+                    print "ERROR: \t A multilinestring has been created by shp_parallel_offset that is not closed!"
+                    
+        elif isinstance(offset,shp.LineString):                 
+            data = np.array(offset.coords)
     
-    #Interpolate Large spaces! 
+        else:
+            data = np.array(offset.coords)
+    
+    
+    #==============CHECK ORIENTATION if closed=================================
+    #Check Orientation and reverse if neccessary
+    #TODO: Be careful not to reverse Linestring!
+    if closed == True:
+        Orientation = Polygon_orientation(data)
+        if Orientation == False:
+            data = np.flipud(data)
+       
+    
+    #==============Interpolate large linear spaces=============================
     seg_P2Plength = []
     cumm_length = 0
-    Resolution = 180
+    Resolution = 100
     
     for j in range(0,len(data)-1):
         seg_P2Plength.append(P2Pdistance(data[j],data[j+1]))
@@ -78,23 +100,47 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
             Refinement = True
         else:
             Refinement = False   
+  
+    
+    #Make sure there are unique rows
+#    if np.allclose(data[0],data[-1]):
+#        closed = True
+#        
+#    else:
+#        closed = False
+#        before = len(data)
+#        data = unique_rows(data.round(decimals=9))
+#        after = len(data)
+#        if after<before:
+#            print 'non unique elements found',len(data)
 
-    plt.figure(2)
+
+    fig = plt.figure(1)
+    ax = fig.add_subplot(111)
     plt.clf()         
     plt.plot(*arrPts.T, color='black', marker='.')
+    
+#    for i, item in enumerate(data):
+#            plt.annotate(i, (item[0],item[1]), color='red')
+    
+    plt.plot(*arrPts[0].T, color='green', marker='o')
+    plt.plot(*arrPts[-1].T, color='purple', marker='o')
     plt.plot(*data.T, color='red', marker='.')
+    plt.plot(*data[0].T, color='green', marker='x')
+    plt.plot(*data[-1].T, color='purple', marker='x')
     plt.axis('equal')  
     plt.show()   
     
+
     
     return data
 
-
+    
     
 
 #==============================================================================       
 if __name__ == '__main__': 
-    None
+    execfile("SONATA.py")
 #    for i,item in enumerate(projection):
 #        timelines(0,item[0],item[1],color[int(item[2])])
                

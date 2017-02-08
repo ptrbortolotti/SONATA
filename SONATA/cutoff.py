@@ -4,7 +4,6 @@ Created on Wed Jan 04 13:52:57 2017
 
 @author: TPflumm
 
-
 """
 
 
@@ -12,7 +11,7 @@ from OCC.Geom2d import Geom2d_BezierCurve
 from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
 from OCC.Geom2dConvert import geom2dconvert_CurveToBSplineCurve
 
-from BSplineLst_utils import get_BSplineLst_Pnt2d, get_BSplineLst_D2, trim_BSplineLst
+from BSplineLst_utils import get_BSplineLst_Pnt2d, get_BSplineLst_D2, trim_BSplineLst, get_BSplineLst_length
 from utils import point2d_list_to_TColgp_Array1OfPnt2d
 
 
@@ -33,10 +32,13 @@ def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
     if S1>S2:
         S1, S2 = S2, S1
             
-    cutoff_depth = 1.05*dist  
-        
+
+    length = get_BSplineLst_length(OffsetBSplineLst)   
+    paralength = abs(S2-S1)
+    cutoff_depth = 1.2*dist/length*paralength
+    
     #check if OffsetBSplineLst is closed:
-    if not Offset_StartPnt.IsEqual(Offset_EndPnt, 1e-9):
+    if not Offset_StartPnt.IsEqual(Offset_EndPnt, 1e-4) and not(S1 == 0.0 and S2==1.0):
         if cutoff_style == 0: # STEP-CUTOFF
             Offset_StartPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S1,S1,S2)
             Offset_EndPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S2,S1,S2)
@@ -65,7 +67,7 @@ def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
             Offset_V1Start.Normalize()
             Offset_V1End.Normalize()
     
-            kappa_bezier = cutoff_depth  
+            kappa_bezier = 0.5*dist  
             Offset_V1Start.Multiply(-kappa_bezier)
             Offset_V1End.Multiply(kappa_bezier)
                    
@@ -115,3 +117,6 @@ def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
         None
 
     return OffsetBSplineLst
+
+if __name__ == '__main__':
+    execfile("SONATA.py")

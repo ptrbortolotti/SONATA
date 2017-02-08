@@ -27,7 +27,8 @@ from layer import Layer
 import numpy as np
 
 #PythonOCC Libraries
-from OCC.gp import gp_Pnt2d,  gp_Trsf2d, gp_Vec2d
+from OCC.gp import gp_Pnt2d,  gp_Trsf2d, gp_Vec2d, gp_Pnt
+from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
 from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
 from OCC.TColgp import TColgp_HArray1OfPnt2d, TColgp_Array1OfPnt2d
 from OCC.Geom2d import Geom2d_TrimmedCurve, Geom2d_BezierCurve
@@ -173,8 +174,8 @@ filename = 'sec_config.input'
 Configuration = section_config(filename)
 
 #Normalize layer thickness to chord lenght
-for i, item in enumerate(Configuration.SEG_Layup):
-    item[:,2] =  item[:,2]/Configuration.SETUP_scale_factor
+#for i, item in enumerate(Configuration.SEG_Layup):
+#    item[:,2] =  item[:,2]/Configuration.SETUP_scale_factor
 
 #==========================                  
 #Initialize Segments and sort the according to ID 
@@ -182,18 +183,18 @@ SegmentLst = []   #List of Segment Objects
 for i,item in enumerate(Configuration.SEG_ID):
     if item == 0:        
         if Configuration.SETUP_input_type == 0:   #0) Airfoil from UIUC Database  --- naca23012
-            SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, airfoil = Configuration.SETUP_datasource))
+            SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], scale_factor = Configuration.SETUP_scale_factor, Theta = Configuration.SETUP_Theta, OCC=False, airfoil = Configuration.SETUP_datasource))
         
         elif Configuration.SETUP_input_type == 1: #1) Geometry from .dat file --- AREA_R250.dat
-            SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, filename = Configuration.SETUP_datasource))
+            SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], scale_factor = Configuration.SETUP_scale_factor,  Theta = Configuration.SETUP_Theta, OCC=False, filename = Configuration.SETUP_datasource))
         
         elif Configuration.SETUP_input_type == 2: #2)2d .step or .iges  --- AREA_R230.stp
-            BSplineLst = import_2d_stp(Configuration.SETUP_datasource)
-            SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=True, Boundary = BSplineLst))
+            BSplineLst = import_2d_stp(Configuration.SETUP_datasource, Configuration.SETUP_scale_factor,Configuration.SETUP_Theta)
+            SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], Theta = Configuration.SETUP_Theta, OCC=True, Boundary = BSplineLst))
         
         elif Configuration.SETUP_input_type == 3: #3)3D .step or .iges and radial station of crosssection --- AREA_Blade.stp, R=250
-            BSplineLst = import_3d_stp(Configuration.SETUP_datasource,Configuration.SETUP_radial_station)
-            SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=True, Boundary = BSplineLst))  
+            BSplineLst = import_3d_stp(Configuration.SETUP_datasource,Configuration.SETUP_radial_station,Configuration.SETUP_scale_factor,Configuration.SETUP_Theta)
+            SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], Theta = Configuration.SETUP_Theta, OCC=True, Boundary = BSplineLst))  
 
         else:
             print 'ERROR: \t WRONG input_type'
@@ -205,8 +206,6 @@ sorted(SegmentLst, key=getID)
 # ============================================================================= 
 #               Build SEGMENT 0:
 # =============================================================================
-
-
 SegmentLst[0].build_wire()
 SegmentLst[0].build_layers()
 SegmentLst[0].determine_final_boundary()    #Determine Boundary from Segment 0:
@@ -251,6 +250,8 @@ Interface_Static_SetCVal("write.step.schema", "AP203")
 
 # transfer shapes and display them in the viewer
 display.DisplayShape(SegmentLst[0].wire, color="BLACK")
+
+
 #step_writer.Transfer(SegmentLst[0].wire, STEPControl_AsIs)
 for i,seg in enumerate(SegmentLst):
     display.DisplayShape(seg.wire, color="BLACK")
@@ -336,6 +337,22 @@ for i,seg in enumerate(SegmentLst):
 
 #======================================================================
 #VIEWER:
+'''CREATE AXIS SYSTEM for Visualization'''
+O  = gp_Pnt(0., 0., 0.)
+p1 = gp_Pnt(10.0/Configuration.SETUP_scale_factor,0.,0.)
+p2 = gp_Pnt(0.,10.0/Configuration.SETUP_scale_factor,0.)
+p3 = gp_Pnt(0.,0.,10.0/Configuration.SETUP_scale_factor)
+
+h1 = BRepBuilderAPI_MakeEdge(O,p1).Shape()
+h2 = BRepBuilderAPI_MakeEdge(O,p2).Shape()
+h3 = BRepBuilderAPI_MakeEdge(O,p3).Shape()
+
+display.DisplayShape(O,color='BLACK')
+display.DisplayShape(h1,color='RED')
+display.DisplayShape(h2,color='GREEN')
+display.DisplayShape(h3,color='BLUE')
+    
+    
 f = display.View.View().GetObject()
 
 display.register_select_callback(print_xy_click)

@@ -46,6 +46,15 @@ def isclose(a, b, rel_tol=1e-09, abs_tol=1e-09):
     """ 
     return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
+def Polygon_orientation(npArray):
+    #Calculate of Polygon.
+    area = PolygonArea(npArray)
+    #print area
+    if area > 0: #counter-clockwise=True
+        return True
+    elif area < 0: #clockwise=False
+        return False
+    else: return None
 
 def PolygonArea(corners):
     ''' Area of Polygon using Shoelace formula

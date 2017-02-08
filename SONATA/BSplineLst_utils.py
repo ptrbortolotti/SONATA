@@ -1,18 +1,21 @@
 #Basic Libraries:
+import math
+import os
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.optimize import leastsq
 
 #PythonOCC Libraries
 from OCC.gp import gp_Pnt2d, gp_Dir2d, gp_Vec2d
 from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
-from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection
-from OCC.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve, Geom2dAPI_ProjectPointOnCurve
+from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection,GCPnts_UniformDeflection, GCPnts_TangentialDeflection
+from OCC.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve, Geom2dAPI_ProjectPointOnCurve, Geom2dAPI_PointsToBSpline
 from OCC.Geom2d import Handle_Geom2d_BSplineCurve_DownCast, Geom2d_Line
 
 #Own Libraries:
 from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_to_npArray, \
                     discrete_stepsize, curvature_of_curve, isclose, unique_rows, \
-                    P2Pdistance, PolygonArea
+                    P2Pdistance, PolygonArea, TColgp_Array1OfPnt2d_from_nparray
 
 
 ###############################################################################
@@ -141,12 +144,28 @@ def intersect_BSplineLst_with_BSpline(BSplineLst,BSpline):
     
 
 def BSplineLst_Orientation(BSplineLst, NbPoints=31):   
-    #Place Equidistant Points on BSplineLst:
-    a = np.linspace(0.0, 1.0, num=NbPoints, endpoint=True)
-    Pnt2dLst = []
-    for s in a:
-        Pnt2dLst.append(get_BSplineLst_Pnt2d(BSplineLst,s, 0, 1))
-    b = Pnt2dLst_to_npArray(Pnt2dLst)
+
+    #FASTER BUT NOT EQUIDISTANT APPROACH!    
+    Pnt2dLst = []   
+    for item in BSplineLst:
+        First = item.FirstParameter()
+        Pnt2dLst.append(item.StartPoint())
+        Last = item.LastParameter()
+        inc = (Last-First)/NbPoints
+        para = First+inc
+        while para<=Last:
+            p = gp_Pnt2d()
+            item.D0(para,p)
+            Pnt2dLst.append(p)
+            para += inc
+    b = Pnt2dLst_to_npArray(Pnt2dLst)   
+        
+#   Place Equidistant Points on BSplineLst:                             #THIS APPROACH WAS SUPER SLOW!
+#    a = np.linspace(0.0, 1.0, num=NbPoints, endpoint=True)
+#    Pnt2dLst = []
+#    for s in a:
+#        Pnt2dLst.append(get_BSplineLst_Pnt2d(BSplineLst,s, 0, 1))
+#    b = Pnt2dLst_to_npArray(Pnt2dLst)
     
     #Calculate of Polygon.
     area = PolygonArea(b)
@@ -238,21 +257,21 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
                  break
         
 #NOTE: Somehow the execption if para2 is close to Last doesn't work properly!!!!!!!     
-#             elif para1[0] != i and para2[0] == i:
-#                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
-#                 if isclose(para2[1],Last):
-#                     trimmed_BSplineLst.append(BSplineCopy)
-#                 else:
-#                     BSplineCopy.Segment(First,para2[1])
-#                 trimmed_BSplineLst.append(BSplineCopy)
-#                 break
-             
              elif para1[0] != i and para2[0] == i:
                  BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
-                 BSplineCopy.Segment(First,para2[1])
-                 trimmed_BSplineLst.append(BSplineCopy)
+                 if isclose(para2[1],Last):
+                     trimmed_BSplineLst.append(BSplineCopy)
+                 else:
+                     BSplineCopy.Segment(First,para2[1])
+                     trimmed_BSplineLst.append(BSplineCopy)
                  break
-                
+             
+#             elif para1[0] != i and para2[0] == i:
+#                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+#                 BSplineCopy.Segment(First,para2[1])
+#                 trimmed_BSplineLst.append(BSplineCopy)
+#                 break
+#                
                 
     return trimmed_BSplineLst		
 
@@ -391,11 +410,14 @@ def seg_boundary_from_dct(DCT_data,angular_deflection = 30):
         
     return list_of_bsplines
 
-def discretize_BSplineLst(BSplineLst,Deflection=0.00001):
+
+def discretize_BSplineLst(BSplineLst,AngularDeflection = 0.02,CurvatureDeflection = 0.05,MinimumOfPoints = 500,UTol = 1.0e-8):
     Pnt2dLst = []
+    Deflection = 2e-4
     for i,item in enumerate(BSplineLst):
         Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
-        discretization = GCPnts_QuasiUniformDeflection(Adaptor,Deflection,4)	#GeomAbs_Shape Continuity: 1=C0, 2=G1, 3=C1, 3=G2,... 
+        discretization = GCPnts_QuasiUniformDeflection(Adaptor,Deflection)	#GeomAbs_Shape Continuity: 1=C0, 2=G1, 3=C1, 3=G2,... 
+        #discretization = GCPnts_TangentialDeflection(Adaptor,AngularDeflection,CurvatureDeflection,MinimumOfPoints, UTol)
         NbPoints = discretization.NbPoints()
         for j in range(1, NbPoints+1):
             Pnt = discretization.Value(j)
@@ -416,10 +438,10 @@ def discretize_BSplineLst(BSplineLst,Deflection=0.00001):
     if closed:
         npArray = np.vstack((npArray,b[0]))
     else: None
+    #print len(npArray)
 
     return npArray
-    
-         
+             
     
 def BSplineLst_from_dct(DCT_data,angular_deflection=15):
            
@@ -437,13 +459,12 @@ def BSplineLst_from_dct(DCT_data,angular_deflection=15):
     DCT_Segments = [] 
     
     #Closed:       
-    if np.array_equal(DCT_data[0],DCT_data[-1]): 
+    if np.allclose(DCT_data[0],DCT_data[-1]): 
         closed = True
         if NbCorners == 0:
             DCT_Segments.append(DCT_data)
        
         elif NbCorners > 0:
-            
 
             if corners[0] == 0 and corners[-1] == len(DCT_data)-1:
                 for i in range(0,NbCorners-2):                
@@ -474,14 +495,23 @@ def BSplineLst_from_dct(DCT_data,angular_deflection=15):
 
     
     list_of_bsplines = []
+    plt.figure(2)
+    plt.clf()
+    plt.axis('equal')  
     for i,item in enumerate(DCT_Segments):
-        data = item.T
-        tmp_harray = TColgp_HArray1OfPnt2d_from_nparray(data)
-        if closed == True and NbCorners == 0:
-            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 1e-06)             #Interpolate datapoints to bspline   
-        else:
-            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 1e-06)             #Interpolate datapoints to bspline
             
+        data = item.T
+
+        plt.plot(*item.T, marker='.')
+    
+        tmp_harray = TColgp_HArray1OfPnt2d_from_nparray(data)
+        try: tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 1e-06)             #Interpolate datapoints to bspline
+        except: #RAISED ERROR
+            plt.plot(*item.T,color='purple', marker='.')
+            for i, it in enumerate(item):
+                plt.annotate(i, (it[0],it[1]), color='black')
+        
+        plt.show()                                      
         tmp_interpolation.Perform()                              
         tmp_bspline = tmp_interpolation.Curve().GetObject()
         list_of_bsplines.append(tmp_bspline)
@@ -491,18 +521,21 @@ def BSplineLst_from_dct(DCT_data,angular_deflection=15):
     
     
     
-def set_BSplineLst_to_Origin(BSplineLst):
+def set_BSplineLst_to_Origin(BSplineLst,Theta=0):
     '''
-    The Origin is determined by the most right Intersection Point of the X-Axis with the segment boundary 
-    '''   
-    xaxis = Geom2d_Line(gp_Pnt2d(0,0),gp_Dir2d(1,0))   #x-axis
+    The Origin is determined by the most right Intersection Point of the X-Axis with the segment boundary, the axis is rotated backwards by Theta (in degree). 
+    '''
+    Theta=Theta/float(180)*np.pi
+    x = math.cos(Theta)
+    y = -math.sin(Theta)
+    axis = Geom2d_Line(gp_Pnt2d(0,0),gp_Dir2d(x,y))   #x-axis
     tolerance=1e-10
     IntPnts = []
    
     for i,item in enumerate(BSplineLst): 
         First = item.FirstParameter()
         Last = item.LastParameter()
-        intersection = Geom2dAPI_InterCurveCurve(xaxis.GetHandle(), item.GetHandle(),tolerance)
+        intersection = Geom2dAPI_InterCurveCurve(axis.GetHandle(), item.GetHandle(),tolerance)
         for j in range(1,intersection.NbPoints()+1):
                 IntPnt = intersection.Point(j)
                 XValue = IntPnt.X()
@@ -554,3 +587,10 @@ def set_BSplineLst_to_Origin(BSplineLst):
     else: None
     
     return OBSplineLst
+
+
+
+
+if __name__ == '__main__':
+    execfile("SONATA.py")
+

@@ -30,7 +30,8 @@ class Segment(object):
         self.Layup = kwargs.get('Layup') 
         self.CoreMaterial = kwargs.get('CoreMaterial') 
         self.OCC = kwargs.get('OCC')
-        #self.wire  = []
+        self.Theta = kwargs.get('Theta') 
+        self.scale_factor  = kwargs.get('scale_factor') 
         self.LayerLst = []
 
         if self.OCC == True:
@@ -39,9 +40,9 @@ class Segment(object):
             
         elif self.OCC == False:
             if kwargs.get('airfoil') != None:
-               BSplineLst_tmp = self.BSplineLst_from_airfoil_database(kwargs.get('airfoil'),30) 
+               BSplineLst_tmp = self.BSplineLst_from_airfoil_database(kwargs.get('airfoil'),30,self.scale_factor) 
             elif kwargs.get('filename') != None:
-                BSplineLst_tmp = self.BSplineLst_from_file(kwargs.get('filename'),30)  
+                BSplineLst_tmp = self.BSplineLst_from_file(kwargs.get('filename'),30,self.scale_factor)  
             self.BSplineLst = set_BSplineLst_to_Origin(BSplineLst_tmp)
 
         self.Projection = layup_to_projection(self.Layup)
@@ -62,11 +63,10 @@ class Segment(object):
                 new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, 0, self.LayerLst[-1].S1, 0, 1)  #start und ende der lage
                 new_Boundary_BSplineLst += copy_BSplineLst(self.LayerLst[-1].BSplineLst)
                 new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, self.LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
-                   
-                new_Boundary_BSplineLst = set_BSplineLst_to_Origin(new_Boundary_BSplineLst)
+                new_Boundary_BSplineLst = set_BSplineLst_to_Origin(new_Boundary_BSplineLst,self.Theta)
         
             #CREATE LAYER Object
-            tmp_Layer = Layer(i,new_Boundary_BSplineLst, self.Layup[i-1][0], self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],self.Layup[i-1][4],cutoff_style= 2, join_style=1, discrete_deflection = 1e-03 , name = 'test')   
+            tmp_Layer = Layer(i,new_Boundary_BSplineLst, self.Layup[i-1][0], self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],self.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
             tmp_Layer.build_layer() 
             tmp_Layer.build_wire()
             self.LayerLst.append(tmp_Layer)     
@@ -93,21 +93,23 @@ class Segment(object):
         return trim_wire(self.wire, S1, S2)
         
 
-    def BSplineLst_from_airfoil_database(self,string,angular_deflection=30):
+    def BSplineLst_from_airfoil_database(self,string,angular_deflection=30,scale_factor=1.0):
         '''
         string: 'naca23012'
         angular deflection: allowed angluar deflection in discrete representation before starting to split
         '''
         DCT_data = UIUCAirfoil2d(string).T
+        DCT_data = np.multiply(DCT_data,scale_factor)
         self.BSplineLst = seg_boundary_from_dct(DCT_data,angular_deflection)
         return self.BSplineLst 
                                      
-    def BSplineLst_from_file(self,filename,angular_deflection=30):
+    def BSplineLst_from_file(self,filename,angular_deflection=30,scale_factor=1.0):
         '''
         filename: 'naca23012.dat'
         angular_deflection allowed angular deflection in discrete representation before starting to split default
         '''
         DCT_data = AirfoilDat2d(filename).T
+        DCT_data = np.multiply(DCT_data,scale_factor)
         self.BSplineLst = seg_boundary_from_dct(DCT_data,angular_deflection)
         return seg_boundary_from_dct(DCT_data,angular_deflection)
             

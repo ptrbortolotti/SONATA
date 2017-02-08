@@ -35,11 +35,6 @@ class Layer(object):
         else:
             self.join_style = kwargs.get('join_style')          
             
-        
-        if (kwargs.get('discrete_deflection') == None) or (type(kwargs.get('discrete_deflection')) is not float):      #offset algorithm join_style = 1#( 1:round,2:mitre,3:bevels)
-             self.discrete_deflection = 1e-05                            
-        else:
-            self.discrete_deflection = kwargs.get('discrete_deflection')          
 
         #self.wire = []                                     #Make Wire from BSplineSegments
         #self.display_set = False
@@ -76,7 +71,7 @@ class Layer(object):
             
     def build_layer(self):
         Trimmed_BSplineLst = trim_BSplineLst(self.Boundary_BSplineLst, self.S1, self.S2, 0, 1)
-        npArray = discretize_BSplineLst(Trimmed_BSplineLst,self.discrete_deflection)   
+        npArray = discretize_BSplineLst(Trimmed_BSplineLst)   
         offlinepts = shp_parallel_offset(npArray,self.thickness,self.join_style)
         OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
         OffsetBSplineLst = cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,self.S1,self.S2,self.cutoff_style)

@@ -149,6 +149,10 @@ def AirfoilDat2d(name):
 class section_config(object):
     
     def __init__(self, filename):
+        self.SETUP_scale_factor = 1
+        self.SETUP_Theta = 0
+
+        
         self.WEB_ID = []
         self.WEB_Pos1 = []
         self.WEB_Pos2 = []
@@ -157,7 +161,9 @@ class section_config(object):
         self.SEG_Layup = []
         self.SEG_Boundary_OCC = []      #Segment Boundaries in Opencascade format (TOPO_DSwire)
         self.SEG_Boundary_DCT = []      #Segment Boundaries in discrete values (np.array) 
+
         self.read_config(filename)
+
         
     def read_config(self,filename):
 
@@ -183,7 +189,7 @@ class section_config(object):
         if self.SETUP_input_type == 3:
             self.SETUP_radial_station = read_FLOATrowSTR(SETUP_str,'radial_station')
         self.SETUP_scale_factor = read_FLOATrowSTR(SETUP_str,'scale_factor')
-        
+        self.SETUP_Theta = read_FLOATrowSTR(SETUP_str,'Theta')
         #self.SETUP_Airfoil = read_TXTrowSTR(SETUP_str,'Airfoil')
         #self.SETUP_chord = read_FLOATrowSTR(SETUP_str,'chord')
                                             

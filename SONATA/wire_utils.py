@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 #PythonOCC Libraries
 from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf
-from OCC.GCPnts import GCPnts_AbscissaPoint
+from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_TangentialDeflection
 from OCC.BRepAdaptor import BRepAdaptor_CompCurve, BRepAdaptor_Curve
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge, BRepBuilderAPI_Transform
 from OCC.BRepLib import BRepLib_MakeFace
@@ -16,7 +16,7 @@ from OCC.TopoDS import topods
 
 #Own Libraries:
 from explorer import WireExplorer
-from utils import Pnt2dLst_to_npArray, PolygonArea
+from utils import Pnt2dLst_to_npArray, PolygonArea, unique_rows, P2Pdistance
 
 ###############################################################################
 # Wire Utilities
@@ -138,6 +138,81 @@ def find_coordinate_on_ordered_edges(TopoDS_wire,S):
              break
          idx += 1
     return [idx,U]  #Return index of edge and parameter U on edge!
+
+
+def discretize_wire_TangentialDeflection(wire,Resolution=600,AngularDeflection = 0.015,CurvatureDeflection = 0.1,MinimumOfPoints = 500,UTol = 1.0e-9):
+    Pnt2dLst = []
+    AdaptorComp = BRepAdaptor_CompCurve(wire, True)
+    discretization = GCPnts_TangentialDeflection(AdaptorComp,AngularDeflection,CurvatureDeflection,MinimumOfPoints, UTol)
+    #print 'NbPoints3 = ', discretization.NbPoints()
+    
+    NbPoints = discretization.NbPoints()
+    for j in range(1, NbPoints+1):
+        Pnt = discretization.Value(j)
+        Pnt2dLst.append(Pnt)
+    
+    a = Pnt2dLst_to_npArray(Pnt2dLst)
+    b = np.around(a,10) # Evenly round to the given number of decimals. 
+    
+    #check if it is closed:
+    if np.array_equal(b[0],b[-1]):
+        closed = True
+    else: closed = False
+    #print 'Closed: ',closed
+
+    npArray = unique_rows(b) # Remove possible doubles!    
+    if closed:
+        npArray = np.vstack((npArray,b[0]))
+    else: None
+        
+        
+    #Interpolate Large spaces! 
+    seg_P2Plength = []
+    cumm_length = 0
+    data = npArray
+    
+    for j in range(0,len(data)-1):
+        seg_P2Plength.append(P2Pdistance(data[j],data[j+1]))
+        cumm_length += P2Pdistance(data[j],data[j+1]) 
+        
+    #Check if Refinement is necessary:
+    if len(seg_P2Plength) > 0 and max(seg_P2Plength) > cumm_length/Resolution :
+        Refinement = True
+    else:
+        Refinement = False
+    
+    while Refinement == True:
+        temp_data = []
+        for i in range(0,len(data)-1):
+            if P2Pdistance(data[i],data[i+1]) > (cumm_length/Resolution):
+                p0 = data[i]
+                p1 = data[i+1]  
+                v1 = p1-p0
+                p05 = p0+v1/2
+                temp_data.append(p0)
+                temp_data.append(p05)
+            else:
+                temp_data.append(data[i])
+                
+        temp_data.append(data[-1])        
+        data = np.vstack(temp_data)        
+         
+        #Check if further Refinement is necessary
+        seg_P2Plength = []
+        cumm_length = 0
+        for j in range(0,len(data)-1):
+            seg_P2Plength.append(P2Pdistance(data[j],data[j+1]))
+            cumm_length += P2Pdistance(data[j],data[j+1]) 
+         
+        if max(seg_P2Plength) > cumm_length/Resolution:
+            Refinement = True
+        else:
+            Refinement = False   
+
+
+    return data
+
+
 
 
 def trim_wire(TopoDS_wire, S1, S2):
