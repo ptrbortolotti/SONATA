@@ -34,7 +34,7 @@ def plot_mesh(nodes,elements,data,show_element_number=False,show_node_number=Fal
         patches.append(polygon)
     
     p = PatchCollection(patches, alpha=0.5)
-    p.set_array(data[:,0])
+    p.set_array(data)
     ax.add_collection(p)
     fig.colorbar(p, ax=ax)
     
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     elements = elements['elements']
     layup_angle = scipy.io.loadmat('layupAngle.mat')
     layup_angle = layup_angle['layup_angle']
-    
+    layup_angle = layup_angle[:,0]
 
     plot_mesh(nodes,elements,layup_angle,False,False)
     

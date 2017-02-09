@@ -56,12 +56,12 @@ class Segment(object):
     def __getstate__(self):
         """Return state values to be pickled."""
         self.Para_BSplineLst = ParaLst_from_BSplineLst(self.BSplineLst)
-        return (self.ID, self.Layup, self.CoreMaterial, self.OCC, self.Theta, self.scale_factor, self.LayerLst, self.Para_BSplineLst)   
+        return (self.ID, self.Layup, self.CoreMaterial, self.OCC, self.Theta, self.scale_factor, self.Projection, self.LayerLst, self.Para_BSplineLst)   
     
     
     def __setstate__(self, state):
         """Restore state from the unpickled state values."""
-        self.ID, self.Layup, self.CoreMaterial, self.OCC, self.Theta, self.scale_factor, self.LayerLst, self.Para_BSplineLst = state
+        self.ID, self.Layup, self.CoreMaterial, self.OCC, self.Theta, self.scale_factor, self.Projection, self.LayerLst,  self.Para_BSplineLst = state
         self.BSplineLst = BSplineLst_from_ParaLst(self.Para_BSplineLst)
 
 

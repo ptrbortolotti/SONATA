@@ -8,7 +8,7 @@ from scipy.optimize import leastsq
 #PythonOCC Libraries
 from OCC.gp import gp_Pnt2d, gp_Dir2d, gp_Vec2d
 from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
-from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection,GCPnts_UniformDeflection, GCPnts_TangentialDeflection
+from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection,GCPnts_UniformDeflection, GCPnts_TangentialDeflection, GCPnts_QuasiUniformAbscissa
 from OCC.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve, Geom2dAPI_ProjectPointOnCurve, Geom2dAPI_PointsToBSpline
 from OCC.Geom2d import Handle_Geom2d_BSplineCurve_DownCast, Geom2d_Line
 
@@ -82,6 +82,25 @@ def get_BSplineLst_length(BSplineLst):
     for i,item in enumerate(BSplineLst):
          CummLength += get_BSpline_length(item)
     return CummLength  
+
+
+def equidistant_Points_on_BSplineLst(BSplineLst,minLen):
+    ''' minLen = the minimum distance between points. Should be determined by the segment0.BSplineLstLenght/Resolution
+    '''
+    Pnt2dLst = []
+    for item in BSplineLst:
+        Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
+        length = get_BSpline_length(item)
+        NbPoints = int(length//minLen)+2  
+        discretization = GCPnts_QuasiUniformAbscissa(Adaptor,NbPoints)
+        
+        for j in range(1, NbPoints+1):
+                para = discretization.Parameter(j)
+                Pnt = gp_Pnt2d()
+                item.D0(para,Pnt)
+                Pnt2dLst.append(Pnt)
+
+    return Pnt2dLst
 
     
 def find_BSpline_coordinate(BSpline,s):
