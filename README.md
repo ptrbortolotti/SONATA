@@ -1,19 +1,25 @@
-SONATA is a part of a project to develop a environment for Multidiciplinary Rotor Blade Design for Structural Optimization and Aeroelastic Analysis in a Variable Speed Environment.
-SONATA contains the structural modelling part
+# SONATA: Rotor Blade Design Preprocessor for Structural Optimization and Aeroelastic Analysis.
 
-# SONATA: Multidiciplinary Rotor Blade Design for Structural Optimization and Aeroelastic Analysis.
+<img src="logo.png" align="left" hspace="20" vspace="6"> **SONATA** is a python software for preprocessing closed composite beam crossections for helicopter applications.  It is using the Opencascade kernel with its pythonocc wrapper. SONATA helps the engineer to parameterize a closed composite rotor blade crossection with multiple spars. It is specifically designed to be suited for helicopter rotor blade crossections of the blade aerodynamic section and elastic blade root. SONATA combines visualization and 2D-Finite Element discretisation of the crossection. 
 
-<a href="https://d3js.org"><img src="https://d3js.org/logo.svg" align="left" hspace="10" vspace="6"></a>
+The first part of the software contains a parametric topology generator 
+The topology is saved as a .pkl and can be reloaded
+The second part generates a mesh upon the topology, the mesh can be exported into a VABS and SECTIONBUILDER conform PATRAN mesh file .ptr
 
-**SONATA** is a python software for preprocessing closed composite beam crossections for helicopter applications.  It is using the Opencascade kernel with its pythonocc wrapper. SONATA helps the engineer to parameterize a closed composite rotor blade crossection with multiple spars. It is specifically designt to be suited for helicopter rotor blade crossections of the blade aerodynamic section and elastic blade root. SONATA combines visualization and inte with a data-driven approach to DOM manipulation, giving you the full capabilities of modern browsers and the freedom to design the right visual interface for your data.
+More to come...
+<img src="capture_png1.png" hspace="20" vspace="6" width="600">
 
 ## Resources
+* [PythonOCC](http://www.pythonocc.org/)
 
-* [API Reference](https://github.com/d3/d3/blob/master/API.md)
-* [Release Notes](https://github.com/d3/d3/releases)
-* [Gallery](https://github.com/d3/d3/wiki/Gallery)
-* [Examples](http://bl.ocks.org/mbostock)
-* [Wiki](https://github.com/d3/d3/wiki)
+## Documentation for Developers:
+
+* [OpenCascadeTechnology Documentation](https://www.opencascade.com/doc/occt-6.9.1/refman/html/index.html)
+* [PythonOCC API Documentation](http://api.pythonocc.org/)
+
+* Gallery
+* Examples
+* Wiki
 
 ## Installing
 
