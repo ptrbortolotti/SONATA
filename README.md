@@ -1,4 +1,4 @@
-# SONATA: Multidiciplinary Rotor Blade Design for **S**tructural **O**ptimization a**n**d **A**eroelas**t**ic **A**nalysis.
+# SONATA: Multidiciplinary Rotor Blade Design for **S**tructural **O**ptimization a*n*d **A**eroelas**t**ic **A**nalysis.
 
 <a href="https://d3js.org"><img src="https://d3js.org/logo.svg" align="left" hspace="10" vspace="6"></a>
 
