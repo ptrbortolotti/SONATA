@@ -1,6 +1,6 @@
-# SONATA: Multidiciplinary Rotor Blade Design for **S**tructural **O**ptimization a*n*d **A**eroelas**t**ic **A**nalysis.
+# SONATA: Rotor Blade Design Preprocessor for Structural Optimization and Aeroelastic Analysis.
 
-<a href="https://d3js.org"><img src="logo.png" align="left" hspace="10" vspace="6"></a>**SONATA** is a python software for preprocessing closed composite beam crossections for helicopter applications.  It is using the Opencascade kernel with its pythonocc wrapper. SONATA helps the engineer to parameterize a closed composite rotor blade crossection with multiple spars. It is specifically designed to be suited for helicopter rotor blade crossections of the blade aerodynamic section and elastic blade root. SONATA combines visualization and 2D-Finite Element discretisation of the crossection. 
+<img src="logo.png" align="left" hspace="10" vspace="6">**SONATA** is a python software for preprocessing closed composite beam crossections for helicopter applications.  It is using the Opencascade kernel with its pythonocc wrapper. SONATA helps the engineer to parameterize a closed composite rotor blade crossection with multiple spars. It is specifically designed to be suited for helicopter rotor blade crossections of the blade aerodynamic section and elastic blade root. SONATA combines visualization and 2D-Finite Element discretisation of the crossection. 
 
 
 
@@ -22,6 +22,8 @@ a python distribution is needed best use Anaconda
 Anaconda pythonocc-core,
 install pythonocc-utils
 install shapely
+
+
 
 ```html
 <script src="https://d3js.org/d3.v4.js"></script>
