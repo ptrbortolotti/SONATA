@@ -5,8 +5,8 @@
 The first part of the software contains a parametric topology generator 
 The topology is saved as a .pkl and can be reloaded
 The second part generates a mesh upon the topology, the mesh can be exported into a VABS and SECTIONBUILDER conform PATRAN mesh file .ptr
-More to come
 
+More to come...
 
 
 ## Resources
