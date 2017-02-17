@@ -7,7 +7,7 @@ The topology is saved as a .pkl and can be reloaded
 The second part generates a mesh upon the topology, the mesh can be exported into a VABS and SECTIONBUILDER conform PATRAN mesh file .ptr
 
 More to come...
-
+<img src="capture_png1.png" align="left" hspace="20" vspace="6">
 
 ## Resources
 * [PythonOCC](http://www.pythonocc.org/)
