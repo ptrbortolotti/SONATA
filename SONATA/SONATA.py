@@ -222,9 +222,10 @@ if Configuration.SETUP_NbOfWebs > 0:
 # ============================================================================= 
 #               Build remaining SEGMENTS 
 # =============================================================================
-for i,seg in enumerate(SegmentLst[1:],start=1):
-    seg.build_segment_boundary_from_WebLst(WebLst,SegmentLst[0].final_Boundary_BSplineLst)
-    seg.build_layers()
+if Configuration.SETUP_NbOfWebs > 0:
+    for i,seg in enumerate(SegmentLst[1:],start=1):
+        seg.build_segment_boundary_from_WebLst(WebLst,SegmentLst[0].final_Boundary_BSplineLst)
+        seg.build_layers()
 
 
 #============================================================================= 
@@ -289,7 +290,7 @@ for i,seg in enumerate(SegmentLst):
             k = 0
         #item.get_pnt2d(0,)
 
-#display.DisplayShape(BW.Curve, color="BLACK")        
+display.DisplayShape(BW.Curve, color="BLACK")        
 #step_writer.Transfer(BW.Curve, STEPControl_AsIs)        
         
 #status = step_writer.Write("SONATA.stp")    
@@ -306,56 +307,6 @@ with open(output_filename, 'wb') as output:
 with open(output_filename, 'rb') as handle:
     b = pickle.load(handle)
 
-#print output.closed
-
-# ============================================================================= 
-#               MESH THE TOPOLOGY ::
-# =============================================================================
-#for j,layer in enumerate(SegmentLst[0].LayerLst[1:],start=1):
-#    display.DisplayShape(layer.wire, color="BLACK")
-#
-#    Deflection = 0.0001
-#    NbPoints = 50
-#    Pnt2dLst = []
-#    
-#    AngularDeflection = 0.5
-#    CurvatureDeflection = 0.5
-#    MinimumOfPoints = 10
-#    
-#    for i,item in enumerate(SegmentLst[0].LayerLst[-1].BSplineLst):
-#        Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
-#        #discretization = GCPnts_QuasiUniformDeflection(Adaptor,Deflection,4)	#GeomAbs_Shape Continuity: 1=C0, 2=G1, 3=C1, 3=G2,... 
-#        #discretization = GCPnts_TangentialDeflection(Adaptor,AngularDeflection,CurvatureDeflection,MinimumOfPoints)	#GeomAbs_Shape Continuity: 1=C0, 2=G1, 3=C1, 3=G2,... 
-#        discretization = GCPnts_QuasiUniformAbscissa(Adaptor,NbPoints)	#GeomAbs_Shape Continuity: 1=C0, 2=G1, 3=C1, 3=G2,... 
-#        NbPoints = discretization.NbPoints()
-#        for j in range(1, NbPoints+1):
-#            para = discretization.Parameter(j)
-#            Pnt = gp_Pnt2d()
-#            item.D0(para,Pnt)
-#            Pnt2dLst.append(Pnt)
-#        
-#    a = Pnt2dLst_to_npArray(Pnt2dLst)
-#    b = np.around(a,10) # Evenly round to the given number of decimals. 
-#    
-#    #check if it is closed:
-#    if np.array_equal(b[0],b[-1]):
-#        closed = True
-#    else: closed = False
-#
-#    npArray = unique_rows(b) # Remove possible doubles! 
-#    
-#    if closed:
-#        npArray = np.vstack((npArray,b[0]))
-#    else: None
-#
-#
-#    plt.figure(1)
-#    plt.clf()         
-#    plt.plot(*npArray.T, color='black', marker='.')
-#    #plt.plot(*data.T, color='red', marker='.')
-#    plt.axis('equal')  
-#    plt.show()   
-#    
 
 #======================================================================
 #VIEWER:

@@ -23,11 +23,23 @@ from para_Geom2d_BsplineCurve import Para_Geom2d_BSplineCurve
 # BSpline and BSplineLst Utilities
 ###############################################################################
 
+def isPnt_on_2dcurve(Pnt2d,Curve2d,tolerance=1e-6):
+    projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,Curve2d)
+    Trigger = False
+    for i in range(1,projection.NbPoints()+1):
+        if projection.Distance(i) <= tolerance:
+            Trigger = True
+        else:
+            None           
+    return Trigger
 
-
- 
-
-
+def isPnt_on_BSplineLst(Pnt2d,BSplineLst,tolerance=1e-6):
+    Bool = False
+    for item in BSplineLst:
+        if isPnt_on_2dcurve(Pnt2d,item.GetHandle(),tolerance):
+            Bool = True
+            break
+    return Bool
 
 def findPnt_on_2dcurve(Pnt2d,Curve2d):
     projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,Curve2d)
@@ -40,20 +52,11 @@ def findPnt_on_BSplineLst(Pnt2d,BSplineLst):
             u = findPnt_on_2dcurve(Pnt2d,item.GetHandle())
             coordinates = [i,u]
         else:
-            None
+            coordinates = None
     return coordinates
     
     
-def isPnt_on_2dcurve(Pnt2d,Curve2d,tolerance=1e-6):
-    projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,Curve2d)
-    Trigger = False
-    for i in range(1,projection.NbPoints()+1):
-        if projection.Distance(i) <= tolerance:
-            Trigger = True
-        else:
-            None           
-    return Trigger
-        
+
 
 def get_BSpline_length(BSpline):
     tolerance=1e-10

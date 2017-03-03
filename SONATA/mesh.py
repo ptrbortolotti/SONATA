@@ -2,13 +2,14 @@ import os
 import numpy as np
 import pickle
 import matplotlib as plt
+import itertools
 
 from OCC.AIS import AIS_Shape
 from OCC.BRep import BRep_Builder, BRep_Tool
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeFace
 from OCC.BRepAdaptor import BRepAdaptor_CompCurve
 from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Vec2d,gp_Lin2d, gp_Dir2d
-from OCC.GCPnts import GCPnts_QuasiUniformAbscissa
+from OCC.GCPnts import GCPnts_QuasiUniformAbscissa, GCPnts_AbscissaPoint
 from OCC.Geom2d import Geom2d_Line
 from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
 from OCC.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
@@ -20,11 +21,17 @@ from OCC.BRepLib import breplib_BuildCurves3d
 from OCC.TopoDS import TopoDS_Compound, topods_Face, topods_Edge
 
 
-from BSplineLst_utils import get_BSplineLst_length, get_BSpline_length, trim_BSplineLst, set_BSplineLst_to_Origin
-from CADinput import order_BSplineLst_Head2Tail
+from BSplineLst_utils import get_BSplineLst_length, get_BSpline_length, trim_BSplineLst, set_BSplineLst_to_Origin, \
+                            BSplineLst_Orientation, reverse_BSplineLst, findPnt_on_BSplineLst, copy_BSplineLst,\
+                            isPnt_on_BSplineLst
+from CADinput import order_BSplineLst_Head2Tail, Check_BSplineLst_Head2Tail
 from wire_utils import build_wire_from_BSplineLst,get_wire_length
 from utils import Pnt2dLst_to_npArray, unique_rows, PolygonArea, calc_DCT_angles,calc_angle_between
-from display_mesh import plot_mesh
+from display_mesh import plot_mesh, plot_cells
+from mesh_utils import mesh_quality_enhancer
+from node import Node
+from cell import Cell
+
 #=======================DISPLAY FUCTIONS....===================================
 def display_SONATA_SegmentLst(SegmentLst):
     # transfer shapes and display them in the viewer
@@ -61,8 +68,6 @@ def display_custome_shape(shape,linewidth,transparency,RGB):
     ais_context = display.GetContext().GetObject()
     ais_context.Display(ais_shp.GetHandle())
     return None
-
-
 
 def export_to_PDF(event=None):
     display.set_bg_gradient_color(255,255,255,255,255,255)
@@ -156,13 +161,6 @@ display.set_bg_gradient_color(20,6,111,200,200,200)
 
 #====================NOTES:==========================================================
 '''
-1) Distribute Equidistant Points on Layer_i
-2) Find Cell where the Max.Error between Cell and the Layer is larger than allowed -> Split Cell at max deviation
-3) Determine Area of Cells and Cell Angles -> Improve Cells 
-
-
-
-
 
 '''
 #===================LOAD CROSSSECTION==========================================
@@ -177,139 +175,6 @@ for seg in SegmentLst:
     seg.build_wire()
     for layer in seg.LayerLst:
         layer.build_wire()
-
-
-#####################################NODE###################################### 
-class Node(object):
-    class_counter= 1
-    def __init__(self, Pnt2d, parameters=['0',0,0]):
-        self.id= self.__class__.class_counter
-        self.__class__.class_counter += 1
-        
-        self.Pnt2d = Pnt2d  #gp_Pnt2d
-        self.Pnt = gp_Pnt(self.Pnt2d.X(),self.Pnt2d.Y(),0)  #gp_Pnt
-        self.coordinates = [self.Pnt2d.X(),self.Pnt2d.Y()]  #[x,y]
-        self.parameters = parameters    #[LayerID, idx, U]
-        self.corner = False
-        self.face_pointer = []
-        
-    def __repr__(self): 
-        #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 
-        return  str('Node: %s @ [%.3f,%.3f]' % (self.id, self.coordinates[0],self.coordinates[1]))
-            
-  
-
-def Pnt2dLst_to_NodeLst(Pnt2dLst):
-    NodeLst = []
-    for Pnt2d in Pnt2dLst:
-        NodeLst.append(Node(Pnt2d))
-    return NodeLst
-
-def calc_cell_angles(cell):
-    corners = []
-    for node in cell.nodes:
-        corners.append(node.coordinates)         
-    corners = np.asarray(corners)   
-    temp = []
-    for i in range(0,corners.shape[0]):
-            if i == corners.shape[0]-1: #last point
-                v1 = corners[i-1]-corners[i] 
-                v2 = corners[0]-corners[i]
-            else:
-                v1 = corners[i-1]-corners[i]
-                v2 = corners[i+1]-corners[i]
-            temp.append(calc_angle_between(v1,v2))
-    return np.array(temp)
-
-
-
-#####################################CELL######################################        
-class Cell(object):
-    class_counter= 1
-    def __init__(self,nodeLst):                  #int
-        self.id = self.__class__.class_counter
-        self.__class__.class_counter += 1
-        
-        self.nodes = nodeLst                #[node,node,node,nodes]      !!!counterclockwise direction!!!
-        self.face  = []                     #[rear,top,front,bottom]        !!!counterclockwise direction!!!       
-        self.wire  = self.build_wire()      #TopoDs_wire
-        self.neighbours = []                #-[Cell_ID,CELL_ID... ]
-        #self.theta_1 = self.calc_theta_1()  #Ply coordinate system is formed by rotating the global coordinate system in the right-hand sense about the amount 0<Theta_1<260.
-                                            #Theta_1[0:9] is a list storing nine real numbers for the layer plane angles at the nodes of ths element. For simplification, if the 
-                                            #ply orinetation can be considered as uniform this element. Theta_1[0] stores the layer plane angles and Theta_1[1] = 540, and all the 
-                                            #rest can be zeroes or other real numbers because they do not enter the calculation. If the elements''' 
-        self.theta_3 = None                 #The Ply coordiate system is rotated about y3 in the right hand sense by the amount -90<Theta_3<90 to for the material system. 
-        self.MatID  = None                 #material id, int
-        
-        #Element quality critiria
-        self.area = self.calc_area()
-        self.minimum_angle = self.minimum_angle()
-        self.maximum_angle = self.maximum_angle()
-        self.minimum_edge = None
-        self.maximum_edge = None
-        self.shape_quality = None
-        self.minimum_jacobinan = None
-        #AREA RATIO to neighbors
-        
-    def __repr__(self): 
-        #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 
-        STR = ''
-        STR += str('Cell %s w. nodes:\t' % (self.id))
-        for n in self.nodes:
-            STR += str('%i, ' % (n.id))
-            
-        return  STR
-        
-    def calc_theta_1(self):  
-        theta_1 = [0] * 9
-        v0 = gp_Vec2d(gp_Pnt2d(0,0),gp_Pnt2d(1,0))
-        v1 = gp_Vec2d(self.nodes[1].Pnt2d,self.nodes[2].Pnt2d)
-        theta_11 = (v0.Angle(v1))*180/np.pi
-        if theta_11<0:
-            theta_11 = 360+theta_11
-        theta_1[0] = theta_11
-        theta_1[1] = 540
-        return theta_1
-
-    def calc_area(self):  
-        corners = []
-        for node in self.nodes:
-            corners.append(node.coordinates)      
-        return PolygonArea(corners)     
-    
-    def minimum_angle(self):  
-        #print np.amin(calc_cell_angles(self))
-        return np.amin(calc_cell_angles(self))
-    
-    def maximum_angle(self):  
-        #print np.amax(calc_cell_angles(self))
-        return np.amax(calc_cell_angles(self))       
-
-    def build_wire(self):
-        WireBuilder = BRepBuilderAPI_MakeWire()
-        for i in range(0,len(self.nodes)-1):
-            me = BRepBuilderAPI_MakeEdge(self.nodes[i].Pnt, self.nodes[i+1].Pnt)
-            if me.IsDone():
-                WireBuilder.Add(me.Edge())
-        
-        me = BRepBuilderAPI_MakeEdge(self.nodes[-1].Pnt, self.nodes[0].Pnt)
-        if me.IsDone():
-            WireBuilder.Add(me.Edge())         
-        
-        return WireBuilder.Wire()
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 def equidistant_nodes_on_BSplineLst(BSplineLst, IC=False, **kwargs): #include corners
     ''' minLen = the minimum distance between points. Should be determined by the segment0.BSplineLstLenght/Resolution
@@ -386,7 +251,7 @@ def corners_of_BSplineLst(BSplineLst):
     return corners #gp_Pnt2d Lst
     
 
-def project_Pnt2d_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer_thickness,minLen, tol=4e-3):
+def project_Pnt2d_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer_thickness,minLen, tol=8e-3):
     LayerID = 'T_' + a_nodes[0].parameters[0]
     b_nodes = []
     cellLst = []
@@ -397,7 +262,7 @@ def project_Pnt2d_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer_thicknes
     closed_a = False
     if a_BSplineLst[0].StartPoint().IsEqual(a_BSplineLst[-1].EndPoint(),1e-5):
         closed_a = True
-    print closed_a
+    print 'closed_a :', closed_a
                
     #==================PROJECT POINTS ON LOWER BOUNDARY =======================            
     if closed_a == True:
@@ -427,20 +292,119 @@ def project_Pnt2d_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer_thicknes
             
 
         elif len(pPnts) == 2:
-            #display.DisplayShape(Pnt2d,color='GREEN')
+            
+#            display.DisplayShape(node.Pnt2d,color='GREEN')
+#            display.DisplayShape(pPnts[0],color='YELLOW')
+#            display.DisplayShape(pPnts[1],color='RED')
+            
             v1 = gp_Vec2d(Pnt2d,pPnts[0])
             v2 = gp_Vec2d(Pnt2d,pPnts[1])
-            angle = (180-v1.Angle(v2)*180/np.pi)
+            angle = (180-abs(v1.Angle(v2)*180/np.pi))
             crit_angle = 100
-
+            
+            node.cornerstyle = 1
+            
+            
+            #print 'corner angle: ', angle 
             if angle < crit_angle:
                 node.corner = True
-                b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
-                b_nodes.append(Node(b_BSplineLst[pIdx[0]].EndPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].LastParameter()]))
-                b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))    
-                #display.DisplayShape(pPnts[0],color='YELLOW')        
-                #display.DisplayShape(b_BSplineLst[pIdx[0]].EndPoint(),color='ORANGE')
-                #display.DisplayShape(pPnts[1],color='RED')
+                node.cornerstyle = 2
+                #=======================
+                #print pIdx[0],pPara[0],'|',pIdx[1], pPara[1]
+                #TODO: DETECT ALL EXTERIOR CORNERS WITHIN THAT INTERVAL pIdx[0],pPara[0],'|',pIdx[1], pPara[1]
+                #TODO: IF NO EXTERIOR CORNER IS FOUND USE BISECTOR!
+                #TODO: USE node.cornertype = 1,2,3,4 to detemine Shape of Elements
+                #       cornertype = 0 no exterior corner, cornertype=1 one exterior corner, ....
+                #TODO: THIS ALGORITHM DOESNT FIND ALL 
+                exterior_corners = [] 
+                exterior_corners_para = []
+                
+                #if b_nodes auf dem BSpline dazwischen existieren?
+                try:
+                    b_nodes[-1]
+                    #print b_nodes[-1], b_nodes[-1].parameters
+                    x =  b_nodes[-1].parameters[1]*1e5 + b_nodes[-1].parameters[2]
+                    a = pIdx[0]*1e5 + pPara[0]
+                    b = pIdx[1]*1e5 + pPara[1]
+                    if a<x and x<b:
+                        z_BSplineLst = b_BSplineLst[pIdx[1]:] + b_BSplineLst[:pIdx[0]+1]
+                        regular_corner = False
+
+                    else:
+                        regular_corner = True
+
+                except IndexError:
+                    regular_corner = True
+                    
+                if regular_corner == True:
+                    for j,item in enumerate(b_BSplineLst[pIdx[0]:pIdx[1]], start=pIdx[0]):
+                        #print "j: ",j
+                        spline1 = item
+                        spline2 = b_BSplineLst[j+1]
+                        u1,p1,v1 = spline1.LastParameter(),gp_Pnt2d(),gp_Vec2d()
+                        u2,p2,v2  = spline2.FirstParameter(),gp_Pnt2d(),gp_Vec2d()
+                        spline1.D1(u1,p1,v1)
+                        spline2.D1(u2,p2,v2)
+                        
+                        Angle = abs(v1.Angle(v2))*180/np.pi
+                        if Angle>0.05:
+                            exterior_corners.append(item.EndPoint())
+                            exterior_corners_para.append([LayerID,j,u1])  
+                            #display.DisplayShape(item.EndPoint(),color='WHITE')
+
+                else: 
+                    for j,item in enumerate(z_BSplineLst[:-1]):
+                        #print "j: ",j, 'len: ',len(z_BSplineLst) 
+                        spline1 = item
+                        spline2 = z_BSplineLst[j+1]
+                        u1,p1,v1 = spline1.LastParameter(),gp_Pnt2d(),gp_Vec2d()
+                        u2,p2,v2  = spline2.FirstParameter(),gp_Pnt2d(),gp_Vec2d()
+                        spline1.D1(u1,p1,v1)
+                        spline2.D1(u2,p2,v2)
+                        
+                        Angle = abs(v1.Angle(v2))*180/np.pi
+                        if Angle>0.05:
+                            exterior_corners.append(item.EndPoint())
+                            if len(b_BSplineLst) >= i+pIdx[1]:
+                                idx = i+pIdx[1]
+                            else: idx = i+pIdx[1]-len(b_BSplineLst)
+                            exterior_corners_para.append([LayerID,idx,u1])  
+                            display.DisplayShape(item.EndPoint(),color='WHITE')
+    
+#                
+                if len(exterior_corners) == 0:   
+                    pass
+                
+                elif len(exterior_corners) == 1:
+                    
+                    if regular_corner == True:
+                        b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
+                        b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
+                        b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
+                    
+                    else:
+                        b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
+                        b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
+                        b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
+                        
+                    #display.DisplayShape(exterior_corners[0],color='WHITE')
+                
+                elif len(exterior_corners) == 2:
+                    pass
+                    
+                #print len(exterior_corners)
+                    #b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))  
+                
+                #=======================
+                
+                #b_nodes.append(Node(b_BSplineLst[pIdx[0]].EndPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].LastParameter()]))
+                #b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))    
+
+                
+                
+#                display.DisplayShape(pPnts[0],color='YELLOW')        
+#                display.DisplayShape(b_BSplineLst[pIdx[0]].EndPoint(),color='ORANGE')
+#                display.DisplayShape(pPnts[1],color='RED')
              
             else:
                 if b_BSplineLst[pIdx[0]].EndPoint().IsEqual(b_nodes[-1].Pnt2d,1e-5):
@@ -451,10 +415,11 @@ def project_Pnt2d_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer_thicknes
                 #display.DisplayShape(b_BSplineLst[pIdx[0]].EndPoint(),color='WHITE')
                 #display.DisplayShape(Pnt2d,color='GREEN')
                 
-        else: 
+        elif len(pPnts) == 3:
+            b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
+            
+        else:
             print 'Projection Error, number of projection points: ', len(pPnts)
-            print projection.NbPoints()
-            #display.DisplayShape(Pnt2d,color='RED')  
     
     
     #==============REVERSED PROJECTION=========================================
@@ -525,19 +490,20 @@ def project_Pnt2d_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer_thicknes
 #    b_nodes =  sorted(newlist, key=lambda Node: (Node.parameters[1],Node.parameters[2]))
     
     #Assosiate a_nodes[0] to b_nodes[0]
-    pNode = []
-    for i,node in enumerate(b_nodes):
-        if a_nodes[0].Pnt2d.Distance(node.Pnt2d)<=distance:
-            pNode.append(node)
-            break
-        
-    b_nodes_start = pNode[0]
+#    pNode = []
+#    for i,node in enumerate(b_nodes):
+#        if a_nodes[0].Pnt2d.Distance(node.Pnt2d)<=distance:
+#            pNode.append(node)
+#            break
+#        
+#    b_nodes_start = pNode[0]
     
-    for n in b_nodes:
-        print n
+#    for n in b_nodes:
+#        print n
 
-    display.DisplayShape(b_nodes_start.Pnt2d,color='WHITE')  
+    #display.DisplayShape(b_nodes_start.Pnt2d,color='WHITE')  
     
+
     #==============CREATE CELLS PROJECTION=========================================
 #    for n in b_nodes:
 #        display.DisplayShape(n.Pnt2d,color='GREEN')
@@ -545,18 +511,22 @@ def project_Pnt2d_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer_thicknes
 #    for n in a_nodes:
 #        display.DisplayShape(n.Pnt2d,color='ORANGE')  
 #     
-    display.DisplayShape(a_nodes[0].Pnt2d,color='RED')  
+    #display.DisplayShape(a_nodes[0].Pnt2d,color='RED')  
 #    display.DisplayShape(b_nodes[0].Pnt2d,color='YELLOW')  
 
     #Last Cell as Triangle:
     b = 0   #b_nodes idx
     if closed_a == True:
         start = 0
-    else: start = 1
+        end = len(a_nodes)
+    else: 
+        start = 1
+        end = len(a_nodes)-1
     
     
     #for a,node in enumerate(a_nodes[1:-1], start=beginning):
-    for a in range(start,len(a_nodes)-1):
+    for a in range(start,end):
+        #print 'Closed_a: ', closed_a, ', a: ', a, ', len(a_nodes): ', len(a_nodes),', b: ', b, ', len(b_nodes):', len(b_nodes), '\n',  
         if closed_a == False and a == 1: #Start Triangle
             cellLst.append(Cell([a_nodes[a],a_nodes[a-1],b_nodes[b]]))
         
@@ -576,13 +546,6 @@ def project_Pnt2d_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer_thicknes
         b += 1
         
         
-        
-    #==============DISPLAY POINTS AND CELLS=========================================    
-
-#    print cellLst
-#    for cell in cellLst:
-#        display.DisplayShape(cell.wire,color='BLACK')
-#        
 
         
     return a_nodes, b_nodes, cellLst
@@ -627,73 +590,66 @@ def export_cells_to_patran(filename, cells):
         f.write('\n')   
 
 
-def plot_cells(cells):
-    #Get all nodes in cells
-    nodes = [] 
-    for cell in cells:
-        for node in cell.nodes:
-            if node not in nodes:
-                nodes.append(node)
-    nodes = sorted(nodes, key=lambda Node: (Node.id))
-    cells = sorted(cells, key=lambda Cell: (Cell.id))   
-    
-    nodes_array = []
-    for n in nodes:
-        nodes_array.append([n.coordinates[0],n.coordinates[1]])
-    nodes_array = np.asarray(nodes_array)   
-     
-    element_array = []
-    for c in cells:
-        tmp = []
-        for i in range(0,4):
-            if i<len(c.nodes):
-                tmp.append(c.nodes[i].id)
-            else:
-                tmp.append(0)
-        element_array.append(tmp)
-    element_array = np.asarray(element_array)  
-    
-    data = []
-    for c in cells:
-        data.append(c.minimum_angle)  
-    data = np.asarray(data)  
-    
-    plot_mesh(nodes_array,element_array,data,False,False)    
-    
-    return None
-
-
-
-
-
 #=========================================================================
 #                   M A I N 
 #=========================================================================
 
 Projection = SegmentLst[-1].Projection
-Resolution = 600 # Nb of Points on Segment0
+Resolution = 550 # Nb of Points on Segment0
 length = get_BSplineLst_length(SegmentLst[0].BSplineLst)
 global_minLen = round(length/Resolution,5)
 
+display_SONATA_SegmentLst(SegmentLst)
 
 #MESH LAYER -1
-layer = SegmentLst[-1].LayerLst[-3]
-a_BSplineLst = layer.BSplineLst
-b_BSplineLst = trim_BSplineLst(layer.Boundary_BSplineLst, layer.S1, layer.S2, 0, 1)
+k = 0
+for layer in reversed(SegmentLst[-1].LayerLst[-3:-1]):
+    [R,G,B,T] =  plt.cm.jet(k*50)
 
+    a_BSplineLst = layer.BSplineLst
+    b_BSplineLst = trim_BSplineLst(layer.Boundary_BSplineLst, layer.S1, layer.S2, 0, 1)
+    if BSplineLst_Orientation(b_BSplineLst,11) == False:
+        b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
+       
     
-a_nodes = equidistant_nodes_on_BSplineLst(a_BSplineLst, True, minLen = global_minLen, LayerID = layer.ID[0])
-a_nodes, b_nodes, cells = project_Pnt2d_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness,global_minLen)
+    a_nodes = equidistant_nodes_on_BSplineLst(a_BSplineLst, True, minLen = global_minLen, LayerID = layer.ID[0])
+    if k>0:
+        a_nodes = disco_nodes
+    #TODO: Replace with: select_nodes_on_BSplineLst(BSplineLst,CellLst)
+    
+    a_nodes, b_nodes, cells = project_Pnt2d_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness,global_minLen,1e-1)
+    enhanced_cells = mesh_quality_enhancer(cells,b_BSplineLst,global_minLen)
+    #find all nodes on of enhanced cells on b_BSplineLst
+    
+    disco_nodes = []
+    for ec in enhanced_cells:
+        for n in ec.nodes:
+            if isPnt_on_BSplineLst(n.Pnt2d,b_BSplineLst):
+               disco_nodes.append(n)
+               
+    #disco_nodes =  sorted(disco_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))           
+    
+    for n in disco_nodes:
+        #print n, n.parameters[1],n.parameters[2]
+        display.DisplayColoredShape(n.Pnt2d, Quantity_Color(R, G, B, 0))
+    
+    
+    for c in enhanced_cells:
+        c.wire = c.build_wire()
+        c.theta_3 = layer.Orientation
+        c.MatID = layer.MatID
+        #print cell,'\t',cell.theta_3,cell.theta_1,cell.MatID,cell.area
 
-for cell in cells:
-    cell.theta_3 = layer.Orientation
-    cell.MatID = layer.MatID
-    #print cell,'\t',cell.theta_3,cell.theta_1,cell.MatID,cell.area
-
-
-#print cellLst
-for cell in cells:
-    display.DisplayShape(cell.wire,color='BLACK')
+    for c in enhanced_cells:
+        display.DisplayColoredShape(c.wire, Quantity_Color(R, G, B, 0))
+        None
+        
+    #a_nodes = disco_nodes
+    
+    k = k+1;
+    
+    #if k>5:
+    #    k = 0
 
 #for n in b_nodes:
 #    display.DisplayShape(n.Pnt2d,color='GREEN')
@@ -705,13 +661,13 @@ for cell in cells:
 #export_cells_to_patran('sec_config.ptr',cells)
 #plot_cells(cells)
 
-#MESH LAYER -2
-layer = SegmentLst[-1].LayerLst[-3]
-a_BSplineLst = layer.BSplineLst
-b_BSplineLst = trim_BSplineLst(layer.Boundary_BSplineLst, layer.S1, layer.S2, 0, 1)
+##MESH LAYER -2
+#layer = SegmentLst[-1].LayerLst[-3]
+#a_BSplineLst = layer.BSplineLst
+#b_BSplineLst = trim_BSplineLst(layer.Boundary_BSplineLst, layer.S1, layer.S2, 0, 1)
 
 
-display.DisplayShape(a_BSplineLst[1],color='RED')  
+#display.DisplayShape(a_BSplineLst[1],color='RED')  
 
 
 #COLLECT ALL NODES THAT ARE ON a_BSplineLst
@@ -726,20 +682,18 @@ display.DisplayShape(a_BSplineLst[1],color='RED')
 
 
 
-
 #====================DISPLAY===================================================    
-display_SONATA_SegmentLst(SegmentLst)
-
-
+#display_SONATA_SegmentLst(SegmentLst)
 
 
 
 #==============================================================================
 '''CREATE AXIS SYSTEM for Visualization'''
+length = 5
 O  = gp_Pnt(0., 0., 0.)
-p1 = gp_Pnt(10.0,0.,0.)
-p2 = gp_Pnt(0.,10.0,0.)
-p3 = gp_Pnt(0.,0.,10.0)
+p1 = gp_Pnt(length,0.,0.)
+p2 = gp_Pnt(0.,length,0.)
+p3 = gp_Pnt(0.,0.,length)
 
 h1 = BRepBuilderAPI_MakeEdge(O,p1).Shape()
 h2 = BRepBuilderAPI_MakeEdge(O,p2).Shape()

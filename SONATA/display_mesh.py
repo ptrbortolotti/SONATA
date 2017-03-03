@@ -36,10 +36,14 @@ def plot_mesh(nodes,elements,data,show_element_number=False,show_node_number=Fal
     p = PatchCollection(patches, alpha=0.5)
     p.set_array(data)
     ax.add_collection(p)
-    fig.colorbar(p, ax=ax)
+    cbar = fig.colorbar(p, ax=ax)
+    cbar = cbar.ax.set_ylabel('data')
     
     ax.scatter(nodes[:,0],nodes[:,1],c='k',)
     plt.axis('equal')
+    ax.set_title('example')
+    ax.set_xlabel('x [mm]')
+    ax.set_ylabel('y [mm]')
     
     ##display element number
     if show_element_number == True:
@@ -53,6 +57,40 @@ def plot_mesh(nodes,elements,data,show_element_number=False,show_node_number=Fal
     plt.show()
     
 
+def plot_cells(cells):
+    #Get all nodes in cells
+    nodes = [] 
+    for cell in cells:
+        for node in cell.nodes:
+            if node not in nodes:
+                nodes.append(node)
+    nodes = sorted(nodes, key=lambda Node: (Node.id))
+    cells = sorted(cells, key=lambda Cell: (Cell.id))   
+    
+    nodes_array = []
+    for n in nodes:
+        nodes_array.append([n.coordinates[0],n.coordinates[1]])
+    nodes_array = np.asarray(nodes_array)   
+     
+    element_array = []
+    for c in cells:
+        tmp = []
+        for i in range(0,4):
+            if i<len(c.nodes):
+                tmp.append(c.nodes[i].id)
+            else:
+                tmp.append(0)
+        element_array.append(tmp)
+    element_array = np.asarray(element_array)  
+    
+    data = []
+    for c in cells:
+        data.append(c.minimum_angle)  
+    data = np.asarray(data)  
+    
+    plot_mesh(nodes_array,element_array,data,False,False)    
+    
+    return None
     
     
     

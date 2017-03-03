@@ -489,15 +489,16 @@ def Check_BSplineLst_Head2Tail(BSplineLst):
 # =============================================================================  
 if __name__ == '__main__': 
     display, start_display, add_menu, add_function_to_menu = init_display('wx')
-    display.Context.SetDeviationAngle(0.000001)       # 0.001 default. Be careful to scale it to the problem.
-    display.Context.SetDeviationCoefficient(0.000001) # 0.001 default. Be careful to scale it to the problem. 
+    display.Context.SetDeviationAngle(0.0001)       # 0.001 default. Be careful to scale it to the problem.
+    display.Context.SetDeviationCoefficient(0.0001) # 0.001 default. Be careful to scale it to the problem. 
     display.set_bg_gradient_color(20,6,111,200,200,200)
     
     '''CREATE AXIS SYSTEM for Visualization'''
+    length = 10
     O  = gp_Pnt(0., 0., 0.)
-    p1 = gp_Pnt(10,0.,0.)
-    p2 = gp_Pnt(0.,10.0,0.)
-    p3 = gp_Pnt(0.,0.,10.0)
+    p1 = gp_Pnt(length,0.,0.)
+    p2 = gp_Pnt(0.,length,0.)
+    p3 = gp_Pnt(0.,0.,length)
     
     h1 = BRepBuilderAPI_MakeEdge(O,p1).Shape()
     h2 = BRepBuilderAPI_MakeEdge(O,p2).Shape()
@@ -527,10 +528,17 @@ if __name__ == '__main__':
     display.DisplayShape(BSplineLst[0].StartPoint())
     for item in BSplineLst:
         display.DisplayShape(item,color="GREEN")
-        
-    #aResShape = load_3D('AREA_Blatt_L.stp') 
-    #display.DisplayShape(aResShape, color=None, transparency=0.7, update=True)
 
+    P = gp_Pnt(121,0,0)
+    factor = 0.5
+    aResShape = load_3D('AREA_Blatt_L.stp')
+    aTrsf = gp_Trsf()
+    aTrsf.SetScale(P,factor)
+    aBRespTrsf = BRepBuilderAPI_Transform(aResShape, aTrsf)
+    aScaledShape = aBRespTrsf.Shape()
+    
+    display.DisplayShape(aResShape, color=None, transparency=0.7, update=True)
+    display.DisplayShape(aScaledShape, color=None, transparency=0.7, update=True)
     
 
 # DISPLAY
