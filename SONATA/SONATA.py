@@ -290,7 +290,7 @@ for i,seg in enumerate(SegmentLst):
             k = 0
         #item.get_pnt2d(0,)
 
-display.DisplayShape(BW.Curve, color="BLACK")        
+#display.DisplayShape(BW.Curve, color="BLACK")        
 #step_writer.Transfer(BW.Curve, STEPControl_AsIs)        
         
 #status = step_writer.Write("SONATA.stp")    
@@ -303,10 +303,6 @@ output_filename = filename.replace('.input', '.pkl')
 
 with open(output_filename, 'wb') as output:
     pickle.dump(SegmentLst, output, protocol=pickle.HIGHEST_PROTOCOL)
-
-with open(output_filename, 'rb') as handle:
-    b = pickle.load(handle)
-
 
 #======================================================================
 #VIEWER:

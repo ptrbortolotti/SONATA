@@ -17,8 +17,8 @@
 &DEFN Setup
 	NbOfWebs = 1						#Number of Webs (0=CSpar, 1=Dspar,...)		[int]			DEFAULT=0
 	BalanceWeight = False 				#True or False for Balance Weight			[boolean]		DEFAULT=FALSE
-	input_type = 3						#0) Airfoil from UIUC Database; 1) Geometry from .dat file; 2)2d .step or .iges 3)3D .step or .iges and radial station of crosssection 	[int] DEFAULT=0	
-	datasource =  AREA_Blatt_L.stp		#0)	naca23012					1) AREA_R250.dat			2)AREA_R230.stp	 	3)AREA_Blatt_L.stp							[string] DEFAULT=NONE
+	input_type = 3						#0) Airfoil from UIUC Database; 1) Geometry from .dat file; 2)2d .step or .iges 3)3D .step or .iges and radial station of crosssection 		[int] DEFAULT=0	
+	datasource = AREA_Blatt_L.stp		#0)	naca23012					1) AREA_R250.dat			2)AREA_R230.stp	 	3)AREA_Blatt_L.stp	 4)Twist, Taper 						[string] DEFAULT=NONE
 	radial_station = 250				#Radial station of crosssection. Only necessary for input type 3. [float]	Default=NONE
 	scale_factor = 1	 				#use as reference scale factor				[float] 		DEFAULT=1
 	Theta = 6.2							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
@@ -73,7 +73,7 @@
 	  CoreMaterial = 	4					#Material ID of core filling 				[int]
 
 	  &DEFN Layup
-	  # #Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
+	  #Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
 	  0.0		1.0		0.4				45					1		#Skin1
 	  0.7		0.4		0.3				45					1		#Skin1
 	  &END
@@ -117,6 +117,6 @@
 &DEFN BalanceWeight
 	XPos = 0.032						#	X Position	[-]						[float]				NO DEFAULT VALUE						
 	YPos = 0.0045						#	Y Position	[-]						[float]				NO DEFAULT VALUE
-	Diameter = 0.0405					#	Diameter of Balance Weight [mm]		[float]				NO DEFAULT VALUE
+	Diameter = 4.05						#	Diameter of Balance Weight [mm]		[float]				NO DEFAULT VALUE
 	MatID = 1   						#   Material ID							[int]				NO DEFAULT VALUE
 &END

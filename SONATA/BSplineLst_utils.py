@@ -23,6 +23,49 @@ from para_Geom2d_BsplineCurve import Para_Geom2d_BSplineCurve
 # BSpline and BSplineLst Utilities
 ###############################################################################
 
+
+def distance_on_BSplineLst(BSplineLst,para1,para2):
+#    para1 = findPnt_on_BSplineLst(P1,BSplineLst)
+#    para2 = findPnt_on_BSplineLst(P2,BSplineLst)
+    
+#    if closed:
+#        print para1,para2
+#        para2 = [len(BSplineLst)-1, BSplineLst[-1].LastParameter()]
+#        print para1,para2
+    tol=1e-7
+    #print para1,para2
+    
+    Distance = 0
+    for i,item in enumerate(BSplineLst):
+        Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
+        First = item.FirstParameter() 
+        Last =  item.LastParameter() 
+        if para1[0] == i and para2[0] != i:
+            Length = GCPnts_AbscissaPoint().Length(Adaptor, para1[1],Last, tol)
+            Distance += Length
+             
+        elif (para1[0] != i and para2[0] != i) and (para1[0] < i and para2[0] > i):
+            Length = GCPnts_AbscissaPoint().Length(Adaptor, First, Last, tol)
+            Distance += Length
+             
+        elif para1[0] == i and para2[0] == i:
+            Length = GCPnts_AbscissaPoint().Length(Adaptor, para1[1],para2[1], tol)
+            Distance += Length
+            break
+    
+    #NOTE: Somehow the execption if para2 is close to Last doesn't work properly!!!!!!! Similar to the trimm function     
+        elif para1[0] != i and para2[0] == i:
+            if isclose(para2[1],Last):
+                 Length = GCPnts_AbscissaPoint().Length(Adaptor, First,Last, tol)
+                 Distance += Length
+            else:
+                 Length = GCPnts_AbscissaPoint().Length(Adaptor, First,para2[1], tol)
+                 Distance += Length
+            break
+
+    return Distance		
+
+
 def isPnt_on_2dcurve(Pnt2d,Curve2d,tolerance=1e-6):
     projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,Curve2d)
     Trigger = False
@@ -51,13 +94,12 @@ def findPnt_on_BSplineLst(Pnt2d,BSplineLst):
         if isPnt_on_2dcurve(Pnt2d,item.GetHandle()):
             u = findPnt_on_2dcurve(Pnt2d,item.GetHandle())
             coordinates = [i,u]
+            break
         else:
             coordinates = None
     return coordinates
-    
-    
 
-
+    
 def get_BSpline_length(BSpline):
     tolerance=1e-10
     first = BSpline.FirstParameter()
@@ -306,8 +348,49 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
     return trimmed_BSplineLst		
 
 
-
+def trim_BSplineLst_by_coordinates(BSplineLst, para1,para2):
+    trimmed_BSplineLst = []
+#    para1 =  find_BSplineLst_coordinate(BSplineLst, S1, start, end)
+#    para2 =  find_BSplineLst_coordinate(BSplineLst, S2, start, end)
+    for i,item in enumerate(BSplineLst):       
+         First = item.FirstParameter() 
+         Last =  item.LastParameter() 
+         if para1[0] == i and para2[0] != i:
+             BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+             BSplineCopy.Segment(para1[1],Last)
+             trimmed_BSplineLst.append(BSplineCopy)
+             
+         elif (para1[0] != i and para2[0] != i) and (para1[0] < i and para2[0] > i):
+             BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+             BSplineCopy.Segment(First,Last)
+             trimmed_BSplineLst.append(BSplineCopy)
+             
+         elif para1[0] == i and para2[0] == i:
+             BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+             BSplineCopy.Segment(para1[1],para2[1])
+             trimmed_BSplineLst.append(BSplineCopy)
+             break
     
+    #NOTE: Somehow the execption if para2 is close to Last doesn't work properly!!!!!!!     
+         elif para1[0] != i and para2[0] == i:
+             BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+             if isclose(para2[1],Last):
+                 trimmed_BSplineLst.append(BSplineCopy)
+             else:
+                 BSplineCopy.Segment(First,para2[1])
+                 trimmed_BSplineLst.append(BSplineCopy)
+             break
+         
+    #             elif para1[0] != i and para2[0] == i:
+    #                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+    #                 BSplineCopy.Segment(First,para2[1])
+    #                 trimmed_BSplineLst.append(BSplineCopy)
+    #                 break
+    #                
+                
+    return trimmed_BSplineLst	
+
+
     
 def trim_BSplineLst_by_Pnt2d(BSplineLst,Pos1_Pnt2d,Pos2_Pnt2d):
     trimmed_BSplineLst= []

@@ -177,7 +177,7 @@ if __name__ == '__main__':
 
     
     projectionlist=layup_to_projection(Layup)
-
+    #Projection = projection_of_layers2(Layup,0,1,7)
 
     #=====================================================
     #               PLOT!!!!

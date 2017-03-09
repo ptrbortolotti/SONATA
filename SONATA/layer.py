@@ -4,6 +4,7 @@ from cutoff import cutoff_layer
 from offset import shp_parallel_offset
 from para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
 
+
 class Layer(object):
     ''' 
     The layer object is constructed from multiple BSplineCurveSegments. It is the basis for all future operations. 
@@ -60,7 +61,6 @@ class Layer(object):
     def __setstate__(self, state):
         """Restore state from the unpickled state values."""
         self.ID, self.S1, self.S2, self.thickness, self.Orientation, self.MatID, self.Para_Boundary_BSplineLst, self.Para_BSplineLst = state
-        
         self.Boundary_BSplineLst = BSplineLst_from_ParaLst(self.Para_Boundary_BSplineLst)
         self.BSplineLst = BSplineLst_from_ParaLst(self.Para_BSplineLst)
 
