@@ -200,7 +200,5 @@ def display_SONATA_SegmentLst(display,SegmentLst):
 
 
 
-
-
 if __name__ == '__main__':   
     pass

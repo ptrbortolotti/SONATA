@@ -37,26 +37,54 @@ class Cell(object):
         self.__class__.class_counter += 1
         
         self.nodes = nodeLst                #[node,node,node,nodes]      !!!counterclockwise direction!!!
-        self.face  = []                     #[rear,top,front,bottom]        !!!counterclockwise direction!!!       
+        #self.face  = []                     #[rear,top,front,bottom]        !!!counterclockwise direction!!!       
         #self.wire  = self.build_wire()      #TopoDs_wire
-        self.wire  = None     #TopoDs_wire
-        self.neighbours = []                #-[Cell_ID,CELL_ID... ]
-        #self.theta_1 = self.calc_theta_1()  #Ply coordinate system is formed by rotating the global coordinate system in the right-hand sense about the amount 0<Theta_1<260.
+        #self.wire  = None     #TopoDs_wire
+        #self.neighbours = []                #-[Cell_ID,CELL_ID... ]
+        #self.theta_1 = 0                    #Ply coordinate system is formed by rotating the global coordinate system in the right-hand sense about the amount 0<Theta_1<260.
                                             #Theta_1[0:9] is a list storing nine real numbers for the layer plane angles at the nodes of ths element. For simplification, if the 
                                             #ply orinetation can be considered as uniform this element. Theta_1[0] stores the layer plane angles and Theta_1[1] = 540, and all the 
                                             #rest can be zeroes or other real numbers because they do not enter the calculation. If the elements''' 
-        self.theta_3 = None                 #The Ply coordiate system is rotated about y3 in the right hand sense by the amount -90<Theta_3<90 to for the material system. 
-        self.MatID  = None                 #material id, int
+        self.theta_3 = None                 #The Ply coordiate system is rotated about y3 in the right hand sense by the amount -90<Theta_3<90 to for the material system.
+
+        self.MatID  = None                 #material id, 
+        self.structured = True
+        # self.minimum_edge = None
+#        self.maximum_edge = None
+#        self.shape_quality = None
+#        self.minimum_jacobinan = None
+        #AREA RATIO to neighbors
         
         #Element quality critiria
-        self.area = self.calc_area()
-        self.minimum_angle = self.minimum_angle()
-        self.maximum_angle = self.maximum_angle()
-        self.minimum_edge = None
-        self.maximum_edge = None
-        self.shape_quality = None
-        self.minimum_jacobinan = None
-        #AREA RATIO to neighbors
+    @property
+    def wire(self):
+        return self.build_wire()
+    
+    @property
+    def theta_1(self):
+        return self.calc_theta_1()
+    
+    @property
+    def theta_11(self):
+        return self.theta_1[0]
+    
+    @property
+    def area(self):
+        return self.calc_area()
+    
+    @property
+    def orientation(self): 
+        return self.calc_orientation()
+        
+    @property
+    def minimum_angle(self):
+        return self.calc_minimum_angle()
+
+    @property
+    def maximum_angle(self):
+        return self.calc_maximum_angle()  
+                    
+
         
     def __repr__(self): 
         #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 
@@ -66,29 +94,50 @@ class Cell(object):
             STR += str('%i, ' % (n.id))
             
         return  STR
+    
+    def __getstate__(self):
+        """Return state values to be pickled."""
+        return (self.id, self.nodes, self.theta_3, self.MatID, self.structured)   
+    
+    def __setstate__(self, state):
+        """Restore state from the unpickled state values."""
+        self.id, self.nodes, self.theta_3, self.MatID, self.structured = state
+        #self.wire = self.build_wire()
         
-    def calc_theta_1(self):  
+    def calc_theta_1(self):
         theta_1 = [0] * 9
-        v0 = gp_Vec2d(gp_Pnt2d(0,0),gp_Pnt2d(1,0))
-        v1 = gp_Vec2d(self.nodes[1].Pnt2d,self.nodes[2].Pnt2d)
-        theta_11 = (v0.Angle(v1))*180/np.pi
-        if theta_11<0:
-            theta_11 = 360+theta_11
-        theta_1[0] = theta_11
-        theta_1[1] = 540
+        if self.structured:
+            v0 = gp_Vec2d(gp_Pnt2d(0,0),gp_Pnt2d(1,0))
+            v1 = gp_Vec2d(self.nodes[1].Pnt2d,self.nodes[2].Pnt2d)
+            theta_11 = (v0.Angle(v1))*180/np.pi
+            if theta_11<0:
+                theta_11 = 360+theta_11
+            theta_1[0] = theta_11
+            theta_1[1] = 540
+        else:
+            theta_1[0] = 0
+            theta_1[1] = 540
         return theta_1
 
     def calc_area(self):  
         corners = []
         for node in self.nodes:
             corners.append(node.coordinates)      
-        return PolygonArea(corners)     
+        return PolygonArea(corners)
+
+    def calc_orientation(self):  
+        corners = []
+        for node in self.nodes:
+            corners.append(node.coordinates)      
+        if PolygonArea(corners)>0:
+            return True
+        else: return False
     
-    def minimum_angle(self):  
+    def calc_minimum_angle(self):  
         #print np.amin(calc_cell_angles(self))
         return np.amin(calc_cell_angles(self))
     
-    def maximum_angle(self):  
+    def calc_maximum_angle(self):  
         #print np.amax(calc_cell_angles(self))
         return np.amax(calc_cell_angles(self))       
 
@@ -104,3 +153,5 @@ class Cell(object):
             WireBuilder.Add(me.Edge())         
         
         return WireBuilder.Wire()
+    
+    

@@ -13,6 +13,7 @@ import shapely.geometry as shp
 from scipy.optimize import leastsq
 import datetime
 import pickle
+from functools import partial
 
 #PythonOCC Libraries
 from OCC.Display.SimpleGui import init_display
@@ -41,7 +42,8 @@ from OCC.IFSelect import IFSelect_RetDone
 
 #Own Libraries:
 from readinput import section_config 
-from display import show_coordinate_system
+from display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, export_to_SVG, export_to_PS, export_to_EnhPS, export_to_TEX, \
+                          export_to_BMP,export_to_TIFF, show_coordinate_system, display_SONATA_SegmentLst
 from segment import Segment
 from layer import Layer
 from utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, discrete_stepsize, curvature_of_curve
@@ -60,96 +62,6 @@ from cutoff import cutoff_layer
 from weight import Weight
 from CADinput import import_2d_stp, import_3d_stp
 
-def export_to_PDF(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_pdf%s.pdf' % i):
-        i += 1
-    f.Export('capture_pdf%s.pdf' % i, Graphic3d_EF_PDF)
-    print "EXPORT: \t Screencapture exported to capture_pdf%s.pdf" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-    
-def export_to_SVG(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_svg%s.svg' % i):
-        i += 1
-    f.Export('capture_svg_%s.svg' % i, Graphic3d_EF_SVG)
-    print "EXPORT: \t Screencapture exported to capture_svg%s.svg" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-    
-def export_to_PS(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_ps%s.ps' % i):
-        i += 1
-    f.Export('capture_ps%s.ps' % i, Graphic3d_EF_PostScript)
-    print "EXPORT: \t Screencapture exported to capture_ps%s.ps" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-
-def export_to_EnhPS(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_Enh_ps%s.ps' % i):
-        i += 1
-    f.Export('capture_Enh_ps%s.ps' % i, Graphic3d_EF_EnhPostScript)
-    print "EXPORT: \t Screencapture exported to capture_Enh_ps%s.ps" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-    
-def export_to_TEX(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_tex%s.tex' % i):
-        i += 1
-    f.Export('capture_tex%s.tex' % i, Graphic3d_EF_TEX)
-    print "EXPORT: \t Screencapture exported to capture_tex%s.tex" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-    
-def export_to_BMP(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_bmp%s.bmp' % i):
-        i += 1
-    display.View.Dump('capture_bmp%s.bmp' % i)
-    print "EXPORT: \t Screencapture exported to capture_bmp%s.bmp" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-
-def export_to_PNG(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_png%s.png' % i):
-        i += 1
-    display.View.Dump('capture_png%s.png' % i)
-    print "EXPORT: \t Screencapture exported to capture_png%s.bmp" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-
-def export_to_JPEG(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_jpeg%s.jpeg' % i):
-        i += 1
-    display.View.Dump('capture_jpeg%s.jpeg' % i)
-    print "EXPORT: \t Screencapture exported to capture_jpeg%s.jpeg" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-
-def export_to_TIFF(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_tiff%s.tiff' % i):
-        i += 1
-    display.View.Dump('capture_tiff%s.tiff' % i)
-    print "EXPORT: \t Screencapture exported to capture_tiff%s.tiff" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-    
-
-def print_xy_click(SHP, *kwargs):
-    for shape in SHP:
-        print("Shape selected: ", shape)
-    print(kwargs)
-
-
-    
-   
 ###############################################################################
 #                           M    A    I    N                                  #
 ###############################################################################
@@ -305,37 +217,19 @@ with open(output_filename, 'wb') as output:
     pickle.dump(SegmentLst, output, protocol=pickle.HIGHEST_PROTOCOL)
 
 #======================================================================
-#VIEWER:
-'''CREATE AXIS SYSTEM for Visualization'''
-O  = gp_Pnt(0., 0., 0.)
-p1 = gp_Pnt(10.0/Configuration.SETUP_scale_factor,0.,0.)
-p2 = gp_Pnt(0.,10.0/Configuration.SETUP_scale_factor,0.)
-p3 = gp_Pnt(0.,0.,10.0/Configuration.SETUP_scale_factor)
-
-h1 = BRepBuilderAPI_MakeEdge(O,p1).Shape()
-h2 = BRepBuilderAPI_MakeEdge(O,p2).Shape()
-h3 = BRepBuilderAPI_MakeEdge(O,p3).Shape()
-
-display.DisplayShape(O,color='BLACK')
-display.DisplayShape(h1,color='RED')
-display.DisplayShape(h2,color='GREEN')
-display.DisplayShape(h3,color='BLUE')
-    
-    
-f = display.View.View().GetObject()
-
-display.register_select_callback(print_xy_click)
 display.set_bg_gradient_color(20,6,111,200,200,200)
+show_coordinate_system(display,5)
+
 add_menu('screencapture')
-add_function_to_menu('screencapture', export_to_PDF)
-add_function_to_menu('screencapture', export_to_SVG)
-add_function_to_menu('screencapture', export_to_PS)
-add_function_to_menu('screencapture', export_to_EnhPS)
-add_function_to_menu('screencapture', export_to_TEX)
-add_function_to_menu('screencapture', export_to_BMP)
-add_function_to_menu('screencapture', export_to_PNG)
-add_function_to_menu('screencapture', export_to_JPEG)
-add_function_to_menu('screencapture', export_to_TIFF)
+add_function_to_menu('screencapture','export to PDF', partial(export_to_PDF,display))
+add_function_to_menu('screencapture','export to SVG', partial(export_to_SVG,display))
+add_function_to_menu('screencapture','export to PS', partial(export_to_PS,display))
+add_function_to_menu('screencapture','export to EnhPS', partial(export_to_EnhPS,display))
+add_function_to_menu('screencapture','export to TEX', partial(export_to_TEX,display))
+add_function_to_menu('screencapture','export to BMP', partial(export_to_BMP,display))
+add_function_to_menu('screencapture', 'export to PNG', partial(export_to_PNG,display))
+add_function_to_menu('screencapture', 'export to JPEG', partial(export_to_JPEG,display))
+add_function_to_menu('screencapture', 'export to TIFF', partial(export_to_TIFF,display))
 
 display.View_Top()
 display.FitAll()

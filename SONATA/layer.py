@@ -19,6 +19,7 @@ class Layer(object):
         self.thickness = thickness   	                      #in
         self.Orientation = Orientation
         self.MatID = MatID
+        self.cells = []
         
         #KWARGS:
         if kwargs.get('name') == None:

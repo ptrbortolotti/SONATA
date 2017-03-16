@@ -192,16 +192,14 @@ def grab_nodes_on_BSplineLst(nodes,BSplineLst):
     return disco_nodes
 
 def determine_a_nodes(mesh,a_BSplineLst,global_minLen,LayerID):
-    print "grab nodes of mesh"
     disco_nodes = grab_nodes_of_cells_on_BSplineLst(mesh,a_BSplineLst)
-    print "dicover remaining segments"
     #determine distance between neighboring nodes and discover the remaining segments to discretize mit equidistant points!
     non_dct_segments = []
     disco_nodes = sorted(disco_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))
     para_start = [0,0]
     para_end = [len(a_BSplineLst)-1, a_BSplineLst[-1].LastParameter()]
     
-    factor = 30
+    factor = 10
     for j in range(0,len(disco_nodes)+1):
         if j==0:
             d = distance_on_BSplineLst(a_BSplineLst,para_start,disco_nodes[j].parameters[1:])
@@ -235,7 +233,13 @@ def determine_a_nodes(mesh,a_BSplineLst,global_minLen,LayerID):
     return disco_nodes
 
 
-def mesh_quality_enhancer(cells,b_BSplineLst,global_minLen):
+def mesh_quality_enhancer(cells,b_BSplineLst,global_minLen,**kwargs):
+    
+    #KWARGS:
+    if kwargs.get('display') !=  None:
+        display = kwargs.get('display')
+
+    
     enhanced_cells = []
     for i,c in enumerate(cells):
         if len(c.nodes) == 4:
@@ -268,7 +272,7 @@ def mesh_quality_enhancer(cells,b_BSplineLst,global_minLen):
                 move_node_on_BSplineLst(b_BSplineLst,cells[i-1].nodes[1],delta)   
                 
                 
-            if c.nodes[0].cornerstyle == 2:
+            if c.nodes[0].cornerstyle == 2 or c.nodes[0].cornerstyle == 3:
                 #display.DisplayShape(c.nodes[0].Pnt2d,color='RED')
                 
                 v1 = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[1].Pnt2d)
@@ -277,7 +281,7 @@ def mesh_quality_enhancer(cells,b_BSplineLst,global_minLen):
         
                 if angle < 60:
                     #display.DisplayShape(c.nodes[0].Pnt2d,color='RED')
-                    L = c.nodes[0].Pnt2d.Distance(c.nodes[2].Pnt2d)*1.2
+                    L = c.nodes[0].Pnt2d.Distance(c.nodes[2].Pnt2d)*1.5
                     BS_Vec2d = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[2].Pnt2d)
                     MiddleNodes = []
                     for i in range(0,int(L//global_minLen)-1):
@@ -340,18 +344,14 @@ def mesh_quality_enhancer(cells,b_BSplineLst,global_minLen):
                     for i in range(0,len(MiddleNodes)):
         
                         if i == 0:  #FIRST
-                            nodeLst = [c.nodes[0],MiddleNodes[i],BackNodes[i],c.nodes[3]]                           
+                            nodeLst = [MiddleNodes[i],BackNodes[i],c.nodes[3],c.nodes[0]]                                  
                         else:
                             nodeLst = [MiddleNodes[i],BackNodes[i],BackNodes[i-1],MiddleNodes[i-1]]    
                         BackCellLst.append(Cell(nodeLst))
                     
                     if len(MiddleNodes)>0: #LAST
-                        nodeLst = [c.nodes[2],BackNodes[-1],MiddleNodes[-1]]   
+                        nodeLst = [MiddleNodes[-1],c.nodes[2],BackNodes[-1]]  
                         BackCellLst.append(Cell(nodeLst))
-                        
-        #                for bc in BackCellLst:
-        #                    bc.wire = bc.build_wire()
-        #                    display.DisplayShape(bc.wire,color='GREEN')     
                         
                     enhanced_cells.extend(FrontCellLst)
                     enhanced_cells.extend(reversed(BackCellLst))
@@ -371,14 +371,17 @@ def mesh_quality_enhancer(cells,b_BSplineLst,global_minLen):
 
 
 
-def export_cells_to_patran(filename, cells):
+def export_cells(cells, filename):
     #Get all nodes in cells
     nodes = [] 
     for cell in cells:
         for node in cell.nodes:
             if node not in nodes:
                 nodes.append(node)
+                
     nodes = sorted(nodes, key=lambda Node: (Node.id))
+    for i,n in enumerate(nodes):
+        n.id = i+1
     cells = sorted(cells, key=lambda Cell: (Cell.id))    
     
     

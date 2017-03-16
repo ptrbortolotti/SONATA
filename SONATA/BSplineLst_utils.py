@@ -22,7 +22,18 @@ from para_Geom2d_BsplineCurve import Para_Geom2d_BSplineCurve
 ###############################################################################
 # BSpline and BSplineLst Utilities
 ###############################################################################
-
+def ProjectPointOnBSplineLst(BSplineLst,Pnt2d,tolerance_distance=100):
+    p2 = []
+    for idx,item in enumerate(BSplineLst):
+        projection2 = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item.GetHandle())
+        for j in range(1,projection2.NbPoints()+1):
+            if projection2.Distance(j)<=tolerance_distance:
+                p2.append([projection2.Point(j),idx,projection2.Parameter(j),projection2.Distance(j)])
+            else: None   
+    
+    p2 = np.asarray(p2)
+    min_index = p2[:,3].argmin() 
+    return p2[min_index,:]
 
 def distance_on_BSplineLst(BSplineLst,para1,para2):
 #    para1 = findPnt_on_BSplineLst(P1,BSplineLst)

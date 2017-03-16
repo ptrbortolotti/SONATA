@@ -6,6 +6,7 @@ Created on Thu Jan 19 11:01:06 2017
 """
 import scipy.io
 import numpy as np
+import math
 
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
@@ -30,14 +31,15 @@ def plot_nodes(nodes):
     plt.show()
 
 
-def plot_mesh(nodes,elements,data,show_element_number=False,show_node_number=False):
+def plot_mesh(nodes,elements,theta_11,data,show_element_number=False,show_node_number=False):
     fig, ax = plt.subplots()
     patches = []
     centroids = []
     for i,ele in enumerate(elements):
-        print ele
+        #print ele
         if int(0) in ele:
             array = np.vstack((nodes[ele[0]-1],nodes[ele[1]-1],nodes[ele[2]-1]))
+            centroids.append(centroid(array))
         else:
             array = np.vstack((nodes[ele[0]-1],nodes[ele[1]-1],nodes[ele[2]-1],nodes[ele[3]-1]))
             centroids.append(centroid(array))
@@ -49,8 +51,14 @@ def plot_mesh(nodes,elements,data,show_element_number=False,show_node_number=Fal
     ax.add_collection(p)
     cbar = fig.colorbar(p, ax=ax)
     cbar = cbar.ax.set_ylabel('data')
+    
+    for i,cent in enumerate(centroids):
+        lfactor=0.5
+        dx = lfactor*math.cos(math.radians(theta_11[i]))
+        dy = lfactor*math.sin(math.radians(theta_11[i]))
+        ax.arrow(cent[0], cent[1], dx, dy, head_width=0.05, head_length=0.1, fc='k', ec='k') 
         
-    ax.scatter(nodes[:,0],nodes[:,1],c='k',)
+    #ax.scatter(nodes[:,0],nodes[:,1],c='k',)
     plt.axis('equal')
     ax.set_title('example')
     ax.set_xlabel('x [mm]')
@@ -69,7 +77,7 @@ def plot_mesh(nodes,elements,data,show_element_number=False,show_node_number=Fal
     plt.show()
     
 
-def plot_cells(cells):
+def plot_cells(cells,attr1):
     #Get all nodes in cells
     nodes = [] 
     for cell in cells:
@@ -78,6 +86,8 @@ def plot_cells(cells):
                 nodes.append(node)
                 
     nodes = sorted(nodes, key=lambda Node: (Node.id))
+    for i,n in enumerate(nodes):
+        n.id = i+1
     cells = sorted(cells, key=lambda Cell: (Cell.id))   
     
     nodes_array = []
@@ -98,10 +108,15 @@ def plot_cells(cells):
     
     data = []
     for c in cells:
-        data.append(c.minimum_angle)  
+        data.append(getattr(c, attr1))  
     data = np.asarray(data)  
     
-    plot_mesh(nodes_array,element_array,data,False,False)    
+    theta_11 = []
+    for c in cells:
+        theta_11.append(getattr(c, 'theta_11'))  
+    theta_11 = np.asarray(theta_11)  
+    
+    plot_mesh(nodes_array,element_array,theta_11,data,False,False)    
     
     return None
 
