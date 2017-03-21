@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pickle
 import matplotlib as plt
@@ -23,8 +24,8 @@ from node import Node
 from cell import Cell
 from display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, export_to_SVG, export_to_PS, export_to_EnhPS, export_to_TEX, \
                           export_to_BMP,export_to_TIFF, show_coordinate_system, display_SONATA_SegmentLst
-
-
+from VABS_interface import VABS_config, export_cells_for_VABS
+from readinput import read_material_input
 #====================NOTES:==========================================================
 
 def corners_of_BSplineLst(BSplineLst):
@@ -393,7 +394,17 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
     return a_nodes, b_nodes, cellLst
 
 
-
+def theta_1_from_2nodes(node1,node2):
+    #calc theta_1_angle for middle Triangle
+    theta_1 = [0] * 9
+    v0 = gp_Vec2d(gp_Pnt2d(0,0),gp_Pnt2d(1,0))
+    v1 = gp_Vec2d(node1.Pnt2d,node2.Pnt2d)
+    theta_11 = (v0.Angle(v1))*180/np.pi
+    if theta_11<0:
+        theta_11 = 360+theta_11
+    theta_1[0] = theta_11
+    theta_1[1] = 540
+    return theta_1
 
 
 def second_stage_improvements(cells,b_BSplineLst,global_minLen):
@@ -415,9 +426,13 @@ def second_stage_improvements(cells,b_BSplineLst,global_minLen):
                 #MODIFY EXISTING CELL
                 c.nodes = [nodeLst[0],nodeLst[1],newNode]
                 enhanced_cells2.append(c)
+                enhanced_cells2[-1].calc_theta_1()
                 #ADD NEW CELLS
                 enhanced_cells2.append(Cell([nodeLst[0],newNode,nodeLst[3]]))
+                enhanced_cells2[-1].theta_1 = theta_1_from_2nodes(nodeLst[0],nodeLst[3])
+                #Append last triangle
                 enhanced_cells2.append(Cell([nodeLst[3],newNode,nodeLst[2]]))
+                enhanced_cells2[-1].calc_theta_1()
                 
             #MERGE NODES when to small
             elif magnitude<=0.15*global_minLen:
@@ -428,7 +443,9 @@ def second_stage_improvements(cells,b_BSplineLst,global_minLen):
                 nodeLst[2].parameters = ['modified',p2[1],p2[2]]
                 #MODIFY EXISTING CELL
                 c.nodes = [nodeLst[0],nodeLst[2],nodeLst[3]]
+                c.theta_1 = theta_1_from_2nodes(nodeLst[0],nodeLst[3])
                 enhanced_cells2.append(c)
+                
                 #MODIFY Last CELL
                 cells[i-1].nodes[2] = nodeLst[2]
                 
@@ -443,7 +460,7 @@ def second_stage_improvements(cells,b_BSplineLst,global_minLen):
 #=========================================================================
 #                   M A I N 
 #=========================================================================
-SHOW = False
+SHOW = True
 
 if SHOW == True:
     #====================INIT DISPLAY:==========================================================
@@ -470,8 +487,6 @@ for seg in SegmentLst:
 
 
 #%%===================MESH SEGMENT================================================
-#
-#
 #Resolution = 500 # Nb of Points on Segment0
 #length = get_BSplineLst_length(SegmentLst[0].BSplineLst)
 #global_minLen = round(length/Resolution,5)
@@ -496,6 +511,8 @@ for seg in SegmentLst:
 #       
 #    a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness,global_minLen,1e-1)
 #    enhanced_cells = mesh_quality_enhancer(cells,b_BSplineLst,global_minLen)
+#    for c in enhanced_cells:
+#        c.calc_theta_1()
 #    enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen)
 #
 #    for c in enhanced_cells:
@@ -525,9 +542,10 @@ for seg in SegmentLst:
 #    c.structured = False
 #    c.theta_3 = 0
 #    c.MatID = int(SegmentLst[0].CoreMaterial)
+#    c.calc_theta_1()
 #
 #mesh.extend(c_cells)
-#
+
 ##%%=====================SAVE MESH as pickle:===================================
 #output_filename = filename.replace('_topo.pkl', '_mesh.pkl')
 #with open(output_filename, 'wb') as output:
@@ -550,9 +568,16 @@ print '\t   - smallest angle [deg]: %s' % minimum_angle
 orientation = all([c.orientation for c in mesh])
 print '\t   - Orientation [CC]: %s' % orientation 
 
-filename = filename.replace('.pkl', '.msh')
-plot_cells(mesh,'theta_11')
-#export_cells(mesh,filename)
+plot_cells(mesh,'theta_3')
+
+# %%===================VABS====================================================
+filename = filename.replace('.pkl', '_vabs.dat')
+MaterialLst = read_material_input('mat_database.input')
+VABSsetup = VABS_config(Timoshenko_flag=0)
+export_cells_for_VABS(mesh,filename,VABSsetup,MaterialLst)
+command = 'VABSIII.exe '+ filename
+os.system(command)
+
 
 
 #%%====================DISPLAY=================================================

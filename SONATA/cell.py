@@ -34,21 +34,21 @@ class Cell(object):
     class_counter= 1
     def __init__(self,nodeLst):                  #int
         self.id = self.__class__.class_counter
-        self.__class__.class_counter += 1
-        
+        self.__class__.class_counter += 1       
         self.nodes = nodeLst                #[node,node,node,nodes]      !!!counterclockwise direction!!!
         #self.face  = []                     #[rear,top,front,bottom]        !!!counterclockwise direction!!!       
         #self.wire  = self.build_wire()      #TopoDs_wire
         #self.wire  = None     #TopoDs_wire
         #self.neighbours = []                #-[Cell_ID,CELL_ID... ]
-        #self.theta_1 = 0                    #Ply coordinate system is formed by rotating the global coordinate system in the right-hand sense about the amount 0<Theta_1<260.
+        self.theta_1 = [0] * 9              #Ply coordinate system is formed by rotating the global coordinate system in the right-hand sense about the amount 0<Theta_1<260.
                                             #Theta_1[0:9] is a list storing nine real numbers for the layer plane angles at the nodes of ths element. For simplification, if the 
                                             #ply orinetation can be considered as uniform this element. Theta_1[0] stores the layer plane angles and Theta_1[1] = 540, and all the 
-                                            #rest can be zeroes or other real numbers because they do not enter the calculation. If the elements''' 
+                        #rest can be zeroes or other real numbers because they do not enter the calculation. If the elements''' 
         self.theta_3 = None                 #The Ply coordiate system is rotated about y3 in the right hand sense by the amount -90<Theta_3<90 to for the material system.
 
         self.MatID  = None                 #material id, 
         self.structured = True
+
         # self.minimum_edge = None
 #        self.maximum_edge = None
 #        self.shape_quality = None
@@ -56,13 +56,10 @@ class Cell(object):
         #AREA RATIO to neighbors
         
         #Element quality critiria
+        
     @property
     def wire(self):
         return self.build_wire()
-    
-    @property
-    def theta_1(self):
-        return self.calc_theta_1()
     
     @property
     def theta_11(self):
@@ -83,9 +80,7 @@ class Cell(object):
     @property
     def maximum_angle(self):
         return self.calc_maximum_angle()  
-                    
 
-        
     def __repr__(self): 
         #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 
         STR = ''
@@ -97,11 +92,11 @@ class Cell(object):
     
     def __getstate__(self):
         """Return state values to be pickled."""
-        return (self.id, self.nodes, self.theta_3, self.MatID, self.structured)   
+        return (self.id, self.nodes, self.theta_3, self.MatID, self.theta_1, self.structured)   
     
     def __setstate__(self, state):
         """Restore state from the unpickled state values."""
-        self.id, self.nodes, self.theta_3, self.MatID, self.structured = state
+        self.id, self.nodes, self.theta_3, self.MatID, self.theta_1, self.structured, = state
         #self.wire = self.build_wire()
         
     def calc_theta_1(self):
@@ -117,7 +112,8 @@ class Cell(object):
         else:
             theta_1[0] = 0
             theta_1[1] = 540
-        return theta_1
+        self.theta_1 = theta_1
+        return None
 
     def calc_area(self):  
         corners = []

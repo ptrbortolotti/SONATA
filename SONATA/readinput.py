@@ -9,6 +9,7 @@
 #Date:	09/21/2016
 #==============================================================================
 import numpy as np 
+import ast
 import urllib2  
 from utils import allunique
 
@@ -28,6 +29,8 @@ def read_segment(STR,seg2find):
 def read_rowstring(STR,STR2Find):  
     Start = STR.find(STR2Find)
     End = STR[Start::].find('\n')+Start
+    if End<Start:
+        End=len(STR)
     return Start,End    
     
 def str2bool(v):
@@ -59,8 +62,34 @@ def read_TXTrowSTR(STR,STR2Find):
     temp = STR[Start:End]
     temp = temp.split('=')[1]
     temp = temp.replace(" ", "")
+    return temp
+
+def read_LISTrowSTR(STR,STR2Find):
+    Start,End = read_rowstring(STR,STR2Find)
+    temp = STR[Start:End]
+    temp = temp.split('=')[1]
+    temp = temp.replace(" ", "")
+    temp = ast.literal_eval(temp)
     return temp 
 
+def read_CMATRIX(STR,STR2Find):
+    Start,End = read_rowstring(STR,STR2Find)
+    End = STR[Start::].find(']]')+Start
+    temp = STR[Start:End+len(']]')]
+    temp = temp.split('=')[1]
+    temp = temp.replace(" ", "")
+    temp = temp.replace("\t", "")
+    temp = temp.replace("\n", ",")
+    temp = temp.replace("[,", "[float('nan'),")
+    temp = temp.replace(",,,,,", ",float('nan'),float('nan'),float('nan'),float('nan'),")
+    temp = temp.replace(",,,,", ",float('nan'),float('nan'),float('nan'),")
+    temp = temp.replace(",,,", ",float('nan'),float('nan'),")
+    temp = temp.replace(",,", ",float('nan'),")
+    temp = temp.replace("float('nan'),", '696969,')
+    a = np.asarray(ast.literal_eval(temp))
+    a[a==696969] = float('nan') #replace all 696969's with nan's
+    return a
+    
 def read_layup(STR):
     str2find = '&DEFN Layup'
     start1 = STR.find(str2find)
@@ -233,9 +262,10 @@ class section_config(object):
   
         #======================================================================
         #CHECK and READ SEGMENT COMPOSITE LAYUP DEFINITION!
-        SEG_str,SEG_start,SEG_end = read_segment(STR,'Seg')        
+        SEG_str,SEG_start,SEG_end = read_segment(STR,'Seg')
+             
                 
-        while SEG_str!= '':         
+        while SEG_str!= '':
             self.SEG_ID.append(read_INTrowSTR(SEG_str,'SegID'))
             self.SEG_CoreMaterial.append(read_INTrowSTR(SEG_str,'CoreMaterial'))
             self.SEG_Layup.append(read_layup(SEG_str))
@@ -256,9 +286,113 @@ class section_config(object):
             print 'WARNING: \t The number of segments does not corresponds to the number of Webs'
 
 
+
+
+
+
+
+class Material(object):
+    def __init__(self,MatID,name,orth,rho,**kwargs):
+        self.id = MatID
+        self.name = name
+        self.orth = orth
+        self.rho = rho
+        
+        #ISOTROPIC
+        if orth == 0: 
+            self.E = kwargs.get('E') 
+            self.nu = kwargs.get('nu')  
+            self.alpha = kwargs.get('alpha')  
+
+        #orthotropic material
+        elif orth == 1:
+            self.E = kwargs.get('E') 
+            self.G = kwargs.get('G') 
+            self.nu = kwargs.get('nu')  
+            self.alpha = kwargs.get('alpha')  
+             
+        #general anisotropic material
+        elif orth == 2:
+            self.C = kwargs.get('C')  
+            self.alpha = kwargs.get('alpha')  
+
+    def __repr__(self): 
+        return  str('Material %s: %s' % (self.id, self.name))
+
+
+def read_material_input(filename):
+    MaterialLst=[]
+#    filename='mat_database.input'
+    a = ''
+    with open(filename) as f:
+        for line in f:
+            line = line.partition('#')[0]
+            line = line.rstrip()
+            a += line 
+            a += '\n'
+         
+    STR = ''.join([s for s in a.strip().splitlines(True) if s.strip("\r\n").strip()])
+    #NbMat = STR.count('&DEFN Material')
+
+    MAT_str,MAT_start,MAT_end = read_segment(STR,'Material')
+   
+    while MAT_str!= '':
+        MAT_str = MAT_str[len('&DEFN Material'):-len('&END')]
+
+        #determine MatID, name and orth
+        MatID = read_INTrowSTR(MAT_str,'MatID')
+        name = read_TXTrowSTR(MAT_str,'name')
+        orth = read_INTrowSTR(MAT_str,'orth')
+        rho = read_FLOATrowSTR(MAT_str,'rho')
+        
+        #Remove long name string:
+        Start_name,End_name = read_rowstring(MAT_str,'name')
+        End_name = MAT_str[Start_name:].index('\n') + Start_name
+        for k in range(Start_name,End_name):  
+                templist = list(MAT_str)
+                templist[k] = ' '
+                MAT_str = ''.join(templist)
+   
+        if orth == 0:
+            #print 'Isotropic material'
+            E = read_FLOATrowSTR(MAT_str,'E')
+            nu = read_FLOATrowSTR(MAT_str,'nu')
+            alpha = read_FLOATrowSTR(MAT_str,'alpha')
+            MaterialLst.append(Material(MatID,name,orth,rho,E=E,nu=nu,alpha=alpha))
+            
+        elif orth == 1:
+            #print 'orthotropic material'
+            E =  np.asarray(read_LISTrowSTR(MAT_str,'E'))
+            G =  np.asarray(read_LISTrowSTR(MAT_str,'G'))
+            nu =  np.asarray(read_LISTrowSTR(MAT_str,'nu'))
+            alpha =  np.asarray(read_LISTrowSTR(MAT_str,'alpha'))
+            MaterialLst.append(Material(MatID,name,orth,rho,E=E,G=G,nu=nu,alpha=alpha))
+            
+        elif orth == 2:
+            #print 'general anisotropic material'
+            C = read_CMATRIX(MAT_str,'C')
+            alpha = np.asarray(read_LISTrowSTR(MAT_str,'alpha'))
+            MaterialLst.append(Material(MatID,name,orth,rho,C=C,alpha=alpha))
+        
+        for k in range(MAT_start,MAT_end):  
+                templist = list(STR)
+                templist[k] = ' '
+                STR = ''.join(templist)
+                
+        MAT_str,MAT_start,MAT_end = read_segment(STR,'Material') 
+    
+    MaterialLst.sort(key=lambda Material: (Material.id))
+    return MaterialLst
+
+
+
 #======================================================
 #       MAIN
-#======================================================
+#======================================================       
 if __name__ == '__main__':
     filename = 'sec_config.input'
     section1 = section_config(filename)
+    
+    filename='mat_database.input'
+    MaterialLst = read_material_input(filename)
+    
