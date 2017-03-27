@@ -1,0 +1,122 @@
+#==============================SONATA-INPUT=============================
+#This file contains the input information for the structural design of the rotorblade crosssection
+#Author: Tobias Pflumm
+#Date:	01/30/2017
+#TODO:  SET DEFAULT VALUES
+
+#USER MANUAL:
+
+#2)AREA_R250.stp
+# - If the input_type = 2 is chosen, the user has to provide a .stp file that has the crosssection coordinate system, 
+#		x-axis is chordwise and points to the trailing edge, y-axis upwards
+# - If the input_type = 3 is chosen, the user has to provide 
+
+
+
+#===============================SETUP===================================
+&DEFN Setup
+	NbOfWebs = 0						#Number of Webs (0=CSpar, 1=Dspar,...)		[int]			DEFAULT=0
+	BalanceWeight = False 				#True or False for Balance Weight			[boolean]		DEFAULT=FALSE
+	input_type = 0						#0) Airfoil from UIUC Database; 1) Geometry from .dat file; 2)2d .step or .iges 3)3D .step or .iges and radial station of crosssection 				[int] DEFAULT=0	
+	datasource = n0012		#0)	naca23012					1) AREA_R250.dat			2)AREA_R230.stp	 	3)AREA_Blatt_L.stp	 4)Twist, Taper 						[string] DEFAULT=NONE
+	radial_station = 250				#Radial station of crosssection. Only necessary for input type 3. [float]	Default=NONE
+	scale_factor = 150	 				#use as reference scale factor				[float] 		DEFAULT=1
+	Theta = 0.0							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
+&END 
+
+
+#===============================WEB DEFINITION==========================
+ # &DEFN Web
+	  # WebID = 1							#Web ID 									[int]													
+	  # Pos1 = 0.3						#first Position (between 0 and 1) 			[float]
+	  # Pos2 = 0.7						#second Position (between 0 and 1) 			[float]
+ # &END
+
+#&DEFN Web
+#	WebID = 2							#Web ID 									[int]													
+#	Pos1 = 0.25							#first Position (between 0 and 1) 			[float]
+#	Pos2 = 0.75							#second Position (between 0 and 1) 			[float]
+#&END
+
+#&DEFN 
+#	WebID = 3							#Web ID 									[int]													
+#	Pos1 = 0.15							#first Position (between 0 and 1) 			[float]
+#	Pos2 = 0.85							#second Position (between 0 and 1) 			[float]
+#&END
+
+#===============================COMPOSITE LAYUP DEFINITION==============
+
+&DEFN Seg
+	SegID = 0							#Segment ID									[int]
+	CoreMaterial = 	3					#Material ID of core filling 				[int]
+
+	&DEFN Layup
+	#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
+	0.0			1.0		0.24			45					1		#String1	
+	0.0			1.0		0.24			45					1		#String2
+	0.0			1.0		0.23			45					1		#String1	
+	0.0			1.0		0.23			45					1		#String2
+ 	0.2			0.8		0.60			45					2		#String1
+ 	0.37		0.65	0.60			45					2		#String2
+ 	0.39		0.72	0.90			45					2		#String2
+	0.25		0.6		0.60			45					2		#String2
+	0.0			1.0		0.50			45					2		#String2
+	0.0			1.0		0.50			45					2		#String2
+	0.33		0.75	0.40			45					2		#String2
+	#0.1			0.90	0.20			45					2		#String2
+	#0.05		0.95	0.20			45					2		#String2
+	&END
+&END 
+
+ # &DEFN Seg
+	  # SegID = 1							#Segment ID									[int]
+	  # CoreMaterial = 	4					#Material ID of core filling 				[int]
+
+	  # &DEFN Layup
+	  # #Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
+	  # 0.0		1.0		0.4				45					1		#Skin1
+	  # 0.7		0.4		0.3				45					1		#Skin1
+	  # &END
+# &END 
+
+# &DEFN Seg
+	 # SegID = 2							#Segment ID									[int]
+	 # CoreMaterial = 	4					#Material ID of core filling 				[int]
+	 
+	 # &DEFN Layup
+	 # #Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
+	 # 0.0		1.0 	0.5				45					1		#Skin1s
+	 # 0.4		0.6		0.4				45					1		#Skin1s
+	 # 0.25		0.75	0.23			45					1		#Skin1s
+	 # &END
+# &END 
+
+# &DEFN Seg
+	# SegID = 3															#Segment ID															[int]
+	# CoreMaterial = 	4												#give material id of core fillings in that segment					[int]
+	# &DEFN Layup
+	# #Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
+	# 0.3			0.7		0.4			45					1		#Skin1
+	# 0.7			0.4		0.2			45					1		#Skin1
+	# &END
+# &END 
+
+# &DEFN Seg
+	# SegID = 4															#Segment ID															[int]
+	# CoreMaterial = 	4													#give material id of core fillings in that segment					[int]
+	# &DEFN Layup
+	# #Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
+	# 0.3			0.7		0.4			45					1		#Skin1
+	# 0.7			0.4		0.2			45					1		#Skin1
+	# &END
+# &END 
+
+
+#=================================Balance Weight Definition=============
+
+# &DEFN BalanceWeight
+	# XPos = 0.032						#	X Position	[-]						[float]				NO DEFAULT VALUE						
+	# YPos = 0.0045						#	Y Position	[-]						[float]				NO DEFAULT VALUE
+	# Diameter = 4.05						#	Diameter of Balance Weight [mm]		[float]				NO DEFAULT VALUE
+	# MatID = 1   						#   Material ID							[int]				NO DEFAULT VALUE
+# &END
