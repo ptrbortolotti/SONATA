@@ -66,7 +66,6 @@ class Segment(object):
         self.BSplineLst = BSplineLst_from_ParaLst(self.Para_BSplineLst)
 
 
-
     
     def build_layers(self):
       

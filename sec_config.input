@@ -15,13 +15,15 @@
 
 #===============================SETUP===================================
 &DEFN Setup
+	mat_filename = mat_database.input	#Path and filename of the Material Database
 	NbOfWebs = 0						#Number of Webs (0=CSpar, 1=Dspar,...)		[int]			DEFAULT=0
 	BalanceWeight = False 				#True or False for Balance Weight			[boolean]		DEFAULT=FALSE
-	input_type = 0						#0) Airfoil from UIUC Database; 1) Geometry from .dat file; 2)2d .step or .iges 3)3D .step or .iges and radial station of crosssection 				[int] DEFAULT=0	
-	datasource = n0012		#0)	naca23012					1) AREA_R250.dat			2)AREA_R230.stp	 	3)AREA_Blatt_L.stp	 4)Twist, Taper 						[string] DEFAULT=NONE
+	input_type = 3						#0) Airfoil from UIUC Database; 1) Geometry from .dat file; 2)2d .step or .iges 3)3D .step or .iges and radial station of crosssection 				[int] DEFAULT=0	
+	datasource = examples/AREA_Blatt_L.stp		#0)	naca23012					1) AREA_R250.dat			2)AREA_R230.stp	 	3)AREA_Blatt_L.stp	 4)Twist, Taper 						[string] DEFAULT=NONE
 	radial_station = 250				#Radial station of crosssection. Only necessary for input type 3. [float]	Default=NONE
-	scale_factor = 150	 				#use as reference scale factor				[float] 		DEFAULT=1
-	Theta = 0.0							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
+	scale_factor = 1	 				#use as reference scale factor				[float] 		DEFAULT=1
+	Theta = 6.2							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
+	mesh_resolution = 300				#Scales approximately to the number of points on Segment0
 &END 
 
 

@@ -92,8 +92,6 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
         ax.text(0.02, 0.97, textstr, transform=ax.transAxes, fontsize=12,
                 verticalalignment='top', bbox=props)
 
-       
-        
         if VABSProperties.Xs2 != None:
             SC, = plt.plot(VABSProperties.Xs2,VABSProperties.Xs3,'ko',label='SC: Generalized Shear Center')
             ax.annotate('SC', (VABSProperties.Xs2,VABSProperties.Xs3),fontsize=20)

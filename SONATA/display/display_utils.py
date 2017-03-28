@@ -172,7 +172,6 @@ def display_custome_shape(display,shape,linewidth,transparency,RGB):
 
 #=======================SONATA DISPLAY FUCTIONS===================================
 def display_SONATA_SegmentLst(display,SegmentLst):
-    
     # transfer shapes and display them in the viewer
     display.DisplayShape(SegmentLst[0].wire, color="BLACK")
     display.DisplayShape(SegmentLst[0].BSplineLst[0].StartPoint())

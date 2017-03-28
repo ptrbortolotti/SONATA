@@ -19,12 +19,32 @@ from OCC.TopoDS import TopoDS_Compound, topods_Face, topods_Edge
 
 from SONATA.topo.BSplineLst_utils import get_BSplineLst_length, get_BSpline_length, trim_BSplineLst, set_BSplineLst_to_Origin, \
                             BSplineLst_Orientation, reverse_BSplineLst, findPnt_on_BSplineLst, copy_BSplineLst, \
-                            isPnt_on_BSplineLst, distance_on_BSplineLst, trim_BSplineLst_by_Pnt2d, trim_BSplineLst_by_coordinates
+                            isPnt_on_BSplineLst, distance_on_BSplineLst, trim_BSplineLst_by_Pnt2d, trim_BSplineLst_by_coordinates, \
+                            ProjectPointOnBSplineLst
 from SONATA.fileIO.CADinput import order_BSplineLst_Head2Tail, Check_BSplineLst_Head2Tail
 from SONATA.topo.wire_utils import build_wire_from_BSplineLst,get_wire_length
 from SONATA.topo.utils import Pnt2dLst_to_npArray, unique_rows, PolygonArea, calc_DCT_angles,calc_angle_between
 from SONATA.mesh.node import Node
 from SONATA.mesh.cell import Cell
+
+
+def sort_and_reassignID(mesh):
+    #Get all nodes in cells
+    temp = []
+    for cell in mesh:
+        temp.extend(cell.nodes)
+        
+    nodes = sorted(set(temp), key=lambda Node: (Node.id))
+    for i,n in enumerate(nodes):
+        n.id = i+1
+        
+    mesh = sorted(mesh, key=lambda Cell: (Cell.id))    
+    for i,c in enumerate(mesh):
+        c.id = i+1
+    
+    return mesh, nodes
+
+
 
 def equidistant_nodes_on_BSplineLst(BSplineLst, IC=False, IncStart=True, IncEnd=True, **kwargs): #include corners
     ''' minLen = the minimum distance between points. Should be determined by the segment0.BSplineLstLenght/Resolution
@@ -233,7 +253,7 @@ def determine_a_nodes(mesh,a_BSplineLst,global_minLen,LayerID):
     return disco_nodes
 
 
-def mesh_quality_enhancer(cells,b_BSplineLst,global_minLen,**kwargs):
+def first_stage_improvements(cells,b_BSplineLst,global_minLen,**kwargs):
     
     #KWARGS:
     if kwargs.get('display') !=  None:
@@ -293,7 +313,7 @@ def mesh_quality_enhancer(cells,b_BSplineLst,global_minLen,**kwargs):
                     pPnts = []
                     pPara = []
                     pIdx = []
-                    distance = global_minLen
+                    distance = global_minLen*1.2
                     for n in MiddleNodes: 
                         for idx,item in enumerate(b_BSplineLst):
                             projection = Geom2dAPI_ProjectPointOnCurve(n.Pnt2d,item.GetHandle())
@@ -367,6 +387,77 @@ def mesh_quality_enhancer(cells,b_BSplineLst,global_minLen,**kwargs):
             enhanced_cells.append(c)
     
     return enhanced_cells
+
+
+
+def theta_1_from_2nodes(node1,node2):
+    #calc theta_1_angle for middle Triangle
+    theta_1 = [0] * 9
+    v0 = gp_Vec2d(gp_Pnt2d(0,0),gp_Pnt2d(1,0))
+    v1 = gp_Vec2d(node1.Pnt2d,node2.Pnt2d)
+    theta_11 = (v0.Angle(v1))*180/np.pi
+    if theta_11<0:
+        theta_11 = 360+theta_11
+    theta_1[0] = theta_11
+    theta_1[1] = 540
+    return theta_1
+
+
+def second_stage_improvements(cells,b_BSplineLst,global_minLen):
+    enhanced_cells2 = []
+    for i,c in enumerate(cells):
+        if len(c.nodes)==4:
+            v = gp_Vec2d(c.nodes[1].Pnt2d,c.nodes[2].Pnt2d)
+            magnitude = v.Magnitude()
+            cP = c.nodes[1].Pnt2d.Translated(v.Multiplied(0.5)) 
+            #display.DisplayColoredShape(cP, 'GREEN')  
+            p2 = ProjectPointOnBSplineLst(b_BSplineLst,cP,1)
+            #display.DisplayColoredShape(p2[0], 'YELLOW')  
+            
+            #SPLIT CELLS INTO TRIANGLES AND ADD NODE!
+            if magnitude>=1.8*global_minLen:
+                #display.DisplayColoredShape(p2[0], 'ORANGE')
+                nodeLst = c.nodes
+                newNode = Node(p2[0],['test',p2[1],p2[2]])
+                #MODIFY EXISTING CELL
+                c.nodes = [nodeLst[0],nodeLst[1],newNode]
+                enhanced_cells2.append(c)
+                enhanced_cells2[-1].calc_theta_1()
+                #ADD NEW CELLS
+                enhanced_cells2.append(Cell([nodeLst[0],newNode,nodeLst[3]]))
+                enhanced_cells2[-1].theta_1 = theta_1_from_2nodes(nodeLst[0],nodeLst[3])
+                #Append last triangle
+                enhanced_cells2.append(Cell([nodeLst[3],newNode,nodeLst[2]]))
+                enhanced_cells2[-1].calc_theta_1()
+                
+            #MERGE NODES when to small
+            elif magnitude<=0.15*global_minLen:
+                #display.DisplayColoredShape(p2[0], 'RED')
+                nodeLst = c.nodes
+                #Modify Node 2
+                nodeLst[2].Pnt2d = p2[0]
+                nodeLst[2].parameters = ['modified',p2[1],p2[2]]
+                #MODIFY EXISTING CELL
+                c.nodes = [nodeLst[0],nodeLst[2],nodeLst[3]]
+                c.theta_1 = theta_1_from_2nodes(nodeLst[0],nodeLst[3])
+                enhanced_cells2.append(c)
+                
+                #MODIFY Last CELL
+                cells[i-1].nodes[2] = nodeLst[2]
+                
+                
+            else:
+                enhanced_cells2.append(c)
+
+        else:
+            enhanced_cells2.append(c) 
+    return enhanced_cells2
+
+
+
+
+
+
 
 def export_cells(cells, filename):
     #Get all nodes in cells

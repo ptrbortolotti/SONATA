@@ -211,6 +211,7 @@ class section_config(object):
         #READ SETUP SEGMENT OF INPUT FILE
         SETUP_str,SETUP_start,SETUP_end = read_segment(STR,'Setup')  
         #print SETUP_str,SETUP_start,SETUP_end,'\n'
+        self.SETUP_mat_filename = read_TXTrowSTR(SETUP_str,'mat_filename')
         self.SETUP_NbOfWebs = read_INTrowSTR(SETUP_str,'NbOfWebs')
         self.SETUP_BalanceWeight = read_BOOLrowSTR(SETUP_str,'BalanceWeight')
         self.SETUP_input_type = read_INTrowSTR(SETUP_str,'input_type')
@@ -219,6 +220,7 @@ class section_config(object):
             self.SETUP_radial_station = read_FLOATrowSTR(SETUP_str,'radial_station')
         self.SETUP_scale_factor = read_FLOATrowSTR(SETUP_str,'scale_factor')
         self.SETUP_Theta = read_FLOATrowSTR(SETUP_str,'Theta')
+        self.SETUP_mesh_resolution = read_INTrowSTR(SETUP_str,'mesh_resolution')
         #self.SETUP_Airfoil = read_TXTrowSTR(SETUP_str,'Airfoil')
         #self.SETUP_chord = read_FLOATrowSTR(SETUP_str,'chord')
                                             

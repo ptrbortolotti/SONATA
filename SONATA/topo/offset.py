@@ -115,24 +115,23 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
 #            print 'non unique elements found',len(data)
 
 
-    fig = plt.figure(1)
-    ax = fig.add_subplot(111)
-    plt.clf()         
-    plt.plot(*arrPts.T, color='black', marker='.')
+#    fig = plt.figure(1)
+#    ax = fig.add_subplot(111)
+#    plt.clf()         
+#    plt.plot(*arrPts.T, color='black', marker='.')
+#    
+##    for i, item in enumerate(data):
+##            plt.annotate(i, (item[0],item[1]), color='red')
+#    
+#    plt.plot(*arrPts[0].T, color='green', marker='o')
+#    plt.plot(*arrPts[-1].T, color='purple', marker='o')
+#    plt.plot(*data.T, color='red', marker='.')
+#    plt.plot(*data[0].T, color='green', marker='>')
+#    plt.plot(*data[-1].T, color='purple', marker='>')
+#    plt.axis('equal')  
+#    plt.show()   
     
-#    for i, item in enumerate(data):
-#            plt.annotate(i, (item[0],item[1]), color='red')
-    
-    plt.plot(*arrPts[0].T, color='green', marker='o')
-    plt.plot(*arrPts[-1].T, color='purple', marker='o')
-    plt.plot(*data.T, color='red', marker='.')
-    plt.plot(*data[0].T, color='green', marker='>')
-    plt.plot(*data[-1].T, color='purple', marker='>')
-    plt.axis('equal')  
-    plt.show()   
-    
-
-    
+   
     return data
 
     

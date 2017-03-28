@@ -22,6 +22,16 @@ from SONATA.topo.para_Geom2d_BsplineCurve import Para_Geom2d_BSplineCurve
 ###############################################################################
 # BSpline and BSplineLst Utilities
 ###############################################################################
+
+def corners_of_BSplineLst(BSplineLst):
+    corners = [] 
+    for item in BSplineLst:
+        corners.append(item.EndPoint())
+        
+    corners.pop(-1)
+    return corners #gp_Pnt2d Lst
+    
+
 def ProjectPointOnBSplineLst(BSplineLst,Pnt2d,tolerance_distance=100):
     p2 = []
     for idx,item in enumerate(BSplineLst):
@@ -619,14 +629,14 @@ def BSplineLst_from_dct(DCT_data,angular_deflection=15):
 
     
     list_of_bsplines = []
-    plt.figure(2)
-    plt.clf()
-    plt.axis('equal')  
+#    plt.figure(2)
+#    plt.clf()
+#    plt.axis('equal')  
     for i,item in enumerate(DCT_Segments):
             
         data = item.T
 
-        plt.plot(*item.T, marker='.')
+#        plt.plot(*item.T, marker='.')
     
         tmp_harray = TColgp_HArray1OfPnt2d_from_nparray(data)
         try: tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 1e-06)             #Interpolate datapoints to bspline
@@ -635,7 +645,7 @@ def BSplineLst_from_dct(DCT_data,angular_deflection=15):
             for i, it in enumerate(item):
                 plt.annotate(i, (it[0],it[1]), color='black')
         
-        plt.show()                                      
+#        plt.show()                                      
         tmp_interpolation.Perform()                              
         tmp_bspline = tmp_interpolation.Curve().GetObject()
         list_of_bsplines.append(tmp_bspline)

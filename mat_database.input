@@ -67,7 +67,6 @@
 		alpha = [0.2,30,30]					#Thermal expansion coefficient at 20°C [a11,a22,a33] [10-6/K] [float]
 &END
 
-
 &DEFN Material
  		MatID = 3							#Material ID 	[int]	
 		name = ROHACELL51 IG/IG-F							#Name [string]
