@@ -44,86 +44,86 @@ def export_to_PDF(display,event=None):
     f = display.View.View().GetObject()
     display.set_bg_gradient_color(255,255,255,255,255,255)
     i = 0
-    while os.path.exists('capture_pdf%s.pdf' % i):
+    while os.path.exists('img/capture_pdf%s.pdf' % i):
         i += 1
-    f.Export('capture_pdf%s.pdf' % i, Graphic3d_EF_PDF)
-    print "EXPORT: \t Screencapture exported to capture_pdf%s.pdf" % i
+    f.Export('img/capture_pdf%s.pdf' % i, Graphic3d_EF_PDF)
+    print "EXPORT: \t Screencapture exported to img/capture_pdf%s.pdf" % i
     display.set_bg_gradient_color(20,6,111,200,200,200)
     
 def export_to_SVG(display,event=None):
     f = display.View.View().GetObject()
     display.set_bg_gradient_color(255,255,255,255,255,255)
     i = 0
-    while os.path.exists('capture_svg%s.svg' % i):
+    while os.path.exists('img/capture_svg%s.svg' % i):
         i += 1
-    f.Export('capture_svg_%s.svg' % i, Graphic3d_EF_SVG)
-    print "EXPORT: \t Screencapture exported to capture_svg%s.svg" % i
+    f.Export('img/capture_svg_%s.svg' % i, Graphic3d_EF_SVG)
+    print "EXPORT: \t Screencapture exported to img/capture_svg%s.svg" % i
     display.set_bg_gradient_color(20,6,111,200,200,200)
     
 def export_to_PS(display,event=None):
     f = display.View.View().GetObject()
     display.set_bg_gradient_color(255,255,255,255,255,255)
     i = 0
-    while os.path.exists('capture_ps%s.ps' % i):
+    while os.path.exists('img/capture_ps%s.ps' % i):
         i += 1
-    f.Export('capture_ps%s.ps' % i, Graphic3d_EF_PostScript)
-    print "EXPORT: \t Screencapture exported to capture_ps%s.ps" % i
+    f.Export('img/capture_ps%s.ps' % i, Graphic3d_EF_PostScript)
+    print "EXPORT: \t Screencapture exported to img/capture_ps%s.ps" % i
     display.set_bg_gradient_color(20,6,111,200,200,200)
 
 def export_to_EnhPS(display,event=None):
     f = display.View.View().GetObject()
     display.set_bg_gradient_color(255,255,255,255,255,255)
     i = 0
-    while os.path.exists('capture_Enh_ps%s.ps' % i):
+    while os.path.exists('img/capture_Enh_ps%s.ps' % i):
         i += 1
-    f.Export('capture_Enh_ps%s.ps' % i, Graphic3d_EF_EnhPostScript)
-    print "EXPORT: \t Screencapture exported to capture_Enh_ps%s.ps" % i
+    f.Export('img/capture_Enh_ps%s.ps' % i, Graphic3d_EF_EnhPostScript)
+    print "EXPORT: \t Screencapture exported to img/capture_Enh_ps%s.ps" % i
     display.set_bg_gradient_color(20,6,111,200,200,200)
     
 def export_to_TEX(display,event=None):
     f = display.View.View().GetObject()
     display.set_bg_gradient_color(255,255,255,255,255,255)
     i = 0
-    while os.path.exists('capture_tex%s.tex' % i):
+    while os.path.exists('img/capture_tex%s.tex' % i):
         i += 1
-    f.Export('capture_tex%s.tex' % i, Graphic3d_EF_TEX)
-    print "EXPORT: \t Screencapture exported to capture_tex%s.tex" % i
+    f.Export('img/capture_tex%s.tex' % i, Graphic3d_EF_TEX)
+    print "EXPORT: \t Screencapture exported to img/capture_tex%s.tex" % i
     display.set_bg_gradient_color(20,6,111,200,200,200)
     
 def export_to_BMP(display,event=None):
     display.set_bg_gradient_color(255,255,255,255,255,255)
     i = 0
-    while os.path.exists('capture_bmp%s.bmp' % i):
+    while os.path.exists('img/capture_bmp%s.bmp' % i):
         i += 1
-    display.View.Dump('capture_bmp%s.bmp' % i)
-    print "EXPORT: \t Screencapture exported to capture_bmp%s.bmp" % i
+    display.View.Dump('img/capture_bmp%s.bmp' % i)
+    print "EXPORT: \t Screencapture exported to img/capture_bmp%s.bmp" % i
     display.set_bg_gradient_color(20,6,111,200,200,200)
 
 def export_to_PNG(display,event=None):
     display.set_bg_gradient_color(255,255,255,255,255,255)
     i = 0
-    while os.path.exists('capture_png%s.png' % i):
+    while os.path.exists('img/capture_png%s.png' % i):
         i += 1
-    display.View.Dump('capture_png%s.png' % i)
-    print "EXPORT: \t Screencapture exported to capture_png%s.bmp" % i
+    display.View.Dump('img/capture_png%s.png' % i)
+    print "EXPORT: \t Screencapture exported to img/capture_png%s.bmp" % i
     display.set_bg_gradient_color(20,6,111,200,200,200)
 
 def export_to_JPEG(display,event=None):
     display.set_bg_gradient_color(255,255,255,255,255,255)
     i = 0
-    while os.path.exists('capture_jpeg%s.jpeg' % i):
+    while os.path.exists('img/capture_jpeg%s.jpeg' % i):
         i += 1
-    display.View.Dump('capture_jpeg%s.jpeg' % i)
-    print "EXPORT: \t Screencapture exported to capture_jpeg%s.jpeg" % i
+    display.View.Dump('img/capture_jpeg%s.jpeg' % i)
+    print "EXPORT: \t Screencapture exported to img/capture_jpeg%s.jpeg" % i
     display.set_bg_gradient_color(20,6,111,200,200,200)
 
 def export_to_TIFF(display,event=None):
     display.set_bg_gradient_color(255,255,255,255,255,255)
     i = 0
-    while os.path.exists('capture_tiff%s.tiff' % i):
+    while os.path.exists('img/capture_tiff%s.tiff' % i):
         i += 1
-    display.View.Dump('capture_tiff%s.tiff' % i)
-    print "EXPORT: \t Screencapture exported to capture_tiff%s.tiff" % i
+    display.View.Dump('img/capture_tiff%s.tiff' % i)
+    print "EXPORT: \t Screencapture exported to img/capture_tiff%s.tiff" % i
     display.set_bg_gradient_color(20,6,111,200,200,200)
 
 

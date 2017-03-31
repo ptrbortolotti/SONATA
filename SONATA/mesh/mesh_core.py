@@ -13,7 +13,7 @@ from SONATA.mesh.cell import Cell
 
 #===================FUNCTIONALITIES==========================================
 
-def triangle_mesh(nodes,area=1.0):
+def triangle_mesh(nodes,options):
     points = []
     for n in nodes:
         points.append([n.Pnt2d.X(),n.Pnt2d.Y()])
@@ -30,7 +30,6 @@ def triangle_mesh(nodes,area=1.0):
     poly['vertices'] = old_vertices
     poly['segments'] = segments_core
 
-    options = 'pa%s' % (area)
     mesh =  triangulate(poly, options)
     
     new_vertices = []
@@ -50,8 +49,16 @@ def find_node(nodeLst,ID):
     
     return tmp
 
-def gen_core_cells(a_nodes,area=1.0):
-    mesh = triangle_mesh(a_nodes,area)  
+def gen_core_cells(a_nodes,area=1.0,**kwargs):
+    
+    #KWARGS:
+    if kwargs.get('options') !=  None:
+        options = kwargs.get('options')
+    else:
+        options = 'pa%s' % (area)
+    
+    mesh = triangle_mesh(a_nodes,options)  
+    
     tmp = []
     for n in a_nodes:
         tmp.append([n.Pnt2d.X(),n.Pnt2d.Y(),n.id])

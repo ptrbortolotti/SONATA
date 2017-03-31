@@ -6,7 +6,8 @@ Created on Wed Jan 18 12:49:54 2017
 """
 import numpy as np
 
-from OCC.gp import gp_Circ2d, gp_Pnt2d, gp_Ax2d, gp_Dir2d, gp_Vec2d
+from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge
+from OCC.gp import gp_Circ2d, gp_Pnt2d, gp_Ax2d, gp_Dir2d, gp_Vec2d, gp_Ax2, gp_Dir,gp_Circ, gp_Pnt
 from OCC.Geom2d import Geom2d_Circle, Geom2d_BezierCurve
 from OCC.Display.SimpleGui import init_display
 
@@ -31,12 +32,23 @@ class Weight(object):
         self.MatID = MatID
         self.style = weight_style
         
+
+        #Circ = gp_Circ2d(Ax2d,R)
         Center = gp_Pnt2d(self.X,self.Y)
         Ax2d = gp_Ax2d(Center,gp_Dir2d(1,0))
-        #Circ = gp_Circ2d(Ax2d,R)
         self.Curve = Geom2d_Circle(Ax2d,self.D/2)
         
-        
+    @property
+    def wire(self):
+        return self.build_wire()
+    
+    def build_wire(self):
+        Center = gp_Pnt(self.X,self.Y,0)
+        Ax2 = gp_Ax2(Center,gp_Dir(0,0,1))
+        Circ = gp_Circ(Ax2,self.D/2)
+        aedge = BRepBuilderAPI_MakeEdge(Circ).Edge()
+        wire = BRepBuilderAPI_MakeWire(aedge)
+        return wire.Wire()
 #        elif style == 1:
 #        W = 0.4
 #        P1 = Center.Translated(gp_Vec2d(-R,0)) 

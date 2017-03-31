@@ -152,17 +152,27 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
     
                 
                 #print 'Len:exterior_corners =',len(exterior_corners)
-                
                 if len(exterior_corners) == 0:
                     node.cornerstyle = 2
                     print pIdx[0],pPara[0],pIdx[1],pPara[1]
-                    b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
-                    newPnt = gp_Pnt2d()
-                    newPara = (pPara[0]+pPara[1])/2                    
-                    b_BSplineLst[pIdx[0]].D0(newPara,newPnt)
-                    b_nodes.append(Node(newPnt,[LayerID,pIdx[0],newPara]))
-                    b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
-                
+                    if regular_corner == True:
+                        b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
+                        newPnt = gp_Pnt2d()
+                        newPara = (pPara[0]+pPara[1])/2                    
+                        b_BSplineLst[pIdx[0]].D0(newPara,newPnt)
+                        b_nodes.append(Node(newPnt,[LayerID,pIdx[0],newPara]))
+                        b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
+                    
+                    else:
+                        b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
+                        newPara = b_BSplineLst[pIdx[0]].FirstParameter()
+                        newPnt = gp_Pnt2d()                  
+                        b_BSplineLst[pIdx[0]].D0(newPara,newPnt)
+                        b_nodes.append(Node(newPnt,[LayerID,pIdx[0],newPara]))
+                        b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
+                        
+                        
+                        
                 elif len(exterior_corners) == 1:
                     node.cornerstyle = 3
                     if regular_corner == True:

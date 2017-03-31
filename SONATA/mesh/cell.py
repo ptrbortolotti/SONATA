@@ -48,6 +48,7 @@ class Cell(object):
 
         self.MatID  = None                 #material id, 
         self.structured = True
+        self.interior_nodes = []
         #Element quality critiria
         # self.minimum_edge = None
 #        self.maximum_edge = None
@@ -98,11 +99,11 @@ class Cell(object):
     
     def __getstate__(self):
         """Return state values to be pickled."""
-        return (self.id, self.nodes, self.theta_3, self.MatID, self.theta_1, self.structured)   
+        return (self.id, self.nodes, self.theta_3, self.MatID, self.theta_1, self.structured, self.interior_nodes)   
     
     def __setstate__(self, state):
         """Restore state from the unpickled state values."""
-        self.id, self.nodes, self.theta_3, self.MatID, self.theta_1, self.structured, = state
+        self.id, self.nodes, self.theta_3, self.MatID, self.theta_1, self.structured, self.interior_nodes = state
         #self.wire = self.build_wire()
     
     

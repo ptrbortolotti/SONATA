@@ -32,6 +32,7 @@ from SONATA.topo.BSplineLst_utils import reverse_BSplineLst, BSplineLst_Orientat
 from SONATA.mesh.mesh_byprojection import mesh_by_projecting_nodes_on_BSplineLst
 from SONATA.mesh.mesh_core import gen_core_cells
 from SONATA.mesh.mesh_utils import first_stage_improvements,second_stage_improvements, determine_a_nodes, equidistant_nodes_on_BSplineLst, sort_and_reassignID                                        
+from SONATA.mesh.mesh_intersect import map_mesh_by_intersect_curve2d
 
 from SONATA.vabs.VABS_interface import VABS_config, export_cells_for_VABS, XSectionalProperties
 from SONATA.vabs.strain import Strain
@@ -145,7 +146,7 @@ for seg in SegmentLst:
 #%%============================================================================ 
 #                           M E S H
 # =============================================================================  
-Resolution = 300 # Nb of Points on Segment0
+Resolution = Configuration.SETUP_mesh_resolution # Nb of Points on Segment0
 length = get_BSplineLst_length(SegmentLst[0].BSplineLst)
 global_minLen = round(length/Resolution,5)
 
@@ -153,7 +154,7 @@ global_minLen = round(length/Resolution,5)
 mesh = []
 disco_nodes = []
 for j,seg in enumerate(reversed(SegmentLst)):
-    for i,layer in enumerate(reversed(seg.LayerLst[-10:])):
+    for i,layer in enumerate(reversed(seg.LayerLst)):
         print 'STATUS: \t Meshing Segment %s, Layer %s' %(seg.ID,len(seg.LayerLst)-i)
         
         a_BSplineLst = layer.BSplineLst       
@@ -169,18 +170,18 @@ for j,seg in enumerate(reversed(SegmentLst)):
         #TODO: Scale tolerance to problem size!    
         a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness,global_minLen,1e-1) 
         
-        if i==9:
-            for n in b_nodes:
-                display.DisplayShape(n.Pnt2d)
-            for c in cells:
-                display.DisplayShape(c.wire)
+#        if i==9:
+#            for n in b_nodes:
+#                display.DisplayShape(n.Pnt2d)
+#            for c in cells:
+#                display.DisplayShape(c.wire)
         
-        if i<9:
-            enhanced_cells = first_stage_improvements(cells,b_BSplineLst,global_minLen)
-            for c in enhanced_cells:
-                c.calc_theta_1()
-            enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen)
-    
+
+        enhanced_cells = first_stage_improvements(cells,b_BSplineLst,global_minLen)
+        for c in enhanced_cells:
+            c.calc_theta_1()
+        enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen)
+
         for c in enhanced_cells:
             c.theta_3 = layer.Orientation
             c.MatID = int(layer.MatID)
@@ -211,7 +212,28 @@ for j,seg in enumerate(reversed(SegmentLst)):
     mesh,nodes = sort_and_reassignID(mesh)
 
 
-#=====================PICKLE MESH ===========================================
+#%% BALANCE WEIGHT - CUTTING HOLE ALGORITHM====================================
+#if Configuration.SETUP_BalanceWeight == True:
+#    print 'STATUS: \t Meshing Balance Weight'   
+#
+#    mesh,boundary_nodes = map_mesh_by_intersect_curve2d(mesh,BW.Curve,BW.wire,display=display) 
+#    triangle_options = 'pa.3'
+#    [bw_cells,bw_nodes] = gen_core_cells(boundary_nodes,options=triangle_options)
+#    
+#    for c in bw_cells:
+#        c.structured = False
+#        c.theta_3 = 0
+#        c.MatID = Configuration.BW_MatID
+#        c.calc_theta_1()
+#    
+#    mesh.extend(bw_cells)
+#
+#    for c in mesh:
+#         display.DisplayShape(c.wire,color='BLACK')         
+#
+#mesh,nodes = sort_and_reassignID(mesh)
+
+#%%=====================PICKLE MESH ===========================================
 output_filename = filename.replace('.input', '_mesh.pkl')
 with open(output_filename, 'wb') as output:
     pickle.dump(mesh, output, protocol=pickle.HIGHEST_PROTOCOL)
@@ -240,7 +262,7 @@ print '\t   - smallest angle [deg]: %s' % minimum_angle
 filename = filename.replace('.input', '.vab')
 VABSsetup = VABS_config(recover_flag=0)
 VABSsetup.F = [0,0,0]    #in Newton
-VABSsetup.M = [100e3,0,0]     #in Newton/mm
+VABSsetup.M = [0,220e3,0]     #in Newton/mm
 
 print 'STATUS: \t RUNNING VABS for Constitutive modeling:'
 #EXECUTE VABS:
@@ -273,7 +295,7 @@ print 'STATUS: \t POST-PROCESSING:'
 print 'INFO: \t Total duration: %s' % (datetime.now() - startTime)
 filename_K = filename+'.K'
 BeamProperties = XSectionalProperties(filename_K)
-plot_cells(mesh, nodes, 'MatID',BeamProperties,'NACA0012, 150mm chord',False)
+plot_cells(mesh, nodes, 'MatID',BeamProperties,'NACA0012, 150mm chord')
 
 
 if VABSsetup.recover_flag == 1:

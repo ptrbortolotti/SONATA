@@ -104,7 +104,7 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
     
     
 
-def plot_cells(cells,nodes,attr1,VABSProperties,title,plotTheta11=False, plotDisplacement=False,):
+def plot_cells(cells,nodes,attr1,VABSProperties=None,title='None',plotTheta11=False, plotDisplacement=False,):
     nodes_array = []
     for n in nodes:
         if plotDisplacement:
