@@ -119,7 +119,7 @@ def read_layup(STR):
     
 
 def UIUCAirfoil(name):
-    foil_dat_url = 'http://www.ae.illinois.edu/m-selig/ads/coord_seligFmt/%s.dat' % name
+    foil_dat_url = 'http://m-selig.ae.illinois.edu/ads/coord_seligFmt/%s.dat' % name
     f = urllib2.urlopen(foil_dat_url)
     temp_x = []
     temp_y = []
@@ -133,7 +133,7 @@ def UIUCAirfoil(name):
     return np.array([temp_x,temp_y,temp_z])                                                         # return AirfoilCoordinate as np.arrray
 
 def UIUCAirfoil2d(name):
-    foil_dat_url = 'http://www.ae.illinois.edu/m-selig/ads/coord_seligFmt/%s.dat' % name
+    foil_dat_url = 'http://m-selig.ae.illinois.edu/ads/coord_seligFmt/%s.dat' % name
     f = urllib2.urlopen(foil_dat_url)
     temp_x = []
     temp_y = []
