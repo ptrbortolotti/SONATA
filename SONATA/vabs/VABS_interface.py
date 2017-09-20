@@ -115,7 +115,7 @@ def export_cells_for_VABS(cells,nodes,filename,VABSsetup,MaterialLst):
         f.write('\n')
         #Node number, coordinates x_2, coordinatex x_3
         for n in nodes:
-            f.write('%i\t\t%.8f\t%.8f\n' % (n.id,n.coordinates[0],n.coordinates[1]))
+            f.write('%i\t\t%.6f\t%.5f\n' % (n.id,n.coordinates[0],n.coordinates[1]))
         f.write('\n')
         #Element number, connectivity
         for c in cells:
@@ -129,9 +129,9 @@ def export_cells_for_VABS(cells,nodes,filename,VABSsetup,MaterialLst):
         f.write('\n')
         #Element number, Layup orientation
         for c in cells:
-            f.write('%i\t\t%i\t%.1f\t' % (c.id,c.MatID,c.theta_3))
+            f.write('%i\t\t%i\t%i\t' % (c.id,c.MatID,c.theta_3))
             for t in c.theta_1:
-                f.write('%.1f\t' % (t))
+                f.write('%.2f\t' % (t))
             f.write('\n')  
         f.write('\n')
         #Materials 
@@ -290,7 +290,13 @@ class XSectionalProperties(object):
         self.I1 = read_FLOATrowSTR(MP,'Mass Moments of Intertia about x1 axis')
         self.I2 = read_FLOATrowSTR(MP,'Mass Moments of Intertia about x2 axis')
         self.I3 = read_FLOATrowSTR(MP,'Mass Moments of Intertia about x3 axis')
-        self.PIA = read_PIA(MP, 'The Principal Inertial Axes Rotated from User Coordinate System by')
+        
+        try:
+            self.PIA = read_PIA(MP, 'The Principal Inertial Axes Rotated from User Coordinate System by')
+        except:
+            if  'The user coordinate axes are the principal inertial axes.' in MP:
+                self.PIA = float(0)
+                
         self.Rg = read_FLOATrowSTR(MP,'The mass-weighted radius of gyration')
         #The Geometric Center of the Cross Section:
         self.Xg2 = read_FLOATrowSTR(GC,'Xg2')

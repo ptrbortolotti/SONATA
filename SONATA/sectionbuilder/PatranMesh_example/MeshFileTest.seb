@@ -1,0 +1,178 @@
+!======================================================
+!				S E T U P
+!======================================================
+
+
+@PROCESS_CONTROL_DEFINITION {
+  @UNIT_SYSTEM {SI}
+  @MANUAL_PATH {FIGURES\}
+  @FIGURES_PATH {FIGURES\}
+  @DEBUG_PRINT_FLAG {3}
+}
+
+
+!======================================================
+!				MODEL DEFINITION
+!======================================================
+
+@MODEL_DEFINITION {
+  @MATERIAL_PROPERTY_DEFINITION {
+    @MATERIAL_PROPERTY_NAME {MatPropAluminum} {
+      @MATERIAL_TYPE {ISOTROPIC}
+      @MATERIAL_DENSITY { 2.68000e+003}
+      @STIFFNESS_PROPERTIES {
+        @YOUNG'S_MODULUS { 7.30000e+010}
+        @POISSON'S_RATIO { 3.00000e-001}
+      }
+      @STRENGTH_PROPERTIES {
+        @FAILURE_CRITERION_TYPE {VON_MISES}
+        @ALLOWABLE_TENSILE_STRESS { 6.20000e+008}
+      }
+    }
+  }
+  
+  
+  @LAYUP_DEFINITION {
+    @LAYUP_NAME {Layup} {
+      @LAYER_THICKNESS {1.0}
+      @MATERIAL_PROPERTY_NAME {MatPropAluminum}
+      @LAYER_DEFINITION {
+        @ORIENTATION_ANGLES {0.0, 0.0}
+      }
+    }
+  }
+  
+  @SOLID_PROPERTY_DEFINITION {
+    @SOLID_PROPERTY_NAME {SolPropMatPropAluminum} {
+      @IS_DEFINED_IN_FRAME {GLOBAL}
+      @LAYER_ORIENTATION {ALONG_U}
+      @LAYUP_NAME {Layup}
+    }
+  }
+  
+@VERTEX_DEFINITION {
+  @VERTEX_NAME {VertexA} { @AT_POINT {PointA} }
+  @VERTEX_NAME {VertexB} { @AT_POINT {PointB} }
+  @VERTEX_NAME {VertexC} { @AT_POINT {PointC} }
+  @VERTEX_NAME {VertexD} { @AT_POINT {PointD} }
+}
+@EDGE_DEFINITION {
+  @EDGE_NAME {EdgeBA} {
+    @CONNECTED_TO_VERTICES {VertexB, VertexA}
+    @CURVE_NAME {CurveBA}
+  }
+  @EDGE_NAME {EdgeCD} {
+    @CONNECTED_TO_VERTICES {VertexC, VertexD}
+    @CURVE_NAME {CurveCD}
+  }
+  @EDGE_NAME {EdgeCB} {
+    @CONNECTED_TO_VERTICES {VertexC, VertexB}
+    @CURVE_NAME {CurveCB}
+  }
+  @EDGE_NAME {EdgeDA} {
+    @CONNECTED_TO_VERTICES {VertexD, VertexA}
+    @CURVE_NAME {CurveDA}
+  }
+}
+@POINT_DEFINITION {
+  @POINT_NAME {PointA} {
+    @COORDINATES { 0.00000e+000,  1.00000e+000,  1.00000e+000}
+  }
+  @POINT_NAME {PointB} {
+    @COORDINATES { 0.00000e+000, -1.00000e+000,  1.00000e+000}
+  }
+  @POINT_NAME {PointC} {
+    @COORDINATES { 0.00000e+000, -1.00000e+000, -1.00000e+000}
+  }
+  @POINT_NAME {PointD} {
+    @COORDINATES { 0.00000e+000,  1.00000e+000, -1.00000e+000}
+  }
+}
+@CURVE_DEFINITION {
+  @CURVE_NAME {CurveBA} {
+    @IS_DEFINED_IN_FRAME {INERTIAL}
+    @POINT_DEFINITION {
+      @NUMBER_OF_CONTROL_POINTS {     2}
+      @DEGREE_OF_CURVE {     1}
+      @RATIONAL_CURVE_FLAG {NO}
+      @END_POINT_0 {PointB}
+      @END_POINT_1 {PointA}
+    }
+    @CURVE_MESH_PARAMETERS_NAME {MeshCurv}
+  }
+  @CURVE_NAME {CurveCD} {
+    @IS_DEFINED_IN_FRAME {INERTIAL}
+    @POINT_DEFINITION {
+      @NUMBER_OF_CONTROL_POINTS {     2}
+      @DEGREE_OF_CURVE {     1}
+      @RATIONAL_CURVE_FLAG {NO}
+      @END_POINT_0 {PointC}
+      @END_POINT_1 {PointD}
+    }
+    @CURVE_MESH_PARAMETERS_NAME {MeshCurv}
+  }
+  @CURVE_NAME {CurveCB} {
+    @IS_DEFINED_IN_FRAME {INERTIAL}
+    @POINT_DEFINITION {
+      @NUMBER_OF_CONTROL_POINTS {     2}
+      @DEGREE_OF_CURVE {     1}
+      @RATIONAL_CURVE_FLAG {NO}
+      @END_POINT_0 {PointC}
+      @END_POINT_1 {PointB}
+    }
+    @CURVE_MESH_PARAMETERS_NAME {MeshCurv}
+  }
+  @CURVE_NAME {CurveDA} {
+    @IS_DEFINED_IN_FRAME {INERTIAL}
+    @POINT_DEFINITION {
+      @NUMBER_OF_CONTROL_POINTS {     2}
+      @DEGREE_OF_CURVE {     1}
+      @RATIONAL_CURVE_FLAG {NO}
+      @END_POINT_0 {PointD}
+      @END_POINT_1 {PointA}
+    }
+    @CURVE_MESH_PARAMETERS_NAME {MeshCurv}
+  }
+}
+@CURVE_MESH_PARAMETERS_DEFINITION {
+  @CURVE_MESH_PARAMETERS_NAME {MeshCurv} {
+    @NUMBER_OF_ELEMENTS {     1}
+    @ORDER_OF_ELEMENTS {     1}
+  }
+}
+@SURFACE_DEFINITION {
+  @SURFACE_NAME {Surface1} {
+    @IS_DEFINED_IN_FRAME {INERTIAL}
+    @POINT_DEFINITION {
+      @NUMBER_OF_CONTROL_POINTS {     2,      2}
+      @DEGREE_OF_CURVE {     1,      1}
+      @RATIONAL_CURVE_FLAG {NO}
+      @EDGE_CURVES {CurveCD, CurveDA, CurveBA, CurveCB}
+    }
+  }
+}
+}
+
+!======================================================
+!				SECTION_BUILDER_DEFINITION
+!======================================================
+@SECTION_BUILDER_DEFINITION {
+  @SECTION_BUILDER_NAME {SBuild} {
+    @CURVATURE_VECTOR { 0.00000e+000,  0.00000e+000,  0.00000e+000}
+    @TANGENT_VECTOR { 1.00000e+002,  0.00000e+000,  0.00000e+000}
+  }
+}
+
+!======================================================
+!				PRE_PROCESSING_ANALYSIS
+!======================================================
+@PRE_PROCESSING_ANALYSIS {
+  @MESH_FILE_DEFINITION {
+    @MESH_FILE_DEFINITION_NAME {MshFileName} {
+      @MESH_FILE_TYPE {PATRAN}
+!     @FILE_NAME {tri_6node.dat}
+!     @FILE_NAME {box_beam.dat}
+	  @FILE_NAME {SimpleMeshFile8.dat}
+    }
+  }
+}

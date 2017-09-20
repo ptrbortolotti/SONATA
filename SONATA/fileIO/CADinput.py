@@ -47,88 +47,6 @@ from SONATA.topo.BSplineLst_utils import get_BSpline_length, get_BSplineLst_leng
                             reverse_BSplineLst, BSplineLst_Orientation,discretize_BSplineLst, \
                             BSplineLst_from_dct
 
-def export_to_PDF(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_pdf%s.pdf' % i):
-        i += 1
-    f.Export('capture_pdf%s.pdf' % i, Graphic3d_EF_PDF)
-    print "EXPORT: \t Screencapture exported to capture_pdf%s.pdf" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-    
-def export_to_SVG(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_svg%s.svg' % i):
-        i += 1
-    f.Export('capture_svg%s.svg' % i, Graphic3d_EF_SVG)
-    print "EXPORT: \t Screencapture exported to capture_svg%s.svg" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-    
-def export_to_PS(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_ps%s.ps' % i):
-        i += 1
-    f.Export('capture_ps%s.ps' % i, Graphic3d_EF_PostScript)
-    print "EXPORT: \t Screencapture exported to capture_ps%s.ps" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-
-def export_to_EnhPS(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_Enh_ps%s.ps' % i):
-        i += 1
-    f.Export('capture_Enh_ps%s.ps' % i, Graphic3d_EF_EnhPostScript)
-    print "EXPORT: \t Screencapture exported to capture_Enh_ps%s.ps" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-    
-def export_to_TEX(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_tex%s.tex' % i):
-        i += 1
-    f.Export('capture_tex%s.tex' % i, Graphic3d_EF_TEX)
-    print "EXPORT: \t Screencapture exported to capture_tex%s.tex" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-    
-def export_to_BMP(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_bmp%s.bmp' % i):
-        i += 1
-    display.View.Dump('capture_bmp%s.bmp' % i)
-    print "EXPORT: \t Screencapture exported to capture_bmp%s.bmp" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-
-def export_to_PNG(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_png%s.png' % i):
-        i += 1
-    display.View.Dump('capture_png%s.png' % i)
-    print "EXPORT: \t Screencapture exported to capture_png%s.bmp" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-
-def export_to_JPEG(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_jpeg%s.jpeg' % i):
-        i += 1
-    display.View.Dump('capture_jpeg%s.jpeg' % i)
-    print "EXPORT: \t Screencapture exported to capture_jpeg%s.jpeg" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-
-def export_to_TIFF(event=None):
-    display.set_bg_gradient_color(255,255,255,255,255,255)
-    i = 0
-    while os.path.exists('capture_tiff%s.tiff' % i):
-        i += 1
-    display.View.Dump('capture_tiff%s.tiff' % i)
-    print "EXPORT: \t Screencapture exported to capture_tiff%s.tiff" % i
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-
-
 
 def load_stp(filename):
     step_reader = STEPControl_Reader()
@@ -338,7 +256,10 @@ def stp3d_to_wire(TopoDS_Shape, R):
     face = BRepBuilderAPI_MakeFace(Pln).Shape()
 
     section = BRepAlgoAPI_Section(TopoDS_Shape, face)   # Computes Shape/Plane intersection
-
+    section.ComputePCurveOn1(True)
+    section.Approximation(True)
+    section.Build()
+    
     ex = TopExp_Explorer(section.Shape(),6,7) #Search for Edges(6), Exclude Vertices(7)
     
     EdgeLst = []
@@ -351,7 +272,8 @@ def stp3d_to_wire(TopoDS_Shape, R):
         #print "is null?", bool(edge.IsNull())
         #display.DisplayShape(edge)
         ex.Next()
-        
+    
+     
     Wire = EdgeLst_to_Wire(EdgeLst)
     
     #DISPLAY SECTIONING PLANE
@@ -384,25 +306,19 @@ def import_2d_stp(filename,scale_factor,Theta=0):
     print 'STATUS: \t CHECK Counterclockwise: \t ', BSplineLst_Orientation(BSplineLst,11)
     
 #    display.DisplayShape(wire)
-#    
 #    plt.figure(1)
 #    plt.clf()         
 #    plt.plot(*npArray.T, color='black', marker='.')
 #    plt.axis('equal')  
-#    plt.show() 
-#    
-    
+#    plt.show()    
     return BSplineLst
 
+ 
+   
 
-
-def import_3d_stp(filename,R,scale_factor,Theta=0):
-    '''
-    The 3D Shape must given in Rotorblade Coordinates!
-    '''
-    print 'STATUS: \t IMPORT_3d_STP'
-    aResShape = load_3D(filename) 
+def BSplineLst_from_intersect_shape(aResShape,R,scale_factor,Theta):
     wire = stp3d_to_wire(aResShape,R)
+
     wire = translate_wire(wire,gp_Pnt(R,0,0),gp_Pnt(0,0,0))
     wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,1,0)),math.pi/2)
     wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,0,1)),math.pi/2)
@@ -429,6 +345,16 @@ def import_3d_stp(filename,R,scale_factor,Theta=0):
 #    plt.show()   
     
     return BSplineLst
+
+
+
+def import_3d_stp(filename,R,scale_factor,Theta=0):
+    '''
+    The 3D Shape must given in Rotorblade Coordinates!
+    '''
+    print 'STATUS: \t IMPORT_3d_STP'
+    aResShape = load_3D(filename) 
+    return BSplineLst_from_intersect_shape(aResShape,R,scale_factor,Theta)
 
 
 def order_BSplineLst_Head2Tail(BSplineLst,rel_tol=1e-06):    
@@ -541,18 +467,6 @@ if __name__ == '__main__':
 # =============================================================================
 
     f = display.View.View().GetObject()
-    
-    display.set_bg_gradient_color(20,6,111,200,200,200)
-    add_menu('screencapture')
-    add_function_to_menu('screencapture', export_to_PDF)
-    add_function_to_menu('screencapture', export_to_SVG)
-    add_function_to_menu('screencapture', export_to_PS)
-    add_function_to_menu('screencapture', export_to_EnhPS)
-    add_function_to_menu('screencapture', export_to_TEX)
-    add_function_to_menu('screencapture', export_to_BMP)
-    add_function_to_menu('screencapture', export_to_PNG)
-    add_function_to_menu('screencapture', export_to_JPEG)
-    add_function_to_menu('screencapture', export_to_TIFF)
     
     display.View_Top()
     #display.View_Iso()

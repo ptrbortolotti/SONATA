@@ -15,6 +15,7 @@ class Node(object):
         self.Pnt2d = Pnt2d  #gp_Pnt2d
         self.parameters = parameters    #[LayerID, idx, U]
         self.corner = False
+        self.regular_corner = None
         self.cornerstyle = None
         self.displacement = [None,None,None]
 
@@ -30,8 +31,8 @@ class Node(object):
         return  str('Node: %s @ [%.3f,%.3f]' % (self.id, self.coordinates[0],self.coordinates[1]))
             
     def __eq__(self,other):
-        #return self.Pnt2d.IsEqual(other.Pnt2d,1e-7)    #slow but robust
-        return self.id == other.id    #faster, but be careful not to assign the id's otherwise in the code
+        return self.Pnt2d.IsEqual(other.Pnt2d,1e-6)    #slow but robust
+        #return self.id == other.id    #faster, but be careful not to assign the id's otherwise in the code
     
     def __getstate__(self):
         """Return state values to be pickled."""
@@ -42,7 +43,11 @@ class Node(object):
         self.id, self.parameters, self.corner, self.cornerstyle, tmp_coords   = state
         self.Pnt2d = gp_Pnt2d(tmp_coords[0],tmp_coords[1])
     
+    def Distance(self,other):
+       return self.Pnt2d.Distance(other.Pnt2d)
+   
     
+        
 
 def Pnt2dLst_to_NodeLst(Pnt2dLst):
     NodeLst = []

@@ -43,10 +43,10 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
         else:
             array = np.vstack((nodes[ele[0]-1],nodes[ele[1]-1],nodes[ele[2]-1],nodes[ele[3]-1]))
             centroids.append(centroid(array))
-        polygon = Polygon(array, True)
+        polygon = Polygon(array, True, edgecolor='k')
         patches.append(polygon)
     
-    p = PatchCollection(patches, alpha=0.5)
+    p = PatchCollection(patches, alpha=0.5, edgecolors = 'k')
     p.set_array(data)
     ax.add_collection(p)
     cbar = fig.colorbar(p, ax=ax)
@@ -88,9 +88,18 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
         
         # place a text box in upper left in axes coords
         textstr = 'mass per unit span \t\t\t\t\t = $%.2f$ [g/mm]\nmass moments of intertia about x1 axis \t= $%.2f$ [g/mm2]'%(VABSProperties.MpUS,VABSProperties.I1)
-        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-        ax.text(0.02, 0.97, textstr, transform=ax.transAxes, fontsize=12,
+        props = dict(boxstyle='round', facecolor='white', alpha=0.5)
+        ax.text(0.02, 0.97, textstr, transform=ax.transAxes, fontsize=10,
                 verticalalignment='top', bbox=props)
+                
+        
+        # place a text box in upper left in axes coords
+        textstr = 'Classical Stiffness Matrix:\n'+np.array2string(VABSProperties.CS, precision=2, separator=',  ')
+        props = dict(boxstyle='round', facecolor='white', alpha=0.5)
+        ax.text(0.02, 0.12, textstr, transform=ax.transAxes, fontsize=10,
+                verticalalignment='top', bbox=props)
+            
+        
 
         if VABSProperties.Xs2 != None:
             SC, = plt.plot(VABSProperties.Xs2,VABSProperties.Xs3,'ko',label='SC: Generalized Shear Center')

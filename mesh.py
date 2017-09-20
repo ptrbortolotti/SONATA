@@ -26,7 +26,7 @@ from SONATA.topo.BSplineLst_utils import get_BSplineLst_length, get_BSpline_leng
                             ProjectPointOnBSplineLst, findPnt_on_2dcurve
 from SONATA.topo.weight import Weight
 
-from SONATA.display.display_mesh import plot_cells
+from SONATA.display.display_mesh import plot_cells,plot_nodes
 
 from SONATA.mesh.mesh_byprojection import mesh_by_projecting_nodes_on_BSplineLst
 from SONATA.mesh.mesh_core import gen_core_cells
@@ -41,6 +41,7 @@ from SONATA.vabs.VABS_interface import VABS_config, export_cells_for_VABS, XSect
 from SONATA.vabs.strain import Strain
 from SONATA.vabs.stress import Stress
 
+from SONATA.mesh.cell import Cell
 
 
 #=================================================================================
@@ -74,48 +75,48 @@ for seg in SegmentLst:
 
 #
 ##%%===================MESH SEGMENT================================================
-#Resolution = 300 # Nb of Points on Segment0
-#length = get_BSplineLst_length(SegmentLst[0].BSplineLst)
-#global_minLen = round(length/Resolution,5)
-#
-#
-#mesh = []
-#disco_nodes = []
-#k = 0
-#for i,layer in enumerate(reversed(SegmentLst[-1].LayerLst)):
-#    print 'STATUS: \t Meshing Layer %s' %(i)
-#    [R,G,B,T] =  plt.cm.jet(k*50)
-#    
-#    a_BSplineLst = layer.BSplineLst       
-#    b_BSplineLst = trim_BSplineLst(layer.Boundary_BSplineLst, layer.S1, layer.S2, 0, 1)
-#    if BSplineLst_Orientation(b_BSplineLst,11) == False:
-#        b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
-#     
-#    if i==0:
-#        a_nodes = equidistant_nodes_on_BSplineLst(a_BSplineLst, True, True, True, minLen = global_minLen, LayerID = layer.ID[0])
-#    else: 
-#        a_nodes = determine_a_nodes(mesh,a_BSplineLst,global_minLen,layer.ID[0])
-#       
-#    a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness,global_minLen,1e-1)
-#    enhanced_cells = first_stage_improvements(cells,b_BSplineLst,global_minLen)
-#    for c in enhanced_cells:
-#        c.calc_theta_1()
-#    enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen)
-#
-#    for c in enhanced_cells:
-#        c.theta_3 = layer.Orientation
-#        c.MatID = int(layer.MatID)
-#        c.structured = True
-#        #print cell,'\t',cell.theta_3,cell.theta_1,cell.MatID,cell.area
-#        
-#    k = k+1;
-#    if k>5:
-#        k = 0
-#    layer.cells = enhanced_cells
-#    mesh.extend(enhanced_cells)
-#
-#    
-##%%===================MESH CORE================================================
+Resolution = 300 # Nb of Points on Segment0
+length = get_BSplineLst_length(SegmentLst[0].BSplineLst)
+global_minLen = round(length/Resolution,5)
+
+
+mesh = []
+disco_nodes = []
+k = 0
+for i,layer in enumerate(reversed(SegmentLst[-1].LayerLst)):
+    print 'STATUS: \t Meshing Layer %s' %(i)
+    [R,G,B,T] =  plt.cm.jet(k*50)
+    
+    a_BSplineLst = layer.BSplineLst       
+    b_BSplineLst = trim_BSplineLst(layer.Boundary_BSplineLst, layer.S1, layer.S2, 0, 1)
+    if BSplineLst_Orientation(b_BSplineLst,11) == False:
+        b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
+     
+    if i==0:
+        a_nodes = equidistant_nodes_on_BSplineLst(a_BSplineLst, True, True, True, minLen = global_minLen, LayerID = layer.ID[0])
+    else: 
+        a_nodes = determine_a_nodes(mesh,a_BSplineLst,global_minLen,layer.ID[0])
+       
+    a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness,global_minLen,1e-1)
+    enhanced_cells = first_stage_improvements(cells,b_BSplineLst,global_minLen)
+    for c in enhanced_cells:
+        c.calc_theta_1()
+    enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen)
+
+    for c in enhanced_cells:
+        c.theta_3 = layer.Orientation
+        c.MatID = int(layer.MatID)
+        c.structured = True
+        #print cell,'\t',cell.theta_3,cell.theta_1,cell.MatID,cell.area
+        
+    k = k+1;
+    if k>5:
+        k = 0
+    layer.cells = enhanced_cells
+    mesh.extend(enhanced_cells)
+
+    
+#%%===================MESH CORE================================================
 #print 'STATUS: \t Meshing Core %s' %(1)
 #core_Boundary_BSplineLst = []
 #core_Boundary_BSplineLst += trim_BSplineLst(SegmentLst[-1].LayerLst[-1].Boundary_BSplineLst, 0, SegmentLst[-1].LayerLst[-1].S1, 0, 1)  #start und ende der lage
@@ -133,12 +134,12 @@ for seg in SegmentLst:
 #
 #mesh.extend(c_cells)
 #mesh,nodes = sort_and_reassignID(mesh)
-#
-#
+
+
 ##%%=====================SAVE MESH as pickle:===================================
-#output_filename = filename.replace('.pkl', '_mesh.pkl')
-#with open(output_filename, 'wb') as output:
-#    pickle.dump(mesh, output, protocol=pickle.HIGHEST_PROTOCOL)
+output_filename = filename.replace('.pkl', '_mesh.pkl')
+with open(output_filename, 'wb') as output:
+    pickle.dump(mesh, output, protocol=pickle.HIGHEST_PROTOCOL)
 
 filename = filename.replace('.pkl', '_mesh.pkl')
 with open(filename, 'rb') as handle:
@@ -158,42 +159,106 @@ print '\t   - smallest angle [deg]: %s' % minimum_angle
 #print '\t   - Orientation [CC]: %s' % orientation 
 
 
+def indentify_close_nodes(nodes,tol=1e-4):
+        #TODO: For now, it works only for the boundary nodes of the intersection 
+        # that are sorted! Make applicable for the whole mesh
+        doublett = []
+        for i,n in enumerate(nodes[:-1]):
+            dist =  n.Distance(nodes[i+1])
+            if dist<tol:
+                doublett.append((n,nodes[i+1]))
+        
+        dist =  boundary_nodes[-1].Distance(nodes[0])
+        if dist<tol:
+            doublett.append((n,nodes[i+1]))
+            
+        return doublett 
+
+def remove_duplicate_node_from_mesh(mesh,doublett):
+    cells_with_collapsing_node = [c for c in mesh if [n for n in c.nodes if n == doublett[0]] ] 
+    cells_to_transform =  [c for c in cells_with_collapsing_node if len(c.nodes) == 4] 
+    #replace node2find with neighbor in all cells 
+    for c in cells_to_transform:
+        for i,n in enumerate(c.nodes):
+            if n==doublett[0]:
+                c.nodes[i]=doublett[1]
+                  
+    #if neighbor happens to appear twice, pop one
+    for c in cells_to_transform:
+        counter = 0
+        popidx = None
+        for idx,n in enumerate(c.nodes):
+            if n==doublett[1] and counter==1:
+                popidx = idx
+            elif n==doublett[1] and counter==0:
+                counter = 1
+        try:      
+            c.nodes.pop(popidx)
+        except:
+            None 
+    return None
+
+def remove_duplicate_node_from_nodes(nodes,doublett):
+    for idx,n in enumerate(nodes):
+        popidx = None
+        if n==doublett[0]:
+            popidx = idx                
+        try:      
+            nodes.pop(popidx)
+        except:
+            None
+    #plot_nodes(nodes) 
+    return nodes
+
+
 #%% BALANCE WEIGHT - CUTTING HOLE ALGORITHM====================================
 
-if Configuration.SETUP_BalanceWeight == True:
-    print 'STATUS: \t Building Balance Weight'   
-    BW = Weight(0,Configuration.BW_XPos,Configuration.BW_YPos,Configuration.BW_Diameter,Configuration.BW_MatID)
-    display.DisplayShape(BW.wire)
-    
-    for c in mesh:
-        display.DisplayShape(c.wire,color='BLACK')         
-
-    for x in nodes:
-        if x.id == 112:
-            display.DisplayShape(x.Pnt2d,color='GREEN')
-        elif x.id == 113:
-            display.DisplayShape(x.Pnt2d,color='YELLOW')
-
-        
-    mesh,boundary_nodes = map_mesh_by_intersect_curve2d(mesh,BW.Curve,BW.wire,display=display)
-    
-    for n in boundary_nodes:
-        print n
-        display.DisplayShape(n.Pnt2d,color='WHITE')         
-
-    
-    plot_cells(mesh, nodes, 'MatID')   
-    triangle_options = 'pa.3'
-    [bw_cells,bw_nodes] = gen_core_cells(boundary_nodes,options=triangle_options)
-    
-    for c in bw_cells:
-        c.structured = False
-        c.theta_3 = 0
-        c.MatID = Configuration.BW_MatID
-        c.calc_theta_1()
-    
-    mesh.extend(bw_cells)
-    
+#if Configuration.SETUP_BalanceWeight == True:
+#    print 'STATUS: \t Building Balance Weight'   
+#    BW = Weight(0,Configuration.BW_XPos,Configuration.BW_YPos,Configuration.BW_Diameter,Configuration.BW_MatID)
+#    display.DisplayShape(BW.wire)
+#    
+#    for c in mesh:
+#        display.DisplayShape(c.wire,color='BLACK')         
+#       
+#    mesh,boundary_nodes = map_mesh_by_intersect_curve2d(mesh,BW.Curve,BW.wire,display=display)
+#    mesh,nodes = sort_and_reassignID(mesh)
+#    
+#    for c in mesh:
+#        display.DisplayShape(c.wire,color='GREEN')    
+#    
+#    #TODO: MAKE FUNCTION THAT REMOVES CLOSE NODES IF ALL CELLS ARE QUADS!
+#    
+#    #Identify duplicate nodes
+#    doublettes = indentify_close_nodes(boundary_nodes,tol=1e-1)
+#
+#    print doublettes
+#    for d in doublettes:
+#        display.DisplayShape(d[0].Pnt2d)
+#        display.DisplayShape(d[1].Pnt2d, color='ORANGE')
+#
+#    for d in doublettes:
+#        remove_duplicate_node_from_mesh(mesh,d)
+#    
+#    for d in doublettes:
+#        remove_duplicate_node_from_nodes(boundary_nodes,d)
+#        
+#    
+#    for c in mesh:
+#        display.DisplayShape(c.wire,color='WHITE')     
+#    
+#    plot_cells(mesh, nodes, 'MatID')   
+#    triangle_options = 'pa.6'
+#    [bw_cells,bw_nodes] = gen_core_cells(boundary_nodes,options=triangle_options)
+#    
+#    for c in bw_cells:
+#        c.structured = False
+#        c.theta_3 = 0
+#        c.MatID = Configuration.BW_MatID
+#        c.calc_theta_1()
+#    
+#    mesh.extend(bw_cells)
+#    
 
 mesh,nodes = sort_and_reassignID(mesh)
 plot_cells(mesh, nodes, 'MatID')       
@@ -263,11 +328,11 @@ plot_cells(mesh, nodes, 'MatID')
 
 #%%====================OCC-DISPLAY=================================================
 if SHOW == True:
-#    for c in mesh:
-#        display.DisplayColoredShape(c.wire, 'BLACK')
+    for c in mesh:
+        display.DisplayColoredShape(c.wire, 'BLACK')
     #    
     display_SONATA_SegmentLst(display, SegmentLst)      
-    ##plot_cells(mesh)
+    #plot_cells(mesh)
     
     display.set_bg_gradient_color(20,6,111,200,200,200)
     show_coordinate_system(display,5)

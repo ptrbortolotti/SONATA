@@ -1,0 +1,1308 @@
+
+     **********************************
+     *                                *
+     *         --- DYMORE ---         *
+     *       FLEXIBLE MULTIBODY       *
+     *        DYNAMIC ANALYSIS        *
+     *                                *
+     **********************************
+     --- Dymore Version 4.1
+     --- Run date: Fri Jul 14 09:30:28 2017
+
+
+
+
+                    ***********************************
+                    *   @PROCESS_CONTROL_DEFINITION   *
+                    ***********************************
+
+ Unit system: [SI].
+ Debug print flag: [HIGH].
+ Finite element analysis: [YES].
+ Post-processing analysis: [YES].
+ Signal processing analysis: [YES].
+ User's manual path: [C:\dymore4_0\UsersManual\].
+ Figures directory path: [FIGURES\].
+
+
+
+                    *************************
+                    *   @MODEL_DEFINITION   *
+                    *************************
+
+
+
+
+      --------------------------
+      |   @VERTEX_DEFINITION   |
+      --------------------------
+
+
+ *** Vertex name: [VertexA1]
+ At point: [PointA].
+
+ *** Vertex name: [VertexA2]
+ At point: [PointA].
+
+ *** Vertex name: [VertexA3]
+ At point: [PointA].
+
+ *** Vertex name: [VertexA4]
+ At point: [PointA].
+
+ *** Vertex name: [VertexB1]
+ At point: [PointB].
+
+ *** Vertex name: [VertexB2]
+ At point: [PointB].
+
+ *** Vertex name: [VertexB3]
+ At point: [PointB].
+
+ *** Vertex name: [VertexC1]
+ At point: [PointC].
+
+ *** Vertex name: [VertexC2]
+ At point: [PointC].
+
+ *** Vertex name: [VertexC3]
+ At point: [PointC].
+
+ *** Vertex name: [VertexD1]
+ At point: [PointD].
+
+ *** Vertex name: [VertexD2]
+ At point: [PointD].
+
+ *** Vertex name: [VertexD3]
+ At point: [PointD].
+
+
+
+      ------------------------
+      |   @EDGE_DEFINITION   |
+      ------------------------
+
+
+ *** Edge name: [EdgeRvjA]
+ Connected to vertices: [VertexA1, VertexA2].
+ Triad name: [TriadRvjA].
+
+ *** Edge name: [EdgeRotationA]
+ Connected to vertices: [VertexA1, VertexA3].
+
+ *** Edge name: [EdgePrdA]
+ Connected to vertices: [VertexA3, VertexA4].
+
+ *** Edge name: [EdgeBeam1]
+ Connected to vertices: [VertexA2, VertexB1].
+ Curve name: [CurveBeam1].
+
+ *** Edge name: [EdgeRvjB]
+ Connected to vertices: [VertexB1, VertexB2].
+ Triad name: [TriadRvjB].
+
+ *** Edge name: [EdgeRotationB]
+ Connected to vertices: [VertexB1, VertexB3].
+
+ *** Edge name: [EdgeBeam2]
+ Connected to vertices: [VertexB2, VertexC1].
+ Curve name: [CurveBeam2].
+
+ *** Edge name: [EdgeRvjC]
+ Connected to vertices: [VertexC1, VertexC2].
+ Triad name: [TriadRvjC].
+
+ *** Edge name: [EdgeRotationC]
+ Connected to vertices: [VertexC1, VertexC3].
+
+ *** Edge name: [EdgeBeam3]
+ Connected to vertices: [VertexC2, VertexD1].
+ Curve name: [CurveBeam3].
+
+ *** Edge name: [EdgeRvjD]
+ Connected to vertices: [VertexD1, VertexD2].
+ Triad name: [TriadRvjD].
+
+ *** Edge name: [EdgeRotationD]
+ Connected to vertices: [VertexD1, VertexD3].
+
+
+
+      -------------------------
+      |   @POINT_DEFINITION   |
+      -------------------------
+
+
+ *** Point name: [PointA]
+ Coordinates = ( 0.00000e+000,  0.00000e+000,  0.00000e+000) [m].
+
+ *** Point name: [PointB]
+ Coordinates = ( 0.00000e+000,  1.20000e-001,  0.00000e+000) [m].
+
+ *** Point name: [PointC]
+ Coordinates = ( 2.40000e-001,  1.20000e-001,  0.00000e+000) [m].
+
+ *** Point name: [PointD]
+ Coordinates = ( 2.40000e-001,  0.00000e+000,  0.00000e+000) [m].
+
+
+
+      -------------------------
+      |   @TRIAD_DEFINITION   |
+      -------------------------
+
+
+ *** Triad: [TriadRvjA],
+ Orientation definition type : [VECTORS_E2_E3].
+ E2 = ( 0.00000e+000,  1.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+ *** Triad: [TriadRvjB],
+ Orientation definition type : [VECTORS_E2_E3].
+ E2 = ( 0.00000e+000,  1.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+ *** Triad: [TriadRvjC],
+ Orientation definition type : [EULER_ANGLES_323].
+ Euler angles 323 = ( 0.00000e+000,  5.00000e+000,  0.00000e+000) [deg].
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+ *** Triad: [TriadRvjD],
+ Orientation definition type : [VECTORS_E2_E3].
+ E2 = ( 0.00000e+000,  1.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+
+
+      -------------------------
+      |   @CURVE_DEFINITION   |
+      -------------------------
+
+
+ *** Curve: [CurveBeam1],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    2).
+ Curve degree = (    1).
+ Rational curve : [NO].
+ End point 0 : [PointA].
+ End point 1 : [PointB].
+ Orientation distribution : [OriDistBeam1].
+ Curve mesh parameters : [MeshBeam1].
+
+ *** Curve: [CurveBeam2],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    2).
+ Curve degree = (    1).
+ Rational curve : [NO].
+ End point 0 : [PointB].
+ End point 1 : [PointC].
+ Orientation distribution : [OriDistBeam2].
+ Curve mesh parameters : [MeshBeam2].
+
+ *** Curve: [CurveBeam3],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    2).
+ Curve degree = (    1).
+ Rational curve : [NO].
+ End point 0 : [PointC].
+ End point 1 : [PointD].
+ Orientation distribution : [OriDistBeam3].
+ Curve mesh parameters : [MeshBeam1].
+
+ *** Curve: [CurveTest],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    5).
+ Curve degree = (    3).
+ Rational curve : [NO].
+ xx = ( 0.00000e+000,  0.00000e+000,  0.00000e+000) [m].
+ xx = ( 2.00000e-001,  3.00000e-001,  0.00000e+000) [m].
+ xx = ( 4.00000e-001,  6.00000e-001,  0.00000e+000) [m].
+ xx = ( 5.00000e-001,  2.00000e-001,  0.00000e+000) [m].
+ xx = ( 1.00000e+000,  0.00000e+000,  0.00000e+000) [m].
+ Spline flag : [YES].
+
+
+
+      --------------------------------------------
+      |   @ORIENTATION_DISTRIBUTION_DEFINITION   |
+      --------------------------------------------
+
+
+ *** Orientation distribution: [OriDistBeam1],
+ Orientation definition type : [VECTORS_E2_E3].
+ Coordinate type : [ETA_COORDINATE].
+ ETA_COORDINATE = ( 0.00000e+000).
+ E2 = (-1.00000e+000,  0.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+
+ *** Orientation distribution: [OriDistBeam2],
+ Orientation definition type : [VECTORS_E2_E3].
+ Coordinate type : [ETA_COORDINATE].
+ ETA_COORDINATE = ( 0.00000e+000).
+ E2 = ( 0.00000e+000,  1.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+
+ *** Orientation distribution: [OriDistBeam3],
+ Orientation definition type : [VECTORS_E2_E3].
+ Coordinate type : [ETA_COORDINATE].
+ ETA_COORDINATE = ( 0.00000e+000).
+ E2 = ( 1.00000e+000,  0.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+
+
+
+      -----------------------------------------
+      |   @CURVE_MESH_PARAMETERS_DEFINITION   |
+      -----------------------------------------
+
+
+ *** Curve mesh parameters: [MeshBeam1],
+ Number of elements = (    4).
+ Order of the elements = (    3).
+
+ *** Curve mesh parameters: [MeshBeam2],
+ Number of elements = (    4).
+ Order of the elements = (    3).
+
+
+
+      --------------------------------------
+      |   @BOUNDARY_CONDITION_DEFINITION   |
+      --------------------------------------
+
+
+ *** Boundary condition: [ClampA],
+ Entity : [VertexA1].
+ Displacements boundary conditions = (    1,     1,     1).
+ Rotation      boundary conditions = (    1,     1,     1).
+
+
+
+      ----------------------------------
+      |   @REVOLUTE_JOINT_DEFINITION   |
+      ----------------------------------
+
+
+ *** Revolute joint: [RvjA],
+ Edge : [EdgeRvjA].
+ Relative rotation : [RotationA].
+
+
+
+      -------------------------------------
+      |   @RELATIVE_ROTATION_DEFINITION   |
+      -------------------------------------
+
+
+ *** Relative rotation: [RotationA],
+ Edge : [EdgeRotationA].
+
+
+
+      -------------------------------------------
+      |   @PRESCRIBED_DISPLACEMENT_DEFINITION   |
+      -------------------------------------------
+
+
+ *** Prescribed displacement: [PrdA],
+ Edge : [EdgePrdA].
+ Degree of freedom = (    4).
+ Time function : [ScheduleRotationA].
+
+
+
+      ------------------------
+      |   @BEAM_DEFINITION   |
+      ------------------------
+
+
+ *** Beam: [Beam1],
+ Edge : [EdgeBeam1].
+ Property table : [PropertyBeam1].
+
+
+
+      ----------------------------------
+      |   @REVOLUTE_JOINT_DEFINITION   |
+      ----------------------------------
+
+
+ *** Revolute joint: [RvjB],
+ Edge : [EdgeRvjB].
+ Relative rotation : [RotationB].
+
+
+
+      -------------------------------------
+      |   @RELATIVE_ROTATION_DEFINITION   |
+      -------------------------------------
+
+
+ *** Relative rotation: [RotationB],
+ Edge : [EdgeRotationB].
+
+
+
+      ------------------------
+      |   @BEAM_DEFINITION   |
+      ------------------------
+
+
+ *** Beam: [Beam2],
+ Edge : [EdgeBeam2].
+ Property table : [PropertyBeam2].
+
+
+
+      ----------------------------------
+      |   @REVOLUTE_JOINT_DEFINITION   |
+      ----------------------------------
+
+
+ *** Revolute joint: [RvjC],
+ Edge : [EdgeRvjC].
+ Relative rotation : [RotationC].
+
+
+
+      -------------------------------------
+      |   @RELATIVE_ROTATION_DEFINITION   |
+      -------------------------------------
+
+
+ *** Relative rotation: [RotationC],
+ Edge : [EdgeRotationC].
+
+
+
+      ------------------------
+      |   @BEAM_DEFINITION   |
+      ------------------------
+
+
+ *** Beam: [Beam3],
+ Edge : [EdgeBeam3].
+ Property table : [PropertyBeam3].
+
+
+
+      ----------------------------------
+      |   @REVOLUTE_JOINT_DEFINITION   |
+      ----------------------------------
+
+
+ *** Revolute joint: [RvjD],
+ Edge : [EdgeRvjD].
+ Relative rotation : [RotationD].
+
+
+
+      -------------------------------------
+      |   @RELATIVE_ROTATION_DEFINITION   |
+      -------------------------------------
+
+
+ *** Relative rotation: [RotationD],
+ Edge : [EdgeRotationD].
+
+
+
+      --------------------------------------
+      |   @BOUNDARY_CONDITION_DEFINITION   |
+      --------------------------------------
+
+
+ *** Boundary condition: [ClampD],
+ Entity : [VertexD2].
+ Displacements boundary conditions = (    1,     1,     1).
+ Rotation      boundary conditions = (    1,     1,     1).
+
+
+
+      ---------------------------------
+      |   @BEAM_PROPERTY_DEFINITION   |
+      ---------------------------------
+
+
+ *** Beam property: [PropertyBeam1]
+ Property definition type: [SECTIONAL_PROPERTIES].
+ Coordinate type: [ETA_COORDINATE].
+ Eta coordinate = ( 0.00000e+000)
+ Axial stiffness = ( 4.00000e+007). [N].
+ Bending stiffnesses I22, I33, I23 = ( 2.40000e+006,  2.40000e+006,  0.00000e+000) [N.m^2].
+ Torsional stiffness = ( 2.80000e+005). [N.m^2].
+ Shearing stiffnesses K22, K33, K23 = ( 2.00000e+006,  2.00000e+006,  0.00000e+000) [N].
+ Mass/Span = ( 3.20000e+000). [kg/m].
+ Moments of Inertia M11, M22, M33 = ( 2.40000e-002,  1.20000e-002,  1.20000e-002) [kg.m^2/m].
+ Center of mass location = ( 0.00000e+000,  0.00000e+000) [m].
+ Shear center location = ( 0.00000e+000,  0.00000e+000) [m].
+ Centroid location = ( 0.00000e+000,  0.00000e+000) [m].
+
+ *** Beam property: [PropertyBeam2]
+ Property definition type: [SECTIONAL_PROPERTIES].
+ Coordinate type: [ETA_COORDINATE].
+ Eta coordinate = ( 0.00000e+000)
+ Axial stiffness = ( 4.00000e+006). [N].
+ Bending stiffnesses I22, I33, I23 = ( 2.40000e+005,  2.40000e+005,  0.00000e+000) [N.m^2].
+ Torsional stiffness = ( 2.80000e+004). [N.m^2].
+ Shearing stiffnesses K22, K33, K23 = ( 2.00000e+005,  2.00000e+005,  0.00000e+000) [N].
+ Mass/Span = ( 1.60000e+000). [kg/m].
+ Moments of Inertia M11, M22, M33 = ( 1.20000e-002,  6.00000e-003,  6.00000e-003) [kg.m^2/m].
+ Center of mass location = ( 0.00000e+000,  0.00000e+000) [m].
+ Shear center location = ( 0.00000e+000,  0.00000e+000) [m].
+ Centroid location = ( 0.00000e+000,  0.00000e+000) [m].
+
+ *** Beam property: [PropertyBeam3]
+ Property definition type: [SECTIONAL_PROPERTIES].
+ Coordinate type: [ETA_COORDINATE].
+ Eta coordinate = ( 0.00000e+000)
+ Axial stiffness = ( 4.00000e+005). [N].
+ Bending stiffnesses I22, I33, I23 = ( 2.40000e+004,  2.40000e+004,  0.00000e+000) [N.m^2].
+ Torsional stiffness = ( 2.80000e+004). [N.m^2].
+ Shearing stiffnesses K22, K33, K23 = ( 2.00000e+005,  2.00000e+005,  0.00000e+000) [N].
+ Mass/Span = ( 1.60000e+000). [kg/m].
+ Moments of Inertia M11, M22, M33 = ( 1.20000e-002,  6.00000e-003,  6.00000e-003) [kg.m^2/m].
+ Center of mass location = ( 0.00000e+000,  0.00000e+000) [m].
+ Shear center location = ( 0.00000e+000,  0.00000e+000) [m].
+ Centroid location = ( 0.00000e+000,  0.00000e+000) [m].
+
+
+
+      ---------------------------------
+      |   @TIME_FUNCTION_DEFINITION   |
+      ---------------------------------
+
+
+ *** Time function: [ScheduleRotationA],
+ Time function type : [USER_DEFINED].
+ Time = ( 0.00000e+000).  Function value = ( 0.00000e+000).
+ Time = ( 1.00000e+001).  Function value = (-5.00000e+001).
+
+
+
+      ---------------------------------
+      |   @TIME_FUNCTION_DEFINITION   |
+      ---------------------------------
+
+
+ *** Time function: [ScheduleA],
+ Time function type : [HARMONIC].
+ Harmonic No = (    1).
+ Amplitude = ( 1.00000e+000).  Period = ( 1.20000e+000). [sec].  Phase = ( 2.50000e-001).
+ Start time = ( 0.00000e+000). [sec].
+ End   time = ( 1.00000e+000). [sec].
+ Harmonic No = (    2).
+ Amplitude = (-1.00000e+000).  Period = ( 1.50000e+000). [sec].  Phase = (-2.50000e-001).
+ Start time = ( 1.00000e+000). [sec].
+ End   time = ( 2.00000e+000). [sec].
+ Start time = ( 0.00000e+000). [sec].
+ End   time = ( 5.00000e+000). [sec].
+
+
+
+      ------------------------------------
+      |   @FOURIER_ANALYSIS_DEFINITION   |
+      ------------------------------------
+
+
+ *** Fourier analysis: [FourierOnLine],
+ Analysis type : [ON_LINE].
+ Number of frequencies = (    5).
+ Frequencies [1/sec] = ( 
+  7.95775e-001,  1.59155e+000,  2.38732e+000,  3.18310e+000,  3.97887e+000).
+ Gain coefficient = ( 3.18310e-003).
+ Output channel number = (    1).
+
+
+
+      --------------------------
+      |   @SENSOR_DEFINITION   |
+      --------------------------
+
+
+ *** Sensor name: [SensorBeam1Forces]
+ Object name: [Beam1].
+ Sensor type: [FORCES].
+ Eta coordinate = ( 0.00000e+000)
+
+ *** Sensor name: [SensorBeam1Velocities]
+ Object name: [Beam1].
+ Sensor type: [VELOCITIES].
+ Eta coordinate = ( 0.00000e+000)
+
+ *** Sensor name: [SensorBeam2Displacements]
+ Object name: [Beam2].
+ Sensor type: [DISPLACEMENTS].
+ Eta coordinate = ( 1.00000e+000)
+ Rotation representation: [EULER_ANGLES_312].
+
+ *** Sensor name: [SensorBeam2Forces]
+ Object name: [Beam2].
+ Sensor type: [FORCES].
+ Eta coordinate = ( 1.00000e+000)
+
+ *** Sensor name: [SensorBeam2Velocities]
+ Object name: [Beam2].
+ Sensor type: [VELOCITIES].
+ Eta coordinate = ( 1.00000e+000)
+
+ *** Sensor name: [SensorRotationA]
+ Object name: [RotationA].
+ Sensor type: [RELATIVE_ROTATIONS].
+
+ *** Sensor name: [SensorRotationB]
+ Object name: [RotationB].
+ Sensor type: [RELATIVE_ROTATIONS].
+
+ *** Sensor name: [SensorRotationC]
+ Object name: [RotationC].
+ Sensor type: [RELATIVE_ROTATIONS].
+
+ *** Sensor name: [SensorRotationD]
+ Object name: [RotationD].
+ Sensor type: [RELATIVE_ROTATIONS].
+
+ *** Sensor name: [SensorPrdA]
+ Object name: [PrdA].
+ Sensor type: [DRIVING_MOMENT].
+
+
+
+      --------------------------
+      |   @SURVEY_DEFINITION   |
+      --------------------------
+
+
+ *** Survey: [SurveyBeam2Displacements]
+ Object name: [Beam2].
+ Survey type: [DISPLACEMENTS].
+ Time = ( 1.00000e-001) [sec].
+
+
+
+      --------------------------
+      |   @FILTER_DEFINITION   |
+      --------------------------
+
+
+ *** Filter: [FilterBeam2Forces],
+ Filter type : [BUTTERWORTH].
+ Filter order = (    2).
+ Cut-off frequency = ( 2.00000e+000). [rad/sec].
+
+
+
+      -------------------------
+      |   @CURVE_DEFINITION   |
+      -------------------------
+
+
+ *** Curve: [CurveEigthCircle],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    3).
+ Curve degree = (    2).
+ Rational curve : [YES].
+ xx = ( 0.00000e+000,  1.00000e+000,  0.00000e+000,  1.00000e+000) [m].
+ xx = ( 0.00000e+000,  1.00000e+000,  4.14214e-001,  9.23880e-001) [m].
+ xx = ( 0.00000e+000,  7.07107e-001,  7.07107e-001,  1.00000e+000) [m].
+
+
+
+      ------------------------------------
+      |   @CREATE_FINITE_ELEMENT_MODEL   |
+      ------------------------------------
+
+ Analysis type: [DYNAMIC].
+ Spectral radius at infinity = ( 0.00000e+000)
+
+
+
+      --------------------------------
+      |   @FINITE_ELEMENT_ANALYSIS   |
+      --------------------------------
+
+
+ *** Fem control parameters name: [AnalysisControlParameters]
+ Maximum number of time steps = (     1)
+ Simulation time range = ( 0.00000e+000,  4.00000e+000).
+ Time step size range = ( 1.00000e-007,  1.00000e-002) [sec].
+ Reference energy level = ( 1.00000e+000) [J].
+
+ *** Step control parameter name: [Step1]
+ Archival frequency = (     1)
+ Reuse number = (10000000)
+ Time step size = ( 2.00000e-003) [sec].
+ Maximum number of iterations = (    10)
+ Factorization strategy = (     5)
+ Convergence norm type: [ENERGY LIKE].
+ Reference length = ( 1.00000e+000) [m].
+ Reference force = ( 1.00000e+000) [N].
+ Convergence tolerance = ( 1.00000e-006)
+ Maximum number of reject = (     5)
+ Average stiffness term = ( 1.00000e+006)
+ Average mass term = ( 1.00000e+000)
+
+
+
+      --------------------------------
+      |   @PRE_PROCESSING_ANALYSIS   |
+      --------------------------------
+
+
+ *** Include command name: [IncludeMSF]
+ Active command: [YES].
+ List of file names:
+ MeshFileTest.seb.
+
+
+
+                    ********************
+                    *   @CHECK_MODEL   *
+                    ********************
+
+
+
+
+      -----------------------------
+      |   @PROCESS_COPY_COMMAND   |
+      -----------------------------
+
+
+
+
+      --------------------------------
+      |   @CHECK_GEOMETRIC_OBJECTS   |
+      --------------------------------
+
+
+ *** Point name: [POINT_ORIGIN]
+ Coordinates = ( 0.00000e+000,  0.00000e+000,  0.00000e+000) [m].
+
+ *** Triad: [TRIAD_INERTIAL],
+ Orientation definition type : [VECTORS_E2_E3].
+ E2 = ( 0.00000e+000,  1.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+ *** Fixed frame: [FXDFRAME_INERTIAL],
+ Point 1 : [POINT_ORIGIN].
+ Triad : [TRIAD_INERTIAL].
+
+ *** Point name: [PointA]
+ Coordinates = ( 0.00000e+000,  0.00000e+000,  0.00000e+000) [m].
+
+ *** Point name: [PointB]
+ Coordinates = ( 0.00000e+000,  1.20000e-001,  0.00000e+000) [m].
+
+ *** Point name: [PointC]
+ Coordinates = ( 2.40000e-001,  1.20000e-001,  0.00000e+000) [m].
+
+ *** Point name: [PointD]
+ Coordinates = ( 2.40000e-001,  0.00000e+000,  0.00000e+000) [m].
+
+ *** Triad: [TriadRvjA],
+ Orientation definition type : [VECTORS_E2_E3].
+ E2 = ( 0.00000e+000,  1.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+ *** Triad: [TriadRvjB],
+ Orientation definition type : [VECTORS_E2_E3].
+ E2 = ( 0.00000e+000,  1.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+ *** Triad: [TriadRvjC],
+ Orientation definition type : [EULER_ANGLES_323].
+ Euler angles 323 = ( 0.00000e+000,  5.00000e+000,  0.00000e+000) [deg].
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+ *** Triad: [TriadRvjD],
+ Orientation definition type : [VECTORS_E2_E3].
+ E2 = ( 0.00000e+000,  1.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+ *** Orientation distribution: [OriDistBeam1],
+ Orientation definition type : [VECTORS_E2_E3].
+ Coordinate type : [ETA_COORDINATE].
+ ETA_COORDINATE = ( 0.00000e+000).
+ E2 = (-1.00000e+000,  0.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+
+ *** Orientation distribution: [OriDistBeam2],
+ Orientation definition type : [VECTORS_E2_E3].
+ Coordinate type : [ETA_COORDINATE].
+ ETA_COORDINATE = ( 0.00000e+000).
+ E2 = ( 0.00000e+000,  1.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+
+ *** Orientation distribution: [OriDistBeam3],
+ Orientation definition type : [VECTORS_E2_E3].
+ Coordinate type : [ETA_COORDINATE].
+ ETA_COORDINATE = ( 0.00000e+000).
+ E2 = ( 1.00000e+000,  0.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+
+
+
+      ----------------------------------
+      |   @RESOLVE_GEOMETRIC_OBJECTS   |
+      ----------------------------------
+
+
+ *** Fixed frame: [FXDFRAME_INERTIAL],
+ Point 1 : [POINT_ORIGIN].
+ Triad : [TRIAD_INERTIAL].
+
+
+
+      --------------------------------
+      |   @CHECK_POINTS_AND_TRIADS   |
+      --------------------------------
+
+
+ *** Point name: [POINT_ORIGIN]
+ Coordinates = ( 0.00000e+000,  0.00000e+000,  0.00000e+000) [m].
+
+ *** Triad: [TRIAD_INERTIAL],
+ Orientation definition type : [VECTORS_E2_E3].
+ E2 = ( 0.00000e+000,  1.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+ *** Point name: [PointA]
+ Coordinates = ( 0.00000e+000,  0.00000e+000,  0.00000e+000) [m].
+
+ *** Point name: [PointB]
+ Coordinates = ( 0.00000e+000,  1.20000e-001,  0.00000e+000) [m].
+
+ *** Point name: [PointC]
+ Coordinates = ( 2.40000e-001,  1.20000e-001,  0.00000e+000) [m].
+
+ *** Point name: [PointD]
+ Coordinates = ( 2.40000e-001,  0.00000e+000,  0.00000e+000) [m].
+
+ *** Triad: [TriadRvjA],
+ Orientation definition type : [VECTORS_E2_E3].
+ E2 = ( 0.00000e+000,  1.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+ *** Triad: [TriadRvjB],
+ Orientation definition type : [VECTORS_E2_E3].
+ E2 = ( 0.00000e+000,  1.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+ *** Triad: [TriadRvjC],
+ Orientation definition type : [EULER_ANGLES_323].
+ Euler angles 323 = ( 0.00000e+000,  5.00000e+000,  0.00000e+000) [deg].
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+ *** Triad: [TriadRvjD],
+ Orientation definition type : [VECTORS_E2_E3].
+ E2 = ( 0.00000e+000,  1.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+
+
+      ----------------------------------
+      |   @CHECK_CURVES_AND_VERTICES   |
+      ----------------------------------
+
+
+ *** Vertex name: [VertexA1]
+ At point: [PointA].
+
+ *** Vertex name: [VertexA2]
+ At point: [PointA].
+
+ *** Vertex name: [VertexA3]
+ At point: [PointA].
+
+ *** Vertex name: [VertexA4]
+ At point: [PointA].
+
+ *** Vertex name: [VertexB1]
+ At point: [PointB].
+
+ *** Vertex name: [VertexB2]
+ At point: [PointB].
+
+ *** Vertex name: [VertexB3]
+ At point: [PointB].
+
+ *** Vertex name: [VertexC1]
+ At point: [PointC].
+
+ *** Vertex name: [VertexC2]
+ At point: [PointC].
+
+ *** Vertex name: [VertexC3]
+ At point: [PointC].
+
+ *** Vertex name: [VertexD1]
+ At point: [PointD].
+
+ *** Vertex name: [VertexD2]
+ At point: [PointD].
+
+ *** Vertex name: [VertexD3]
+ At point: [PointD].
+
+ *** Curve: [CurveBeam1],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    2).
+ Curve degree = (    1).
+ Rational curve : [NO].
+ End point 0 : [PointA].
+ End point 1 : [PointB].
+ Orientation distribution : [OriDistBeam1].
+ Curve mesh parameters : [MeshBeam1].
+
+ *** Curve: [CurveBeam2],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    2).
+ Curve degree = (    1).
+ Rational curve : [NO].
+ End point 0 : [PointB].
+ End point 1 : [PointC].
+ Orientation distribution : [OriDistBeam2].
+ Curve mesh parameters : [MeshBeam2].
+
+ *** Curve: [CurveBeam3],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    2).
+ Curve degree = (    1).
+ Rational curve : [NO].
+ End point 0 : [PointC].
+ End point 1 : [PointD].
+ Orientation distribution : [OriDistBeam3].
+ Curve mesh parameters : [MeshBeam1].
+
+ *** Curve: [CurveTest],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    5).
+ Curve degree = (    3).
+ Rational curve : [NO].
+ xx = ( 0.00000e+000,  0.00000e+000,  0.00000e+000) [m].
+ xx = ( 2.00000e-001,  3.00000e-001,  0.00000e+000) [m].
+ xx = ( 4.00000e-001,  6.00000e-001,  0.00000e+000) [m].
+ xx = ( 5.00000e-001,  2.00000e-001,  0.00000e+000) [m].
+ xx = ( 1.00000e+000,  0.00000e+000,  0.00000e+000) [m].
+ Spline flag : [YES].
+
+ *** Curve mesh parameters: [MeshBeam1],
+ Number of elements = (    4).
+ Order of the elements = (    3).
+
+ *** Curve mesh parameters: [MeshBeam2],
+ Number of elements = (    4).
+ Order of the elements = (    3).
+
+ *** Curve: [CurveEigthCircle],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    3).
+ Curve degree = (    2).
+ Rational curve : [YES].
+ xx = ( 0.00000e+000,  1.00000e+000,  0.00000e+000,  1.00000e+000) [m].
+ xx = ( 0.00000e+000,  1.00000e+000,  4.14214e-001,  9.23880e-001) [m].
+ xx = ( 0.00000e+000,  7.07107e-001,  7.07107e-001,  1.00000e+000) [m].
+
+
+
+      ---------------------------------
+      |   @CHECK_SURFACES_AND_EDGES   |
+      ---------------------------------
+
+
+ *** Edge name: [EdgeRvjA]
+ Connected to vertices: [VertexA1, VertexA2].
+ Triad name: [TriadRvjA].
+
+ *** Edge name: [EdgeRotationA]
+ Connected to vertices: [VertexA1, VertexA3].
+
+ *** Edge name: [EdgePrdA]
+ Connected to vertices: [VertexA3, VertexA4].
+
+ *** Edge name: [EdgeBeam1]
+ Connected to vertices: [VertexA2, VertexB1].
+ Curve name: [CurveBeam1].
+
+ *** Edge name: [EdgeRvjB]
+ Connected to vertices: [VertexB1, VertexB2].
+ Triad name: [TriadRvjB].
+
+ *** Edge name: [EdgeRotationB]
+ Connected to vertices: [VertexB1, VertexB3].
+
+ *** Edge name: [EdgeBeam2]
+ Connected to vertices: [VertexB2, VertexC1].
+ Curve name: [CurveBeam2].
+
+ *** Edge name: [EdgeRvjC]
+ Connected to vertices: [VertexC1, VertexC2].
+ Triad name: [TriadRvjC].
+
+ *** Edge name: [EdgeRotationC]
+ Connected to vertices: [VertexC1, VertexC3].
+
+ *** Edge name: [EdgeBeam3]
+ Connected to vertices: [VertexC2, VertexD1].
+ Curve name: [CurveBeam3].
+
+ *** Edge name: [EdgeRvjD]
+ Connected to vertices: [VertexD1, VertexD2].
+ Triad name: [TriadRvjD].
+
+ *** Edge name: [EdgeRotationD]
+ Connected to vertices: [VertexD1, VertexD3].
+
+
+
+      --------------------------------
+      |   @CHECK_VOLUMES_AND_FACES   |
+      --------------------------------
+
+
+
+
+      -------------------------------
+      |   @CHECK_STRUCTURAL_EDGES   |
+      -------------------------------
+
+
+ *** Revolute joint: [RvjA],
+ Edge : [EdgeRvjA].
+ Relative rotation : [RotationA].
+
+ *** Relative rotation: [RotationA],
+ Edge : [EdgeRotationA].
+
+ *** Prescribed displacement: [PrdA],
+ Edge : [EdgePrdA].
+ Degree of freedom = (    4).
+ Time function : [ScheduleRotationA].
+
+ *** Beam: [Beam1],
+ Edge : [EdgeBeam1].
+ Property table : [PropertyBeam1].
+
+ *** Revolute joint: [RvjB],
+ Edge : [EdgeRvjB].
+ Relative rotation : [RotationB].
+
+ *** Relative rotation: [RotationB],
+ Edge : [EdgeRotationB].
+
+ *** Beam: [Beam2],
+ Edge : [EdgeBeam2].
+ Property table : [PropertyBeam2].
+
+ *** Revolute joint: [RvjC],
+ Edge : [EdgeRvjC].
+ Relative rotation : [RotationC].
+
+ *** Relative rotation: [RotationC],
+ Edge : [EdgeRotationC].
+
+ *** Beam: [Beam3],
+ Edge : [EdgeBeam3].
+ Property table : [PropertyBeam3].
+
+ *** Revolute joint: [RvjD],
+ Edge : [EdgeRvjD].
+ Relative rotation : [RotationD].
+
+ *** Relative rotation: [RotationD],
+ Edge : [EdgeRotationD].
+
+
+
+      -------------------------------
+      |   @CHECK_STRUCTURAL_FACES   |
+      -------------------------------
+
+
+
+
+      ----------------------------
+      |   @CHECK_OTHER_OBJECTS   |
+      ----------------------------
+
+
+ *** Boundary condition: [ClampA],
+ Entity : [VertexA1].
+ Displacements boundary conditions = (    1,     1,     1).
+ Rotation      boundary conditions = (    1,     1,     1).
+
+ *** Boundary condition: [ClampD],
+ Entity : [VertexD2].
+ Displacements boundary conditions = (    1,     1,     1).
+ Rotation      boundary conditions = (    1,     1,     1).
+
+ *** Time function: [ScheduleRotationA],
+ Time function type : [USER_DEFINED].
+ Time = ( 0.00000e+000).  Function value = ( 0.00000e+000).
+ Time = ( 1.00000e+001).  Function value = (-5.00000e+001).
+
+ *** Time function: [ScheduleA],
+ Time function type : [HARMONIC].
+ Harmonic No = (    1).
+ Amplitude = ( 1.00000e+000).  Period = ( 1.20000e+000). [sec].  Phase = ( 2.50000e-001).
+ Start time = ( 0.00000e+000). [sec].
+ End   time = ( 1.00000e+000). [sec].
+ Harmonic No = (    2).
+ Amplitude = (-1.00000e+000).  Period = ( 1.50000e+000). [sec].  Phase = (-2.50000e-001).
+ Start time = ( 1.00000e+000). [sec].
+ End   time = ( 2.00000e+000). [sec].
+ Start time = ( 0.00000e+000). [sec].
+ End   time = ( 5.00000e+000). [sec].
+
+ *** Fourier analysis: [FourierOnLine],
+ Analysis type : [ON_LINE].
+ Number of frequencies = (    5).
+ Frequencies [1/sec] = ( 
+  7.95775e-001,  1.59155e+000,  2.38732e+000,  3.18310e+000,  3.97887e+000).
+ Gain coefficient = ( 3.18310e-003).
+ Output channel number = (    1).
+
+ *** Sensor name: [SensorBeam1Forces]
+ Object name: [Beam1].
+ Sensor type: [FORCES].
+ Eta coordinate = ( 0.00000e+000)
+
+ *** Sensor name: [SensorBeam1Velocities]
+ Object name: [Beam1].
+ Sensor type: [VELOCITIES].
+ Eta coordinate = ( 0.00000e+000)
+
+ *** Sensor name: [SensorBeam2Displacements]
+ Object name: [Beam2].
+ Sensor type: [DISPLACEMENTS].
+ Eta coordinate = ( 1.00000e+000)
+ Rotation representation: [EULER_ANGLES_312].
+
+ *** Sensor name: [SensorBeam2Forces]
+ Object name: [Beam2].
+ Sensor type: [FORCES].
+ Eta coordinate = ( 1.00000e+000)
+
+ *** Sensor name: [SensorBeam2Velocities]
+ Object name: [Beam2].
+ Sensor type: [VELOCITIES].
+ Eta coordinate = ( 1.00000e+000)
+
+ *** Sensor name: [SensorRotationA]
+ Object name: [RotationA].
+ Sensor type: [RELATIVE_ROTATIONS].
+
+ *** Sensor name: [SensorRotationB]
+ Object name: [RotationB].
+ Sensor type: [RELATIVE_ROTATIONS].
+
+ *** Sensor name: [SensorRotationC]
+ Object name: [RotationC].
+ Sensor type: [RELATIVE_ROTATIONS].
+
+ *** Sensor name: [SensorRotationD]
+ Object name: [RotationD].
+ Sensor type: [RELATIVE_ROTATIONS].
+
+ *** Sensor name: [SensorPrdA]
+ Object name: [PrdA].
+ Sensor type: [DRIVING_MOMENT].
+
+ *** Survey: [SurveyBeam2Displacements]
+ Object name: [Beam2].
+ Survey type: [DISPLACEMENTS].
+ Time = ( 1.00000e-001) [sec].
+
+ *** Filter: [FilterBeam2Forces],
+ Filter type : [BUTTERWORTH].
+ Filter order = (    2).
+ Cut-off frequency = ( 2.00000e+000). [rad/sec].
+
+ *** Fem control parameters name: [AnalysisControlParameters]
+ Maximum number of time steps = (     1)
+ Simulation time range = ( 0.00000e+000,  4.00000e+000).
+ Time step size range = ( 1.00000e-007,  1.00000e-002) [sec].
+ Reference energy level = ( 1.00000e+000) [J].
+
+ *** Include command name: [IncludeMSF]
+ Active command: [YES].
+ List of file names:
+ MeshFileTest.seb.
+
+ *** Beam property: [PropertyBeam1]
+ Property definition type: [SECTIONAL_PROPERTIES].
+ Coordinate type: [ETA_COORDINATE].
+ Eta coordinate = ( 0.00000e+000)
+ Axial stiffness = ( 4.00000e+007). [N].
+ Bending stiffnesses I22, I33, I23 = ( 2.40000e+006,  2.40000e+006,  0.00000e+000) [N.m^2].
+ Torsional stiffness = ( 2.80000e+005). [N.m^2].
+ Shearing stiffnesses K22, K33, K23 = ( 2.00000e+006,  2.00000e+006,  0.00000e+000) [N].
+ Mass/Span = ( 3.20000e+000). [kg/m].
+ Moments of Inertia M11, M22, M33 = ( 2.40000e-002,  1.20000e-002,  1.20000e-002) [kg.m^2/m].
+ Center of mass location = ( 0.00000e+000,  0.00000e+000) [m].
+ Shear center location = ( 0.00000e+000,  0.00000e+000) [m].
+ Centroid location = ( 0.00000e+000,  0.00000e+000) [m].
+
+ *** Beam property: [PropertyBeam2]
+ Property definition type: [SECTIONAL_PROPERTIES].
+ Coordinate type: [ETA_COORDINATE].
+ Eta coordinate = ( 0.00000e+000)
+ Axial stiffness = ( 4.00000e+006). [N].
+ Bending stiffnesses I22, I33, I23 = ( 2.40000e+005,  2.40000e+005,  0.00000e+000) [N.m^2].
+ Torsional stiffness = ( 2.80000e+004). [N.m^2].
+ Shearing stiffnesses K22, K33, K23 = ( 2.00000e+005,  2.00000e+005,  0.00000e+000) [N].
+ Mass/Span = ( 1.60000e+000). [kg/m].
+ Moments of Inertia M11, M22, M33 = ( 1.20000e-002,  6.00000e-003,  6.00000e-003) [kg.m^2/m].
+ Center of mass location = ( 0.00000e+000,  0.00000e+000) [m].
+ Shear center location = ( 0.00000e+000,  0.00000e+000) [m].
+ Centroid location = ( 0.00000e+000,  0.00000e+000) [m].
+
+ *** Beam property: [PropertyBeam3]
+ Property definition type: [SECTIONAL_PROPERTIES].
+ Coordinate type: [ETA_COORDINATE].
+ Eta coordinate = ( 0.00000e+000)
+ Axial stiffness = ( 4.00000e+005). [N].
+ Bending stiffnesses I22, I33, I23 = ( 2.40000e+004,  2.40000e+004,  0.00000e+000) [N.m^2].
+ Torsional stiffness = ( 2.80000e+004). [N.m^2].
+ Shearing stiffnesses K22, K33, K23 = ( 2.00000e+005,  2.00000e+005,  0.00000e+000) [N].
+ Mass/Span = ( 1.60000e+000). [kg/m].
+ Moments of Inertia M11, M22, M33 = ( 1.20000e-002,  6.00000e-003,  6.00000e-003) [kg.m^2/m].
+ Center of mass location = ( 0.00000e+000,  0.00000e+000) [m].
+ Shear center location = ( 0.00000e+000,  0.00000e+000) [m].
+ Centroid location = ( 0.00000e+000,  0.00000e+000) [m].
+
+ *** Sensor name: [SensorBeam1Forces]
+ Object name: [Beam1].
+ Sensor type: [FORCES].
+ Eta coordinate = ( 0.00000e+000)
+
+ *** Sensor name: [SensorBeam1Velocities]
+ Object name: [Beam1].
+ Sensor type: [VELOCITIES].
+ Eta coordinate = ( 0.00000e+000)
+
+ *** Sensor name: [SensorBeam2Displacements]
+ Object name: [Beam2].
+ Sensor type: [DISPLACEMENTS].
+ Eta coordinate = ( 1.00000e+000)
+ Rotation representation: [EULER_ANGLES_312].
+
+ *** Sensor name: [SensorBeam2Forces]
+ Object name: [Beam2].
+ Sensor type: [FORCES].
+ Eta coordinate = ( 1.00000e+000)
+
+ *** Sensor name: [SensorBeam2Velocities]
+ Object name: [Beam2].
+ Sensor type: [VELOCITIES].
+ Eta coordinate = ( 1.00000e+000)
+
+ *** Sensor name: [SensorRotationA]
+ Object name: [RotationA].
+ Sensor type: [RELATIVE_ROTATIONS].
+
+ *** Sensor name: [SensorRotationB]
+ Object name: [RotationB].
+ Sensor type: [RELATIVE_ROTATIONS].
+
+ *** Sensor name: [SensorRotationC]
+ Object name: [RotationC].
+ Sensor type: [RELATIVE_ROTATIONS].
+
+ *** Sensor name: [SensorRotationD]
+ Object name: [RotationD].
+ Sensor type: [RELATIVE_ROTATIONS].
+
+ *** Sensor name: [SensorPrdA]
+ Object name: [PrdA].
+ Sensor type: [DRIVING_MOMENT].
+
+ *** Beam: [Beam1],
+ Edge : [EdgeBeam1].
+ Property table : [PropertyBeam1].
+
+ *** Beam: [Beam2],
+ Edge : [EdgeBeam2].
+ Property table : [PropertyBeam2].
+
+ *** Beam: [Beam3],
+ Edge : [EdgeBeam3].
+ Property table : [PropertyBeam3].
+ Axial stiffness = ( 4.00000e+007). [N].
+ Bending stiffnesses I22, I33, I23 = ( 2.40000e+006,  2.40000e+006,  0.00000e+000) [N.m^2].
+ Torsional stiffness = ( 2.80000e+005). [N.m^2].
+ Shearing stiffnesses K22, K33, K23 = ( 2.00000e+006,  2.00000e+006,  0.00000e+000) [N].
+ Mass/Span = ( 3.20000e+000). [kg/m].
+ Moments of Inertia M11, M22, M33 = ( 2.40000e-002,  1.20000e-002,  1.20000e-002) [kg.m^2/m].
+ Center of mass location = ( 0.00000e+000,  0.00000e+000) [m].
+ Shear center location = ( 0.00000e+000,  0.00000e+000) [m].
+ Centroid location = ( 0.00000e+000,  0.00000e+000) [m].
+ Axial stiffness = ( 4.00000e+006). [N].
+ Bending stiffnesses I22, I33, I23 = ( 2.40000e+005,  2.40000e+005,  0.00000e+000) [N.m^2].
+ Torsional stiffness = ( 2.80000e+004). [N.m^2].
+ Shearing stiffnesses K22, K33, K23 = ( 2.00000e+005,  2.00000e+005,  0.00000e+000) [N].
+ Mass/Span = ( 1.60000e+000). [kg/m].
+ Moments of Inertia M11, M22, M33 = ( 1.20000e-002,  6.00000e-003,  6.00000e-003) [kg.m^2/m].
+ Center of mass location = ( 0.00000e+000,  0.00000e+000) [m].
+ Shear center location = ( 0.00000e+000,  0.00000e+000) [m].
+ Centroid location = ( 0.00000e+000,  0.00000e+000) [m].
+ Axial stiffness = ( 4.00000e+005). [N].
+ Bending stiffnesses I22, I33, I23 = ( 2.40000e+004,  2.40000e+004,  0.00000e+000) [N.m^2].
+ Torsional stiffness = ( 2.80000e+004). [N.m^2].
+ Shearing stiffnesses K22, K33, K23 = ( 2.00000e+005,  2.00000e+005,  0.00000e+000) [N].
+ Mass/Span = ( 1.60000e+000). [kg/m].
+ Moments of Inertia M11, M22, M33 = ( 1.20000e-002,  6.00000e-003,  6.00000e-003) [kg.m^2/m].
+ Center of mass location = ( 0.00000e+000,  0.00000e+000) [m].
+ Shear center location = ( 0.00000e+000,  0.00000e+000) [m].
+ Centroid location = ( 0.00000e+000,  0.00000e+000) [m].
+
+
+
+      ----------------------------------
+      |   @EXECUTING_INCLUDE_COMMAND   |
+      ----------------------------------
+
+  --- Executing include command : [IncludeMSF].
+ SectionBuilder name: [MeshFileTest.seb].

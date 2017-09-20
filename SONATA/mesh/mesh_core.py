@@ -56,6 +56,7 @@ def gen_core_cells(a_nodes,area=1.0,**kwargs):
         options = kwargs.get('options')
     else:
         options = 'pa%s' % (area)
+    print len(a_nodes)
     
     mesh = triangle_mesh(a_nodes,options)  
     

@@ -216,7 +216,7 @@ class section_config(object):
         self.SETUP_BalanceWeight = read_BOOLrowSTR(SETUP_str,'BalanceWeight')
         self.SETUP_input_type = read_INTrowSTR(SETUP_str,'input_type')
         self.SETUP_datasource = read_TXTrowSTR(SETUP_str,'datasource')
-        if self.SETUP_input_type == 3:
+        if self.SETUP_input_type == 3 or self.SETUP_input_type == 4:
             self.SETUP_radial_station = read_FLOATrowSTR(SETUP_str,'radial_station')
         self.SETUP_scale_factor = read_FLOATrowSTR(SETUP_str,'scale_factor')
         self.SETUP_Theta = read_FLOATrowSTR(SETUP_str,'Theta')

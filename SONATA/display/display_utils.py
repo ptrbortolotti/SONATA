@@ -5,9 +5,10 @@
 import sys
 import os
 import matplotlib as plt
+import math
 
 from OCC.Display.SimpleGui import init_display
-from OCC.gp import gp_Pnt
+from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax3,gp_Ax1
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
 from OCC.Graphic3d import (Graphic3d_EF_PDF,
                            Graphic3d_EF_SVG,
@@ -17,6 +18,8 @@ from OCC.Graphic3d import (Graphic3d_EF_PDF,
 
 from OCC.Quantity import Quantity_Color
 from OCC.AIS import AIS_Shape
+
+from SONATA.topo.wire_utils import rotate_wire, translate_wire
 
 #===========================================================================
 # MENU FUNCTIONALITIES
@@ -171,25 +174,29 @@ def display_custome_shape(display,shape,linewidth,transparency,RGB):
 
 
 #=======================SONATA DISPLAY FUCTIONS===================================
-def display_SONATA_SegmentLst(display,SegmentLst):
-    # transfer shapes and display them in the viewer
-    display.DisplayShape(SegmentLst[0].wire, color="BLACK")
-    display.DisplayShape(SegmentLst[0].BSplineLst[0].StartPoint())
+def display_SONATA_SegmentLst(display,SegmentLst,Dx=0,alpha=0,beta=0):
+    # transfer shapes and display them in the viewer   
+    wire = rotate_wire(SegmentLst[0].wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,0,1)),alpha)
+    wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,1,0)),beta)
+    wire = translate_wire(wire,gp_Pnt(0,0,0),gp_Pnt(Dx,0,0))
+    display.DisplayShape(wire, color="BLACK")
+    
+    #display.DisplayShape(SegmentLst[0].BSplineLst[0].StartPoint())
     
     for i,seg in enumerate(SegmentLst):
-        display.DisplayShape(seg.wire,color="BLACK")
+        wire = rotate_wire(seg.wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,0,1)),alpha)
+        wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,1,0)),beta)
+        wire = translate_wire(wire,gp_Pnt(0,0,0),gp_Pnt(Dx,0,0))
+        display.DisplayShape(wire,color="BLACK")
+    
         k = 0
         for j,layer in enumerate(seg.LayerLst):
             [R,G,B,T] =  plt.cm.jet(k*50)
+            wire = rotate_wire(layer.wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,0,1)),alpha)
+            wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,1,0)),beta)
+            wire = translate_wire(wire,gp_Pnt(0,0,0),gp_Pnt(Dx,0,0))
             
-            if i==0:
-                display.DisplayColoredShape(layer.wire, Quantity_Color(R, G, B, 0),update=True)
-                
-            elif i==1:
-                display.DisplayColoredShape(layer.wire, Quantity_Color(R, G, B, 0),update=True)
-    
-            else:
-                display.DisplayColoredShape(layer.wire, Quantity_Color(R, G, B, 0),update=True)
+            display.DisplayColoredShape(wire, Quantity_Color(R, G, B, 0),update=True)
     
             k = k+1;
             if k>5:

@@ -1,0 +1,1155 @@
+
+     **********************************
+     *                                *
+     *         --- DYMORE ---         *
+     *       FLEXIBLE MULTIBODY       *
+     *        DYNAMIC ANALYSIS        *
+     *     --- SECTIONBUILDER ---     *
+     *                                *
+     **********************************
+     --- Dymore Version 4.1
+     --- Run date: Fri Jul 14 09:30:28 2017
+
+
+
+
+                    ***********************************
+                    *   @PROCESS_CONTROL_DEFINITION   *
+                    ***********************************
+
+ Unit system: [SI].
+ Post-processing analysis: [YES].
+ Figures directory path: [FIGURES\].
+ User's manual path: [FIGURES\].
+
+
+
+                    *************************
+                    *   @MODEL_DEFINITION   *
+                    *************************
+
+
+
+
+      -------------------------------------
+      |   @MATERIAL_PROPERTY_DEFINITION   |
+      -------------------------------------
+
+
+ *** Material property name: [MatPropAluminum]
+ Material type: [ISOTROPIC].
+ Material density = ( 2.68000e+003) [kg/m^3].
+
+      ---  Stiffness properties  ---- 
+
+ Young's modulus = ( 7.30000e+010) [Pa].
+ Poisson's ratio = ( 3.00000e-001)
+ 
+
+      ---  Strength properties  ---- 
+
+ Failure criterion type: [VON_MISES].
+ Allowable tensile stress = ( 6.20000e+008) [Pa].
+ 
+
+
+
+      -------------------------
+      |   @LAYUP_DEFINITION   |
+      -------------------------
+
+
+ *** Layup name: [Layup]
+ Material property name: [MatPropAluminum].
+ Layer thickness = ( 1.00000e+000)
+
+      ---  Layer  ---- 
+
+ Orientation angles = ( 0.00000e+000,  0.00000e+000).
+ 
+
+
+
+      ----------------------------------
+      |   @SOLID_PROPERTY_DEFINITION   |
+      ----------------------------------
+
+
+ *** Solid property name: [SolPropMatPropAluminum]
+ Is defined in frame: [GLOBAL].
+ Layer orientation: [ALONG_U].
+ Layup name: [Layup].
+
+
+
+      --------------------------
+      |   @VERTEX_DEFINITION   |
+      --------------------------
+
+
+ *** Vertex name: [VertexA]
+ At point: [PointA].
+
+ *** Vertex name: [VertexB]
+ At point: [PointB].
+
+ *** Vertex name: [VertexC]
+ At point: [PointC].
+
+ *** Vertex name: [VertexD]
+ At point: [PointD].
+
+
+
+      ------------------------
+      |   @EDGE_DEFINITION   |
+      ------------------------
+
+
+ *** Edge name: [EdgeBA]
+ Connected to vertices: [VertexB, VertexA].
+ Curve name: [CurveBA].
+
+ *** Edge name: [EdgeCD]
+ Connected to vertices: [VertexC, VertexD].
+ Curve name: [CurveCD].
+
+ *** Edge name: [EdgeCB]
+ Connected to vertices: [VertexC, VertexB].
+ Curve name: [CurveCB].
+
+ *** Edge name: [EdgeDA]
+ Connected to vertices: [VertexD, VertexA].
+ Curve name: [CurveDA].
+
+
+
+      -------------------------
+      |   @POINT_DEFINITION   |
+      -------------------------
+
+
+ *** Point name: [PointA]
+ Coordinates = ( 0.00000e+000,  1.00000e+000,  1.00000e+000) [m].
+
+ *** Point name: [PointB]
+ Coordinates = ( 0.00000e+000, -1.00000e+000,  1.00000e+000) [m].
+
+ *** Point name: [PointC]
+ Coordinates = ( 0.00000e+000, -1.00000e+000, -1.00000e+000) [m].
+
+ *** Point name: [PointD]
+ Coordinates = ( 0.00000e+000,  1.00000e+000, -1.00000e+000) [m].
+
+
+
+      -------------------------
+      |   @CURVE_DEFINITION   |
+      -------------------------
+
+
+ *** Curve: [CurveBA],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    2).
+ Curve degree = (    1).
+ Rational curve : [NO].
+ End point 0 : [PointB].
+ End point 1 : [PointA].
+ Curve mesh parameters : [MeshCurv].
+
+ *** Curve: [CurveCD],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    2).
+ Curve degree = (    1).
+ Rational curve : [NO].
+ End point 0 : [PointC].
+ End point 1 : [PointD].
+ Curve mesh parameters : [MeshCurv].
+
+ *** Curve: [CurveCB],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    2).
+ Curve degree = (    1).
+ Rational curve : [NO].
+ End point 0 : [PointC].
+ End point 1 : [PointB].
+ Curve mesh parameters : [MeshCurv].
+
+ *** Curve: [CurveDA],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    2).
+ Curve degree = (    1).
+ Rational curve : [NO].
+ End point 0 : [PointD].
+ End point 1 : [PointA].
+ Curve mesh parameters : [MeshCurv].
+
+
+
+      -----------------------------------------
+      |   @CURVE_MESH_PARAMETERS_DEFINITION   |
+      -----------------------------------------
+
+
+ *** Curve mesh parameters: [MeshCurv],
+ Number of elements = (    1).
+ Order of the elements = (    1).
+
+
+
+      ---------------------------
+      |   @SURFACE_DEFINITION   |
+      ---------------------------
+
+
+ *** Surface: [Surface1]
+ Is defined in frame: [INERTIAL].
+
+      ---  Points  ---- 
+
+ Number of control points = (    2,     2)
+ Degree of curve = (    1,     1)
+ Rational curve flag: [ NO].
+ Edge curves:
+ CurveCD,
+ CurveDA,
+ CurveBA,
+ CurveCB.
+ 
+
+ *** SectionBuilder name: [SBuild]
+ Curvature vector = ( 0.00000e+000,  0.00000e+000,  0.00000e+000) [1/m].
+ Tangent vector = ( 1.00000e+002,  0.00000e+000,  0.00000e+000).
+ Beam: [is STRAIGHT].
+ Debug print flag: [HIGH].
+
+
+
+      --------------------------------
+      |   @PRE_PROCESSING_ANALYSIS   |
+      --------------------------------
+
+
+ *** Mesh file definition: [MshFileName]
+ Mesh file type: [PATRAN].
+ File name: [SimpleMeshFile8.dat].
+
+
+
+                    **************************
+                    *   @PROCESS_MESH_FILE   *
+                    **************************
+
+ Number of vertices = (     8)
+ Number of faces = (     1)
+ Number of materials = (     1)
+
+      ---  Vertex  ---- 
+
+ Number of vertices = (     8)
+
+      ---  Face  ---- 
+
+ Number of faces = (     1)
+
+      ---  Edge  ---- 
+
+ Number of edges = (     4)
+ Number of vertices = (     4)
+
+      ---  Material property  ---- 
+
+ Number of faces = (     1)
+
+ *** Solid name: [GSolMatPropAluminum]
+ Face name: [GFaceMatPropAluminum].
+ Solid property name: [SolPropMatPropAluminum].
+
+ *** Face name: [GFaceMatPropAluminum]
+ Connected to edges:
+ EdgeCD,
+ EdgeDA,
+ EdgeBA,
+ EdgeCB.
+ Surface: [Surface].
+ Number of materials = (     1)
+
+
+
+                    ********************
+                    *   @CHECK_MODEL   *
+                    ********************
+
+
+
+
+      --------------------------------
+      |   @CHECK_GEOMETRIC_OBJECTS   |
+      --------------------------------
+
+
+ *** Point name: [POINT_ORIGIN]
+ Coordinates = ( 0.00000e+000,  0.00000e+000,  0.00000e+000) [m].
+
+ *** Triad: [TRIAD_INERTIAL],
+ Orientation definition type : [VECTORS_E2_E3].
+ E2 = ( 0.00000e+000,  1.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+ *** Fixed frame: [FXDFRAME_INERTIAL],
+ Point 1 : [POINT_ORIGIN].
+ Triad : [TRIAD_INERTIAL].
+
+ *** Point name: [PointA]
+ Coordinates = ( 0.00000e+000,  1.00000e+000,  1.00000e+000) [m].
+
+ *** Point name: [PointB]
+ Coordinates = ( 0.00000e+000, -1.00000e+000,  1.00000e+000) [m].
+
+ *** Point name: [PointC]
+ Coordinates = ( 0.00000e+000, -1.00000e+000, -1.00000e+000) [m].
+
+ *** Point name: [PointD]
+ Coordinates = ( 0.00000e+000,  1.00000e+000, -1.00000e+000) [m].
+
+
+
+      ----------------------------------
+      |   @RESOLVE_GEOMETRIC_OBJECTS   |
+      ----------------------------------
+
+
+ *** Fixed frame: [FXDFRAME_INERTIAL],
+ Point 1 : [POINT_ORIGIN].
+ Triad : [TRIAD_INERTIAL].
+
+
+
+      --------------------------------
+      |   @CHECK_POINTS_AND_TRIADS   |
+      --------------------------------
+
+
+ *** Point name: [POINT_ORIGIN]
+ Coordinates = ( 0.00000e+000,  0.00000e+000,  0.00000e+000) [m].
+
+ *** Triad: [TRIAD_INERTIAL],
+ Orientation definition type : [VECTORS_E2_E3].
+ E2 = ( 0.00000e+000,  1.00000e+000,  0.00000e+000)
+ E3 = ( 0.00000e+000,  0.00000e+000,  1.00000e+000)
+ Is defined in frame : [FXDFRAME_INERTIAL].
+
+ *** Point name: [PointA]
+ Coordinates = ( 0.00000e+000,  1.00000e+000,  1.00000e+000) [m].
+
+ *** Point name: [PointB]
+ Coordinates = ( 0.00000e+000, -1.00000e+000,  1.00000e+000) [m].
+
+ *** Point name: [PointC]
+ Coordinates = ( 0.00000e+000, -1.00000e+000, -1.00000e+000) [m].
+
+ *** Point name: [PointD]
+ Coordinates = ( 0.00000e+000,  1.00000e+000, -1.00000e+000) [m].
+
+
+
+      ----------------------------------
+      |   @CHECK_CURVES_AND_VERTICES   |
+      ----------------------------------
+
+
+ *** Vertex name: [VertexA]
+ At point: [PointA].
+
+ *** Vertex name: [VertexB]
+ At point: [PointB].
+
+ *** Vertex name: [VertexC]
+ At point: [PointC].
+
+ *** Vertex name: [VertexD]
+ At point: [PointD].
+
+ *** Curve: [CurveBA],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    2).
+ Curve degree = (    1).
+ Rational curve : [NO].
+ End point 0 : [PointB].
+ End point 1 : [PointA].
+ Curve mesh parameters : [MeshCurv].
+
+ *** Curve: [CurveCD],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    2).
+ Curve degree = (    1).
+ Rational curve : [NO].
+ End point 0 : [PointC].
+ End point 1 : [PointD].
+ Curve mesh parameters : [MeshCurv].
+
+ *** Curve: [CurveCB],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    2).
+ Curve degree = (    1).
+ Rational curve : [NO].
+ End point 0 : [PointC].
+ End point 1 : [PointB].
+ Curve mesh parameters : [MeshCurv].
+
+ *** Curve: [CurveDA],
+ Is defined in frame : [INERTIAL].
+
+      ---  Curve points  ---- 
+
+ Number of control points = (    2).
+ Curve degree = (    1).
+ Rational curve : [NO].
+ End point 0 : [PointD].
+ End point 1 : [PointA].
+ Curve mesh parameters : [MeshCurv].
+
+ *** Curve mesh parameters: [MeshCurv],
+ Number of elements = (    1).
+ Order of the elements = (    1).
+
+
+
+      ---------------------------------
+      |   @CHECK_SURFACES_AND_EDGES   |
+      ---------------------------------
+
+
+ *** Edge name: [EdgeBA]
+ Connected to vertices: [VertexB, VertexA].
+ Curve name: [CurveBA].
+
+ *** Edge name: [EdgeCD]
+ Connected to vertices: [VertexC, VertexD].
+ Curve name: [CurveCD].
+
+ *** Edge name: [EdgeCB]
+ Connected to vertices: [VertexC, VertexB].
+ Curve name: [CurveCB].
+
+ *** Edge name: [EdgeDA]
+ Connected to vertices: [VertexD, VertexA].
+ Curve name: [CurveDA].
+
+ *** Surface: [Surface1]
+ Is defined in frame: [INERTIAL].
+
+      ---  Points  ---- 
+
+ Number of control points = (    2,     2)
+ Degree of curve = (    1,     1)
+ Rational curve flag: [ NO].
+ Edge curves:
+ CurveCD,
+ CurveDA,
+ CurveBA,
+ CurveCB.
+ 
+
+
+
+      --------------------------------
+      |   @CHECK_VOLUMES_AND_FACES   |
+      --------------------------------
+
+
+ *** Face name: [GFaceMatPropAluminum]
+ Connected to edges:
+ EdgeCD,
+ EdgeDA,
+ EdgeBA,
+ EdgeCB.
+ Surface: [Surface].
+
+
+ $$$ Error for object: [GFaceMatPropAluminum].
+ Face: [GFaceMatPropAluminum]. Error number (  3)
+ Surface [Surface] does not exist
+ 
+ 
+
+      ---  Destroying Iost  ---- 
+
+
+      ---  List of Memory Items  ---- 
+
+ Number of items = (   326)
+ Item ID = (110100)
+ Pointer = (00000000003A4910)
+ Item ID = (110101)
+ Pointer = (00000000003A3B70)
+ Item ID = (311111)
+ Pointer = (00000000003A1240)
+ Item ID = ( 90000)
+ Pointer = (00000000003A12A0)
+ Item ID = (110110)
+ Pointer = (000000000039D660)
+ Item ID = (110110)
+ Pointer = (00000000003A1340)
+ Item ID = (110111)
+ Pointer = (000000000039E0C0)
+ Item ID = (110111)
+ Pointer = (00000000003A13E0)
+ Item ID = (110111)
+ Pointer = (00000000003A1440)
+ Item ID = (110111)
+ Pointer = (00000000003A14A0)
+ Item ID = (110111)
+ Pointer = (00000000003A1500)
+ Item ID = (110111)
+ Pointer = (00000000003A1560)
+ Item ID = (110111)
+ Pointer = (000000000039E0D0)
+ Item ID = (110111)
+ Pointer = (00000000003A1600)
+ Item ID = (110111)
+ Pointer = (00000000003A1660)
+ Item ID = (110111)
+ Pointer = (00000000003A16C0)
+ Item ID = (110111)
+ Pointer = (00000000003A1720)
+ Item ID = (110111)
+ Pointer = (00000000003A1780)
+ Item ID = (110111)
+ Pointer = (000000000039E0E0)
+ Item ID = (110111)
+ Pointer = (00000000003A1820)
+ Item ID = (110111)
+ Pointer = (00000000003A1880)
+ Item ID = (110111)
+ Pointer = (000000000039E0F0)
+ Item ID = (110111)
+ Pointer = (00000000003A1920)
+ Item ID = (110111)
+ Pointer = (00000000003A1980)
+ Item ID = (110111)
+ Pointer = (00000000003A19E0)
+ Item ID = (110111)
+ Pointer = (000000000039E100)
+ Item ID = (110120)
+ Pointer = (00000000003A1A80)
+ Item ID = (110120)
+ Pointer = (00000000003A3BC0)
+ Item ID = (110120)
+ Pointer = (00000000003A1B20)
+ Item ID = (110120)
+ Pointer = (00000000003A1B80)
+ Item ID = (110120)
+ Pointer = (000000000039E110)
+ Item ID = (110120)
+ Pointer = (000000000039D690)
+ Item ID = (110120)
+ Pointer = (000000000039D6C0)
+ Item ID = (110120)
+ Pointer = (000000000039D6F0)
+ Item ID = (110120)
+ Pointer = (000000000039E120)
+ Item ID = (110120)
+ Pointer = (00000000003A1D20)
+ Item ID = (110120)
+ Pointer = (000000000039E130)
+ Item ID = (110120)
+ Pointer = (00000000003A1DC0)
+ Item ID = (110120)
+ Pointer = (000000000039D720)
+ Item ID = (110120)
+ Pointer = (000000000039D750)
+ Item ID = (110120)
+ Pointer = (000000000039D780)
+ Item ID = (110120)
+ Pointer = (000000000039E140)
+ Item ID = (110120)
+ Pointer = (000000000039D7B0)
+ Item ID = (110120)
+ Pointer = (000000000039E150)
+ Item ID = (110120)
+ Pointer = (00000000003A1FA0)
+ Item ID = (110120)
+ Pointer = (00000000003A2000)
+ Item ID = (110120)
+ Pointer = (000000000039D7E0)
+ Item ID = (110120)
+ Pointer = (00000000003A20A0)
+ Item ID = (110120)
+ Pointer = (000000000039D810)
+ Item ID = (110120)
+ Pointer = (00000000003A2140)
+ Item ID = (110120)
+ Pointer = (000000000039D840)
+ Item ID = (110120)
+ Pointer = (00000000003A21E0)
+ Item ID = (110120)
+ Pointer = (00000000003A61A0)
+ Item ID = (110120)
+ Pointer = (000000000039D870)
+ Item ID = (110120)
+ Pointer = (00000000003A22C0)
+ Item ID = (110120)
+ Pointer = (000000000039D8A0)
+ Item ID = (110120)
+ Pointer = (000000000039D8D0)
+ Item ID = (110120)
+ Pointer = (00000000003A23A0)
+ Item ID = (110120)
+ Pointer = (000000000039D900)
+ Item ID = (110120)
+ Pointer = (00000000003A2440)
+ Item ID = (110120)
+ Pointer = (00000000003A61B0)
+ Item ID = (110121)
+ Pointer = (00000000003A61C0)
+ Item ID = (110121)
+ Pointer = (00000000003A2520)
+ Item ID = (110121)
+ Pointer = (00000000003A2580)
+ Item ID = (110121)
+ Pointer = (00000000003A25E0)
+ Item ID = (110121)
+ Pointer = (00000000003A2640)
+ Item ID = (110121)
+ Pointer = (00000000003A26A0)
+ Item ID = (110121)
+ Pointer = (00000000003A2700)
+ Item ID = (110121)
+ Pointer = (00000000003A2760)
+ Item ID = (110121)
+ Pointer = (00000000003A27C0)
+ Item ID = (110121)
+ Pointer = (00000000003A2820)
+ Item ID = (110121)
+ Pointer = (00000000003A2880)
+ Item ID = (110121)
+ Pointer = (00000000003A28E0)
+ Item ID = (110121)
+ Pointer = (00000000003A2940)
+ Item ID = (110121)
+ Pointer = (00000000003A29A0)
+ Item ID = (110121)
+ Pointer = (00000000003A2A00)
+ Item ID = (110121)
+ Pointer = (00000000003A2A60)
+ Item ID = (110121)
+ Pointer = (00000000003A2AC0)
+ Item ID = (110121)
+ Pointer = (00000000003A2B20)
+ Item ID = (110121)
+ Pointer = (00000000003A2B80)
+ Item ID = (110121)
+ Pointer = (00000000003A2BE0)
+ Item ID = (110121)
+ Pointer = (00000000003A2C40)
+ Item ID = (110121)
+ Pointer = (00000000003A2CA0)
+ Item ID = (110121)
+ Pointer = (00000000003A65C0)
+ Item ID = (110121)
+ Pointer = (00000000003A6620)
+ Item ID = (110121)
+ Pointer = (00000000003A6680)
+ Item ID = (110121)
+ Pointer = (00000000003A66E0)
+ Item ID = (110121)
+ Pointer = (00000000003A6740)
+ Item ID = (110121)
+ Pointer = (00000000003A61D0)
+ Item ID = (110121)
+ Pointer = (00000000003A67E0)
+ Item ID = (110121)
+ Pointer = (00000000003A6840)
+ Item ID = (110121)
+ Pointer = (00000000003A68A0)
+ Item ID = (110121)
+ Pointer = (00000000003A6900)
+ Item ID = (110121)
+ Pointer = (00000000003A6960)
+ Item ID = (110121)
+ Pointer = (00000000003A69C0)
+ Item ID = (110121)
+ Pointer = (00000000003A6A20)
+ Item ID = (110121)
+ Pointer = (00000000003A6A80)
+ Item ID = (110121)
+ Pointer = (00000000003A6AE0)
+ Item ID = (110121)
+ Pointer = (00000000003A6B40)
+ Item ID = (110121)
+ Pointer = (00000000003A6BA0)
+ Item ID = (110121)
+ Pointer = (00000000003A6C00)
+ Item ID = (110121)
+ Pointer = (00000000003A6C60)
+ Item ID = (110121)
+ Pointer = (00000000003A6CC0)
+ Item ID = (110121)
+ Pointer = (00000000003A6D20)
+ Item ID = (110121)
+ Pointer = (00000000003A6D80)
+ Item ID = (110121)
+ Pointer = (00000000003A6DE0)
+ Item ID = (110121)
+ Pointer = (00000000003A6E40)
+ Item ID = (110121)
+ Pointer = (00000000003A6EA0)
+ Item ID = (110121)
+ Pointer = (00000000003A6F00)
+ Item ID = (110121)
+ Pointer = (00000000003A6F60)
+ Item ID = (110121)
+ Pointer = (00000000003A6FC0)
+ Item ID = (110121)
+ Pointer = (00000000003A7020)
+ Item ID = (110121)
+ Pointer = (00000000003A7080)
+ Item ID = (110121)
+ Pointer = (00000000003A70E0)
+ Item ID = (110121)
+ Pointer = (00000000003A61E0)
+ Item ID = (110121)
+ Pointer = (00000000003A61F0)
+ Item ID = (110121)
+ Pointer = (00000000003A71C0)
+ Item ID = (110121)
+ Pointer = (00000000003A7220)
+ Item ID = (110121)
+ Pointer = (00000000003A7280)
+ Item ID = (110121)
+ Pointer = (00000000003A72E0)
+ Item ID = (110121)
+ Pointer = (00000000003A6200)
+ Item ID = (110121)
+ Pointer = (00000000003A7380)
+ Item ID = (110121)
+ Pointer = (00000000003A73E0)
+ Item ID = (110121)
+ Pointer = (00000000003A7440)
+ Item ID = (110121)
+ Pointer = (00000000003A74A0)
+ Item ID = (110121)
+ Pointer = (00000000003A7500)
+ Item ID = (110121)
+ Pointer = (00000000003A7560)
+ Item ID = (110121)
+ Pointer = (00000000003A75C0)
+ Item ID = (110121)
+ Pointer = (00000000003A6210)
+ Item ID = (110130)
+ Pointer = (00000000003505D0)
+ Item ID = (110130)
+ Pointer = (00000000003A76A0)
+ Item ID = (110130)
+ Pointer = (000000000039D930)
+ Item ID = (110131)
+ Pointer = (00000000003A6220)
+ Item ID = (110131)
+ Pointer = (00000000003A7780)
+ Item ID = (110131)
+ Pointer = (00000000003A77E0)
+ Item ID = (110131)
+ Pointer = (00000000003A7840)
+ Item ID = (110131)
+ Pointer = (00000000003A78A0)
+ Item ID = (110131)
+ Pointer = (00000000003A7900)
+ Item ID = (110131)
+ Pointer = (00000000003A7960)
+ Item ID = (110131)
+ Pointer = (00000000003A79C0)
+ Item ID = (110131)
+ Pointer = (00000000003A7A20)
+ Item ID = (110131)
+ Pointer = (00000000003A7A80)
+ Item ID = (110131)
+ Pointer = (00000000003A6230)
+ Item ID = (110131)
+ Pointer = (00000000003A7B20)
+ Item ID = (110131)
+ Pointer = (00000000003A7B80)
+ Item ID = (110131)
+ Pointer = (00000000003A7BE0)
+ Item ID = (110131)
+ Pointer = (00000000003A7C40)
+ Item ID = (110131)
+ Pointer = (00000000003A6240)
+ Item ID = (110131)
+ Pointer = (00000000003A6250)
+ Item ID = (110131)
+ Pointer = (00000000003A7D20)
+ Item ID = (110131)
+ Pointer = (00000000003A6260)
+ Item ID = (110132)
+ Pointer = (00000000003A6270)
+ Item ID = (110132)
+ Pointer = (00000000003A7E00)
+ Item ID = (110132)
+ Pointer = (00000000003A7E60)
+ Item ID = (110132)
+ Pointer = (00000000003A7EC0)
+ Item ID = (110132)
+ Pointer = (00000000003A6280)
+ Item ID = (110132)
+ Pointer = (00000000003A7F60)
+ Item ID = (110132)
+ Pointer = (00000000003A6290)
+ Item ID = (110132)
+ Pointer = (00000000003A8000)
+ Item ID = (110132)
+ Pointer = (00000000003A8060)
+ Item ID = (110132)
+ Pointer = (00000000003A80C0)
+ Item ID = (110132)
+ Pointer = (00000000003A62A0)
+ Item ID = (110132)
+ Pointer = (00000000003A62B0)
+ Item ID = (110132)
+ Pointer = (00000000003A62C0)
+ Item ID = (110132)
+ Pointer = (00000000003A62D0)
+ Item ID = (110132)
+ Pointer = (00000000003A8220)
+ Item ID = (110132)
+ Pointer = (00000000003A62E0)
+ Item ID = (110132)
+ Pointer = (00000000003A62F0)
+ Item ID = (110132)
+ Pointer = (00000000003A8300)
+ Item ID = (110132)
+ Pointer = (00000000003A6300)
+ Item ID = (110133)
+ Pointer = (00000000003A6310)
+ Item ID = (110133)
+ Pointer = (00000000003A83E0)
+ Item ID = (110133)
+ Pointer = (00000000003A8440)
+ Item ID = (110133)
+ Pointer = (00000000003AA5A0)
+ Item ID = (110133)
+ Pointer = (00000000003A84E0)
+ Item ID = (110133)
+ Pointer = (00000000003A8540)
+ Item ID = (110133)
+ Pointer = (00000000003A85A0)
+ Item ID = (110133)
+ Pointer = (00000000003A8600)
+ Item ID = (110133)
+ Pointer = (00000000003A8660)
+ Item ID = (110133)
+ Pointer = (00000000003A86C0)
+ Item ID = (110133)
+ Pointer = (00000000003A8720)
+ Item ID = (110133)
+ Pointer = (00000000003A8780)
+ Item ID = (110133)
+ Pointer = (00000000003A87E0)
+ Item ID = (110133)
+ Pointer = (00000000003AA5D0)
+ Item ID = (110133)
+ Pointer = (00000000003A8880)
+ Item ID = (110133)
+ Pointer = (00000000003A88E0)
+ Item ID = (110133)
+ Pointer = (00000000003A8940)
+ Item ID = (110133)
+ Pointer = (00000000003A89A0)
+ Item ID = (110133)
+ Pointer = (00000000003A6320)
+ Item ID = (110133)
+ Pointer = (00000000003A8A40)
+ Item ID = (110133)
+ Pointer = (00000000003A8AA0)
+ Item ID = (110133)
+ Pointer = (00000000003A8B00)
+ Item ID = (110133)
+ Pointer = (00000000003A8B60)
+ Item ID = (110133)
+ Pointer = (00000000003A8BC0)
+ Item ID = (110133)
+ Pointer = (00000000003A6330)
+ Item ID = (110133)
+ Pointer = (00000000003A6340)
+ Item ID = (110133)
+ Pointer = (00000000003A6350)
+ Item ID = (110133)
+ Pointer = (00000000003AA600)
+ Item ID = (110133)
+ Pointer = (00000000003AA630)
+ Item ID = (110133)
+ Pointer = (00000000003AA660)
+ Item ID = (110133)
+ Pointer = (00000000003AA690)
+ Item ID = (110133)
+ Pointer = (00000000003A8DE0)
+ Item ID = (110133)
+ Pointer = (00000000003A6360)
+ Item ID = (110133)
+ Pointer = (00000000003A6370)
+ Item ID = (110133)
+ Pointer = (00000000003AA6C0)
+ Item ID = (110133)
+ Pointer = (00000000003AA6F0)
+ Item ID = (110133)
+ Pointer = (00000000003AA720)
+ Item ID = (110133)
+ Pointer = (00000000003A8F80)
+ Item ID = (110133)
+ Pointer = (00000000003A8FE0)
+ Item ID = (110133)
+ Pointer = (00000000003A9040)
+ Item ID = (110133)
+ Pointer = (00000000003A90A0)
+ Item ID = (110133)
+ Pointer = (00000000003AA750)
+ Item ID = (110133)
+ Pointer = (00000000003A9140)
+ Item ID = (110133)
+ Pointer = (00000000003A91A0)
+ Item ID = (110133)
+ Pointer = (00000000003A9200)
+ Item ID = (110133)
+ Pointer = (00000000003A9260)
+ Item ID = (110133)
+ Pointer = (00000000003AA780)
+ Item ID = (110133)
+ Pointer = (00000000003AA7B0)
+ Item ID = (110133)
+ Pointer = (00000000003AA7E0)
+ Item ID = (110133)
+ Pointer = (00000000003AA810)
+ Item ID = (110133)
+ Pointer = (00000000003AA840)
+ Item ID = (110133)
+ Pointer = (00000000003AA870)
+ Item ID = (110133)
+ Pointer = (00000000003AA8A0)
+ Item ID = (110133)
+ Pointer = (00000000003AA8D0)
+ Item ID = (110133)
+ Pointer = (00000000003AA900)
+ Item ID = (110133)
+ Pointer = (00000000003AA930)
+ Item ID = (110133)
+ Pointer = (00000000003AA960)
+ Item ID = (110133)
+ Pointer = (00000000003AA990)
+ Item ID = (110133)
+ Pointer = (00000000003AA9C0)
+ Item ID = (110133)
+ Pointer = (00000000003AA9F0)
+ Item ID = (110133)
+ Pointer = (00000000003AAA20)
+ Item ID = (110133)
+ Pointer = (00000000003AAA50)
+ Item ID = (110133)
+ Pointer = (00000000003AAA80)
+ Item ID = (110133)
+ Pointer = (00000000003AAAB0)
+ Item ID = (110133)
+ Pointer = (00000000003AAAE0)
+ Item ID = (110133)
+ Pointer = (00000000003AAB10)
+ Item ID = (110133)
+ Pointer = (00000000003AAB40)
+ Item ID = (110133)
+ Pointer = (00000000003A9800)
+ Item ID = (110133)
+ Pointer = (00000000003A9860)
+ Item ID = (110133)
+ Pointer = (00000000003A98C0)
+ Item ID = (110133)
+ Pointer = (00000000003A9920)
+ Item ID = (110133)
+ Pointer = (00000000003A9980)
+ Item ID = (110133)
+ Pointer = (00000000003AAB70)
+ Item ID = (110133)
+ Pointer = (00000000003A9A20)
+ Item ID = (110133)
+ Pointer = (00000000003A9A80)
+ Item ID = (110133)
+ Pointer = (00000000003A9AE0)
+ Item ID = (110133)
+ Pointer = (00000000003A6380)
+ Item ID = (110133)
+ Pointer = (00000000003AABA0)
+ Item ID = (110133)
+ Pointer = (00000000003AABD0)
+ Item ID = (110133)
+ Pointer = (00000000003AAC00)
+ Item ID = (110133)
+ Pointer = (00000000003A9C40)
+ Item ID = (110133)
+ Pointer = (00000000003A9CA0)
+ Item ID = (110133)
+ Pointer = (00000000003A9D00)
+ Item ID = (110133)
+ Pointer = (00000000003AAC30)
+ Item ID = (110133)
+ Pointer = (00000000003AAC60)
+ Item ID = (110133)
+ Pointer = (00000000003AAC90)
+ Item ID = (110133)
+ Pointer = (00000000003AACC0)
+ Item ID = (110133)
+ Pointer = (00000000003A9E60)
+ Item ID = (110133)
+ Pointer = (00000000003A9EC0)
+ Item ID = (110133)
+ Pointer = (00000000003A9F20)
+ Item ID = (110133)
+ Pointer = (00000000003A9F80)
+ Item ID = (110133)
+ Pointer = (00000000003A9FE0)
+ Item ID = (110133)
+ Pointer = (00000000003AA040)
+ Item ID = (110133)
+ Pointer = (00000000003AA0A0)
+ Item ID = (110133)
+ Pointer = (00000000003AA100)
+ Item ID = (110133)
+ Pointer = (00000000003AA160)
+ Item ID = (110133)
+ Pointer = (00000000003AA1C0)
+ Item ID = (110133)
+ Pointer = (00000000003AA220)
+ Item ID = (110133)
+ Pointer = (00000000003AACF0)
+ Item ID = (110133)
+ Pointer = (00000000003AA2C0)
+ Item ID = (110133)
+ Pointer = (00000000003AA320)
+ Item ID = (110133)
+ Pointer = (00000000003AA380)
+ Item ID = (110133)
+ Pointer = (00000000003AA3E0)
+ Item ID = (110133)
+ Pointer = (00000000003AA440)
+ Item ID = (110133)
+ Pointer = (00000000003AA4A0)
+ Item ID = (110133)
+ Pointer = (00000000003A6390)
+ Item ID = (110133)
+ Pointer = (00000000003AA540)
+ Item ID = (110133)
+ Pointer = (00000000003A63A0)
+ Item ID = (110133)
+ Pointer = (00000000003A63B0)
+ Item ID = (110133)
+ Pointer = (00000000003AB660)
+ Item ID = (110133)
+ Pointer = (00000000003A63C0)
+ Item ID = (110133)
+ Pointer = (00000000003A63D0)
+ Item ID = (110133)
+ Pointer = (00000000003AB740)
+ Item ID = (110133)
+ Pointer = (00000000003AB7A0)
+ Item ID = (110133)
+ Pointer = (00000000003AB800)
+ Item ID = (110133)
+ Pointer = (00000000003AB860)
+ Item ID = (110133)
+ Pointer = (00000000003AB8C0)
+ Item ID = (110133)
+ Pointer = (00000000003A63E0)
+ Item ID = (110133)
+ Pointer = (00000000003A63F0)
+ Item ID = (110133)
+ Pointer = (00000000003AB9A0)
+ Item ID = (110133)
+ Pointer = (00000000003ABA00)
+ Item ID = (110133)
+ Pointer = (00000000003AAD20)
+ Item ID = (110133)
+ Pointer = (00000000003AAD50)
+ Item ID = (110133)
+ Pointer = (00000000003AAD80)
+ Item ID = (110133)
+ Pointer = (00000000003AADB0)
+ Item ID = (110133)
+ Pointer = (00000000003A6400)
+ Item ID = ( 59000)
+ Pointer = (00000000003B3570)
+ Item ID = ( 59001)
+ Pointer = (00000000003A3C10)
+ Item ID = (311111)
+ Pointer = (00000000003ABC20)
+ Item ID = ( 90000)
+ Pointer = (00000000003ABC80)
+ Item ID = (123700)
+ Pointer = (00000000003B6390)
+ Item ID = (123703)
+ Pointer = (00000000003B2CC0)
+ Item ID = (123800)
+ Pointer = (00000000003B7E50)
+ Item ID = (123801)
+ Pointer = (00000000003AAF00)
+ Item ID = (123802)
+ Pointer = (00000000003B76B0)
+ Item ID = (123803)
+ Pointer = (00000000003A4570)
+ Item ID = (123804)
+ Pointer = (00000000003B76C0)
+ Item ID = (123805)
+ Pointer = (00000000003B76D0)
+ Item ID = (124500)
+ Pointer = (00000000003AAF30)
+ Item ID = (124500)
+ Pointer = (00000000003AAF60)
+ Item ID = (124500)
+ Pointer = (00000000003AAF90)
+ Item ID = (124500)
+ Pointer = (00000000003AAFC0)
+ Item ID = (124500)
+ Pointer = (00000000003AAFF0)
+ Item ID = (124500)
+ Pointer = (00000000003AB020)
+ Item ID = (124500)
+ Pointer = (00000000003AB050)
+ Item ID = (124500)
+ Pointer = (00000000003AB080)
+ Item ID = (124400)
+ Pointer = (00000000003B64B0)
+ Item ID = ( 82000)
+ Pointer = (00000000003BFEE0)
+ Item ID = ( 82003)
+ Pointer = (0000000000350990)
+ Item ID = ( 82003)
+ Pointer = (00000000003B9ED0)
+ Item ID = ( 90000)
+ Pointer = (00000000003B9F30)
+ Item ID = ( 82004)
+ Pointer = (00000000003B76E0)
+ Item ID = ( 82004)
+ Pointer = (00000000003B76F0)
+ Item ID = ( 82004)
+ Pointer = (00000000003B7700)
+ Item ID = ( 82004)
+ Pointer = (00000000003B7710)
+ Item ID = ( 82005)
+ Pointer = (00000000003B7720)

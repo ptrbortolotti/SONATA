@@ -1,0 +1,2542 @@
+
+ <HTML>
+ <HEAD>
+   <META NAME = 'GENERATOR' CONTENT = 'Dymore HTML'>
+   <TITLE>index file</TITLE>
+ </HEAD>
+ <BODY BGCOLOR = '#F0F0F0'>
+
+ <P><CENTER><A NAME ='TOP_OF_FILE'>
+ <FONT COLOR ='#004000' size=+3>
+ Model Definition for analysis:
+ </FONT>
+ <FONT SIZE =+3> { </FONT>
+ <FONT COLOR ='#ff0000' SIZE=+3>
+ fourbar
+ </FONT>
+ <FONT SIZE =+3>}</FONT>
+ </CENTER></P>
+
+ <UL>
+ <LI><A HREF ='#Actuator_Elements'>Actuator_Elements</A>.</LI>
+ <LI><A HREF ='#Aerodynamic_Elements'>Aerodynamic_Elements</A>.</LI>
+ <LI><A HREF ='#Aerodynamic_Properties'>Aerodynamic_Properties</A>.</LI>
+ <LI><A HREF ='#Analysis_Control'>Analysis_Control</A>.</LI>
+ <LI><A HREF ='#Constraint_Elements'>Constraint_Elements</A>.</LI>
+ <LI><A HREF ='#Controller_Elements'>Controller_Elements</A>.</LI>
+ <LI><A HREF ='#External_Loading'>External_Loading</A>.</LI>
+ <LI><A HREF ='#Geometric_Objects'>Geometric_Objects</A>.</LI>
+ <LI><A HREF ='#Graphical_Objects'>Graphical_Objects</A>.</LI>
+ <LI><A HREF ='#Post_Processing_Tools'>Post_Processing_Tools</A>.</LI>
+ <LI><A HREF ='#Structural_Elements'>Structural_Elements</A>.</LI>
+ <LI><A HREF ='#Structural_Properties'>Structural_Properties</A>.</LI>
+ <LI><A HREF ='#Topological_Entities'>Topological_Entities</A>.</LI>
+ <LI><A HREF ='#Utility_Objects'>Utility_Objects</A>.</LI>
+ </UL>
+
+ <P><CENTER><HR>
+ <A NAME ='Actuator_Elements'></A>
+ <FONT COLOR ="#ff0000" SIZE = +2>Actuator_Elements</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\ActuatorElements\ActuatorElements.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P><CENTER><HR>
+ <A NAME ='Aerodynamic_Elements'></A>
+ <FONT COLOR ="#ff0000" SIZE = +2>Aerodynamic_Elements</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\AerodynamicElements\AerodynamicElements.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P><CENTER><HR>
+ <A NAME ='Aerodynamic_Properties'></A>
+ <FONT COLOR ="#ff0000" SIZE = +2>Aerodynamic_Properties</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\AerodynamicProperties\AerodynamicProperties.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P><CENTER><HR>
+ <A NAME ='Analysis_Control'></A>
+ <FONT COLOR ="#ff0000" SIZE = +2>Analysis_Control</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\AnalysisControls\AnalysisControls.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P> @FEM_CONTROL_PARAMETERS {
+ <A HREF ='#AnalysisControlParameters'>AnalysisControlParameters</A>}
+ <BR></P>
+
+ <P> @PRE_PROCESSING_CONTROL_PARAMETERS {
+ <A HREF ='#PreProcessControlParameters'>PreProcessControlParameters</A>}
+ <BR></P>
+
+ <P> @POST_PROCESSING_CONTROL_PARAMETERS {
+ <A HREF ='#PostProcessControlParameters'>PostProcessControlParameters</A>}
+ <BR></P>
+
+ <P> @STEP_CONTROL_PARAMETERS {
+ <A HREF ='#Step1'>Step1</A>}
+ <BR></P>
+
+ <P><CENTER><HR>
+ <A NAME ='Constraint_Elements'></A>
+ <FONT COLOR ="#ff0000" SIZE = +2>Constraint_Elements</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\ConstraintElements\ConstraintElements.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P> @PRESCRIBED_DISPLACEMENT_DEFINITION {
+ <A HREF ='#PrdA'>PrdA</A>}
+ <BR></P>
+
+ <P> @REVOLUTE_JOINT_DEFINITION {
+ <A HREF ='#RvjA'>RvjA</A>, 
+ <A HREF ='#RvjB'>RvjB</A>, 
+ <A HREF ='#RvjC'>RvjC</A>, 
+ <A HREF ='#RvjD'>RvjD</A>}
+ <BR></P>
+
+ <P> @RELATIVE_ROTATION_DEFINITION {
+ <A HREF ='#RotationA'>RotationA</A>, 
+ <A HREF ='#RotationB'>RotationB</A>, 
+ <A HREF ='#RotationC'>RotationC</A>, 
+ <A HREF ='#RotationD'>RotationD</A>}
+ <BR></P>
+
+ <P><CENTER><HR>
+ <A NAME ='Controller_Elements'></A>
+ <FONT COLOR ="#ff0000" SIZE = +2>Controller_Elements</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\ControllerElements\ControllerElements.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P><CENTER><HR>
+ <A NAME ='External_Loading'></A>
+ <FONT COLOR ="#ff0000" SIZE = +2>External_Loading</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\ExternalLoading\ExternalLoading.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P><CENTER><HR>
+ <A NAME ='Geometric_Objects'></A>
+ <FONT COLOR ="#ff0000" SIZE = +2>Geometric_Objects</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\GeometricObjects.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P> @BOUNDARY_CONDITION_DEFINITION {
+ <A HREF ='#ClampA'>ClampA</A>, 
+ <A HREF ='#ClampD'>ClampD</A>}
+ <BR></P>
+
+ <P> @CURVE_DEFINITION {
+ <A HREF ='#CurveBeam1'>CurveBeam1</A>, 
+ <A HREF ='#CurveBeam2'>CurveBeam2</A>, 
+ <A HREF ='#CurveBeam3'>CurveBeam3</A>, 
+ <A HREF ='#CurveTest'>CurveTest</A>, 
+ <A HREF ='#CurveEigthCircle'>CurveEigthCircle</A>}
+ <BR></P>
+
+ <P> @FIXED_FRAME_DEFINITION {
+ <A HREF ='#FXDFRAME_INERTIAL'>FXDFRAME_INERTIAL</A>}
+ <BR></P>
+
+ <P> @CURVE_MESH_PARAMETERS_DEFINITION {
+ <A HREF ='#MeshBeam1'>MeshBeam1</A>, 
+ <A HREF ='#MeshBeam2'>MeshBeam2</A>}
+ <BR></P>
+
+ <P> @ORIENTATION_DISTRIBUTION_DEFINITION {
+ <A HREF ='#OriDistBeam1'>OriDistBeam1</A>, 
+ <A HREF ='#OriDistBeam2'>OriDistBeam2</A>, 
+ <A HREF ='#OriDistBeam3'>OriDistBeam3</A>}
+ <BR></P>
+
+ <P> @POINT_DEFINITION {
+ <A HREF ='#POINT_ORIGIN'>POINT_ORIGIN</A>, 
+ <A HREF ='#PointA'>PointA</A>, 
+ <A HREF ='#PointB'>PointB</A>, 
+ <A HREF ='#PointC'>PointC</A>, 
+ <A HREF ='#PointD'>PointD</A>}
+ <BR></P>
+
+ <P> @REFERENCE_FRAME_DEFINITION {
+ <A HREF ='#REFFRAME_INERTIAL'>REFFRAME_INERTIAL</A>}
+ <BR></P>
+
+ <P> @TRIAD_DEFINITION {
+ <A HREF ='#TRIAD_INERTIAL'>TRIAD_INERTIAL</A>, 
+ <A HREF ='#TriadRvjA'>TriadRvjA</A>, 
+ <A HREF ='#TriadRvjB'>TriadRvjB</A>, 
+ <A HREF ='#TriadRvjC'>TriadRvjC</A>, 
+ <A HREF ='#TriadRvjD'>TriadRvjD</A>}
+ <BR></P>
+
+ <P><CENTER><HR>
+ <A NAME ='Graphical_Objects'></A>
+ <FONT COLOR ="#ff0000" SIZE = +2>Graphical_Objects</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GraphicalObjects\GraphicalObjects.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P><CENTER><HR>
+ <A NAME ='Post_Processing_Tools'></A>
+ <FONT COLOR ="#ff0000" SIZE = +2>Post_Processing_Tools</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\PostProcessingTools\PostProcessingTools.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P> @FILTER_DEFINITION {
+ <A HREF ='#FilterBeam2Forces'>FilterBeam2Forces</A>}
+ <BR></P>
+
+ <P> @FOURIER_ANALYSIS_DEFINITION {
+ <A HREF ='#FourierOnLine'>FourierOnLine</A>}
+ <BR></P>
+
+ <P> @SENSOR_DEFINITION {
+ <A HREF ='#SensorBeam1Forces'>SensorBeam1Forces</A>, 
+ <A HREF ='#SensorBeam1Velocities'>SensorBeam1Velocities</A>, 
+ <A HREF ='#SensorBeam2Displacements'>SensorBeam2Displacements</A>, 
+ <A HREF ='#SensorBeam2Forces'>SensorBeam2Forces</A>, 
+ <A HREF ='#SensorBeam2Velocities'>SensorBeam2Velocities</A>, 
+ <A HREF ='#SensorRotationA'>SensorRotationA</A>, 
+ <A HREF ='#SensorRotationB'>SensorRotationB</A>, 
+ <A HREF ='#SensorRotationC'>SensorRotationC</A>, 
+ <A HREF ='#SensorRotationD'>SensorRotationD</A>, 
+ <A HREF ='#SensorPrdA'>SensorPrdA</A>}
+ <BR></P>
+
+ <P> @SURVEY_DEFINITION {
+ <A HREF ='#SurveyBeam2Displacements'>SurveyBeam2Displacements</A>}
+ <BR></P>
+
+ <P><CENTER><HR>
+ <A NAME ='Structural_Elements'></A>
+ <FONT COLOR ="#ff0000" SIZE = +2>Structural_Elements</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\StructuralElements\StructuralElements.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P> @BEAM_DEFINITION {
+ <A HREF ='#Beam1'>Beam1</A>, 
+ <A HREF ='#Beam2'>Beam2</A>, 
+ <A HREF ='#Beam3'>Beam3</A>}
+ <BR></P>
+
+ <P><CENTER><HR>
+ <A NAME ='Structural_Properties'></A>
+ <FONT COLOR ="#ff0000" SIZE = +2>Structural_Properties</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\StructuralProperties\StructuralProperties.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P> @BEAM_PROPERTY_DEFINITION {
+ <A HREF ='#PropertyBeam1'>PropertyBeam1</A>, 
+ <A HREF ='#PropertyBeam2'>PropertyBeam2</A>, 
+ <A HREF ='#PropertyBeam3'>PropertyBeam3</A>}
+ <BR></P>
+
+ <P> @SECTION_BUILDER_SECTION_DATA {
+ <A HREF ='#PropertyBeam1: section at eta =  0.00000e+000'>PropertyBeam1: section at eta =  0.00000e+000</A>, 
+ <A HREF ='#PropertyBeam2: section at eta =  0.00000e+000'>PropertyBeam2: section at eta =  0.00000e+000</A>, 
+ <A HREF ='#PropertyBeam3: section at eta =  0.00000e+000'>PropertyBeam3: section at eta =  0.00000e+000</A>}
+ <BR></P>
+
+ <P><CENTER><HR>
+ <A NAME ='Topological_Entities'></A>
+ <FONT COLOR ="#ff0000" SIZE = +2>Topological_Entities</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\TopologicalEntities.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P> @EDGE_DEFINITION {
+ <A HREF ='#EdgeRvjA'>EdgeRvjA</A>, 
+ <A HREF ='#EdgeRotationA'>EdgeRotationA</A>, 
+ <A HREF ='#EdgePrdA'>EdgePrdA</A>, 
+ <A HREF ='#EdgeBeam1'>EdgeBeam1</A>, 
+ <A HREF ='#EdgeRvjB'>EdgeRvjB</A>, 
+ <A HREF ='#EdgeRotationB'>EdgeRotationB</A>, 
+ <A HREF ='#EdgeBeam2'>EdgeBeam2</A>, 
+ <A HREF ='#EdgeRvjC'>EdgeRvjC</A>, 
+ <A HREF ='#EdgeRotationC'>EdgeRotationC</A>, 
+ <A HREF ='#EdgeBeam3'>EdgeBeam3</A>, 
+ <A HREF ='#EdgeRvjD'>EdgeRvjD</A>, 
+ <A HREF ='#EdgeRotationD'>EdgeRotationD</A>}
+ <BR></P>
+
+ <P> @VERTEX_DEFINITION {
+ <A HREF ='#VertexA1'>VertexA1</A>, 
+ <A HREF ='#VertexA2'>VertexA2</A>, 
+ <A HREF ='#VertexA3'>VertexA3</A>, 
+ <A HREF ='#VertexA4'>VertexA4</A>, 
+ <A HREF ='#VertexB1'>VertexB1</A>, 
+ <A HREF ='#VertexB2'>VertexB2</A>, 
+ <A HREF ='#VertexB3'>VertexB3</A>, 
+ <A HREF ='#VertexC1'>VertexC1</A>, 
+ <A HREF ='#VertexC2'>VertexC2</A>, 
+ <A HREF ='#VertexC3'>VertexC3</A>, 
+ <A HREF ='#VertexD1'>VertexD1</A>, 
+ <A HREF ='#VertexD2'>VertexD2</A>, 
+ <A HREF ='#VertexD3'>VertexD3</A>}
+ <BR></P>
+
+ <P><CENTER><HR>
+ <A NAME ='Utility_Objects'></A>
+ <FONT COLOR ="#ff0000" SIZE = +2>Utility_Objects</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\UtilityObjects\UtilityObjects.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P> @INCLUDE_COMMAND {
+ <A HREF ='#IncludeMSF'>IncludeMSF</A>}
+ <BR></P>
+
+ <P> @TIME_FUNCTION_DEFINITION {
+ <A HREF ='#ScheduleRotationA'>ScheduleRotationA</A>, 
+ <A HREF ='#ScheduleA'>ScheduleA</A>}
+ <BR></P>
+
+ <P><CENTER><HR>
+ <A NAME ='POINT_ORIGIN'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@POINT_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Point.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @POINT_NAME {
+ <FONT COLOR ="#ff0000">POINT_ORIGIN</FONT>
+ } { 
+ </P>
+ <DL>
+
+ <DD>
+ @COORDINATES {  0.00000e+000,  0.00000e+000,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='TRIAD_INERTIAL'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@TRIAD_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Triad.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @TRIAD_NAME {
+ <FONT COLOR ="#ff0000">TRIAD_INERTIAL</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @ORIENTATION_DEFINITION_TYPE {<FONT COLOR ='#808000'>VECTORS_E2_E3</FONT>}
+
+ <DD>
+ @ORIENTATION_E2 {  0.00000e+000,  1.00000e+000,  0.00000e+000}
+
+ <DD>
+ @ORIENTATION_E3 {  0.00000e+000,  0.00000e+000,  1.00000e+000}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='FXDFRAME_INERTIAL'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@FIXED_FRAME_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\FxdFrame.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @FIXED_FRAME_NAME {
+ <FONT COLOR ="#ff0000">FXDFRAME_INERTIAL</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @POINT1_NAME {<A HREF ='#POINT_ORIGIN'>POINT_ORIGIN</A>}
+ <DD> @TRIAD_NAME {<A HREF ='#TRIAD_INERTIAL'>TRIAD_INERTIAL</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='VertexA1'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@VERTEX_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Vertex.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @VERTEX_NAME {
+ <FONT COLOR ="#ff0000">VertexA1</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @AT_POINT {<A HREF ='#PointA'>PointA</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='VertexA2'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@VERTEX_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Vertex.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @VERTEX_NAME {
+ <FONT COLOR ="#ff0000">VertexA2</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @AT_POINT {<A HREF ='#PointA'>PointA</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='VertexA3'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@VERTEX_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Vertex.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @VERTEX_NAME {
+ <FONT COLOR ="#ff0000">VertexA3</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @AT_POINT {<A HREF ='#PointA'>PointA</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='VertexA4'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@VERTEX_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Vertex.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @VERTEX_NAME {
+ <FONT COLOR ="#ff0000">VertexA4</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @AT_POINT {<A HREF ='#PointA'>PointA</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='VertexB1'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@VERTEX_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Vertex.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @VERTEX_NAME {
+ <FONT COLOR ="#ff0000">VertexB1</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @AT_POINT {<A HREF ='#PointB'>PointB</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='VertexB2'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@VERTEX_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Vertex.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @VERTEX_NAME {
+ <FONT COLOR ="#ff0000">VertexB2</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @AT_POINT {<A HREF ='#PointB'>PointB</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='VertexB3'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@VERTEX_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Vertex.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @VERTEX_NAME {
+ <FONT COLOR ="#ff0000">VertexB3</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @AT_POINT {<A HREF ='#PointB'>PointB</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='VertexC1'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@VERTEX_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Vertex.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @VERTEX_NAME {
+ <FONT COLOR ="#ff0000">VertexC1</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @AT_POINT {<A HREF ='#PointC'>PointC</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='VertexC2'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@VERTEX_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Vertex.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @VERTEX_NAME {
+ <FONT COLOR ="#ff0000">VertexC2</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @AT_POINT {<A HREF ='#PointC'>PointC</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='VertexC3'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@VERTEX_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Vertex.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @VERTEX_NAME {
+ <FONT COLOR ="#ff0000">VertexC3</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @AT_POINT {<A HREF ='#PointC'>PointC</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='VertexD1'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@VERTEX_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Vertex.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @VERTEX_NAME {
+ <FONT COLOR ="#ff0000">VertexD1</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @AT_POINT {<A HREF ='#PointD'>PointD</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='VertexD2'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@VERTEX_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Vertex.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @VERTEX_NAME {
+ <FONT COLOR ="#ff0000">VertexD2</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @AT_POINT {<A HREF ='#PointD'>PointD</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='VertexD3'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@VERTEX_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Vertex.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @VERTEX_NAME {
+ <FONT COLOR ="#ff0000">VertexD3</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @AT_POINT {<A HREF ='#PointD'>PointD</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='EdgeRvjA'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@EDGE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Edge.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @EDGE_NAME {
+ <FONT COLOR ="#ff0000">EdgeRvjA</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexA1'>VertexA1</A>, <A HREF ='#VertexA2'>VertexA2</A>}
+ <DD> @TRIAD_NAME {<A HREF ='#TriadRvjA'>TriadRvjA</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='EdgeRotationA'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@EDGE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Edge.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @EDGE_NAME {
+ <FONT COLOR ="#ff0000">EdgeRotationA</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexA1'>VertexA1</A>, <A HREF ='#VertexA3'>VertexA3</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='EdgePrdA'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@EDGE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Edge.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @EDGE_NAME {
+ <FONT COLOR ="#ff0000">EdgePrdA</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexA3'>VertexA3</A>, <A HREF ='#VertexA4'>VertexA4</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='EdgeBeam1'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@EDGE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Edge.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @EDGE_NAME {
+ <FONT COLOR ="#ff0000">EdgeBeam1</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexA2'>VertexA2</A>, <A HREF ='#VertexB1'>VertexB1</A>}
+ <DD> @CURVE_NAME {<A HREF ='#CurveBeam1'>CurveBeam1</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='EdgeRvjB'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@EDGE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Edge.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @EDGE_NAME {
+ <FONT COLOR ="#ff0000">EdgeRvjB</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexB1'>VertexB1</A>, <A HREF ='#VertexB2'>VertexB2</A>}
+ <DD> @TRIAD_NAME {<A HREF ='#TriadRvjB'>TriadRvjB</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='EdgeRotationB'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@EDGE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Edge.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @EDGE_NAME {
+ <FONT COLOR ="#ff0000">EdgeRotationB</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexB1'>VertexB1</A>, <A HREF ='#VertexB3'>VertexB3</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='EdgeBeam2'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@EDGE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Edge.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @EDGE_NAME {
+ <FONT COLOR ="#ff0000">EdgeBeam2</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexB2'>VertexB2</A>, <A HREF ='#VertexC1'>VertexC1</A>}
+ <DD> @CURVE_NAME {<A HREF ='#CurveBeam2'>CurveBeam2</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='EdgeRvjC'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@EDGE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Edge.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @EDGE_NAME {
+ <FONT COLOR ="#ff0000">EdgeRvjC</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexC1'>VertexC1</A>, <A HREF ='#VertexC2'>VertexC2</A>}
+ <DD> @TRIAD_NAME {<A HREF ='#TriadRvjC'>TriadRvjC</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='EdgeRotationC'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@EDGE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Edge.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @EDGE_NAME {
+ <FONT COLOR ="#ff0000">EdgeRotationC</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexC1'>VertexC1</A>, <A HREF ='#VertexC3'>VertexC3</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='EdgeBeam3'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@EDGE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Edge.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @EDGE_NAME {
+ <FONT COLOR ="#ff0000">EdgeBeam3</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexC2'>VertexC2</A>, <A HREF ='#VertexD1'>VertexD1</A>}
+ <DD> @CURVE_NAME {<A HREF ='#CurveBeam3'>CurveBeam3</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='EdgeRvjD'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@EDGE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Edge.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @EDGE_NAME {
+ <FONT COLOR ="#ff0000">EdgeRvjD</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexD1'>VertexD1</A>, <A HREF ='#VertexD2'>VertexD2</A>}
+ <DD> @TRIAD_NAME {<A HREF ='#TriadRvjD'>TriadRvjD</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='EdgeRotationD'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@EDGE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\TopologicalEntities\Edge.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @EDGE_NAME {
+ <FONT COLOR ="#ff0000">EdgeRotationD</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexD1'>VertexD1</A>, <A HREF ='#VertexD3'>VertexD3</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='PointA'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@POINT_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Point.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @POINT_NAME {
+ <FONT COLOR ="#ff0000">PointA</FONT>
+ } { 
+ </P>
+ <DL>
+
+ <DD>
+ @COORDINATES {  0.00000e+000,  0.00000e+000,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='PointB'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@POINT_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Point.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @POINT_NAME {
+ <FONT COLOR ="#ff0000">PointB</FONT>
+ } { 
+ </P>
+ <DL>
+
+ <DD>
+ @COORDINATES {  0.00000e+000,  1.20000e-001,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='PointC'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@POINT_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Point.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @POINT_NAME {
+ <FONT COLOR ="#ff0000">PointC</FONT>
+ } { 
+ </P>
+ <DL>
+
+ <DD>
+ @COORDINATES {  2.40000e-001,  1.20000e-001,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='PointD'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@POINT_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Point.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @POINT_NAME {
+ <FONT COLOR ="#ff0000">PointD</FONT>
+ } { 
+ </P>
+ <DL>
+
+ <DD>
+ @COORDINATES {  2.40000e-001,  0.00000e+000,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='TriadRvjA'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@TRIAD_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Triad.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @TRIAD_NAME {
+ <FONT COLOR ="#ff0000">TriadRvjA</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @ORIENTATION_DEFINITION_TYPE {<FONT COLOR ='#808000'>VECTORS_E2_E3</FONT>}
+
+ <DD>
+ @ORIENTATION_E2 {  0.00000e+000,  1.00000e+000,  0.00000e+000}
+
+ <DD>
+ @ORIENTATION_E3 {  0.00000e+000,  0.00000e+000,  1.00000e+000}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='TriadRvjB'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@TRIAD_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Triad.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @TRIAD_NAME {
+ <FONT COLOR ="#ff0000">TriadRvjB</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @ORIENTATION_DEFINITION_TYPE {<FONT COLOR ='#808000'>VECTORS_E2_E3</FONT>}
+
+ <DD>
+ @ORIENTATION_E2 {  0.00000e+000,  1.00000e+000,  0.00000e+000}
+
+ <DD>
+ @ORIENTATION_E3 {  0.00000e+000,  0.00000e+000,  1.00000e+000}
+ <DD> @IS_DEFINED_IN_FRAME {<FONT COLOR ='#808000'>FXDFRAME_INERTIAL</FONT>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='TriadRvjC'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@TRIAD_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Triad.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @TRIAD_NAME {
+ <FONT COLOR ="#ff0000">TriadRvjC</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @ORIENTATION_DEFINITION_TYPE {<FONT COLOR ='#808000'>EULER_ANGLES_323</FONT>}
+
+ <DD>
+ @EULER_ANGLES_323 {  0.00000e+000,  5.00000e+000,  0.00000e+000}
+ <FONT COLOR ='#975820'>[deg]</FONT>
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='TriadRvjD'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@TRIAD_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Triad.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @TRIAD_NAME {
+ <FONT COLOR ="#ff0000">TriadRvjD</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @ORIENTATION_DEFINITION_TYPE {<FONT COLOR ='#808000'>VECTORS_E2_E3</FONT>}
+
+ <DD>
+ @ORIENTATION_E2 {  0.00000e+000,  1.00000e+000,  0.00000e+000}
+
+ <DD>
+ @ORIENTATION_E3 {  0.00000e+000,  0.00000e+000,  1.00000e+000}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='CurveBeam1'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@CURVE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Curve.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @CURVE_NAME {
+ <FONT COLOR ="#ff0000">CurveBeam1</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @IS_DEFINED_IN_FRAME {<FONT COLOR ='#808000'>INERTIAL</FONT>}
+
+ <P>@POINT_DEFINITION {</P>
+ <DL>
+
+ <DD>
+ @NUMBER_OF_CONTROL_POINTS {     2}
+
+ <DD>
+ @DEGREE_OF_CURVE {     1}
+ <DD> @RATIONAL_CURVE_FLAG {<FONT COLOR ='#808000'>NO</FONT>}
+ <DD> @END_POINT_0 {<A HREF ='#PointA'>PointA</A>}
+ <DD> @END_POINT_1 {<A HREF ='#PointB'>PointB</A>}
+ </DL><P>
+ }
+
+ <P>@TRIAD_DEFINITION {</P>
+ <DL>
+ <DD> @ORIENTATION_DISTRIBUTION_NAME {<A HREF ='#OriDistBeam1'>OriDistBeam1</A>}
+ </DL><P>
+ }
+ <DD> @CURVE_MESH_PARAMETERS_NAME {<A HREF ='#MeshBeam1'>MeshBeam1</A>}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\CurveBeam1Qcv1Q.png' BORDER ='5'></CENTER>
+ <CENTER>CURVE (X1 X2 VIEW)</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\CurveBeam1Qcv2Q.png' BORDER ='5'></CENTER>
+ <CENTER>CURVE (X1 X3 VIEW)</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\CurveBeam1Qcv3Q.png' BORDER ='5'></CENTER>
+ <CENTER>CURVE (X2 X3 VIEW)</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='CurveBeam2'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@CURVE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Curve.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @CURVE_NAME {
+ <FONT COLOR ="#ff0000">CurveBeam2</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @IS_DEFINED_IN_FRAME {<FONT COLOR ='#808000'>INERTIAL</FONT>}
+
+ <P>@POINT_DEFINITION {</P>
+ <DL>
+
+ <DD>
+ @NUMBER_OF_CONTROL_POINTS {     2}
+
+ <DD>
+ @DEGREE_OF_CURVE {     1}
+ <DD> @RATIONAL_CURVE_FLAG {<FONT COLOR ='#808000'>NO</FONT>}
+ <DD> @END_POINT_0 {<A HREF ='#PointB'>PointB</A>}
+ <DD> @END_POINT_1 {<A HREF ='#PointC'>PointC</A>}
+ </DL><P>
+ }
+
+ <P>@TRIAD_DEFINITION {</P>
+ <DL>
+ <DD> @ORIENTATION_DISTRIBUTION_NAME {<A HREF ='#OriDistBeam2'>OriDistBeam2</A>}
+ </DL><P>
+ }
+ <DD> @CURVE_MESH_PARAMETERS_NAME {<A HREF ='#MeshBeam2'>MeshBeam2</A>}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\CurveBeam2Qcv1Q.png' BORDER ='5'></CENTER>
+ <CENTER>CURVE (X1 X2 VIEW)</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\CurveBeam2Qcv2Q.png' BORDER ='5'></CENTER>
+ <CENTER>CURVE (X1 X3 VIEW)</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\CurveBeam2Qcv3Q.png' BORDER ='5'></CENTER>
+ <CENTER>CURVE (X2 X3 VIEW)</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='CurveBeam3'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@CURVE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Curve.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @CURVE_NAME {
+ <FONT COLOR ="#ff0000">CurveBeam3</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @IS_DEFINED_IN_FRAME {<FONT COLOR ='#808000'>INERTIAL</FONT>}
+
+ <P>@POINT_DEFINITION {</P>
+ <DL>
+
+ <DD>
+ @NUMBER_OF_CONTROL_POINTS {     2}
+
+ <DD>
+ @DEGREE_OF_CURVE {     1}
+ <DD> @RATIONAL_CURVE_FLAG {<FONT COLOR ='#808000'>NO</FONT>}
+ <DD> @END_POINT_0 {<A HREF ='#PointC'>PointC</A>}
+ <DD> @END_POINT_1 {<A HREF ='#PointD'>PointD</A>}
+ </DL><P>
+ }
+
+ <P>@TRIAD_DEFINITION {</P>
+ <DL>
+ <DD> @ORIENTATION_DISTRIBUTION_NAME {<A HREF ='#OriDistBeam3'>OriDistBeam3</A>}
+ </DL><P>
+ }
+ <DD> @CURVE_MESH_PARAMETERS_NAME {<A HREF ='#MeshBeam1'>MeshBeam1</A>}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\CurveBeam3Qcv1Q.png' BORDER ='5'></CENTER>
+ <CENTER>CURVE (X1 X2 VIEW)</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\CurveBeam3Qcv2Q.png' BORDER ='5'></CENTER>
+ <CENTER>CURVE (X1 X3 VIEW)</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\CurveBeam3Qcv3Q.png' BORDER ='5'></CENTER>
+ <CENTER>CURVE (X2 X3 VIEW)</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='CurveTest'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@CURVE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Curve.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @CURVE_NAME {
+ <FONT COLOR ="#ff0000">CurveTest</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @IS_DEFINED_IN_FRAME {<FONT COLOR ='#808000'>INERTIAL</FONT>}
+
+ <P>@POINT_DEFINITION {</P>
+ <DL>
+
+ <DD>
+ @NUMBER_OF_CONTROL_POINTS {     5}
+
+ <DD>
+ @DEGREE_OF_CURVE {     3}
+ <DD> @RATIONAL_CURVE_FLAG {<FONT COLOR ='#808000'>NO</FONT>}
+
+ <DD>
+ @COORDINATES {  0.00000e+000,  0.00000e+000,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+
+ <DD>
+ @COORDINATES {  2.00000e-001,  3.00000e-001,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+
+ <DD>
+ @COORDINATES {  4.00000e-001,  6.00000e-001,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+
+ <DD>
+ @COORDINATES {  5.00000e-001,  2.00000e-001,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+
+ <DD>
+ @COORDINATES {  1.00000e+000,  0.00000e+000,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+ <DD> @SPLINE {<FONT COLOR ='#808000'>YES</FONT>}
+ </DL><P>
+ }
+
+ <P>@KNOT_SEQUENCE_DEFINITION {</P>
+ <DL>
+
+ <DD>
+ @KNOT_SEQUENCE { <DD>
+ </DL><P>
+ }
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\CurveTestQcv1Q.png' BORDER ='5'></CENTER>
+ <CENTER>CURVE (X1 X2 VIEW)</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\CurveTestQcv2Q.png' BORDER ='5'></CENTER>
+ <CENTER>CURVE (X1 X3 VIEW)</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\CurveTestQcv3Q.png' BORDER ='5'></CENTER>
+ <CENTER>CURVE (X2 X3 VIEW)</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='OriDistBeam1'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@ORIENTATION_DISTRIBUTION_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Oridist.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @ORIENTATION_DISTRIBUTION_NAME {
+ <FONT COLOR ="#ff0000">OriDistBeam1</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @ORIENTATION_DEFINITION_TYPE {<FONT COLOR ='#808000'>VECTORS_E2_E3</FONT>}
+ <DD> @COORDINATE_TYPE {<FONT COLOR ='#808000'>ETA_COORDINATE</FONT>}
+
+ <DD>
+ @ETA_COORDINATE {  0.00000e+000}
+
+ <DD>
+ @ORIENTATION_E2 { -1.00000e+000,  0.00000e+000,  0.00000e+000}
+
+ <DD>
+ @ORIENTATION_E3 {  0.00000e+000,  0.00000e+000,  1.00000e+000}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\OriDistBeam1.png' BORDER ='5'></CENTER>
+ <CENTER>ORIENTATION</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='OriDistBeam2'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@ORIENTATION_DISTRIBUTION_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Oridist.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @ORIENTATION_DISTRIBUTION_NAME {
+ <FONT COLOR ="#ff0000">OriDistBeam2</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @ORIENTATION_DEFINITION_TYPE {<FONT COLOR ='#808000'>VECTORS_E2_E3</FONT>}
+ <DD> @COORDINATE_TYPE {<FONT COLOR ='#808000'>ETA_COORDINATE</FONT>}
+
+ <DD>
+ @ETA_COORDINATE {  0.00000e+000}
+
+ <DD>
+ @ORIENTATION_E2 {  0.00000e+000,  1.00000e+000,  0.00000e+000}
+
+ <DD>
+ @ORIENTATION_E3 {  0.00000e+000,  0.00000e+000,  1.00000e+000}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\OriDistBeam2.png' BORDER ='5'></CENTER>
+ <CENTER>ORIENTATION</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='OriDistBeam3'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@ORIENTATION_DISTRIBUTION_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Oridist.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @ORIENTATION_DISTRIBUTION_NAME {
+ <FONT COLOR ="#ff0000">OriDistBeam3</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @ORIENTATION_DEFINITION_TYPE {<FONT COLOR ='#808000'>VECTORS_E2_E3</FONT>}
+ <DD> @COORDINATE_TYPE {<FONT COLOR ='#808000'>ETA_COORDINATE</FONT>}
+
+ <DD>
+ @ETA_COORDINATE {  0.00000e+000}
+
+ <DD>
+ @ORIENTATION_E2 {  1.00000e+000,  0.00000e+000,  0.00000e+000}
+
+ <DD>
+ @ORIENTATION_E3 {  0.00000e+000,  0.00000e+000,  1.00000e+000}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\OriDistBeam3.png' BORDER ='5'></CENTER>
+ <CENTER>ORIENTATION</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='MeshBeam1'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@CURVE_MESH_PARAMETERS_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\MeshCurv.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @CURVE_MESH_PARAMETERS_NAME {
+ <FONT COLOR ="#ff0000">MeshBeam1</FONT>
+ } { 
+ </P>
+ <DL>
+
+ <DD>
+ @NUMBER_OF_ELEMENTS {     4}
+
+ <DD>
+ @ORDER_OF_ELEMENTS {     3}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='MeshBeam2'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@CURVE_MESH_PARAMETERS_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\MeshCurv.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @CURVE_MESH_PARAMETERS_NAME {
+ <FONT COLOR ="#ff0000">MeshBeam2</FONT>
+ } { 
+ </P>
+ <DL>
+
+ <DD>
+ @NUMBER_OF_ELEMENTS {     4}
+
+ <DD>
+ @ORDER_OF_ELEMENTS {     3}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='ClampA'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@BOUNDARY_CONDITION_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Boundary.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @BOUNDARY_CONDITION_NAME {
+ <FONT COLOR ="#ff0000">ClampA</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @ENTITY_NAME {<A HREF ='#VertexA1'>VertexA1</A>}
+
+ <DD>
+ @DISPLACEMENT_BOUNDARY_CONDITIONS {     1,     1,     1}
+
+ <DD>
+ @ROTATION_BOUNDARY_CONDITIONS {     1,     1,     1}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='RvjA'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@REVOLUTE_JOINT_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\ConstraintElements\Rvj.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @REVOLUTE_JOINT_NAME {
+ <FONT COLOR ="#ff0000">RvjA</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @EDGE_NAME {<A HREF ='#EdgeRvjA'>EdgeRvjA</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexA1'>VertexA1</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexA2'>VertexA2</A>}
+ <DD> @RELATIVE_ROTATION_NAME {<A HREF ='#RotationA'>RotationA</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='RotationA'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@RELATIVE_ROTATION_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\ConstraintElements\Rvr.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @RELATIVE_ROTATION_NAME {
+ <FONT COLOR ="#ff0000">RotationA</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @EDGE_NAME {<A HREF ='#EdgeRotationA'>EdgeRotationA</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexA1'>VertexA1</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexA3'>VertexA3</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='PrdA'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@PRESCRIBED_DISPLACEMENT_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\ConstraintElements\Prd.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @PRESCRIBED_DISPLACEMENT_NAME {
+ <FONT COLOR ="#ff0000">PrdA</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @EDGE_NAME {<A HREF ='#EdgePrdA'>EdgePrdA</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexA3'>VertexA3</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexA4'>VertexA4</A>}
+
+ <DD>
+ @DEGREE_OF_FREEDOM {     4}
+ <DD> @TIME_FUNCTION_NAME {<A HREF ='#ScheduleRotationA'>ScheduleRotationA</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='Beam1'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@BEAM_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\StructuralElements\Bld.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @BEAM_NAME {
+ <FONT COLOR ="#ff0000">Beam1</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @EDGE_NAME {<A HREF ='#EdgeBeam1'>EdgeBeam1</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexA2'>VertexA2</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexB1'>VertexB1</A>}
+ <DD> @BEAM_PROPERTY_NAME {<A HREF ='#PropertyBeam1'>PropertyBeam1</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='RvjB'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@REVOLUTE_JOINT_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\ConstraintElements\Rvj.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @REVOLUTE_JOINT_NAME {
+ <FONT COLOR ="#ff0000">RvjB</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @EDGE_NAME {<A HREF ='#EdgeRvjB'>EdgeRvjB</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexB1'>VertexB1</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexB2'>VertexB2</A>}
+ <DD> @RELATIVE_ROTATION_NAME {<A HREF ='#RotationB'>RotationB</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='RotationB'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@RELATIVE_ROTATION_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\ConstraintElements\Rvr.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @RELATIVE_ROTATION_NAME {
+ <FONT COLOR ="#ff0000">RotationB</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @EDGE_NAME {<A HREF ='#EdgeRotationB'>EdgeRotationB</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexB1'>VertexB1</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexB3'>VertexB3</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='Beam2'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@BEAM_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\StructuralElements\Bld.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @BEAM_NAME {
+ <FONT COLOR ="#ff0000">Beam2</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @EDGE_NAME {<A HREF ='#EdgeBeam2'>EdgeBeam2</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexB2'>VertexB2</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexC1'>VertexC1</A>}
+ <DD> @BEAM_PROPERTY_NAME {<A HREF ='#PropertyBeam2'>PropertyBeam2</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='RvjC'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@REVOLUTE_JOINT_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\ConstraintElements\Rvj.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @REVOLUTE_JOINT_NAME {
+ <FONT COLOR ="#ff0000">RvjC</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @EDGE_NAME {<A HREF ='#EdgeRvjC'>EdgeRvjC</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexC1'>VertexC1</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexC2'>VertexC2</A>}
+ <DD> @RELATIVE_ROTATION_NAME {<A HREF ='#RotationC'>RotationC</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='RotationC'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@RELATIVE_ROTATION_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\ConstraintElements\Rvr.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @RELATIVE_ROTATION_NAME {
+ <FONT COLOR ="#ff0000">RotationC</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @EDGE_NAME {<A HREF ='#EdgeRotationC'>EdgeRotationC</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexC1'>VertexC1</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexC3'>VertexC3</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='Beam3'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@BEAM_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\StructuralElements\Bld.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @BEAM_NAME {
+ <FONT COLOR ="#ff0000">Beam3</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @EDGE_NAME {<A HREF ='#EdgeBeam3'>EdgeBeam3</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexC2'>VertexC2</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexD1'>VertexD1</A>}
+ <DD> @BEAM_PROPERTY_NAME {<A HREF ='#PropertyBeam3'>PropertyBeam3</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='RvjD'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@REVOLUTE_JOINT_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\ConstraintElements\Rvj.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @REVOLUTE_JOINT_NAME {
+ <FONT COLOR ="#ff0000">RvjD</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @EDGE_NAME {<A HREF ='#EdgeRvjD'>EdgeRvjD</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexD1'>VertexD1</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexD2'>VertexD2</A>}
+ <DD> @RELATIVE_ROTATION_NAME {<A HREF ='#RotationD'>RotationD</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='RotationD'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@RELATIVE_ROTATION_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\ConstraintElements\Rvr.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @RELATIVE_ROTATION_NAME {
+ <FONT COLOR ="#ff0000">RotationD</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @EDGE_NAME {<A HREF ='#EdgeRotationD'>EdgeRotationD</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexD1'>VertexD1</A>}
+ <DD> @CONNECTED_TO_VERTICES {<A HREF ='#VertexD3'>VertexD3</A>}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='ClampD'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@BOUNDARY_CONDITION_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Boundary.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @BOUNDARY_CONDITION_NAME {
+ <FONT COLOR ="#ff0000">ClampD</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @ENTITY_NAME {<A HREF ='#VertexD2'>VertexD2</A>}
+
+ <DD>
+ @DISPLACEMENT_BOUNDARY_CONDITIONS {     1,     1,     1}
+
+ <DD>
+ @ROTATION_BOUNDARY_CONDITIONS {     1,     1,     1}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='PropertyBeam1'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@BEAM_PROPERTY_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\StructuralProperties\BldProp.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @BEAM_PROPERTY_NAME {
+ <FONT COLOR ="#ff0000">PropertyBeam1</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @PROPERTY_DEFINITION_TYPE {<FONT COLOR ='#808000'>SECTIONAL_PROPERTIES</FONT>}
+ <DD> @COORDINATE_TYPE {<FONT COLOR ='#808000'>ETA_COORDINATE</FONT>}
+
+ <DD>
+ @ETA_COORDINATE {  0.00000e+000}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1QaxsQ.png' BORDER ='5'></CENTER>
+ <CENTER>AXIAL_STIFFNESS</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qi22Q.png' BORDER ='5'></CENTER>
+ <CENTER>BENDING_STIFFNESS_I22</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qi33Q.png' BORDER ='5'></CENTER>
+ <CENTER>BENDING_STIFFNESS_I33</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qi23Q.png' BORDER ='5'></CENTER>
+ <CENTER>BENDING_STIFFNESS_I23</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1QtosQ.png' BORDER ='5'></CENTER>
+ <CENTER>TORSIONAL_STIFFNESS</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qk22Q.png' BORDER ='5'></CENTER>
+ <CENTER>SHEAR_STIFFNESS_K22</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qk33Q.png' BORDER ='5'></CENTER>
+ <CENTER>SHEAR_STIFFNESS_K33</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qk23Q.png' BORDER ='5'></CENTER>
+ <CENTER>SHEAR_STIFFNESS_K23</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qm00Q.png' BORDER ='5'></CENTER>
+ <CENTER>MASS_PER_LENGTH_M00</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qm11Q.png' BORDER ='5'></CENTER>
+ <CENTER>MOMENT_OF_INERTIA_M11</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qm22Q.png' BORDER ='5'></CENTER>
+ <CENTER>MOMENT_OF_INERTIA_M22</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qm33Q.png' BORDER ='5'></CENTER>
+ <CENTER>MOMENT_OF_INERTIA_M33</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qxm2Q.png' BORDER ='5'></CENTER>
+ <CENTER>MASS_CENTER_LOCATION_XM2</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qxm3Q.png' BORDER ='5'></CENTER>
+ <CENTER>MASS_CENTER_LOCATION_XM3</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qxk2Q.png' BORDER ='5'></CENTER>
+ <CENTER>SHEAR_CENTER_LOCATION_XK2</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qxk3Q.png' BORDER ='5'></CENTER>
+ <CENTER>SHEAR_CENTER_LOCATION_XK3</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qxc2Q.png' BORDER ='5'></CENTER>
+ <CENTER>CENTROID_LOCATION_XC2</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1Qxc3Q.png' BORDER ='5'></CENTER>
+ <CENTER>CENTROID_LOCATION_XC3</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam1QmucQ.png' BORDER ='5'></CENTER>
+ <CENTER>DAMPING_COEFFICIENT</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='PropertyBeam1: section at eta =  0.00000e+000'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@SECTION_BUILDER_SECTION_DATA</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\StructuralProperties\SbSec.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @SECTION_BUILDER_SECTION_NAME {
+ <FONT COLOR ="#ff0000">PropertyBeam1: section at eta =  0.00000e+000</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @PROPERTY_DEFINITION_TYPE {<FONT COLOR ='#808000'>SECTIONAL_PROPERTIES</FONT>}
+
+ <DD>
+ @AXIAL_STIFFNESS {  4.00000e+007}
+ <FONT COLOR ='#975820'>[N]</FONT>
+
+ <DD>
+ @BENDING_STIFFNESSES {  2.40000e+006,  2.40000e+006,  0.00000e+000}
+ <FONT COLOR ='#975820'>[N.m^2]</FONT>
+
+ <DD>
+ @TORSIONAL_STIFFNESS {  2.80000e+005}
+ <FONT COLOR ='#975820'>[N.m^2]</FONT>
+
+ <DD>
+ @SHEARING_STIFFNESSES {  2.00000e+006,  2.00000e+006,  0.00000e+000}
+ <FONT COLOR ='#975820'>[N]</FONT>
+
+ <DD>
+ @MASS_PER_UNIT_SPAN {  3.20000e+000}
+ <FONT COLOR ='#975820'>[kg/m]</FONT>
+
+ <DD>
+ @MOMENTS_OF_INERTIA {  2.40000e-002,  1.20000e-002,  1.20000e-002}
+ <FONT COLOR ='#975820'>[kg.m^2/m]</FONT>
+
+ <DD>
+ @CENTRE_OF_MASS_LOCATION {  0.00000e+000,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+
+ <DD>
+ @SHEAR_CENTRE_LOCATION {  0.00000e+000,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+
+ <DD>
+ @CENTROID_LOCATION {  0.00000e+000,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='PropertyBeam2'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@BEAM_PROPERTY_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\StructuralProperties\BldProp.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @BEAM_PROPERTY_NAME {
+ <FONT COLOR ="#ff0000">PropertyBeam2</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @PROPERTY_DEFINITION_TYPE {<FONT COLOR ='#808000'>SECTIONAL_PROPERTIES</FONT>}
+ <DD> @COORDINATE_TYPE {<FONT COLOR ='#808000'>ETA_COORDINATE</FONT>}
+
+ <DD>
+ @ETA_COORDINATE {  0.00000e+000}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2QaxsQ.png' BORDER ='5'></CENTER>
+ <CENTER>AXIAL_STIFFNESS</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qi22Q.png' BORDER ='5'></CENTER>
+ <CENTER>BENDING_STIFFNESS_I22</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qi33Q.png' BORDER ='5'></CENTER>
+ <CENTER>BENDING_STIFFNESS_I33</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qi23Q.png' BORDER ='5'></CENTER>
+ <CENTER>BENDING_STIFFNESS_I23</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2QtosQ.png' BORDER ='5'></CENTER>
+ <CENTER>TORSIONAL_STIFFNESS</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qk22Q.png' BORDER ='5'></CENTER>
+ <CENTER>SHEAR_STIFFNESS_K22</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qk33Q.png' BORDER ='5'></CENTER>
+ <CENTER>SHEAR_STIFFNESS_K33</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qk23Q.png' BORDER ='5'></CENTER>
+ <CENTER>SHEAR_STIFFNESS_K23</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qm00Q.png' BORDER ='5'></CENTER>
+ <CENTER>MASS_PER_LENGTH_M00</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qm11Q.png' BORDER ='5'></CENTER>
+ <CENTER>MOMENT_OF_INERTIA_M11</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qm22Q.png' BORDER ='5'></CENTER>
+ <CENTER>MOMENT_OF_INERTIA_M22</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qm33Q.png' BORDER ='5'></CENTER>
+ <CENTER>MOMENT_OF_INERTIA_M33</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qxm2Q.png' BORDER ='5'></CENTER>
+ <CENTER>MASS_CENTER_LOCATION_XM2</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qxm3Q.png' BORDER ='5'></CENTER>
+ <CENTER>MASS_CENTER_LOCATION_XM3</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qxk2Q.png' BORDER ='5'></CENTER>
+ <CENTER>SHEAR_CENTER_LOCATION_XK2</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qxk3Q.png' BORDER ='5'></CENTER>
+ <CENTER>SHEAR_CENTER_LOCATION_XK3</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qxc2Q.png' BORDER ='5'></CENTER>
+ <CENTER>CENTROID_LOCATION_XC2</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2Qxc3Q.png' BORDER ='5'></CENTER>
+ <CENTER>CENTROID_LOCATION_XC3</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam2QmucQ.png' BORDER ='5'></CENTER>
+ <CENTER>DAMPING_COEFFICIENT</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='PropertyBeam2: section at eta =  0.00000e+000'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@SECTION_BUILDER_SECTION_DATA</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\StructuralProperties\SbSec.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @SECTION_BUILDER_SECTION_NAME {
+ <FONT COLOR ="#ff0000">PropertyBeam2: section at eta =  0.00000e+000</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @PROPERTY_DEFINITION_TYPE {<FONT COLOR ='#808000'>SECTIONAL_PROPERTIES</FONT>}
+
+ <DD>
+ @AXIAL_STIFFNESS {  4.00000e+006}
+ <FONT COLOR ='#975820'>[N]</FONT>
+
+ <DD>
+ @BENDING_STIFFNESSES {  2.40000e+005,  2.40000e+005,  0.00000e+000}
+ <FONT COLOR ='#975820'>[N.m^2]</FONT>
+
+ <DD>
+ @TORSIONAL_STIFFNESS {  2.80000e+004}
+ <FONT COLOR ='#975820'>[N.m^2]</FONT>
+
+ <DD>
+ @SHEARING_STIFFNESSES {  2.00000e+005,  2.00000e+005,  0.00000e+000}
+ <FONT COLOR ='#975820'>[N]</FONT>
+
+ <DD>
+ @MASS_PER_UNIT_SPAN {  1.60000e+000}
+ <FONT COLOR ='#975820'>[kg/m]</FONT>
+
+ <DD>
+ @MOMENTS_OF_INERTIA {  1.20000e-002,  6.00000e-003,  6.00000e-003}
+ <FONT COLOR ='#975820'>[kg.m^2/m]</FONT>
+
+ <DD>
+ @CENTRE_OF_MASS_LOCATION {  0.00000e+000,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+
+ <DD>
+ @SHEAR_CENTRE_LOCATION {  0.00000e+000,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+
+ <DD>
+ @CENTROID_LOCATION {  0.00000e+000,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='PropertyBeam3'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@BEAM_PROPERTY_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\StructuralProperties\BldProp.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @BEAM_PROPERTY_NAME {
+ <FONT COLOR ="#ff0000">PropertyBeam3</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @PROPERTY_DEFINITION_TYPE {<FONT COLOR ='#808000'>SECTIONAL_PROPERTIES</FONT>}
+ <DD> @COORDINATE_TYPE {<FONT COLOR ='#808000'>ETA_COORDINATE</FONT>}
+
+ <DD>
+ @ETA_COORDINATE {  0.00000e+000}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3QaxsQ.png' BORDER ='5'></CENTER>
+ <CENTER>AXIAL_STIFFNESS</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qi22Q.png' BORDER ='5'></CENTER>
+ <CENTER>BENDING_STIFFNESS_I22</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qi33Q.png' BORDER ='5'></CENTER>
+ <CENTER>BENDING_STIFFNESS_I33</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qi23Q.png' BORDER ='5'></CENTER>
+ <CENTER>BENDING_STIFFNESS_I23</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3QtosQ.png' BORDER ='5'></CENTER>
+ <CENTER>TORSIONAL_STIFFNESS</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qk22Q.png' BORDER ='5'></CENTER>
+ <CENTER>SHEAR_STIFFNESS_K22</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qk33Q.png' BORDER ='5'></CENTER>
+ <CENTER>SHEAR_STIFFNESS_K33</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qk23Q.png' BORDER ='5'></CENTER>
+ <CENTER>SHEAR_STIFFNESS_K23</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qm00Q.png' BORDER ='5'></CENTER>
+ <CENTER>MASS_PER_LENGTH_M00</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qm11Q.png' BORDER ='5'></CENTER>
+ <CENTER>MOMENT_OF_INERTIA_M11</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qm22Q.png' BORDER ='5'></CENTER>
+ <CENTER>MOMENT_OF_INERTIA_M22</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qm33Q.png' BORDER ='5'></CENTER>
+ <CENTER>MOMENT_OF_INERTIA_M33</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qxm2Q.png' BORDER ='5'></CENTER>
+ <CENTER>MASS_CENTER_LOCATION_XM2</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qxm3Q.png' BORDER ='5'></CENTER>
+ <CENTER>MASS_CENTER_LOCATION_XM3</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qxk2Q.png' BORDER ='5'></CENTER>
+ <CENTER>SHEAR_CENTER_LOCATION_XK2</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qxk3Q.png' BORDER ='5'></CENTER>
+ <CENTER>SHEAR_CENTER_LOCATION_XK3</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qxc2Q.png' BORDER ='5'></CENTER>
+ <CENTER>CENTROID_LOCATION_XC2</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3Qxc3Q.png' BORDER ='5'></CENTER>
+ <CENTER>CENTROID_LOCATION_XC3</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\PropertyBeam3QmucQ.png' BORDER ='5'></CENTER>
+ <CENTER>DAMPING_COEFFICIENT</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='PropertyBeam3: section at eta =  0.00000e+000'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@SECTION_BUILDER_SECTION_DATA</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\StructuralProperties\SbSec.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @SECTION_BUILDER_SECTION_NAME {
+ <FONT COLOR ="#ff0000">PropertyBeam3: section at eta =  0.00000e+000</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @PROPERTY_DEFINITION_TYPE {<FONT COLOR ='#808000'>SECTIONAL_PROPERTIES</FONT>}
+
+ <DD>
+ @AXIAL_STIFFNESS {  4.00000e+005}
+ <FONT COLOR ='#975820'>[N]</FONT>
+
+ <DD>
+ @BENDING_STIFFNESSES {  2.40000e+004,  2.40000e+004,  0.00000e+000}
+ <FONT COLOR ='#975820'>[N.m^2]</FONT>
+
+ <DD>
+ @TORSIONAL_STIFFNESS {  2.80000e+004}
+ <FONT COLOR ='#975820'>[N.m^2]</FONT>
+
+ <DD>
+ @SHEARING_STIFFNESSES {  2.00000e+005,  2.00000e+005,  0.00000e+000}
+ <FONT COLOR ='#975820'>[N]</FONT>
+
+ <DD>
+ @MASS_PER_UNIT_SPAN {  1.60000e+000}
+ <FONT COLOR ='#975820'>[kg/m]</FONT>
+
+ <DD>
+ @MOMENTS_OF_INERTIA {  1.20000e-002,  6.00000e-003,  6.00000e-003}
+ <FONT COLOR ='#975820'>[kg.m^2/m]</FONT>
+
+ <DD>
+ @CENTRE_OF_MASS_LOCATION {  0.00000e+000,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+
+ <DD>
+ @SHEAR_CENTRE_LOCATION {  0.00000e+000,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+
+ <DD>
+ @CENTROID_LOCATION {  0.00000e+000,  0.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='ScheduleRotationA'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@TIME_FUNCTION_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\UtilityObjects\TimFun.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @TIME_FUNCTION_NAME {
+ <FONT COLOR ="#ff0000">ScheduleRotationA</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @TIME_FUNCTION_TYPE {<FONT COLOR ='#808000'>USER_DEFINED</FONT>}
+
+ <DD>
+ @TIME {  0.00000e+000}
+ <FONT COLOR ='#975820'>[sec]</FONT>
+
+ <DD>
+ @FUNCTION_VALUE {  0.00000e+000}
+
+ <DD>
+ @TIME {  1.00000e+001}
+ <FONT COLOR ='#975820'>[sec]</FONT>
+
+ <DD>
+ @FUNCTION_VALUE { -5.00000e+001}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\ScheduleRotationA.png' BORDER ='5'></CENTER>
+ <CENTER>TIME FUNCTION</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='ScheduleA'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@TIME_FUNCTION_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\UtilityObjects\TimFun.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @TIME_FUNCTION_NAME {
+ <FONT COLOR ="#ff0000">ScheduleA</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @TIME_FUNCTION_TYPE {<FONT COLOR ='#808000'>HARMONIC</FONT>}
+
+ <DD>
+ @HARMONIC_NUMBER {     1}
+
+ <DD>
+ @AMPLITUDE {  1.00000e+000}
+
+ <DD>
+ @PERIOD {  1.20000e+000}
+ <FONT COLOR ='#975820'>[sec]</FONT>
+
+ <DD>
+ @PHASE {  2.50000e-001}
+
+ <DD>
+ @HARMONIC_NUMBER {     2}
+
+ <DD>
+ @AMPLITUDE { -1.00000e+000}
+
+ <DD>
+ @PERIOD {  1.50000e+000}
+ <FONT COLOR ='#975820'>[sec]</FONT>
+
+ <DD>
+ @PHASE { -2.50000e-001}
+
+ <DD>
+ @START_TIME {  0.00000e+000}
+ <FONT COLOR ='#975820'>[sec]</FONT>
+
+ <DD>
+ @END_TIME {  5.00000e+000}
+ <FONT COLOR ='#975820'>[sec]</FONT>
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\ScheduleA.png' BORDER ='5'></CENTER>
+ <CENTER>TIME FUNCTION</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='FourierOnLine'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@FOURIER_ANALYSIS_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\PostProcessingTools\Fourier.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @FOURIER_ANALYSIS_NAME {
+ <FONT COLOR ="#ff0000">FourierOnLine</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @FOURIER_ANALYSIS_TYPE {<FONT COLOR ='#808000'>ON_LINE</FONT>}
+
+ <DD>
+ @NUMBER_OF_FREQUENCIES {     5}
+
+ <DD>
+ @FOURIER_FREQUENCIES <FONT COLOR ='#975820'>[1/sec]</FONT> <DD> { 7.95775e-001,  1.59155e+000,  2.38732e+000,  3.18310e+000,  3.97887e+000}
+
+ <DD>
+ @GAIN_COEFFICIENT {  3.18310e-003}
+
+ <DD>
+ @OUTPUT_CHANNEL_NUMBER {     1}
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='SensorBeam1Forces'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@SENSOR_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\PostProcessingTools\Sensor.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @SENSOR_NAME {
+ <FONT COLOR ="#ff0000">SensorBeam1Forces</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @OBJECT_NAME {<A HREF ='#Beam1'>Beam1</A>}
+ <DD> @SENSOR_TYPE {<FONT COLOR ='#808000'>FORCES</FONT>}
+
+ <DD>
+ @ETA_COORDINATE {  0.00000e+000}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\SensorBeam1ForcesQforQ.png' BORDER ='5'></CENTER>
+ <CENTER>FORCES</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\SensorBeam1ForcesQmomQ.png' BORDER ='5'></CENTER>
+ <CENTER>MOMENTS</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='SensorBeam1Velocities'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@SENSOR_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\PostProcessingTools\Sensor.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @SENSOR_NAME {
+ <FONT COLOR ="#ff0000">SensorBeam1Velocities</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @OBJECT_NAME {<A HREF ='#Beam1'>Beam1</A>}
+ <DD> @SENSOR_TYPE {<FONT COLOR ='#808000'>VELOCITIES</FONT>}
+
+ <DD>
+ @ETA_COORDINATE {  0.00000e+000}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\SensorBeam1VelocitiesQvelQ.png' BORDER ='5'></CENTER>
+ <CENTER>VELOCITIES</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\SensorBeam1VelocitiesQomeQ.png' BORDER ='5'></CENTER>
+ <CENTER>ANGULAR VELOCITIES</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='SensorBeam2Displacements'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@SENSOR_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\PostProcessingTools\Sensor.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @SENSOR_NAME {
+ <FONT COLOR ="#ff0000">SensorBeam2Displacements</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @OBJECT_NAME {<A HREF ='#Beam2'>Beam2</A>}
+ <DD> @SENSOR_TYPE {<FONT COLOR ='#808000'>DISPLACEMENTS</FONT>}
+
+ <DD>
+ @ETA_COORDINATE {  1.00000e+000}
+ <DD> @ROTATION_REPRESENTATION {<FONT COLOR ='#808000'>EULER_ANGLES_312</FONT>}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\SensorBeam2DisplacementsQdisQ.png' BORDER ='5'></CENTER>
+ <CENTER>DISPLACEMENTS</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\SensorBeam2DisplacementsQrotQ.png' BORDER ='5'></CENTER>
+ <CENTER>EULER ANGLES 3-1-2</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='SensorBeam2Forces'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@SENSOR_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\PostProcessingTools\Sensor.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @SENSOR_NAME {
+ <FONT COLOR ="#ff0000">SensorBeam2Forces</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @OBJECT_NAME {<A HREF ='#Beam2'>Beam2</A>}
+ <DD> @SENSOR_TYPE {<FONT COLOR ='#808000'>FORCES</FONT>}
+
+ <DD>
+ @ETA_COORDINATE {  1.00000e+000}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\SensorBeam2ForcesQforQ.png' BORDER ='5'></CENTER>
+ <CENTER>FORCES</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\SensorBeam2ForcesQmomQ.png' BORDER ='5'></CENTER>
+ <CENTER>MOMENTS</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='SensorBeam2Velocities'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@SENSOR_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\PostProcessingTools\Sensor.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @SENSOR_NAME {
+ <FONT COLOR ="#ff0000">SensorBeam2Velocities</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @OBJECT_NAME {<A HREF ='#Beam2'>Beam2</A>}
+ <DD> @SENSOR_TYPE {<FONT COLOR ='#808000'>VELOCITIES</FONT>}
+
+ <DD>
+ @ETA_COORDINATE {  1.00000e+000}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\SensorBeam2VelocitiesQvelQ.png' BORDER ='5'></CENTER>
+ <CENTER>VELOCITIES</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\SensorBeam2VelocitiesQomeQ.png' BORDER ='5'></CENTER>
+ <CENTER>ANGULAR VELOCITIES</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='SensorRotationA'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@SENSOR_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\PostProcessingTools\Sensor.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @SENSOR_NAME {
+ <FONT COLOR ="#ff0000">SensorRotationA</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @OBJECT_NAME {<A HREF ='#RotationA'>RotationA</A>}
+ <DD> @SENSOR_TYPE {<FONT COLOR ='#808000'>RELATIVE_ROTATIONS</FONT>}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\SensorRotationA.png' BORDER ='5'></CENTER>
+ <CENTER>RELATIVE ROTATION</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='SensorRotationB'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@SENSOR_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\PostProcessingTools\Sensor.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @SENSOR_NAME {
+ <FONT COLOR ="#ff0000">SensorRotationB</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @OBJECT_NAME {<A HREF ='#RotationB'>RotationB</A>}
+ <DD> @SENSOR_TYPE {<FONT COLOR ='#808000'>RELATIVE_ROTATIONS</FONT>}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\SensorRotationB.png' BORDER ='5'></CENTER>
+ <CENTER>RELATIVE ROTATION</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='SensorRotationC'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@SENSOR_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\PostProcessingTools\Sensor.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @SENSOR_NAME {
+ <FONT COLOR ="#ff0000">SensorRotationC</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @OBJECT_NAME {<A HREF ='#RotationC'>RotationC</A>}
+ <DD> @SENSOR_TYPE {<FONT COLOR ='#808000'>RELATIVE_ROTATIONS</FONT>}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\SensorRotationC.png' BORDER ='5'></CENTER>
+ <CENTER>RELATIVE ROTATION</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='SensorRotationD'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@SENSOR_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\PostProcessingTools\Sensor.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @SENSOR_NAME {
+ <FONT COLOR ="#ff0000">SensorRotationD</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @OBJECT_NAME {<A HREF ='#RotationD'>RotationD</A>}
+ <DD> @SENSOR_TYPE {<FONT COLOR ='#808000'>RELATIVE_ROTATIONS</FONT>}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\SensorRotationD.png' BORDER ='5'></CENTER>
+ <CENTER>RELATIVE ROTATION</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='SensorPrdA'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@SENSOR_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\PostProcessingTools\Sensor.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @SENSOR_NAME {
+ <FONT COLOR ="#ff0000">SensorPrdA</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @OBJECT_NAME {<A HREF ='#PrdA'>PrdA</A>}
+ <DD> @SENSOR_TYPE {<FONT COLOR ='#808000'>DRIVING_MOMENT</FONT>}
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\SensorPrdAQprdrQ.png' BORDER ='5'></CENTER>
+ <CENTER>PRESCRIBED ROTATION</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\SensorPrdAQprdmQ.png' BORDER ='5'></CENTER>
+ <CENTER>DRIVING MOMENT</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='SurveyBeam2Displacements'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@SURVEY_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\PostProcessingTools\Survey.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @SURVEY_NAME {
+ <FONT COLOR ="#ff0000">SurveyBeam2Displacements</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @OBJECT_NAME {<A HREF ='#Beam2'>Beam2</A>}
+ <DD> @SURVEY_TYPE {<FONT COLOR ='#808000'>DISPLACEMENTS</FONT>}
+
+ <DD>
+ @TIME {  1.00000e-001}
+ <FONT COLOR ='#975820'>[sec]</FONT>
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\SurveyBeam2DisplacementsQdisQ.png' BORDER ='5'></CENTER>
+ <CENTER>DISPLACEMENTS</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\SurveyBeam2DisplacementsQrotQ.png' BORDER ='5'></CENTER>
+ <CENTER>ROTATIONS</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='FilterBeam2Forces'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@FILTER_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\PostProcessingTools\Filter.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @FILTER_NAME {
+ <FONT COLOR ="#ff0000">FilterBeam2Forces</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @FILTER_TYPE {<FONT COLOR ='#808000'>BUTTERWORTH</FONT>}
+
+ <DD>
+ @FILTER_ORDER {     2}
+
+ <DD>
+ @CUT_OFF_FREQUENCY {  2.00000e+000}
+ <FONT COLOR ='#975820'>[rad/sec]</FONT>
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='CurveEigthCircle'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@CURVE_DEFINITION</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\GeometricObjects\Curve.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @CURVE_NAME {
+ <FONT COLOR ="#ff0000">CurveEigthCircle</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @IS_DEFINED_IN_FRAME {<FONT COLOR ='#808000'>INERTIAL</FONT>}
+
+ <P>@POINT_DEFINITION {</P>
+ <DL>
+
+ <DD>
+ @NUMBER_OF_CONTROL_POINTS {     3}
+
+ <DD>
+ @DEGREE_OF_CURVE {     2}
+ <DD> @RATIONAL_CURVE_FLAG {<FONT COLOR ='#808000'>YES</FONT>}
+
+ <DD>
+ @COORDINATES {  0.00000e+000,  1.00000e+000,  0.00000e+000,  1.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+
+ <DD>
+ @COORDINATES {  0.00000e+000,  1.00000e+000,  4.14214e-001,  9.23880e-001}
+ <FONT COLOR ='#975820'>[m]</FONT>
+
+ <DD>
+ @COORDINATES {  0.00000e+000,  7.07107e-001,  7.07107e-001,  1.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+ </DL><P>
+ }
+ </DL><P>
+ }
+
+ <CENTER><IMG SRC ='FIGURES\CurveEigthCircleQcv1Q.png' BORDER ='5'></CENTER>
+ <CENTER>CURVE (X1 X2 VIEW)</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\CurveEigthCircleQcv2Q.png' BORDER ='5'></CENTER>
+ <CENTER>CURVE (X1 X3 VIEW)</CENTER>
+ <P>
+
+ <CENTER><IMG SRC ='FIGURES\CurveEigthCircleQcv3Q.png' BORDER ='5'></CENTER>
+ <CENTER>CURVE (X2 X3 VIEW)</CENTER>
+ <P>
+
+ <P><CENTER><HR>
+ <A NAME ='AnalysisControlParameters'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@FEM_CONTROL_PARAMETERS</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\AnalysisControls\FemCtrl.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @FEM_CONTROL_PARAMETERS_NAME {
+ <FONT COLOR ="#ff0000">AnalysisControlParameters</FONT>
+ } { 
+ </P>
+ <DL>
+
+ <DD>
+ @MAXIMUM_NUMBER_OF_TIME_STEPS {      1}
+
+ <DD>
+ @SIMULATION_TIME_RANGE {  0.00000e+000,  4.00000e+000}
+
+ <DD>
+ @TIME_STEP_SIZE_RANGE {  1.00000e-007,  1.00000e-002}
+ <FONT COLOR ='#975820'>[sec]</FONT>
+
+ <DD>
+ @REFERENCE_ENERGY_LEVEL {  1.00000e+000}
+ <FONT COLOR ='#975820'>[J]</FONT>
+ </DL><P>
+ }
+
+ <P><CENTER><HR>
+ <A NAME ='Step1'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@STEP_CONTROL_PARAMETERS</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\AnalysisControls\StpCtrl.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @STEP_CONTROL_PARAMETER_NAME {
+ <FONT COLOR ="#ff0000">Step1</FONT>
+ } { 
+ </P>
+ <DL>
+
+ <DD>
+ @ARCHIVAL_FREQUENCY {      1}
+
+ <DD>
+ @REUSE_NUMBER { 10000000}
+
+ <DD>
+ @TIME_STEP_SIZE {  2.00000e-003}
+ <FONT COLOR ='#975820'>[sec]</FONT>
+
+ <DD>
+ @MAXIMUM_NUMBER_OF_ITERATIONS {     10}
+
+ <DD>
+ @FACTORIZATION_STRATEGY {      5}
+ <DD> @CONVERGENCE_NORM_TYPE {<FONT COLOR ='#808000'>ENERGY LIKE</FONT>}
+
+ <DD>
+ @REFERENCE_LENGTH {  1.00000e+000}
+ <FONT COLOR ='#975820'>[m]</FONT>
+
+ <DD>
+ @REFERENCE_FORCE {  1.00000e+000}
+ <FONT COLOR ='#975820'>[N]</FONT>
+
+ <DD>
+ @CONVERGENCE_TOLERANCE {  1.00000e-006}
+
+ <DD>
+ @MAXIMUM_NUMBER_OF_REJECT {      5}
+
+ <DD>
+ @AVERAGE_STIFFNESS_TERM {  1.00000e+006}
+
+ <DD>
+ @AVERAGE_MASS_TERM {  1.00000e+000}
+
+ <P><CENTER><HR>
+ <A NAME ='IncludeMSF'></A>
+ <FONT COLOR ='#004000' SIZE=+1>@INCLUDE_COMMAND</FONT>
+ (<A HREF ='C:\dymore4_0\UsersManual\UtilityObjects\Include.html'>User's manual</A>) (<A HREF ='#TOP_OF_FILE'>Top of File</A>)
+ <HR></CENTER></P>
+
+ <P>
+ @INCLUDE_COMMAND_NAME {
+ <FONT COLOR ="#ff0000">IncludeMSF</FONT>
+ } { 
+ </P>
+ <DL>
+ <DD> @ACTIVE_COMMAND {<FONT COLOR ='#808000'>YES</FONT>}
+ <DD> @LIST_OF_FILE_NAMES {
+ <FONT COLOR ='#808000'>MeshFileTest.seb</FONT>}
+ </DL><P>
+ }

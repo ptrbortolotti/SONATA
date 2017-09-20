@@ -32,6 +32,10 @@ def corners_of_BSplineLst(BSplineLst):
     return corners #gp_Pnt2d Lst
     
 
+
+
+
+
 def ProjectPointOnBSplineLst(BSplineLst,Pnt2d,tolerance_distance=100):
     p2 = []
     for idx,item in enumerate(BSplineLst):
@@ -545,18 +549,17 @@ def seg_boundary_from_dct(DCT_data,angular_deflection = 30):
     return list_of_bsplines
 
 
-def discretize_BSplineLst(BSplineLst,AngularDeflection = 0.02,CurvatureDeflection = 0.05,MinimumOfPoints = 500,UTol = 1.0e-8):
+def discretize_BSplineLst(BSplineLst, Deflection = 2e-4, AngularDeflection=0.02,CurvatureDeflection=0.06,MinimumOfPoints=50):
     Pnt2dLst = []
-    Deflection = 2e-4
     for i,item in enumerate(BSplineLst):
         Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
-        discretization = GCPnts_QuasiUniformDeflection(Adaptor,Deflection)	#GeomAbs_Shape Continuity: 1=C0, 2=G1, 3=C1, 3=G2,... 
-        #discretization = GCPnts_TangentialDeflection(Adaptor,AngularDeflection,CurvatureDeflection,MinimumOfPoints, UTol)
+        discretization = GCPnts_QuasiUniformDeflection(Adaptor,Deflection, 1)	#GeomAbs_Shape Continuity: 1=C0, 2=G1, 3=C1, 3=G2,... 
+        #discretization = GCPnts_TangentialDeflection(Adaptor,AngularDeflection,CurvatureDeflection,MinimumOfPoints)
         NbPoints = discretization.NbPoints()
         for j in range(1, NbPoints+1):
             Pnt = discretization.Value(j)
             Pnt2dLst.append(Pnt)
-        
+    
     a = Pnt2dLst_to_npArray(Pnt2dLst)
     b = np.around(a,10) # Evenly round to the given number of decimals. 
     
@@ -565,15 +568,12 @@ def discretize_BSplineLst(BSplineLst,AngularDeflection = 0.02,CurvatureDeflectio
         closed = True
     else: closed = False
     
-    #print 'Closed: ',closed
-
     npArray = unique_rows(b) # Remove possible doubles! 
     
     if closed:
         npArray = np.vstack((npArray,b[0]))
     else: None
     #print len(npArray)
-
     return npArray
              
     

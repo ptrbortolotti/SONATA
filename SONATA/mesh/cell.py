@@ -113,6 +113,7 @@ class Cell(object):
             v0 = gp_Vec2d(gp_Pnt2d(0,0),gp_Pnt2d(1,0))
             v1 = gp_Vec2d(self.nodes[1].Pnt2d,self.nodes[2].Pnt2d)
             theta_11 = (v0.Angle(v1))*180/np.pi
+            #print 'v0 Magnitude:',v0.Magnitude(), 'v1 Magnitude:',v1.Magnitude(),
             if theta_11<0:
                 theta_11 = 360+theta_11
             theta_1[0] = theta_11
@@ -143,8 +144,15 @@ class Cell(object):
     
     def calc_maximum_angle(self):  
         #print np.amax(calc_cell_angles(self))
-        return np.amax(calc_cell_angles(self))       
+        return np.amax(calc_cell_angles(self))
 
+    def min_facelenght(self):  
+        fl = []
+        for i,n in enumerate(self.nodes[:-1]):
+            fl.append(n.Distance(self.nodes[i+1]))
+        fl.append(self.nodes[-1].Distance(self.nodes[0]))            
+        return min(fl)     
+       
     def build_wire(self):
         WireBuilder = BRepBuilderAPI_MakeWire()
         for i in range(0,len(self.nodes)-1):

@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #PythonOCC Libraries
-from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf
+from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax1
 from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_TangentialDeflection
 from OCC.BRepAdaptor import BRepAdaptor_CompCurve, BRepAdaptor_Curve
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge, BRepBuilderAPI_Transform
@@ -116,12 +116,37 @@ def translate_wire(wire,gp_Pnt1,gp_Pnt2):
 def scale_wire(wire,gp_Pnt1,factor):
     aTrsf = gp_Trsf()
     aTrsf.SetScale(gp_Pnt1,factor)
-    aBRespTrsf = BRepBuilderAPI_Transform(wire, aTrsf)
+    aBRespTrsf = BRepBuilderAPI_Transform(wire,aTrsf)
     aScaledShape = aBRespTrsf.Shape()
     scaledWire = topods.Wire(aScaledShape)
     return scaledWire
 
-	
+def mirror_wire_pnt_dir(brep, pnt, direction, copy=False):
+    '''
+    from pythonocc-utils
+    @param brep:
+    @param line:
+    '''
+    trns = gp_Trsf()
+    trns.SetMirror(gp_Ax1(pnt, direction))
+    brep_trns = BRepBuilderAPI_Transform(brep, trns, copy)
+    brep_trns.Build()
+    return topods.Wire(brep_trns.Shape())
+
+
+def mirror_wire_axe2(brep, axe2, copy=False):
+    '''
+    from pythonocc-utils
+    @param brep:
+    @param line:
+    '''
+    trns = gp_Trsf()
+    trns.SetMirror(axe2)
+    brep_trns = BRepBuilderAPI_Transform(brep, trns, copy)
+    brep_trns.Build()
+    return topods.Wire(brep_trns.Shape())
+
+
 def find_coordinate_on_ordered_edges(TopoDS_wire,S):
     WireLength = get_wire_length(TopoDS_wire)      
     CummLength = 0

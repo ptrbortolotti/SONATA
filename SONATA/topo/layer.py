@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from SONATA.topo.BSplineLst_utils import get_BSplineLst_length, get_BSplineLst_Pnt2d, trim_BSplineLst, copy_BSplineLst, BSplineLst_from_dct, discretize_BSplineLst 
 from SONATA.topo.wire_utils import build_wire_from_BSplineLst
 from SONATA.topo.cutoff import cutoff_layer
@@ -92,12 +94,12 @@ class Layer(object):
             
     def build_layer(self):
         Trimmed_BSplineLst = trim_BSplineLst(self.Boundary_BSplineLst, self.S1, self.S2, 0, 1)
-        npArray = discretize_BSplineLst(Trimmed_BSplineLst)   
+        npArray = discretize_BSplineLst(Trimmed_BSplineLst, 1e-3) 
         offlinepts = shp_parallel_offset(npArray,self.thickness,self.join_style)
         OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
         OffsetBSplineLst = cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,self.S1,self.S2,self.cutoff_style)
         self.BSplineLst = OffsetBSplineLst
-
+        
     
     def get_last():
         pass
