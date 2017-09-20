@@ -188,7 +188,7 @@ if FLAG_MESH:
             if i==0:
                 a_nodes = equidistant_nodes_on_BSplineLst(a_BSplineLst, True, True, True, minLen = global_minLen, LayerID = layer.ID[0])
             else: 
-                a_nodes = determine_a_nodes(mesh,a_BSplineLst,global_minLen,layer.ID[0],2.5)
+                a_nodes = determine_a_nodes(mesh,a_BSplineLst,global_minLen,layer.ID[0],4)
             
             #TODO: Scale tolerance to problem size!    
             if FLAG_SHOW_3D_MESH:
@@ -217,11 +217,11 @@ if FLAG_MESH:
 #            display2.FitAll()
             
             #enhanced_cells = cells
-            #enhanced_cells = modify_cornerstyle_one(cells,b_BSplineLst)
-            enhanced_cells = modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer.thickness, 5e-2,display=display)
+            enhanced_cells = modify_cornerstyle_one(cells,b_BSplineLst)
+            enhanced_cells = modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer.thickness, 5e-2,80,display=display)
             for c in enhanced_cells:
                c.calc_theta_1()
-            #enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen)
+            enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen)
             
         
             for c in enhanced_cells:
