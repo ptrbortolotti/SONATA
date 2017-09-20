@@ -314,7 +314,9 @@ def modify_cornerstyle_one(cells,b_BSplineLst,**kwargs):
 
 
 
-def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1e-2,**kwargs):
+def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1e-2,alpha_crit = 50,**kwargs):
+    
+    
     #KWARGS:
     if kwargs.get('display') !=  None:
         display = kwargs.get('display')
@@ -322,18 +324,22 @@ def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1
     enhanced_cells = []
     for i,c in enumerate(cells):
         if len(c.nodes) == 4:  
-            cs4_counter = 0            
+            #cs4_counter = 0            
             if c.nodes[0].cornerstyle == 2 or c.nodes[0].cornerstyle == 3:
                 #display.DisplayShape(c.nodes[0].Pnt2d,color='RED')
                 
-                v1 = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[1].Pnt2d)
-                v2 = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[3].Pnt2d)
+                #v1 = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[1].Pnt2d)
+                #v2 = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[3].Pnt2d)
+                #angle = (180-abs(v1.Angle(v2)*180/np.pi))
                 #if v2.Magnitude() == 0:
                     #print c.nodes[0].coordinates, c.nodes[3].coordinates
                 
-                angle = (180-abs(v1.Angle(v2)*180/np.pi))
-        
-                if angle < 60:
+                v21 = gp_Vec2d(c.nodes[2].Pnt2d,c.nodes[1].Pnt2d)
+                v23 = gp_Vec2d(c.nodes[2].Pnt2d,c.nodes[3].Pnt2d)
+                angle = abs(v21.Angle(v23)*180/np.pi)
+                
+                #print c,angle
+                if angle < alpha_crit:
                     #display.DisplayShape(c.nodes[0].Pnt2d,color='RED')
                     L = c.nodes[0].Pnt2d.Distance(c.nodes[2].Pnt2d)*1.5
                     BS_Vec2d = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[2].Pnt2d)
@@ -341,8 +347,7 @@ def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1
                     for i in range(0,int(L//global_minLen)-1):
                         P = c.nodes[0].Pnt2d.Translated(BS_Vec2d.Multiplied((1+i)/float(int(L//global_minLen))))
                         MiddleNodes.append(Node(P))
-        #                for P in PntLst:
-        #                    display.DisplayShape(P)
+                        #display.DisplayShape(P)
                     
 
                     FrontNodes = []
