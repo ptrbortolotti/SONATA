@@ -53,8 +53,8 @@ FLAG_TOPO = True
 FLAG_MESH = True
 FLAG_VABS = True
 FLAG_SHOW_2D_MESH = True
-FLAG_SHOW_3D_MESH = True
-FLAG_SHOW_3D_TOPO = True
+FLAG_SHOW_3D_MESH = False
+FLAG_SHOW_3D_TOPO = False
 
 startTime = datetime.now()
 
@@ -175,6 +175,11 @@ if FLAG_MESH:
     
     #===================MESH SEGMENT===============================================
     mesh = []
+    proj_tol_1 = 5e-2
+    proj_tol_2 = 5e-2
+    non_dct_factor = 2.5
+    alpha_crit_2 = 60
+    
     disco_nodes = []
     for j,seg in enumerate(reversed(SegmentLst)):
         for i,layer in enumerate(reversed(seg.LayerLst)):
@@ -188,43 +193,24 @@ if FLAG_MESH:
             if i==0:
                 a_nodes = equidistant_nodes_on_BSplineLst(a_BSplineLst, True, True, True, minLen = global_minLen, LayerID = layer.ID[0])
             else: 
-                a_nodes = determine_a_nodes(mesh,a_BSplineLst,global_minLen,layer.ID[0],4)
+                a_nodes = determine_a_nodes(mesh,a_BSplineLst,global_minLen,layer.ID[0],non_dct_factor)
+            
+            
             
             #TODO: Scale tolerance to problem size!    
             if FLAG_SHOW_3D_MESH:
-                a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, 5e-2, display=display) 
-            
+                a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, proj_tol_1, display=display) 
+                #enhanced_cells = modify_cornerstyle_one(cells,b_BSplineLst)
+                enhanced_cells = modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer.thickness, proj_tol_2,alpha_crit_2,display=display)
+                enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen)
             else:
-                a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, 5e-2,) 
+                a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, proj_tol_1)
+                #enhanced_cells = modify_cornerstyle_one(cells,b_BSplineLst)
+                enhanced_cells = modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer.thickness, proj_tol_2,alpha_crit_2)
+                enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen)       
             
-#            print 'len a_nodes:', len(a_nodes), ' len b_nodes:' , len(b_nodes)
-#
-#            for a_spline in a_BSplineLst:
-#                display2.DisplayShape(a_spline,color='BLACK')
-#        
-#            for b_spline in b_BSplineLst:
-#                display2.DisplayShape(b_spline,color='green')
-#            
-#            for i,a in enumerate(a_nodes):
-#                display2.DisplayShape(a.Pnt,color='RED')
-#                display2.DisplayMessage(a.Pnt,str(i),message_color=(0.3,0.2,0.5))
-#            
-#            for i,b in enumerate(b_nodes):
-#                display2.DisplayShape(b.Pnt,color='ORANGE')
-#                display2.DisplayMessage(b.Pnt,str(i))
-#            
-#            display2.View_Top()
-#            display2.FitAll()
-            
-            #enhanced_cells = cells
-            enhanced_cells = modify_cornerstyle_one(cells,b_BSplineLst)
-            enhanced_cells = modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer.thickness, 5e-2,80,display=display)
             for c in enhanced_cells:
-               c.calc_theta_1()
-            enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen)
-            
-        
-            for c in enhanced_cells:
+                c.calc_theta_1()
                 c.theta_3 = layer.Orientation
                 c.MatID = int(layer.MatID)
                 c.structured = True
@@ -232,34 +218,36 @@ if FLAG_MESH:
     
             layer.cells = enhanced_cells
             mesh.extend(enhanced_cells)
-    #
         
         #===================MESH CORE================================================
-#        print 'STATUS:\t Meshing Segment %s, Core' %(seg.ID)
-#        core_Boundary_BSplineLst = []
-#        core_Boundary_BSplineLst += trim_BSplineLst(SegmentLst[-1].LayerLst[-1].Boundary_BSplineLst, 0, SegmentLst[-1].LayerLst[-1].S1, 0, 1)  #start und ende der lage
-#        core_Boundary_BSplineLst += copy_BSplineLst(SegmentLst[-1].LayerLst[-1].BSplineLst)
-#        core_Boundary_BSplineLst += trim_BSplineLst(SegmentLst[-1].LayerLst[-1].Boundary_BSplineLst, SegmentLst[-1].LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
-#            
-#        a_nodes = determine_a_nodes(mesh,core_Boundary_BSplineLst,global_minLen,layer.ID[0])
-#        area = global_minLen**2/2
-#        [c_cells,c_nodes] = gen_core_cells(a_nodes,area)
-#        
-#        for c in c_cells:
-#            c.structured = False
-#            c.theta_3 = 0
-#            c.MatID = int(SegmentLst[0].CoreMaterial)
-#            c.calc_theta_1()
-#        
-#        mesh.extend(c_cells)
-#        mesh,nodes = sort_and_reassignID(mesh)
+        print 'STATUS:\t Meshing Segment %s, Core' %(seg.ID)
+        core_Boundary_BSplineLst = []
+        core_Boundary_BSplineLst += trim_BSplineLst(SegmentLst[-1].LayerLst[-1].Boundary_BSplineLst, 0, SegmentLst[-1].LayerLst[-1].S1, 0, 1)  #start und ende der lage
+        core_Boundary_BSplineLst += copy_BSplineLst(SegmentLst[-1].LayerLst[-1].BSplineLst)
+        core_Boundary_BSplineLst += trim_BSplineLst(SegmentLst[-1].LayerLst[-1].Boundary_BSplineLst, SegmentLst[-1].LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
+            
+        a_nodes = determine_a_nodes(mesh,core_Boundary_BSplineLst,global_minLen,layer.ID[0])
+        area = 0.8*global_minLen**2
+        [c_cells,c_nodes] = gen_core_cells(a_nodes,area)
+        
+        for c in c_cells:
+            c.structured = False
+            c.theta_3 = 0
+            c.MatID = int(SegmentLst[0].CoreMaterial)
+            c.calc_theta_1()
+        
+        mesh.extend(c_cells)
+        mesh,nodes = sort_and_reassignID(mesh)
     
     
     # BALANCE WEIGHT - CUTTING HOLE ALGORITHM====================================
     if Configuration.SETUP_BalanceWeight == True:
         print 'STATUS:\t Meshing Balance Weight'   
-    
-        mesh,boundary_nodes = map_mesh_by_intersect_curve2d(mesh,BW.Curve,BW.wire,display=display) 
+        
+        if FLAG_SHOW_3D_MESH: 
+            mesh,boundary_nodes = map_mesh_by_intersect_curve2d(mesh,BW.Curve,BW.wire,display=display) 
+        else:
+            mesh,boundary_nodes = map_mesh_by_intersect_curve2d(mesh,BW.Curve,BW.wire)
         triangle_options = 'pa.3'
         [bw_cells,bw_nodes] = gen_core_cells(boundary_nodes,options=triangle_options)
         
@@ -270,10 +258,7 @@ if FLAG_MESH:
             c.calc_theta_1()
         
         mesh.extend(bw_cells)
-    
-        for c in mesh:
-             display.DisplayShape(c.wire,color='BLACK')         
-    
+   
     mesh,nodes = sort_and_reassignID(mesh)
     
     #=====================PICKLE MESH ===========================================
