@@ -29,10 +29,10 @@ class Node(object):
     
     def __repr__(self): 
         return  str('Node: %s @ [%.3f,%.3f]' % (self.id, self.coordinates[0],self.coordinates[1]))
-            
+        
     def __eq__(self,other):
-        return self.Pnt2d.IsEqual(other.Pnt2d,1e-6)    #slow but robust
-        #return self.id == other.id    #faster, but be careful not to assign the id's otherwise in the code
+        #return self.Pnt2d.IsEqual(other.Pnt2d,1e-6)    #slow but robust
+        return self.id == other.id    #faster, but be careful not to assign the id's otherwise in the code
     
     def __getstate__(self):
         """Return state values to be pickled."""
