@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from functools import partial
 from datetime import datetime
 import itertools
+import toolz
 
 #PythonOCC Libraries
 from OCC.Display.SimpleGui import init_display
@@ -67,9 +68,6 @@ print "STATUS:\t Reading Crossection Configuration File"
 Configuration = section_config(filename)
 MaterialLst = read_material_input(Configuration.SETUP_mat_filename)
 
-
-
-    
     
 #===========DISPLAY CONFIG:===============
 if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
@@ -78,7 +76,7 @@ if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
     display.Context.SetDeviationCoefficient(1e-6) # 0.001 default. Be careful to scale it to the problem. 
 
 Results = []
-resLst = [100,200,400]
+resLst = [300]
 for n in range(0,len(resLst)):    
     print n
     Configuration.SETUP_mesh_resolution = resLst[n]
@@ -190,8 +188,11 @@ for n in range(0,len(resLst)):
         mesh = []
         proj_tol_1 = 5e-2
         proj_tol_2 = 5e-2
-        non_dct_factor = 2.5
+        non_dct_factor = 5
+        crit_angle_1 = 115
         alpha_crit_2 = 60
+        growing_factor = 1.8   #critical growing factor of cell before splitting 
+        shrinking_factor = 0.2  #critical shrinking factor for cells before merging nodes
         
         disco_nodes = []
         for j,seg in enumerate(reversed(SegmentLst)):
@@ -209,18 +210,17 @@ for n in range(0,len(resLst)):
                     a_nodes = determine_a_nodes(mesh,a_BSplineLst,global_minLen,layer.ID[0],non_dct_factor)
                 
                 
-                
                 #TODO: Scale tolerance to problem size!    
                 if FLAG_SHOW_3D_MESH:
-                    a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, proj_tol_1, display=display) 
+                    a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, proj_tol_1,crit_angle_1, display=display) 
                     #enhanced_cells = modify_cornerstyle_one(cells,b_BSplineLst)
                     enhanced_cells = modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer.thickness, proj_tol_2,alpha_crit_2,display=display)
-                    enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen)
+                    enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen,growing_factor,shrinking_factor)
                 else:
-                    a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, proj_tol_1)
+                    a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, proj_tol_1, crit_angle_1)
                     #enhanced_cells = modify_cornerstyle_one(cells,b_BSplineLst)
                     enhanced_cells = modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer.thickness, proj_tol_2,alpha_crit_2)
-                    enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen)       
+                    enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen,growing_factor,shrinking_factor)       
                 
                 for c in enhanced_cells:
                     c.calc_theta_1()
@@ -404,7 +404,6 @@ if FLAG_SHOW_2D_MESH:
 #====================3D: OCC-DISPLAY=====================
 if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
     display.set_bg_gradient_color(20,6,111,200,200,200)
-    display.set_bg_gradient_color(255,255,255,255,255,255)
     show_coordinate_system(display,5)
     add_menu('screencapture')
 #    add_function_to_menu('screencapture','export to PDF', partial(export_to_PDF,display))
