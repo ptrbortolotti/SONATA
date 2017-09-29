@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import itertools
+import toolz
 
 from OCC.AIS import AIS_Shape
 from OCC.BRep import BRep_Builder, BRep_Tool
@@ -244,28 +245,37 @@ def determine_a_nodes(mesh,a_BSplineLst,global_minLen,LayerID,factor=5):
                 non_dct_segments.append([disco_nodes[j-1].parameters[1:], disco_nodes[j].parameters[1:]])
                 #print 'distance on BSplineLst d:', d
                 
-        
-    
     #print len(non_dct_segments), " non_dct_segments found"
     tmp_nodes = []
     for seg in non_dct_segments:
         tmp_BSplineLst = trim_BSplineLst_by_coordinates(a_BSplineLst,seg[0],seg[1])
         tmp_nodes.extend(equidistant_nodes_on_BSplineLst(tmp_BSplineLst, True, True, True, minLen = global_minLen, LayerID = LayerID))
     
-    
     #print len(tmp_nodes), "tmp_nodes added"
     #disco_nodes.extend(grab_nodes_on_BSplineLst(tmp_nodes,a_BSplineLst))
     #print 'compare disco_nodes with tmp_nodes and return matches', nf
-    doublicated_nodes = [x for x in tmp_nodes if x in disco_nodes]
-    for dn in doublicated_nodes:
-        tmp_nodes.remove(dn)
-    
-    
-    #disco_nodes.extend(tmp_nodes)
-    disco_nodes.extend(grab_nodes_on_BSplineLst(tmp_nodes,a_BSplineLst))
+        
+    disco_nodes.extend(grab_nodes_on_BSplineLst(tmp_nodes,a_BSplineLst))    
+    disco_nodes = remove_dublicate_nodes(disco_nodes)
     disco_nodes = sorted(disco_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))
+    
     return disco_nodes
+    
 
+
+def remove_dublicate_nodes(nodes,tol=1e-6):
+    nodes = list(set(nodes))
+    doublicated_nodes = [] 
+    for i,a in enumerate(nodes):
+        for b in nodes[i:]:
+            if a.id != b.id and a.Pnt2d.IsEqual(b.Pnt2d,tol):
+                doublicated_nodes.append(a)
+    
+    #print 'doublicated nodes:', doublicated_nodes
+    doublicated_nodes = list(set(doublicated_nodes))
+    for dn in doublicated_nodes:
+        nodes.remove(dn)
+    return nodes
 
 def modify_cornerstyle_one(cells,b_BSplineLst,**kwargs):
     
@@ -479,7 +489,7 @@ def theta_1_from_2nodes(node1,node2):
     return theta_1
 
 
-def second_stage_improvements(cells,b_BSplineLst,global_minLen):
+def second_stage_improvements(cells,b_BSplineLst,global_minLen,factor1=1.8,factor2=0.15):
     enhanced_cells2 = []
     for i,c in enumerate(cells):
         if len(c.nodes)==4:
@@ -491,7 +501,7 @@ def second_stage_improvements(cells,b_BSplineLst,global_minLen):
             #display.DisplayColoredShape(p2[0], 'YELLOW')  
             
             #SPLIT CELLS INTO TRIANGLES AND ADD NODE!
-            if magnitude>=1.8*global_minLen:
+            if magnitude>=factor1*global_minLen:
                 #display.DisplayColoredShape(p2[0], 'ORANGE')
                 nodeLst = c.nodes
                 newNode = Node(p2[0],['test',p2[1],p2[2]])
@@ -507,7 +517,7 @@ def second_stage_improvements(cells,b_BSplineLst,global_minLen):
                 enhanced_cells2[-1].calc_theta_1()
                 
             #MERGE NODES when to small
-            elif magnitude<=0.15*global_minLen:
+            elif magnitude<=factor2*global_minLen:
                 #display.DisplayColoredShape(p2[0], 'RED')
                 nodeLst = c.nodes
                 #Modify Node 2
