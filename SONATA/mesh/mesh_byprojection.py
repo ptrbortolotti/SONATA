@@ -293,12 +293,17 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
                 
             if len(exterior_corners) == 1 and node.corner==False:
                 node.cornerstyle = 1
-                #print 'Node ID: ',node.id,', Len(exterior_corners):', len(exterior_corners)
-                if b_BSplineLst[pIdx[0]].EndPoint().IsEqual(b_nodes[-1].Pnt2d,1e-5):
-                   b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
-                else:
-                    b_nodes.append(Node(b_BSplineLst[pIdx[0]].EndPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].LastParameter()]))
+                print 'Node ID: ',node.id,', Len(exterior_corners):', len(exterior_corners)
+    
+                try: 
+                    if b_BSplineLst[pIdx[0]].EndPoint().IsEqual(b_nodes[-1].Pnt2d,1e-5):
+                       b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
+                      
+                    else:
+                        b_nodes.append(Node(b_BSplineLst[pIdx[0]].EndPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].LastParameter()]))
                 
+                except:
+                    b_nodes.append(Node(b_BSplineLst[pIdx[0]].StartPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].FirstParameter()]))
                 #display.DisplayShape(b_BSplineLst[pIdx[0]].EndPoint(),color='WHITE')
                 #display.DisplayShape(pPnts[0],color='GREEN')
                 #display.DisplayShape(pPnts[1],color='ORANGE')    
@@ -457,7 +462,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
     
     
         for i,a_spline in enumerate(a_BSplineLst):
-            #display.DisplayShape(a_spline,color='CYAN')
+            display.DisplayShape(a_spline,color='CYAN')
             p = gp_Pnt2d()
             v = gp_Vec2d()
             u = (a_spline.LastParameter()-a_spline.FirstParameter())/2+a_spline.FirstParameter()
