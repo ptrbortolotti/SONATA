@@ -242,18 +242,14 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
                     b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
                     b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
                     
+                    #Find Middle between the two exterior corners on b_BsplineLst
                     newPnt = gp_Pnt2d()
-                    newPara = (exterior_corners_para[0][2]+exterior_corners_para[1][2])/2   
-                    
-                    #TODO: Find Middle between the two exterior corners on b_BsplineLst
                     c_BSplineLst = b_BSplineLst[exterior_corners_para[0][1]+1:exterior_corners_para[1][1]+1]
                     [tmp_idx,tmp_u] =  find_BSplineLst_coordinate(c_BSplineLst,0.5,0,1)
                     newIdx = exterior_corners_para[0][1]+1+tmp_idx
                     newPara = tmp_u
                     b_BSplineLst[newIdx].D0(newPara,newPnt)
-                    display.DisplayShape(newPnt,color='RED')
-                    
-                    
+                    #display.DisplayShape(newPnt,color='RED')
                     b_nodes.append(Node(newPnt,[LayerID,newIdx,newPara]))
                     
                     b_nodes.append(Node(exterior_corners[1],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]))
@@ -264,6 +260,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
                     b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
                     b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
                     
+                    #TODO: Use something similar to regular corner to find the middle Point on b_SplineLst!
                     v = gp_Vec2d(exterior_corners[0],exterior_corners[1])
                     p = exterior_corners[0].Translated(v.Multiplied(0.5))
                     p2 = []
