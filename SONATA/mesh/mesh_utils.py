@@ -325,8 +325,7 @@ def modify_cornerstyle_one(cells,b_BSplineLst,**kwargs):
 
 
 def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1e-2,alpha_crit = 50,**kwargs):
-    
-    
+     
     #KWARGS:
     if kwargs.get('display') !=  None:
         display = kwargs.get('display')
@@ -376,17 +375,23 @@ def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1
                                     pIdx.append(idx)
                                 else: None
                         
+                        print 'Nuber of Projected Middle Nodes pPnts:', len(pPnts)
+                        trigger_f = True
+                        trigger_b = True
                         for i,P in enumerate(pPnts):
                                 v01 = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[1].Pnt2d)
                                 v03 = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[3].Pnt2d)
                                 vnP = gp_Vec2d(n.Pnt2d,P)
+
                                 if  len(pPnts)>2:
                                     print vnP.Dot(v01)
                                 
-                                if vnP.Dot(v01)>0:
+                                if vnP.Dot(v01)>0 and trigger_f :
+                                    trigger_f = False
                                     FrontNodes.append(Node(P,['',pIdx[i],pPara[i]]))
                                 
-                                elif vnP.Dot(v01)<0:
+                                elif vnP.Dot(v01)<0 and  trigger_b:
+                                    trigger_b = False
                                     BackNodes.append(Node(P,['',pIdx[i],pPara[i]]))
                                 
                                 else:
@@ -397,12 +402,19 @@ def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1
 #                                FrontNodes.append(Node(P,['',pIdx[i],pPara[i]]))
 #                            else: 
 #                                BackNodes.append(Node(P,['',pIdx[i],pPara[i]]))
-                            
-        #                for P in Front:
-        #                      display.DisplayShape(P,color='ORANGE')
-        #                
-        #                for P in Back:
-        #                      display.DisplayShape(P,color='GREEN')
+                         
+#                        for mn in MiddleNodes:
+#                              display.DisplayShape(mn.Pnt2d,color='BLUE')
+#                              display.DisplayMessage(mn.Pnt,str(mn.id),message_color=(1,1,1))    
+#                            
+#                        for fn in FrontNodes:
+#                              display.DisplayShape(fn.Pnt2d,color='ORANGE')
+#                              display.DisplayMessage(fn.Pnt,str(fn.id),message_color=(1,1,1))
+#                        
+#                        for bn in BackNodes:
+#                              display.DisplayShape(bn.Pnt2d,color='RED')
+#                              display.DisplayMessage(bn.Pnt,str(bn.id),message_color=(1,1,1))
+                              
                           
                     #=====================CREATE FRONT CELLS
                     FrontCellLst = []
@@ -419,11 +431,7 @@ def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1
                     if len(MiddleNodes)>0:   #LAST
                         nodeLst = [MiddleNodes[-1],FrontNodes[-1],c.nodes[2]]   
                         FrontCellLst.append(Cell(nodeLst))
-                        
-#                    for fc in FrontCellLst:
-#                        fc.wire = fc.build_wire()
-#                        display.DisplayShape(fc.wire,color='ORANGE')
-                        
+                                               
                     #=====================CREATE BACK CELLS
                     BackCellLst = []
                     for i in range(0,len(MiddleNodes)):
