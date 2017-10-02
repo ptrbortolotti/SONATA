@@ -12,10 +12,11 @@ from OCC.gp import gp_Vec2d,gp_Pnt2d,gp_Pnt,gp_Vec
 from OCC.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
 from OCC.Display.SimpleGui import init_display
 
+
 from SONATA.mesh.node import Node
 from SONATA.mesh.cell import Cell
-
-
+from SONATA.display.display_utils import display_custome_shape
+from SONATA.topo.BSplineLst_utils import get_BSplineLst_length, find_BSplineLst_coordinate
 
 
 
@@ -237,14 +238,23 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
             elif len(exterior_corners) == 2 and node.corner==True:
                 node.cornerstyle = 4
                 if node.regular_corner == True:
-                    #print 'R',[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]
+                    print 'R',[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]
                     b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
                     b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
                     
                     newPnt = gp_Pnt2d()
-                    newPara = (exterior_corners_para[0][2]+exterior_corners_para[1][2])/2                    
-                    b_BSplineLst[exterior_corners_para[0][1]].D0(newPara,newPnt)
-                    b_nodes.append(Node(newPnt,[LayerID,exterior_corners_para[0][1],newPara]))
+                    newPara = (exterior_corners_para[0][2]+exterior_corners_para[1][2])/2   
+                    
+                    #TODO: Find Middle between the two exterior corners on b_BsplineLst
+                    c_BSplineLst = b_BSplineLst[exterior_corners_para[0][1]+1:exterior_corners_para[1][1]+1]
+                    [tmp_idx,tmp_u] =  find_BSplineLst_coordinate(c_BSplineLst,0.5,0,1)
+                    newIdx = exterior_corners_para[0][1]+1+tmp_idx
+                    newPara = tmp_u
+                    b_BSplineLst[newIdx].D0(newPara,newPnt)
+                    display.DisplayShape(newPnt,color='RED')
+                    
+                    
+                    b_nodes.append(Node(newPnt,[LayerID,newIdx,newPara]))
                     
                     b_nodes.append(Node(exterior_corners[1],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]))
                     b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
@@ -462,6 +472,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
     
     
         for i,a_spline in enumerate(a_BSplineLst):
+            #display_custome_shape(display,a_spline,1.0,0.0,[0.2,0.9,0.8])
             display.DisplayShape(a_spline,color='CYAN')
             p = gp_Pnt2d()
             v = gp_Vec2d()
@@ -471,7 +482,8 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
             #display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
             
         for i,b_spline in enumerate(b_BSplineLst):
-            #display.DisplayShape(b_spline,color='BLUE')
+            #display_custome_shape(display,b_spline,1.0,0.0,[0.1,0.5,1.0 ])
+            display.DisplayShape(b_spline,color='BLUE')
             p = gp_Pnt2d()
             v = gp_Vec2d()
             u = (b_spline.LastParameter()-b_spline.FirstParameter())/2+b_spline.FirstParameter()
