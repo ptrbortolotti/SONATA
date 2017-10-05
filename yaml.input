@@ -1,7 +1,7 @@
-#==============================SONATA-INPUT=============================
+#==============================SONATA-Configuration-Input YAML=============================
 #This file contains the input information for the structural design of the rotorblade crosssection
 #Author: Tobias Pflumm
-#Date:	01/30/2017
+#Date:	09/30/2017
 #TODO:  SET DEFAULT VALUES
 
 #USER MANUAL:
@@ -11,7 +11,7 @@
 #		x-axis is chordwise and points to the trailing edge, y-axis upwards
 # - If the input_type = 3 is chosen, the user has to provide 
 
-				 
+#===============================SETUP===================================				 
 Setup:
     mat_filename: mat_database.input	#Path and filename of the Material Database
     NbOfWebs: 0							#True or False for Balance Weight			[boolean]		DEFAULT=FALSE
@@ -22,7 +22,8 @@ Setup:
     scale_factor: 1						#use as reference scale factor				[float] 		DEFAULT=1
     Theta: 6.7							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
     mesh_resolution: 200				#Scales approximately to the number of points on Segment0
- 
+
+#=======WEBS=======			
 Webs:
 	Web 1:								#WebName									[int]	
 		Pos1: 12.0						
@@ -31,11 +32,13 @@ Webs:
 	Web 2:
 		Pos1: 12.0
 		Pos2: 23.0
-	
+
+#=======SEGMENTS==	
 Segments:
 	Segment 1:							#Web ID 									[int]	
 		CoreMaterial: 3
 		Layup: 
+			#Start[-],End[-],thickness[mm],Orientation [deg],MatID[int],name[str]	
 			- [0.0, 1.0, 0.24, 45, 1, 'Skin1']
 			- [0.0, 1.0, 0.24, 45, 1, 'Skin2']
 			- [0.0, 1.0, 0.24, 45, 1, 'Skin3']
@@ -48,15 +51,17 @@ Segments:
 	Segment 2:
 		CoreMaterial: 2
 		Layup: 
+			#Start[-],End[-],thickness[mm],Orientation [deg],MatID[int],name[str]	
 			- [0.0, 1.0, 0.24, 45, 1, 'Skin1']
 			- [0.0, 1.0, 0.24, 45, 1, 'Skin2']
 			- [0.0, 1.0, 0.24, 45, 1, 'Skin3']
 			- [0.0, 1.0, 0.24, 90, 1, 'Skin4']
-			- [0.0, 1.0, 0.24, -10, 1, 'Skin5']
+			- [0.0, 1.0, 0.24, -10, 1, 'Skin5']s
 			- [0.0, 1.0, 0.24, 45, 1, 'Skin6']
 			- [0.0, 1.0, 0.24, 45, 1, 'Skin7']
 			- [0.0, 1.0, 0.24, 45, 1, 'Skin8']
 
+#=======TRIMMMASS==	
 TrimmMass: 
     XPos1: -21.0            	#	X Position	[-]						[float]				NO DEFAULT VALUE
     YPos2: 1.5              	#	Y Position	[-]						[float]				NO DEFAULT VALUE
