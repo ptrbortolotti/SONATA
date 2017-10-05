@@ -282,25 +282,33 @@ if FLAG_MESH:
         #1. merge nodes that are allready are withing a given tolerance tol=1e-4*global_minlen
             #1.1. merge nodes an move point to the point inbetween!
        
-        #Solve the linear sum assignment problem to find the best matching pairs
-        if seg.ID == 1:
-            cost = []
-            for a in w1_nodes:
-                tmp = []
-                for b in w2_nodes:
-                    tmp.append(a.Pnt2d.Distance(b.Pnt2d))        
-                cost.append(tmp)
-            cost=np.asarray(cost)
-            from scipy.optimize import linear_sum_assignment
-            w1_idx, w2_idx = linear_sum_assignment(cost)
-            
+        if seg.ID == 1:           
             w_tol = 0.3*global_minLen
-            for idx,distance in enumerate(cost[w1_idx,w2_idx]):
-                if distance <= w_tol:
-                    print 'merge nodes', 'w1:', w1_idx[idx], 'w2:', w2_idx[idx]
-                    display.DisplayShape(w1_nodes[w1_idx[idx]].Pnt2d, color="GREEN")
-                    display.DisplayShape(w2_nodes[w2_idx[idx]].Pnt2d, color="RED")
-        
+
+            tmp = []
+            for w1 in w1_nodes:
+                for w2 in w2_nodes:
+                    tmp.append([w1.Pnt2d.Distance(w2.Pnt2d),w1.id,w2.id])   
+            tmp=np.asarray(tmp)
+            NM = tmp[tmp[:,0]<w_tol]
+            NM = NM[NM[:,0].argsort()]
+            
+            #remove possible double nodes in NodeMatching Matrix
+            tmp, tmp_idx = np.unique(NM[:,1],True,axis=0) 
+            tmp_idx.sort(axis=0)
+            NM = NM[tmp_idx]
+            tmp, tmp_idx = np.unique(NM[:,2],True,axis=0)
+            tmp_idx.sort(axis=0)
+            NM = NM[tmp_idx]
+            
+            #MERGE Nodes according to NodeMatching(NM) Matrix:
+            for match in NM:
+                print match[1],match[2]
+                n1 = filter(lambda x: x.id == match[1], w1_nodes)[0]
+                n2 = filter(lambda x: x.id == match[2], w2_nodes)[0]
+                #MERGE NODES by replacing n2 in mesh by n1
+                for 
+            
     # BALANCE WEIGHT - CUTTING HOLE ALGORITHM====================================
     if Configuration.SETUP_BalanceWeight == True:
         print 'STATUS:\t Meshing Balance Weight'   
