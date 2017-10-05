@@ -112,7 +112,10 @@ class Cell(object):
         if self.structured:
             v0 = gp_Vec2d(gp_Pnt2d(0,0),gp_Pnt2d(1,0))
             v1 = gp_Vec2d(self.nodes[1].Pnt2d,self.nodes[2].Pnt2d)
-            theta_11 = (v0.Angle(v1))*180/np.pi
+            try: theta_11 = (v0.Angle(v1))*180/np.pi
+            except: 
+                print 'WARNING: Vector with Null Magnitude at cell', self
+                theta_11 = 0
             #print 'v0 Magnitude:',v0.Magnitude(), 'v1 Magnitude:',v1.Magnitude(),
             if theta_11<0:
                 theta_11 = 360+theta_11
