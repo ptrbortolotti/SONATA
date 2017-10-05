@@ -19,6 +19,7 @@ import toolz
 from OCC.Display.SimpleGui import init_display
 from OCC.STEPControl import STEPControl_Writer, STEPControl_AsIs, STEPControl_GeometricCurveSet
 from OCC.Interface import Interface_Static_SetCVal
+from OCC.gp import gp_Vec2d
 
 #SONATA modules:
 from SONATA.fileIO.readinput import section_config, read_material_input,str2bool
@@ -306,8 +307,14 @@ if FLAG_MESH:
                 print match[1],match[2]
                 n1 = filter(lambda x: x.id == match[1], w1_nodes)[0]
                 n2 = filter(lambda x: x.id == match[2], w2_nodes)[0]
-                #MERGE NODES by replacing n2 in mesh by n1
-                for 
+                #move the first node to the middle!
+                n1.Pnt2d
+                v = gp_Vec2d(n1.Pnt2d, n2.Pnt2d)
+                v.Multiply(0.5)
+                n1.Pnt2d.Translate(v)
+                #find all cells that contain n2 and assign replace it with n1
+                
+                    
             
     # BALANCE WEIGHT - CUTTING HOLE ALGORITHM====================================
     if Configuration.SETUP_BalanceWeight == True:
