@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 
 
 
+
 def centroid(points):
     x = [p[0] for p in points]
     y = [p[1] for p in points]
@@ -109,8 +110,7 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
     
             
     plt.show()
-    
-    
+
     
 
 def plot_cells(cells,nodes,attr1,VABSProperties=None,title='None',plotTheta11=False, plotDisplacement=False,):

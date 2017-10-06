@@ -300,7 +300,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
                 
             if len(exterior_corners) == 1 and node.corner==False:
                 node.cornerstyle = 1
-                print 'Node ID: ',node.id,', Len(exterior_corners):', len(exterior_corners)
+                #print 'Node ID: ',node.id,', Len(exterior_corners):', len(exterior_corners)
     
                 try: 
                     if b_BSplineLst[pIdx[0]].EndPoint().IsEqual(b_nodes[-1].Pnt2d,1e-5):
@@ -446,46 +446,46 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
         
 
     #==============OCC3DVIEWER========================================
-    if kwargs.get('display') !=  None:
-        for i,a in enumerate(a_nodes):
-                if a.corner == True:
-                    display.DisplayShape(a.Pnt,color='WHITE')  
-                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
-                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
-                    
-                elif a.cornerstyle == 1 or a.cornerstyle == 10 :
-                    display.DisplayShape(a.Pnt,color='WHITE')  
-                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
-                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
-                    
-                    
-                else: 
-                    display.DisplayShape(a.Pnt,color='WHITE')  
-                    display.DisplayMessage(a.Pnt,str(a.id))
-                    
-        for i,b in enumerate(b_nodes):
-                display.DisplayShape(b.Pnt,color='GREEN')  
-                #display.DisplayMessage(b.Pnt,str(b.id),message_color=(1.0,0.5,0.0))
-    
-    
-        for i,a_spline in enumerate(a_BSplineLst):
-            #display_custome_shape(display,a_spline,1.0,0.0,[0.2,0.9,0.8])
-            display.DisplayShape(a_spline,color='CYAN')
-            p = gp_Pnt2d()
-            v = gp_Vec2d()
-            u = (a_spline.LastParameter()-a_spline.FirstParameter())/2+a_spline.FirstParameter()
-            a_spline.D1(u,p,v)
-            display.DisplayMessage(p,str(i),height=30,message_color=(0,1,1))
-            #display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
-            
-        for i,b_spline in enumerate(b_BSplineLst):
-            #display_custome_shape(display,b_spline,1.0,0.0,[0.1,0.5,1.0 ])
-            display.DisplayShape(b_spline,color='BLUE')
-            p = gp_Pnt2d()
-            v = gp_Vec2d()
-            u = (b_spline.LastParameter()-b_spline.FirstParameter())/2+b_spline.FirstParameter()
-            b_spline.D1(u,p,v)
-            display.DisplayMessage(p,str(i),height=30,message_color=(0,0,1))    
-            #display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
-            
+#    if kwargs.get('display') !=  None:
+#        for i,a in enumerate(a_nodes):
+#                if a.corner == True:
+#                    display.DisplayShape(a.Pnt,color='WHITE')  
+#                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
+#                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
+#                    
+#                elif a.cornerstyle == 1 or a.cornerstyle == 10 :
+#                    display.DisplayShape(a.Pnt,color='WHITE')  
+#                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
+#                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
+#                    
+#                    
+#                else: 
+#                    display.DisplayShape(a.Pnt,color='WHITE')  
+#                    display.DisplayMessage(a.Pnt,str(a.id))
+#                    
+#        for i,b in enumerate(b_nodes):
+#                display.DisplayShape(b.Pnt,color='GREEN')  
+#                #display.DisplayMessage(b.Pnt,str(b.id),message_color=(1.0,0.5,0.0))
+#    
+#    
+#        for i,a_spline in enumerate(a_BSplineLst):
+#            #display_custome_shape(display,a_spline,1.0,0.0,[0.2,0.9,0.8])
+#            display.DisplayShape(a_spline,color='CYAN')
+#            p = gp_Pnt2d()
+#            v = gp_Vec2d()
+#            u = (a_spline.LastParameter()-a_spline.FirstParameter())/2+a_spline.FirstParameter()
+#            a_spline.D1(u,p,v)
+#            display.DisplayMessage(p,str(i),height=30,message_color=(0,1,1))
+#            #display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
+#            
+#        for i,b_spline in enumerate(b_BSplineLst):
+#            #display_custome_shape(display,b_spline,1.0,0.0,[0.1,0.5,1.0 ])
+#            display.DisplayShape(b_spline,color='BLUE')
+#            p = gp_Pnt2d()
+#            v = gp_Vec2d()
+#            u = (b_spline.LastParameter()-b_spline.FirstParameter())/2+b_spline.FirstParameter()
+#            b_spline.D1(u,p,v)
+#            display.DisplayMessage(p,str(i),height=30,message_color=(0,0,1))    
+#            #display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
+#            
     return a_nodes, b_nodes, cellLst

@@ -132,7 +132,7 @@ def get_BSpline_length(BSpline):
     Adaptor = Geom2dAdaptor_Curve(BSpline.GetHandle())
     Length = GCPnts_AbscissaPoint().Length(Adaptor, first, last, tolerance)
     return Length
-    
+
     
 def copy_BSpline(BSpline):
     BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(BSpline.Copy()).GetObject()
@@ -152,6 +152,11 @@ def get_BSplineLst_length(BSplineLst):
     for i,item in enumerate(BSplineLst):
          CummLength += get_BSpline_length(item)
     return CummLength  
+
+
+
+
+
 
 
 def equidistant_Points_on_BSplineLst(BSplineLst,minLen):

@@ -30,7 +30,7 @@
 #===============================WEB DEFINITION==========================
 &DEFN Web
 	WebID = 1						#Web ID 									[int]													
-	Pos1 = 0.35						#first Position (between 0 and 1) 			[float]
+	Pos1 = 0.3						#first Position (between 0 and 1) 			[float]
 	Pos2 = 0.7						#second Position (between 0 and 1) 			[float]
 &END
 
@@ -63,8 +63,8 @@
 	CoreMaterial = 	4					#Material ID of core filling 				[int]
 	&DEFN Layup
 		#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
-		0.0		1.0		0.3				45					1		#Skin1
-		0.7		0.4		0.3				45					1		#Skin1
+		0.0		1.0		0.3				45					5		#Skin1
+		0.7		0.4		0.3				45					6		#Skin1
 	&END
 &END 
 
@@ -74,9 +74,9 @@ SegID = 2							#Segment ID									[int]
 CoreMaterial = 	5					#Material ID of core filling 				[int]
 	&DEFN Layup
 		#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
-		0.0		1.0 	0.3				45					1		#Skin1s
-		0.4		0.6		0.3				45					1		#Skin1s
-		0.25	0.75	0.3				45					1		#Skin1s
+		0.0		1.0 	0.3				45					4		#Skin1s
+		0.4		0.6		0.3				45					2		#Skin1s
+		0.25	0.75	0.3				45					6		#Skin1s
 	&END
 &END 
 

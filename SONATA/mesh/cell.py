@@ -169,6 +169,19 @@ class Cell(object):
         
         return WireBuilder.Wire()
     
+    def cell_node_distance(self,node):
+        from SONATA.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
+        from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline,Geom2dAPI_ProjectPointOnCurve
+        P_distances = []
+        for i in range(0,len(self.nodes)-1):
+            spline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([self.nodes[i].Pnt2d, self.nodes[i+1].Pnt2d])).Curve().GetObject()
+            projection = Geom2dAPI_ProjectPointOnCurve(node.Pnt2d,spline.GetHandle())
+            for j in range(1,projection.NbPoints()+1):
+                P_distances.append(projection.Distance(j))
 
-        
+        return min(P_distances or [10e6])
+            
+            
+
+
         

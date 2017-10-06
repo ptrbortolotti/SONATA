@@ -30,6 +30,13 @@ from SONATA.mesh.node import Node
 from SONATA.mesh.cell import Cell
 
 
+def find_cells_that_contain_node(cells,n2find):
+    #search cells that contain the node n2find
+    disco_cells = []
+    for c in cells: 
+        if n2find in c.nodes:
+            disco_cells.append(c)
+    return disco_cells
 
 
 def sort_and_reassignID(mesh):
@@ -375,7 +382,7 @@ def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1
                                     pIdx.append(idx)
                                 else: None
                         
-                        print 'Nuber of Projected Middle Nodes pPnts:', len(pPnts)
+                        #print 'Nuber of Projected Middle Nodes pPnts:', len(pPnts)
                         trigger_f = True
                         trigger_b = True
                         for i,P in enumerate(pPnts):
