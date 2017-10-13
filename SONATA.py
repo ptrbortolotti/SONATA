@@ -79,12 +79,23 @@ if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
     display.Context.SetDeviationCoefficient(1e-6) # 0.001 default. Be careful to scale it to the problem. 
 
 
+#def SONATA_CBM(Configuration,Flags,)
+    ''' This function includes the SONATA Dicipline Module for Structural Composite Beam Modelling (CBM).
+        Design Variables are passed in form of the Configuration file. 
+        
+        NOTE: For computational efficiency it is sometimes not suitable to recalculate the topology or the crosssection every iteration,
+              -maybe design flags to account for that.
+        
+        return: BeamProperties (allready inlcude Postprocessed parameters such as Failure Critirion and Safety Margin...)
+        '''
+     
+
+
 
 #%%============================================================================ 
 #               TOPOLOGY AND GEOMETRY:
 #=============================================================================           
 if FLAG_TOPO:
-
     SegmentLst = []   #List of Segment Objects
     for i,item in enumerate(Configuration.SEG_ID):
         if item == 0:        
