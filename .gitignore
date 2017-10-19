@@ -4,6 +4,10 @@
 *.vab*
 *.pdf
 *.svg
+*.bst
+*.synctex
+*.aux
+*.log
 
 #ignored folders
 img/
