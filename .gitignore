@@ -5,7 +5,7 @@
 *.pdf
 *.svg
 *.bst
-*.synctex
+*.gz
 *.aux
 *.log
 
