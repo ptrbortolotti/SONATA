@@ -13,22 +13,15 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
 plt.close("all")
 
-# Make data.
-x1 = np.arange(0, 2.1, 0.1)
-x2 = np.arange(-1, 1.1, 0.1)
-x1, x2 = np.meshgrid(x1, x2)
-f = (x1-1)**2 + x2**2
+from scipy import interpolate
+x = np.arange(-5.01, 5.01, 0.25)
+y = np.arange(-5.01, 5.01, 0.25)
+xx, yy = np.meshgrid(x, y)
+z = np.sin(xx**2+yy**2)
+f = interpolate.interp2d(x, y, z, kind='cubic')
 
-a = float(2)
-g = x1-(x2**2)/a
-
-# Plot the surface.
-# You can force all the contours to be the same color.
-plt.figure()
-CS = plt.contour(x1, x2, f, colors='k')
-plt.clabel(CS, fontsize=9, inline=1)
-CS = plt.contour(x1, x2, g,20, colors='r')
-plt.clabel(CS, fontsize=9, inline=1)
-plt.title('Single color - negative contours dashed')
+xnew = np.arange(-5.01, 5.01, 1e-2)
+ynew = np.arange(-5.01, 5.01, 1e-2)
+znew = f(xnew, ynew)
+plt.plot(x, z[0, :], 'ro-', xnew, znew[0, :], 'b-')
 plt.show()
-
