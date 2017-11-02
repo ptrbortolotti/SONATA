@@ -40,6 +40,7 @@ from SONATA.mesh.mesh_core import gen_core_cells
 from SONATA.mesh.mesh_utils import modify_cornerstyle_one, modify_sharp_corners,second_stage_improvements,grab_nodes_of_cells_on_BSplineLst,\
                                  determine_a_nodes, equidistant_nodes_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node                                        
 from SONATA.mesh.mesh_intersect import map_mesh_by_intersect_curve2d
+from SONATA.mesh.consolidate_mesh import consolidate_mesh_on_web
 
 from SONATA.vabs.VABS_interface import VABS_config, export_cells_for_VABS, XSectionalProperties
 from SONATA.vabs.strain import Strain
@@ -245,181 +246,58 @@ if FLAG_MESH:
             mesh,nodes = sort_and_reassignID(mesh)
             
         #===================MESH CORE================================================
-#        if seg.ID==0 and len(SegmentLst)>0:
-#            pass
-#        
-#        else:
-#            print 'STATUS:\t Meshing Segment %s, Core' %(seg.ID)
-#            core_Boundary_BSplineLst = []
-#            if seg.LayerLst[-1].S1<seg.LayerLst[-1].S2:
-#                core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, 0, seg.LayerLst[-1].S1, 0, 1)  #start und ende der lage
-#                core_Boundary_BSplineLst += copy_BSplineLst(seg.LayerLst[-1].BSplineLst)
-#                core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, seg.LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
-#            
-#            #TODO: Why doesn't this occure in Segments.buildLayer?????
-#            else:
-#                core_Boundary_BSplineLst += copy_BSplineLst(seg.LayerLst[-1].BSplineLst)
-#                core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, seg.LayerLst[-1].S2, seg.LayerLst[-1].S1, 0, 1)  #start und ende der lage
-#                   
-#                for s in core_Boundary_BSplineLst:
-#                    display.DisplayShape(s, color="RED")
-#            
-#
-#        
-#            a_nodes = determine_a_nodes(mesh,core_Boundary_BSplineLst,global_minLen,layer.ID[0])
-#            
-#            area = 0.8*global_minLen**2
-#            [c_cells,c_nodes] = gen_core_cells(a_nodes,area)
-#            
-#            for c in c_cells:
-#                c.structured = False
-#                c.theta_3 = 0
-#                c.MatID = int(seg.CoreMaterial)
-#                c.calc_theta_1()
-#            
-#            mesh.extend(c_cells)
-                
-
-        #===================consolidate mesh on web interface==================
-        w_BSplineLst = [WebLst[0].BSpline_Line]
-        if seg.ID == 1:
-            w1_nodes = grab_nodes_of_cells_on_BSplineLst(enhanced_cells,w_BSplineLst)
-#            for idx,w_n in enumerate(w1_nodes):
-#                display.DisplayMessage(w_n.Pnt,str(idx),height=30,message_color=(1,1,0))
-#                display.DisplayShape(w_n.Pnt2d, color="YELLOW")   
-        elif seg.ID == 2:
-            w2_nodes = grab_nodes_of_cells_on_BSplineLst(enhanced_cells,w_BSplineLst)
-#            for idx,w_n in enumerate(w2_nodes):
-#                display.DisplayMessage(w_n.Pnt,str(idx),height=30,message_color=(1,0.4,0))
-#                display.DisplayShape(w_n.Pnt2d, color="ORANGE")   
+        if seg.ID==0 and len(SegmentLst)>0:
+            pass
         
-        #1. merge nodes that are allready are withing a given tolerance tol=1e-4*global_minlen
-            #1.1. merge nodes an move point to the point inbetween!
-       
-        if seg.ID == 1:           
-            w_tol = 0.5*global_minLen
-
-            tmp = []
-            for w1 in w1_nodes:
-                for w2 in w2_nodes:
-                    tmp.append([w1.Pnt2d.Distance(w2.Pnt2d),w1.id,w2.id])   
-            tmp=np.asarray(tmp)
-            NM = tmp[tmp[:,0]<w_tol]
-            NM = NM[NM[:,0].argsort()]
+        else:
+            print 'STATUS:\t Meshing Segment %s, Core' %(seg.ID)
+            core_Boundary_BSplineLst = []
+            if seg.LayerLst[-1].S1<seg.LayerLst[-1].S2:
+                core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, 0, seg.LayerLst[-1].S1, 0, 1)  #start und ende der lage
+                core_Boundary_BSplineLst += copy_BSplineLst(seg.LayerLst[-1].BSplineLst)
+                core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, seg.LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
             
-            #remove possible double nodes in NodeMatching Matrix
-            tmp, tmp_idx = np.unique(NM[:,1],True,axis=0) 
-            tmp_idx.sort(axis=0)
-            NM = NM[tmp_idx]
-            tmp, tmp_idx = np.unique(NM[:,2],True,axis=0)
-            tmp_idx.sort(axis=0)
-            NM = NM[tmp_idx]
-            
-            #MERGE Nodes according to NodeMatching(NM) Matrix:
-            for match in NM:
-                #print int(match[1]),int(match[2])
-                n1 = filter(lambda x: x.id == match[1], w1_nodes)[0]
-                n2 = filter(lambda x: x.id == match[2], w2_nodes)[0]
-                #move the first node to the middle!
-                n1.Pnt2d
-                v = gp_Vec2d(n1.Pnt2d, n2.Pnt2d)
-                v.Multiply(0.5)
-                n1.Pnt2d.Translate(v)
+            #TODO: Why doesn't this occure in Segments.buildLayer?????
+            else:
+                core_Boundary_BSplineLst += copy_BSplineLst(seg.LayerLst[-1].BSplineLst)
+                core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, seg.LayerLst[-1].S2, seg.LayerLst[-1].S1, 0, 1)  #start und ende der lage
+                   
+                for s in core_Boundary_BSplineLst:
+                    display.DisplayShape(s, color="RED")
                 
-                #find all cells that contain n2 and replace it with n1
-                disco_cells = find_cells_that_contain_node(mesh,n2)
-                for c in disco_cells:
-                    c.nodes = [n1 if x==n2 else x for x in c.nodes]
+            a_nodes = determine_a_nodes(mesh,core_Boundary_BSplineLst,global_minLen,layer.ID[0])
             
-            #determine ramaining w1_nodes. If w1_node.id is not in NM[:,1]
-            rem_w1_nodes = []
-            for w1 in w1_nodes:
-                if w1.id not in NM[:,1]:
-                    rem_w1_nodes.append(w1)
-                    display.DisplayShape(w1.Pnt2d, color="RED")   
-                    
-            rem_w2_nodes = []
-            for w2 in w2_nodes:
-                if w2.id not in NM[:,2]:
-                    rem_w2_nodes.append(w2)
-                    display.DisplayShape(w2.Pnt2d, color="GREEN")   
+            area = 0.8*global_minLen**2
+            [c_cells,c_nodes] = gen_core_cells(a_nodes,area)
             
-            #TODO: move everything to own fuction
-            #TODO make it lean and clean!
-            #identify cells that are beeing intersected by the hanging node!
-            from OCC.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve 
-            from OCC.BRepAdaptor import BRepAdaptor_CompCurve
-            from SONATA.mesh.cell import Cell
+            for c in c_cells:
+                c.structured = False
+                c.theta_3 = 0
+                c.MatID = int(seg.CoreMaterial)
+                c.calc_theta_1()
             
-            for rw1 in rem_w1_nodes:
-                #mark all cells that are very close to the node but do not contain it! 
-                for c in mesh:
-                    if c.cell_node_distance(rw1) < 1e-4 and (rw1 not in c.nodes):
-                        #calculate the minimun distance between the wire and the node.Pnt2d
-                        #display_custome_shape(display,c.wire,2.0, 0.0, [1,0.5,0])
-                        print rw1, c
-                                
-                        #if the cell is a quad split cell into 2 triangles
-                        if len(c.nodes) == 4:
-                            #display.DisplayColoredShape(p2[0], 'ORANGE')
-                            nodeLst = c.nodes
-                            newNode = rw1
-                            #MODIFY EXISTING CELL
-                            c.nodes = [nodeLst[0],nodeLst[1],rw1]
-                            #ADD NEW CELL
-                            newcell = Cell([nodeLst[0],newNode,nodeLst[2],nodeLst[3]])
-                            newcell.theta_1 = c.theta_1
-                            newcell.theta_3 = c.theta_3
-                            newcell.MatID = c.MatID
-                            mesh.append(newcell)
-                        #if cell is triangle split into 2 further triangles
-                        elif len(c.nodes) == 3: 
-                            c.nodes = [nodeLst[0],nodeLst[1],rw1]
-                            newcell = Cell([nodeLst[0],newNode,nodeLst[2]])
-                            newcell.theta_1 = c.theta_1
-                            newcell.theta_3 = c.theta_3
-                            newcell.MatID = c.MatID
-                            mesh.append(newcell)
-                            
-            for rw2 in rem_w2_nodes:
-                #mark all cells that are very close to the node but do not contain it! 
-                for c in mesh:
-                    if c.cell_node_distance(rw2) < 1e-4 and (rw2 not in c.nodes):
-                        #calculate the minimun distance between the wire and the node.Pnt2d
-                        #display_custome_shape(display,c.wire,2.0, 0.0, [1,1,0])
-                        print rw2, c     
+            mesh.extend(c_cells)
                 
-                        #if the cell is a quad split cell into 2 triangles
-                        if len(c.nodes) == 4:
-                            #display.DisplayColoredShape(p2[0], 'ORANGE')
-                            nodeLst = c.nodes
-                            newNode = rw2
-                            #MODIFY EXISTING CELL
-                            c.nodes = [nodeLst[0],nodeLst[1],rw2]
-                            #ADD NEW CELL
-                            newcell = Cell([nodeLst[0],newNode,nodeLst[2],nodeLst[3]])
-                            newcell.theta_1 = c.theta_1
-                            newcell.theta_3 = c.theta_3
-                            newcell.MatID = c.MatID
-                            mesh.append(newcell)
-                        #if cell is triangle split into 2 further triangles
-                        elif len(c.nodes) == 3: 
-                            c.nodes = [nodeLst[0],nodeLst[1],rw2]
-                            newcell = Cell([nodeLst[0],newNode,nodeLst[2]])
-                            newcell.theta_1 = c.theta_1
-                            newcell.theta_3 = c.theta_3
-                            newcell.MatID = c.MatID
-                            mesh.append(newcell)
-                            
-                        #the if cell is triangle split into 2 further triangles
-                        #if the cell is a quad split cell into 2 triangles
-            
 
+    #===================consolidate mesh on web interface==================
+    w_tol = 0.6*global_minLen   
+    
+    
+    for seg in SegmentLst:
+        for layer in seg.LayerLst:
+            for c in layer.cells:
+                seg.cells.append(c)
+    
+    
+    for web in WebLst:
+        #print web.ID,  'Left:', SegmentLst[web.ID].ID, 'Right:', SegmentLst[web.ID+1].ID,
+        web.wl_nodes = grab_nodes_of_cells_on_BSplineLst(SegmentLst[web.ID].cells,web.BSplineLst)
+        web.wr_nodes = grab_nodes_of_cells_on_BSplineLst(SegmentLst[web.ID+1].cells,web.BSplineLst)
+        mesh = consolidate_mesh_on_web(mesh,web.BSplineLst,web.wl_nodes,web.wr_nodes,w_tol,display)
+        
+         
             
-            
-            
-            
-    # BALANCE WEIGHT - CUTTING HOLE ALGORITHM====================================
+    #============= BALANCE WEIGHT - CUTTING HOLE ALGORITHM====================================
     if Configuration.SETUP_BalanceWeight == True:
         print 'STATUS:\t Meshing Balance Weight'   
         
@@ -561,20 +439,13 @@ if FLAG_VABS:
 if FLAG_SHOW_2D_MESH:   
     plot_cells(mesh, nodes, 'MatID', BeamProperties, )
     
-    plt.savefig('SONATA_MESH.pdf', dpi=900, facecolor='w', edgecolor='w',
-        orientation='landscape', papertype='a4', format='pdf')
-    
-    
-    
-    
+    #plt.savefig('SONATA_MESH.pdf', dpi=900, facecolor='w', edgecolor='w',
+    #    orientation='landscape', papertype='a4', format='pdf')
+
 #    from matplotlib2tikz import save as tikz_save
-#    folder = 'img/'
-#    tikz_filename = folder + filename.replace('.input', '.tex')
-#    tikz_save(
-#    tikz_filename,
-#    figureheight = '\\figureheight',
-#    figurewidth = '\\figurewidth'
-#    )    
+#   folder = 'publication/preprocessor_paper/img/'
+#   tikz_filename = folder + filename.replace('.input', '.tex')
+#    tikz_save(tikz_filename, figureheight = '\\figureheight', figurewidth = '\\figurewidth' )    
 #    
 #    import os  
 #    os.system("img/lualatex minimal_latex.tex")

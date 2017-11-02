@@ -36,6 +36,7 @@ class Segment(object):
         self.Theta = kwargs.get('Theta') 
         self.scale_factor  = kwargs.get('scale_factor') 
         self.LayerLst = []
+        self.cells = []
 
         if self.OCC == True:
             self.BSplineLst = kwargs.get('Boundary')

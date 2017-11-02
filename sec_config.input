@@ -16,22 +16,28 @@
 #===============================SETUP===================================
 &DEFN Setup
 	mat_filename = mat_database.input	#Path and filename of the Material Database
-	NbOfWebs = 1						#Number of Webs (0=CSpar, 1=Dspar,...)		[int]			DEFAULT=0
+	NbOfWebs = 2						#Number of Webs (0=CSpar, 1=Dspar,...)		[int]			DEFAULT=0
 	BalanceWeight = True 				#True or False for Balance Weight			[boolean]		DEFAULT=FALSE
 	input_type = 3						#0) Airfoil from UIUC Database; 1) Geometry from .dat file; 2)2d .step or .iges 3)3D .step or .iges and radial station of crosssection 	4) generate 3D-Blade from twist,taper,airfoils,1/4-line			[int] DEFAULT=0	
 	datasource = examples/AREA_Blatt_L.stp				#0)	naca23012					1) AREA_R250.dat			2)AREA_R230.stp	 			3)AREA_Blatt_L.stp	 4)folder of data 						[string] DEFAULT=NONE
 	radial_station = 1600					#Radial station of crosssection. Only necessary for input type 3. [float]	Default=NONE
 	scale_factor = 1	 				#use as reference scale factor				[float] 		DEFAULT=1
 	Theta = -1.0							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
-	mesh_resolution = 200				#Scales approximately to the number of points on Segment0
+	mesh_resolution = 240				#Scales approximately to the number of points on Segment0
 &END 
 
 
 #===============================WEB DEFINITION==========================
 &DEFN Web
 	WebID = 1						#Web ID 									[int]													
-	Pos1 = 0.3						#first Position (between 0 and 1) 			[float]
-	Pos2 = 0.7						#second Position (between 0 and 1) 			[float]
+	Pos1 = 0.35						#first Position (between 0 and 1) 			[float]
+	Pos2 = 0.68						#second Position (between 0 and 1) 			[float]
+&END
+
+&DEFN Web
+	WebID = 2						#Web ID 									[int]													
+	Pos1 = 0.28						#first Position (between 0 and 1) 			[float]
+	Pos2 = 0.80						#second Position (between 0 and 1) 			[float]
 &END
 
 
@@ -75,30 +81,20 @@ CoreMaterial = 	5					#Material ID of core filling 				[int]
 	&DEFN Layup
 		#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
 		0.0		1.0 	0.3				45					4		#Skin1s
-		0.4		0.6		0.3				45					2		#Skin1s
-		0.25	0.75	0.3				45					6		#Skin1s
+		0.0		1.0		0.3				45					2		#Skin1s
 	&END
 &END 
 
-# &DEFN Seg
-	# SegID = 3															#Segment ID															[int]
-	# CoreMaterial = 	4												#give material id of core fillings in that segment					[int]
-	# &DEFN Layup
-	# #Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
-	# 0.3			0.7		0.4			45					1		#Skin1
-	# 0.7			0.4		0.2			45					1		#Skin1
-	# &END
-# &END 
+&DEFN Seg
+	SegID = 3															#Segment ID															[int]
+	CoreMaterial = 	4												#give material id of core fillings in that segment					[int]
+	&DEFN Layup
+	#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
+	0.0			1.0		0.2			0					2		#Skin1
+	0.0			1.0		0.2			0					2		#Skin1
+	&END
+&END 
 
-# &DEFN Seg
-	# SegID = 4															#Segment ID															[int]
-	# CoreMaterial = 	4													#give material id of core fillings in that segment					[int]
-	# &DEFN Layup
-	# #Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
-	# 0.3			0.7		0.4			45					1		#Skin1
-	# 0.7			0.4		0.2			45					1		#Skin1
-	# &END
-# &END 
 
 
 #=================================Balance Weight Definition=============

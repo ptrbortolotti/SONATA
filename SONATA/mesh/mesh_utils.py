@@ -193,7 +193,7 @@ def grab_nodes_of_cells_on_BSplineLst(cells,BSplineLst):
 
 def grab_nodes_on_BSplineLst(nodes,BSplineLst):
     disco_nodes = []
-    tolerance = 1e-6
+    tolerance = 1e-5
     
     for n in nodes:
         for idx,item in enumerate(BSplineLst):
