@@ -16,7 +16,7 @@ from OCC.gp import gp_Pnt, gp_Dir, gp_Ax1
 
 import sys
 sys.path.insert(0, 'C:\TPflumm_local\work\SONATA')
-from SONATA.bladegen.Airfoil import Airfoil
+from SONATA.bladegen.airfoil import Airfoil
 from SONATA.bladegen.bladegen_utils import make_loft
 from SONATA.topo.wire_utils import rotate_wire, translate_wire,scale_wire, mirror_wire_pnt_dir
 from SONATA.display.display_utils import show_coordinate_system 
