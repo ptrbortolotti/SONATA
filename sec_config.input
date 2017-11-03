@@ -101,7 +101,7 @@ CoreMaterial = 	5					#Material ID of core filling 				[int]
 
 &DEFN BalanceWeight
 	XPos = -13.0						#	X Position	[-]						[float]				NO DEFAULT VALUE						
-	YPos = 0.0							#	Y Position	[-]						[float]				NO DEFAULT VALUE
-	Diameter = 3.0						#	Diameter of Balance Weight [mm]		[float]				NO DEFAULT VALUE
+	YPos = -0.1							#	Y Position	[-]						[float]				NO DEFAULT VALUE
+	Diameter = 2.8						#	Diameter of Balance Weight [mm]		[float]				NO DEFAULT VALUE
 	MatID = 6   						#   Material ID							[int]				NO DEFAULT VALUE
 &END

@@ -429,25 +429,25 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
         
 
     #==============OCC3DVIEWER========================================
-    if kwargs.get('display') !=  None:
-        for i,a in enumerate(a_nodes):
-                if a.corner == True:
-                    display.DisplayShape(a.Pnt,color='WHITE')  
-                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
-                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
-                    
-                elif a.cornerstyle == 1 or a.cornerstyle == 10 :
-                    display.DisplayShape(a.Pnt,color='WHITE')  
-                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
-                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
-                    
-                    
-                else: 
-                    display.DisplayShape(a.Pnt,color='WHITE')  
-                    display.DisplayMessage(a.Pnt,str(a.id))
-                    
-        for i,b in enumerate(b_nodes):
-                display.DisplayShape(b.Pnt,color='GREEN')  
+#    if kwargs.get('display') !=  None:
+#        for i,a in enumerate(a_nodes):
+#                if a.corner == True:
+#                    display.DisplayShape(a.Pnt,color='WHITE')  
+#                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
+#                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
+#                    
+#                elif a.cornerstyle == 1 or a.cornerstyle == 10 :
+#                    display.DisplayShape(a.Pnt,color='WHITE')  
+#                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
+#                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
+#                    
+#                    
+#                else: 
+#                    display.DisplayShape(a.Pnt,color='WHITE')  
+#                    display.DisplayMessage(a.Pnt,str(a.id))
+#                    
+#        for i,b in enumerate(b_nodes):
+#                display.DisplayShape(b.Pnt,color='GREEN')  
                 #display.DisplayMessage(b.Pnt,str(b.id),message_color=(1.0,0.5,0.0))
 #    
 #    

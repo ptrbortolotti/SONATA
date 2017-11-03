@@ -193,8 +193,9 @@ if FLAG_MESH:
     length = get_BSplineLst_length(SegmentLst[0].BSplineLst)
     global_minLen = round(length/Resolution,5)
     
-    #===================MESH SEGMENT===============================================
     mesh = []
+    
+    #===meshing parameters===============================
     proj_tol_1 = 5e-2
     proj_tol_2 = 5e-2
     non_dct_factor = 2.6
@@ -203,6 +204,10 @@ if FLAG_MESH:
     growing_factor = 1.8   #critical growing factor of cell before splitting 
     shrinking_factor = 0.10  #critical shrinking factor for cells before merging nodes
     
+    core_cell_area = 0.8*global_minLen**2
+    web_consolidate_tol = 0.5*global_minLen
+    
+    #===================MESH SEGMENT===============================================
     disco_nodes = []
     for j,seg in enumerate(reversed(SegmentLst)):
         for i,layer in enumerate(reversed(seg.LayerLst)):
@@ -257,9 +262,7 @@ if FLAG_MESH:
                 core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, seg.LayerLst[-1].S2, seg.LayerLst[-1].S1, 0, 1)  #start und ende der lage
                    
             a_nodes = determine_a_nodes(mesh,core_Boundary_BSplineLst,global_minLen,layer.ID[0])
-            
-            area = 0.8*global_minLen**2
-            [c_cells,c_nodes] = gen_core_cells(a_nodes,area)
+            [c_cells,c_nodes] = gen_core_cells(a_nodes,core_cell_area)
             
             for c in c_cells:
                 c.structured = False
@@ -269,10 +272,7 @@ if FLAG_MESH:
             
             mesh.extend(c_cells)
                 
-
-    #===================consolidate mesh on web interface==================
-    w_tol = 0.6*global_minLen   
-    
+    #===================consolidate mesh on web interface==================   
     for seg in SegmentLst:
         for layer in seg.LayerLst:
             for c in layer.cells:
@@ -282,10 +282,9 @@ if FLAG_MESH:
         #print web.ID,  'Left:', SegmentLst[web.ID].ID, 'Right:', SegmentLst[web.ID+1].ID,
         web.wl_nodes = grab_nodes_of_cells_on_BSplineLst(SegmentLst[web.ID].cells,web.BSplineLst)
         web.wr_nodes = grab_nodes_of_cells_on_BSplineLst(SegmentLst[web.ID+1].cells,web.BSplineLst)
-        mesh = consolidate_mesh_on_web(mesh,web.BSplineLst,web.wl_nodes,web.wr_nodes,w_tol,display)
+        mesh = consolidate_mesh_on_web(mesh,web.BSplineLst,web.wl_nodes,web.wr_nodes,web_consolidate_tol,display)
         
          
-            
     #============= BALANCE WEIGHT - CUTTING HOLE ALGORITHM====================================
     if Configuration.SETUP_BalanceWeight == True:
         print 'STATUS:\t Meshing Balance Weight'   
@@ -447,7 +446,7 @@ if FLAG_SHOW_2D_MESH:
 if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
     display.set_bg_gradient_color(20,6,111,200,200,200)
     show_coordinate_system(display,5)
-    add_menu('screencapture')
+#    add_menu('screencapture')
 #    add_function_to_menu('screencapture','export to PDF', partial(export_to_PDF,display))
 #    add_function_to_menu('screencapture','export to SVG', partial(export_to_SVG,display))
 #    add_function_to_menu('screencapture','export to PS', partial(export_to_PS,display))

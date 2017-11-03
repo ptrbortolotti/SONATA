@@ -5,13 +5,16 @@ Created on Fri Mar 03 13:39:55 2017
 @author: TPflumm
 """
 import numpy as np
+import operator
 
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge
 from OCC.gp import gp_Vec2d,gp_Pnt2d
+from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline,Geom2dAPI_ProjectPointOnCurve
 
 from SONATA.vabs.strain import Strain
 from SONATA.vabs.stress import Stress
-from SONATA.topo.utils import PolygonArea, calc_angle_between
+from SONATA.topo.utils import PolygonArea, calc_angle_between, point2d_list_to_TColgp_Array1OfPnt2d
+
 
 def calc_cell_angles(cell):
     corners = []
@@ -170,9 +173,8 @@ class Cell(object):
         return WireBuilder.Wire()
     
     def cell_node_distance(self,node):
-        from SONATA.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
-        from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline,Geom2dAPI_ProjectPointOnCurve
         P_distances = []
+
         for i in range(0,len(self.nodes)-1):
             spline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([self.nodes[i].Pnt2d, self.nodes[i+1].Pnt2d])).Curve().GetObject()
             projection = Geom2dAPI_ProjectPointOnCurve(node.Pnt2d,spline.GetHandle())
@@ -180,6 +182,19 @@ class Cell(object):
                 P_distances.append(projection.Distance(j))
 
         return min(P_distances or [10e6])
+    
+    def closest_cell_edge(self,node):
+        P_distances = []
+        for i in range(0,len(self.nodes)-1):
+            spline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([self.nodes[i].Pnt2d, self.nodes[i+1].Pnt2d])).Curve().GetObject()
+            projection = Geom2dAPI_ProjectPointOnCurve(node.Pnt2d,spline.GetHandle())
+            for j in range(1,projection.NbPoints()+1):
+                P_distances.append([projection.Distance(j),i])
+        
+        min_index, min_value = min(enumerate(P_distances), key=operator.itemgetter(1))       
+        return min_value[1]
+    
+    
             
             
 
