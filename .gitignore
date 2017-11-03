@@ -8,6 +8,7 @@
 *.gz
 *.aux
 *.log
+*.py.out
 
 #ignored folders
 img/
