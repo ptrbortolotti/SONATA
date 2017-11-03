@@ -12,4 +12,6 @@
 #ignored folders
 img/
 bugreport/
+publication/
+docs/
 SONATA/sectionbuilder/PatranMesh_example/
