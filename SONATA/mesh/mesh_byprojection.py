@@ -41,13 +41,10 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
     ----------        
       
     
-    
     Notes & Comments:
     ----------  
     TODO: * scale distance not only to layerthickenss but also to min_len.
             or adapt the distance individually for each node. 
-
-
     """
     
     #KWARGS:
@@ -238,7 +235,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
             elif len(exterior_corners) == 2 and node.corner==True:
                 node.cornerstyle = 4
                 if node.regular_corner == True:
-                    print 'R',[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]
+                    #print 'R',[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]
                     b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
                     b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
                     
@@ -301,21 +298,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
             if len(exterior_corners) == 1 and node.corner==False:
                 node.cornerstyle = 1
                 #print 'Node ID: ',node.id,', Len(exterior_corners):', len(exterior_corners)
-    
-                try: 
-                    if b_BSplineLst[pIdx[0]].EndPoint().IsEqual(b_nodes[-1].Pnt2d,1e-5):
-                       b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
-                      
-                    else:
-                        b_nodes.append(Node(b_BSplineLst[pIdx[0]].EndPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].LastParameter()]))
-                
-                except:
-                    b_nodes.append(Node(b_BSplineLst[pIdx[0]].StartPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].FirstParameter()]))
-                #display.DisplayShape(b_BSplineLst[pIdx[0]].EndPoint(),color='WHITE')
-                #display.DisplayShape(pPnts[0],color='GREEN')
-                #display.DisplayShape(pPnts[1],color='ORANGE')    
-                
-
+                b_nodes.append(Node(exterior_corners[0],exterior_corners_para[0]))
             
         else:
             print 'Projection Error, number of projection points: ', len(pPnts)
@@ -446,26 +429,26 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
         
 
     #==============OCC3DVIEWER========================================
-#    if kwargs.get('display') !=  None:
-#        for i,a in enumerate(a_nodes):
-#                if a.corner == True:
-#                    display.DisplayShape(a.Pnt,color='WHITE')  
-#                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
-#                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
-#                    
-#                elif a.cornerstyle == 1 or a.cornerstyle == 10 :
-#                    display.DisplayShape(a.Pnt,color='WHITE')  
-#                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
-#                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
-#                    
-#                    
-#                else: 
-#                    display.DisplayShape(a.Pnt,color='WHITE')  
-#                    display.DisplayMessage(a.Pnt,str(a.id))
-#                    
-#        for i,b in enumerate(b_nodes):
-#                display.DisplayShape(b.Pnt,color='GREEN')  
-#                #display.DisplayMessage(b.Pnt,str(b.id),message_color=(1.0,0.5,0.0))
+    if kwargs.get('display') !=  None:
+        for i,a in enumerate(a_nodes):
+                if a.corner == True:
+                    display.DisplayShape(a.Pnt,color='WHITE')  
+                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
+                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
+                    
+                elif a.cornerstyle == 1 or a.cornerstyle == 10 :
+                    display.DisplayShape(a.Pnt,color='WHITE')  
+                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
+                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
+                    
+                    
+                else: 
+                    display.DisplayShape(a.Pnt,color='WHITE')  
+                    display.DisplayMessage(a.Pnt,str(a.id))
+                    
+        for i,b in enumerate(b_nodes):
+                display.DisplayShape(b.Pnt,color='GREEN')  
+                #display.DisplayMessage(b.Pnt,str(b.id),message_color=(1.0,0.5,0.0))
 #    
 #    
 #        for i,a_spline in enumerate(a_BSplineLst):

@@ -87,11 +87,9 @@ if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
         NOTE: For computational efficiency it is sometimes not suitable to recalculate the topology or the crosssection every iteration,
               -maybe design flags to account for that.
         
-        return: BeamProperties (allready inlcude Postprocessed parameters such as Failure Critirion and Safety Margin...)
+        return: BeamProperties(allready inlcude Postprocessed parameters such as Failure Critirion and Safety Margin...)
         '''
      
-
-
 
 #%%============================================================================ 
 #               TOPOLOGY AND GEOMETRY:
@@ -190,8 +188,7 @@ if FLAG_MESH:
 #    display2, start_display, add_menu, add_function_to_menu = init_display('wx')
 #    display2.Context.SetDeviationAngle(1e-6)       # 0.001 default. Be careful to scale it to the problem.
 #    display2.Context.SetDeviationCoefficient(1e-6) # 0.001 default. Be careful to scale it to the problem. 
-    
-    
+        
     Resolution = Configuration.SETUP_mesh_resolution # Nb of Points on Segment0
     length = get_BSplineLst_length(SegmentLst[0].BSplineLst)
     global_minLen = round(length/Resolution,5)
@@ -216,23 +213,21 @@ if FLAG_MESH:
             if BSplineLst_Orientation(b_BSplineLst,11) == False:
                 b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
              
-            if i==0:
+            if i == 0 and seg.ID != 0:
                 a_nodes = equidistant_nodes_on_BSplineLst(a_BSplineLst, True, True, True, minLen = global_minLen, LayerID = layer.ID[0])
             else: 
                 a_nodes = determine_a_nodes(mesh,a_BSplineLst,global_minLen,layer.ID[0],non_dct_factor)
             
-            
             #TODO: Scale tolerance to problem size!    
-            if FLAG_SHOW_3D_MESH:
-                a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, proj_tol_1,crit_angle_1, display=display) 
-                #enhanced_cells = modify_cornerstyle_one(cells,b_BSplineLst)
-                enhanced_cells = modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer.thickness, proj_tol_2,alpha_crit_2,display=display)
-                enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen,growing_factor,shrinking_factor)
-            else:
-                a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, proj_tol_1, crit_angle_1)
-                #enhanced_cells = modify_cornerstyle_one(cells,b_BSplineLst)
-                enhanced_cells = modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer.thickness, proj_tol_2,alpha_crit_2)
-                enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen,growing_factor,shrinking_factor)       
+            if FLAG_SHOW_3D_MESH: 
+                displaymesh=display 
+            else: 
+                displaymesh=None   
+                
+            a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, proj_tol_1,crit_angle_1, display=displaymesh) 
+            #enhanced_cells = modify_cornerstyle_one(cells,b_BSplineLst)
+            enhanced_cells = modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer.thickness, proj_tol_2,alpha_crit_2,display=displaymesh)
+            enhanced_cells = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen,growing_factor,shrinking_factor)
             
             for c in enhanced_cells:
                 c.calc_theta_1()
@@ -240,7 +235,6 @@ if FLAG_MESH:
                 c.MatID = int(layer.MatID)
                 c.structured = True
 
-    
             layer.cells = enhanced_cells
             mesh.extend(enhanced_cells) 
             mesh,nodes = sort_and_reassignID(mesh)
@@ -262,9 +256,6 @@ if FLAG_MESH:
                 core_Boundary_BSplineLst += copy_BSplineLst(seg.LayerLst[-1].BSplineLst)
                 core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, seg.LayerLst[-1].S2, seg.LayerLst[-1].S1, 0, 1)  #start und ende der lage
                    
-                for s in core_Boundary_BSplineLst:
-                    display.DisplayShape(s, color="RED")
-                
             a_nodes = determine_a_nodes(mesh,core_Boundary_BSplineLst,global_minLen,layer.ID[0])
             
             area = 0.8*global_minLen**2
@@ -282,12 +273,10 @@ if FLAG_MESH:
     #===================consolidate mesh on web interface==================
     w_tol = 0.6*global_minLen   
     
-    
     for seg in SegmentLst:
         for layer in seg.LayerLst:
             for c in layer.cells:
                 seg.cells.append(c)
-    
     
     for web in WebLst:
         #print web.ID,  'Left:', SegmentLst[web.ID].ID, 'Right:', SegmentLst[web.ID+1].ID,
@@ -325,7 +314,7 @@ if FLAG_MESH:
     
     #====================REVIEW==================================================
     print 'STATUS:\t MESHING COMPLETED:'
-    print '\t\t   - Total Number of Cells: %s' %(len(mesh))
+    print '\t   - Total Number of Cells: %s' %(len(mesh))
     print '\t   - Duration: %s' % (datetime.now() - startTime)
     print '\t   - Saved as: %s' % filename 
     minarea = min([c.area for c in mesh])
@@ -365,7 +354,7 @@ if FLAG_VABS:
     VABSsetup.F = [0,0,0]    #in Newton
     VABSsetup.M = [0,220e3,0]     #in Newton/mm
     
-    print 'STATUS: \t RUNNING VABS for Constitutive modeling:'
+    print 'STATUS:\t RUNNING VABS for Constitutive modeling:'
     #EXECUTE VABS:
     if VABSsetup.recover_flag == 1:
         VABSsetup.recover_flag=0
@@ -374,7 +363,7 @@ if FLAG_VABS:
         stdout = subprocess.check_output(command, shell=True)
         VABSsetup.recover_flag=1
         export_cells_for_VABS(mesh,nodes,vabs_filename,VABSsetup,MaterialLst)
-        print 'STATUS: \t RUNNING VABS for 3D Recovery:'
+        print 'STATUS:\t RUNNING VABS for 3D Recovery:'
         command = 'VABSIII.exe '+ vabs_filename
         stdout = stdout + subprocess.check_output(command, shell=True)
         
@@ -385,7 +374,7 @@ if FLAG_VABS:
     
     stdout = stdout.replace('\r\n\r\n','\n\t   -')
     stdout = stdout.replace('\r\n','\n\t   -')
-    stdout = 'STATUS: \t VABS CALCULATIONS COMPLETED: \n\t   -' + stdout
+    stdout = 'STATUS:\t VABS CALCULATIONS COMPLETED: \n\t   -' + stdout
     print stdout 
     
     

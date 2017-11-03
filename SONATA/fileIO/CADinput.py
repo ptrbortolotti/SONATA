@@ -323,7 +323,7 @@ def BSplineLst_from_intersect_shape(aResShape,R,scale_factor,Theta):
     wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,1,0)),math.pi/2)
     wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,0,1)),math.pi/2)
     
-    print 'STATUS: \t CHECK ClosedWire: \t\t ', str(wire.Closed())
+    print 'STATUS:\t CHECK ClosedWire: \t\t ', str(wire.Closed())
     npArray = discretize_wire_TangentialDeflection(wire,70,0.013)
     npArray = np.multiply(npArray,scale_factor)
     BSplineLst = BSplineLst_from_dct(npArray,2)
@@ -333,8 +333,8 @@ def BSplineLst_from_intersect_shape(aResShape,R,scale_factor,Theta):
     if BSplineLst_Orientation(BSplineLst,11) == False:
         BSplineLst = reverse_BSplineLst(BSplineLst)  
     
-    print 'STATUS: \t CHECK Head2Tail: \t\t ', Check_BSplineLst_Head2Tail(BSplineLst)
-    print 'STATUS: \t CHECK Counterclockwise: \t ', BSplineLst_Orientation(BSplineLst,11)
+    print 'STATUS:\t CHECK Head2Tail: \t\t ', Check_BSplineLst_Head2Tail(BSplineLst)
+    print 'STATUS:\t CHECK Counterclockwise: \t ', BSplineLst_Orientation(BSplineLst,11)
     
 #    display.DisplayShape(wire)
 #    
@@ -352,7 +352,7 @@ def import_3d_stp(filename,R,scale_factor,Theta=0):
     '''
     The 3D Shape must given in Rotorblade Coordinates!
     '''
-    print 'STATUS: \t IMPORT_3d_STP'
+    print 'STATUS:\t IMPORT_3d_STP'
     aResShape = load_3D(filename) 
     return BSplineLst_from_intersect_shape(aResShape,R,scale_factor,Theta)
 

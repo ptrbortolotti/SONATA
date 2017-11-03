@@ -141,7 +141,7 @@ class Segment(object):
         
     def build_segment_boundary_from_WebLst(self,WebLst,Segment0_final_Boundary_BSplineLst):
         """Input has to be a complete WebLst"""
-        print 'STATUS: \t Building Segment Boundaries %s' %(self.ID)
+        print 'STATUS:\t Building Segment Boundaries %s' %(self.ID)
         NbOfWebs = len(WebLst)
         i = self.ID - 1    
             
