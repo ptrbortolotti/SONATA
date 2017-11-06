@@ -11,7 +11,7 @@ The topology is saved as a .pkl and can be reloaded
 The second part generates a mesh upon the topology, the mesh can be exported into a VABS and SECTIONBUILDER conform PATRAN mesh file .ptr
 
 More to come...
-<img src="capture_png1.png" hspace="20" vspace="6" width="600">
+<img src="\img\bugless_meshing.png" hspace="20" vspace="6" width="600">
 
 ## Resources
 * [PythonOCC](http://www.pythonocc.org/)
@@ -26,48 +26,11 @@ More to come...
 * Wiki
 
 ## Installing
-
-a python distribution is needed best use Anaconda 
-Anaconda pythonocc-core,
-install pythonocc-utils
-install shapely
+1. A python 2.7 distribution is needed. It is recommended to use use Anaconda for easier package management https://www.anaconda.com/download/
+2. Anaconda pythonocc-core,`d3`
+3. install pythonocc-utils
+4  install shapely
 
 ```html
 <script src="https://d3js.org/d3.v4.js"></script>
-```
-
-For the minified version:
-
-```html
-<script src="https://d3js.org/d3.v4.min.js"></script>
-```
-
-You can also use the standalone D3 microlibraries. For example, [d3-selection](https://github.com/d3/d3-selection):
-
-```html
-<script src="https://d3js.org/d3-selection.v1.js"></script>
-```
-
-D3 is written using [ES2015 modules](http://www.2ality.com/2014/09/es6-modules-final.html). Create a [custom bundle using Rollup](http://bl.ocks.org/mbostock/bb09af4c39c79cffcde4), Webpack, or your preferred bundler. To import D3 into an ES2015 application, either import specific symbols from specific D3 modules:
-
-```js
-import {scaleLinear} from "d3-scale";
-```
-
-Or import everything into a namespace (here, `d3`):
-
-```js
-import * as d3 from "d3";
-```
-
-In Node:
-
-```js
-var d3 = require("d3");
-```
-
-You can also require individual modules and combine them into a `d3` object using [Object.assign](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign):
-
-```js
-var d3 = Object.assign({}, require("d3-format"), require("d3-geo"), require("d3-geo-projection"));
 ```

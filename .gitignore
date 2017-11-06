@@ -11,7 +11,6 @@
 *.py.out
 
 #ignored folders
-img/
 bugreport/
 publication/
 docs/
