@@ -20,17 +20,50 @@ More to come...
 
 * [OpenCascadeTechnology Documentation](https://www.opencascade.com/doc/occt-6.9.1/refman/html/index.html)
 * [PythonOCC API Documentation](http://api.pythonocc.org/)
+* [PythonOCC API Documentation](http://api.pythonocc.org/)
 
-* Gallery
-* Examples
-* Wiki
+
+
 
 ## Installing
 1. A python 2.7 distribution is needed. It is recommended to use use Anaconda for easier package management https://www.anaconda.com/download/
-2. Anaconda pythonocc-core,`d3`
-3. install pythonocc-utils
-4  install shapely
+2. You can install precompiled binaries for MacOSX/Linux/Windows 32 or 64 thanks to the amazing conda package management system. Simply run:
+```
+conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.18
+```
+
+run the following commands to acquire the remaining packages for SONATA:
+- Install with pip install *.whl
+
+pip install Shapely-1.5.17-cp27-cp27m-win_amd64.whl
+pip install triangle-20170106-cp27-cp27m-win_amd64.whl
+pip install intervaltree
+pip install openmdao
+
+
+
+3. install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
+.* Windows: Install the precompiled binaries from the /package directory by running the following command: 
+	```pip install Shapely-1.5.17-cp27-cp27m-win_amd64.whl``` 
+.* Linux: TBD
+
+3. install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
+.* Windows: Install the precompiled binaries from the /package directory by running the following command: 
+	```pip install triangle-20170106-cp27-cp27m-win_amd64.whl```
+.* Linux: TBD
+
+4. install the **openmdao** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
+.* Windows: Install the precompiled binaries from the /package directory by running the following command: 
+	```pip install triangle-20170106-cp27-cp27m-win_amd64.whl```
+.* Linux: TBD
+
 
 ```html
 <script src="https://d3js.org/d3.v4.js"></script>
 ```
+
+
+import OCC
+import intervaltree 
+import shapely
+import openmdao
