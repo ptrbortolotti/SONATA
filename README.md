@@ -32,29 +32,36 @@ More to come...
 
 3. Install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
+		
 		```html
 		pip install packages/Shapely-1.5.17-cp27-cp27m-win_amd64.whl
 		``` 
+		
 	* __Linux__: TBD
 
 3. Install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
 	* __Windows__: Install the precompiled binaries from the /packages directory by running the following command: 
+		
 		```html
 		pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl
 		```
+		
 	* __Linux__: TBD
 
 4. Install the **openmdao** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
+		
 		```html
 		pip install openmdao
 		```
+		
 	* __Linux__: TBD
 
 5. Install the **intervaltree** package.
 
 6. Test the installation and all packages by excecuting the folloging python script:
-	```html
+	
+	```python
 	python test_install.py
 	```
 
