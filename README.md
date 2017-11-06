@@ -34,17 +34,14 @@ More to come...
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
 		
 		```html
-		pip install packages/Shapely-1.5.17-cp27-cp27m-win_amd64.whl
-		``` 
-		
+		pip install packages/Shapely-1.5.17-cp27-cp27m-win_amd64.whl``` 
 	* __Linux__: TBD
 
 3. Install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
 	* __Windows__: Install the precompiled binaries from the /packages directory by running the following command: 
 		
 		```html
-		pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl
-		```
+		pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl	```
 		
 	* __Linux__: TBD
 
@@ -52,25 +49,23 @@ More to come...
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
 		
 		```html
-		pip install openmdao
-		```
+		pip install openmdao```
 		
 	* __Linux__: TBD
 
-5. Install the **intervaltree** package.
+5. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
+	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
+		
+		```html
+		pip install intervaltree```
+		
+	* __Linux__: TBD
+
 
 6. Test the installation and all packages by excecuting the folloging python script:
 	
 	```python
-	python test_install.py
-	```
-
-```html
-<script src="https://d3js.org/d3.v4.js"></script>
-```
+	python test_install.py```
 
 
-import OCC
-import intervaltree 
-import shapely
-import openmdao
+## Example
