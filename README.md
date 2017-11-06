@@ -34,14 +34,15 @@ More to come...
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
 		
 		```html
-		pip install packages/Shapely-1.5.17-cp27-cp27m-win_amd64.whl``` 
+		pip install packages/Shapely-1.5.17-cp27-cp27m-win_amd64.whl
+		
 	* __Linux__: TBD
 
 3. Install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
 	* __Windows__: Install the precompiled binaries from the /packages directory by running the following command: 
 		
 		```html
-		pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl	```
+		pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl
 		
 	* __Linux__: TBD
 
@@ -49,7 +50,7 @@ More to come...
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
 		
 		```html
-		pip install openmdao```
+		pip install openmdao
 		
 	* __Linux__: TBD
 
@@ -57,7 +58,7 @@ More to come...
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
 		
 		```html
-		pip install intervaltree```
+		pip install intervaltree
 		
 	* __Linux__: TBD
 
