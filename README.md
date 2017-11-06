@@ -24,36 +24,39 @@ More to come...
 
 ## Installation
 1. A python 2.7 distribution is needed. It is recommended to use use Anaconda for easier package management https://www.anaconda.com/download/
-2. You can install precompiled binaries for MacOSX/Linux/Windows 32 or 64 thanks to the amazing conda package management system. Simply run:
+2. Install the **pythonocc** precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. Simply run:
 
 	```html
 	conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.18
 	```
 
-3. install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
-	* Windows: Install the precompiled binaries from the /package directory by running the following command: 
-	```html
-	pip install Shapely-1.5.17-cp27-cp27m-win_amd64.whl
-	``` 
-	* Linux: TBD
+3. Install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
+	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
+		```html
+		pip install packages/Shapely-1.5.17-cp27-cp27m-win_amd64.whl
+		``` 
+	* __Linux__: TBD
 
-3. install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
-	* Windows: Install the precompiled binaries from the /package directory by running the following command: 
+3. Install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
+	* __Windows__: Install the precompiled binaries from the /packages directory by running the following command: 
+		```html
+		pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl
+		```
+	* __Linux__: TBD
+
+4. Install the **openmdao** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
+	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
+		```html
+		pip install openmdao
+		```
+	* __Linux__: TBD
+
+5. Install the **intervaltree** package.
+
+6. Test the installation and all packages by excecuting the folloging python script:
 	```html
-	pip install triangle-20170106-cp27-cp27m-win_amd64.whl
+	python test_install.py
 	```
-	* Linux: TBD
-
-4. install the **openmdao** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
-	* Windows: Install the precompiled binaries from the /package directory by running the following command: 
-	```html
-	pip install openmdao
-	```
-	* Linux: TBD
-
-5. install the **intervaltree** package.
-
-
 
 ```html
 <script src="https://d3js.org/d3.v4.js"></script>
