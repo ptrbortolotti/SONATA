@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 """
+Functionalities concerning the consolidation between the individual meshes in 
+the different segments. Segments>0 are seperated by a web and meshed individually. 
+The web is defining the interface between the segemnts. The functions in this 
+module make sure that the nodes of both segments are matched and hanging nodes 
+are eliminated by splitting cells.
+
 Created on Thu Nov 02 10:46:29 2017
 @author: TPflumm
 """
@@ -100,12 +106,7 @@ def split_cells_to_consolidate(mesh,rem_nodes,display):
             
     Returns: 
         mesh: the updated mesh formulation (list of cells)
-        
-    TODO: Determine edge of cell on which the hanging node is and split cells 
-          accordingly.
-    TODO: Split cells according to edg_idx. edg_idx is the index of the edge of
-             the cell, where the new node rn is on
-                
+                        
     '''
     for rn in rem_nodes:
         #mark all cells that are very close to the node but do not contain it! 
@@ -147,6 +148,4 @@ def split_cells_to_consolidate(mesh,rem_nodes,display):
                     newcell.MatID = c.MatID
                     mesh.append(newcell)                 
             
-    return mesh             
-
-    
+    return mesh
