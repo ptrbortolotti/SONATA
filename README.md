@@ -4,7 +4,7 @@
 SONATA is written in python and is using for a lot of operations the Opencascade (CAD) kernel with its python wrapper (pythonocc). 
 
 
-#SONATA helps the engineer to parameterize a closed composite rotor blade crossection with multiple spars. It is specifically designed to be suited for helicopter rotor blade crossections of the blade aerodynamic section and elastic blade root. SONATA combines visualization and 2D-Finite Element discretisation of the crossection. 
+SONATA helps the engineer to parameterize a closed composite rotor blade crossection with multiple spars. It is specifically designed to be suited for helicopter rotor blade crossections of the blade aerodynamic section and elastic blade root. SONATA combines visualization and 2D-Finite Element discretisation of the crossection. 
 
 The first part of the software contains a parametric topology generator 
 The topology is saved as a .pkl and can be reloaded
@@ -25,29 +25,31 @@ More to come...
 ## Installation
 1. A python 2.7 distribution is needed. It is recommended to use use Anaconda for easier package management https://www.anaconda.com/download/
 2. Install the **pythonocc** precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. Simply run:
-	```	conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.18	```
+	
+    ```	conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.18	```
 
 3. Install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
-		```pip install packages/Shapely-1.5.17-cp27-cp27m-win_amd64.whl```
 		
-	* __Linux__: TBD
+        ```pip install packages/Shapely-1.5.17-cp27-cp27m-win_amd64.whl```
+	* Linux: ```pip install shapely```-
 
 3. Install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
 	* __Windows__: Install the precompiled binaries from the /packages directory by running the following command: 
-		```pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl```
 		
+        ```pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl```
 	* __Linux__: TBD
 
 4. Install the **openmdao** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command:
-		```	pip install openmdao```
+		
+        ```	pip install openmdao```
 	* __Linux__: TBD
 
 5. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
-		```pip install intervaltree```
 		
+        ```pip install intervaltree```
 	* __Linux__: TBD
 
 
