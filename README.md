@@ -29,34 +29,36 @@ More to come...
 	
     ```	conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.18	```
 
-3. Install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
+4. Install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
 		
         ```pip install packages/Shapely-1.5.17-cp27-cp27m-win_amd64.whl```
 	* Linux: ```pip install shapely```
 
-3. Install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
+5. Install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
 	* __Windows__: Install the precompiled binaries from the /packages directory by running the following command: 
 		
         ```pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl```
 	* __Linux__: ```easy_install triangle```
 
-4. Install the **openmdao** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
+6. Install the **openmdao** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command:
 		
         ```	pip install openmdao```
 	* __Linux__: ```pip install openmdao```
 
-5. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
+7. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
 		
         ```pip install intervaltree```
 	* __Linux__: ```pip install intervaltree```
 
 
-6. Test the installation and all packages by excecuting the folloging python script:
+8. Test the installation and all packages by excecuting the folloging python script:
 	```	python test_install.py```
 
+9. Now you can download or clone the repository and execute the main SONATA script. 
+	```	python SONATA.py```
 
 ## Introduction:
 
