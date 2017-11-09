@@ -24,7 +24,8 @@ More to come...
 
 ## Installation
 1. A python 2.7 distribution is needed. It is recommended to use use Anaconda for easier package management https://www.anaconda.com/download/
-2. Install the **pythonocc** precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. Simply run:
+2. Install the **pythonocc** precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. 
+3. Simply run the following commands in the terminal (for Windows users: execute the cmd command terminal)
 	
     ```	conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.18	```
 
@@ -38,19 +39,19 @@ More to come...
 	* __Windows__: Install the precompiled binaries from the /packages directory by running the following command: 
 		
         ```pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl```
-	* __Linux__: TBD
+	* __Linux__: ```easy_install triangle```
 
 4. Install the **openmdao** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command:
 		
         ```	pip install openmdao```
-	* __Linux__: TBD
+	* __Linux__: ```pip install openmdao```
 
 5. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
 		
         ```pip install intervaltree```
-	* __Linux__: TBD
+	* __Linux__: ```pip install intervaltree```
 
 
 6. Test the installation and all packages by excecuting the folloging python script:
