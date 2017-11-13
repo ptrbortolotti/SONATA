@@ -191,6 +191,8 @@ class Segment(object):
        
 
 def generate_SegmentLst(Configuration):
+    
+    
     #generate Segment Lst
     SegmentLst = []   #List of Segment Objects
     for i,item in enumerate(Configuration.SEG_ID):

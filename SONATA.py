@@ -1,28 +1,56 @@
 # -*- coding: utf-8 -*-
 """
-This is currently the main excecution file for SONATA.
+This is currently the main excecution script for SONATA.
 Because it is currently still under extensive development the code isn't as 
-clean as it could be.
+clean as it could be but allows easy debugging,printing and 3D displaying.
 
+SONATA is a preprocessor for parametric analysis and design of composite beam 
+cross-sections in a multidisciplinary rotor design environment. A helicopter 
+rotor blade represents a classical aeroelastic problem, where the aerodynamic 
+behavior, the structural elasticity and vibrational dynamics have to be studied 
+simultaneously.  While a geometric definition of a rotorblade with CAD tools is 
+simple, the transfer to a meshed cross-sectional representation may prohibit 
+automated design optimization. Consequently, most researches have developed 
+individual parametric mesh generators for the cross-sectional analysis, that 
+reduces their structural model to few design variables in the process. 
+SONATA represents such a preprocessor. SONATA is written in python and is using
+for a lot of operations the Opencascade (CAD) kernel with its python wrapper 
+(pythonocc).
 
+Because it is currently still under extensive development the code isn't as 
+clean as it could be but allows easy debugging, printing and 3D displaying. In 
+the future, the SONATA execution script shall inlude an openmdao structure 
+which can call the then unlying functionalities. 
 
+#def SONATA_CBM(Configuration,Flags,)
+    ''' This function includes the SONATA Dicipline Module for Structural 
+    Composite Beam Modelling (CBM).
+        Design Variables are passed in form of the Configuration file. 
+        
+        NOTE: For computational efficiency it is sometimes not suitable to 
+        recalculate the topology or the crosssection every iteration,
+              -maybe design flags to account for that.
+        
+        return: BeamProperties(allready inlcude Postprocessed parameters such 
+        as Failure Critirion and Safety Margin...)
+        '''
 
-
+Created on Thu Nov 02 14:36:29 2017
 @author: TPflumm
 """
+
 #Basic PYTHON Modules:
 import numpy as np       
 import pickle
 import sys
 import math
 import subprocess
+import itertools
 import matplotlib.pyplot as plt
 from functools import partial
 from datetime import datetime
-import itertools
-import toolz
 
-#PythonOCC Libraries
+#PythonOCC Modules
 from OCC.Display.SimpleGui import init_display
 from OCC.gp import gp_Vec2d
 
@@ -75,17 +103,7 @@ startTime = datetime.now()
 print "STATUS:\t Reading Crossection Configuration File"
 Configuration = section_config(filename)
 MaterialLst = read_material_input(Configuration.SETUP_mat_filename)
-
-##def SONATA_CBM(Configuration,Flags,)
-#    ''' This function includes the SONATA Dicipline Module for Structural Composite Beam Modelling (CBM).
-#        Design Variables are passed in form of the Configuration file. 
-#        
-#        NOTE: For computational efficiency it is sometimes not suitable to recalculate the topology or the crosssection every iteration,
-#              -maybe design flags to account for that.
-#        
-#        return: BeamProperties(allready inlcude Postprocessed parameters such as Failure Critirion and Safety Margin...)
-#        '''
-     
+    
 #===========DISPLAY CONFIG:===============
 if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
     display, start_display, add_menu, add_function_to_menu = init_display()
@@ -352,7 +370,6 @@ if FLAG_VABS:
         #ASSIGN Displacement U to nodes:
         for i,n in enumerate(nodes):
             n.displacement = BeamProperties.U[i][3:6]
-            
 
 
 ##%%============================================================================ 
