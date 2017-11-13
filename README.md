@@ -25,9 +25,7 @@ More to come...
 
 ## Installation
 1. A python 2.7 distribution is needed. It is recommended to use use Anaconda for easier package management https://www.anaconda.com/download/
-2. Install the **pythonocc** precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. 
-3. Simply run the following commands in the terminal (for Windows users: execute the cmd command terminal)
-	
+2. Install the **pythonocc** precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. Simply run the following commands in the terminal (for Windows users: execute the cmd command terminal):
     ```	conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.18	```
 
 4. Install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
