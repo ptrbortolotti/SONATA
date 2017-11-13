@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-THIS IS THE MAIN SONATA EXECUTION FILE!
+This is currently the main excecution file for SONATA.
+Because it is currently still under extensive development the code isn't as 
+clean as it could be.
+
+
+
+
+
 @author: TPflumm
 """
 #Basic PYTHON Modules:
@@ -17,8 +24,6 @@ import toolz
 
 #PythonOCC Libraries
 from OCC.Display.SimpleGui import init_display
-from OCC.STEPControl import STEPControl_Writer, STEPControl_AsIs, STEPControl_GeometricCurveSet
-from OCC.Interface import Interface_Static_SetCVal
 from OCC.gp import gp_Vec2d
 
 #SONATA modules:
@@ -377,8 +382,6 @@ if FLAG_VABS:
 #ax.set_ylabel('Change of Stiffness Matrix Entry in percent')
 
 
-
-
 #====================2D: MATPLOTLIB-DISPLAY======================
 if FLAG_SHOW_2D_MESH:   
     plot_cells(mesh, nodes, 'MatID')
@@ -438,21 +441,10 @@ if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
        
         else:
             display_SONATA_SegmentLst(display,SegmentLst)
-        
-        
+             
     if FLAG_SHOW_3D_MESH:        
         for c in mesh:
-            display.DisplayColoredShape(c.wire, 'BLACK')
-            
-#        for i,a in enumerate(nodes):
-#            if a.corner == True:
-#                #display.DisplayShape(a.Pnt,color='WHITE')  
-#                #string = str(a.id)+' (cornerstyle='+str(a.cornerstyle)+', regular_corner='+str(a.regular_corner)+')'
-#                #display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
-#                    
-#            else: 
-#                display.DisplayShape(a.Pnt,color='WHITE')  
-#                display.DisplayMessage(a.Pnt,str(a.id))
+            display.DisplayColoredShape(c.wire, 'BLACK')    
   
     display.View_Top()
     display.FitAll()

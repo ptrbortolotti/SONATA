@@ -9,10 +9,12 @@
 *.aux
 *.log
 *.py.out
+*.stp
 
 #ignored folders
 img/
 bugreport/
 publication/
-docs/
+docs/source/
+docs/build/
 SONATA/sectionbuilder/PatranMesh_example/
