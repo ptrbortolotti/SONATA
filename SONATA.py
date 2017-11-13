@@ -21,12 +21,12 @@ from OCC.STEPControl import STEPControl_Writer, STEPControl_AsIs, STEPControl_Ge
 from OCC.Interface import Interface_Static_SetCVal
 from OCC.gp import gp_Vec2d
 
-
 #SONATA modules:
 from SONATA.fileIO.readinput import section_config, read_material_input,str2bool
-from SONATA.fileIO.CADinput import import_2d_stp, import_3d_stp, load_3D#
+from SONATA.fileIO.CADinput import import_2d_stp, import_3d_stp, load_3D
+from SONATA.fileIO.CADoutput import export_to_step
  
-from SONATA.topo.segment import Segment
+from SONATA.topo.segment import Segment, generate_SegmentLst
 from SONATA.topo.web import Web
 from SONATA.topo.weight import Weight
 from SONATA.topo.utils import  getID                 
@@ -52,86 +52,54 @@ from SONATA.display.display_utils import export_to_JPEG, export_to_PNG, export_t
 #%%#############################################################################
 #                           M    A    I    N                                  #
 ###############################################################################
-
 plt.close('all')
 
 #filename = str(sys.argv[1])#           #to run SONATA from command       
 filename = 'sec_config.input'
 
 FLAG_TOPO = True
-FLAG_MESH = True
-FLAG_VABS = True
-FLAG_SHOW_2D_MESH = True
-FLAG_SHOW_3D_MESH = True
+FLAG_MESH = False
+FLAG_VABS = False
 FLAG_SHOW_3D_TOPO = True
+FLAG_SHOW_2D_MESH = False
+FLAG_SHOW_3D_MESH = False
+FLAG_EXPORT_STEP = False
 
 startTime = datetime.now()
-
 #=========READ INPUT:===============
 print "STATUS:\t Reading Crossection Configuration File"
 Configuration = section_config(filename)
 MaterialLst = read_material_input(Configuration.SETUP_mat_filename)
 
-    
+##def SONATA_CBM(Configuration,Flags,)
+#    ''' This function includes the SONATA Dicipline Module for Structural Composite Beam Modelling (CBM).
+#        Design Variables are passed in form of the Configuration file. 
+#        
+#        NOTE: For computational efficiency it is sometimes not suitable to recalculate the topology or the crosssection every iteration,
+#              -maybe design flags to account for that.
+#        
+#        return: BeamProperties(allready inlcude Postprocessed parameters such as Failure Critirion and Safety Margin...)
+#        '''
+     
 #===========DISPLAY CONFIG:===============
 if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
     display, start_display, add_menu, add_function_to_menu = init_display()
     display.Context.SetDeviationAngle(1e-6)       # 0.001 default. Be careful to scale it to the problem.
     display.Context.SetDeviationCoefficient(1e-6) # 0.001 default. Be careful to scale it to the problem. 
 
-
-#def SONATA_CBM(Configuration,Flags,)
-    ''' This function includes the SONATA Dicipline Module for Structural Composite Beam Modelling (CBM).
-        Design Variables are passed in form of the Configuration file. 
-        
-        NOTE: For computational efficiency it is sometimes not suitable to recalculate the topology or the crosssection every iteration,
-              -maybe design flags to account for that.
-        
-        return: BeamProperties(allready inlcude Postprocessed parameters such as Failure Critirion and Safety Margin...)
-        '''
-     
-
 #%%============================================================================ 
 #               TOPOLOGY AND GEOMETRY:
 #=============================================================================           
 if FLAG_TOPO:
-    SegmentLst = []   #List of Segment Objects
-    for i,item in enumerate(Configuration.SEG_ID):
-        if item == 0:        
-            if Configuration.SETUP_input_type == 0:   #0) Airfoil from UIUC Database  --- naca23012
-                SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], scale_factor = Configuration.SETUP_scale_factor, Theta = Configuration.SETUP_Theta, OCC=False, airfoil = Configuration.SETUP_datasource))
-            
-            elif Configuration.SETUP_input_type == 1: #1) Geometry from .dat file --- AREA_R250.dat
-                SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], scale_factor = Configuration.SETUP_scale_factor,  Theta = Configuration.SETUP_Theta, OCC=False, filename = Configuration.SETUP_datasource))
-            
-            elif Configuration.SETUP_input_type == 2: #2)2d .step or .iges  --- AREA_R230.stp
-                BSplineLst = import_2d_stp(Configuration.SETUP_datasource, Configuration.SETUP_scale_factor,Configuration.SETUP_Theta)
-                SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], Theta = Configuration.SETUP_Theta, OCC=True, Boundary = BSplineLst))
-            
-            elif Configuration.SETUP_input_type == 3: #3)3D .step or .iges and radial station of crosssection --- AREA_Blade.stp, R=250
-                BSplineLst = import_3d_stp(Configuration.SETUP_datasource,Configuration.SETUP_radial_station,Configuration.SETUP_scale_factor,Configuration.SETUP_Theta)
-                SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], Theta = Configuration.SETUP_Theta, OCC=True, Boundary = BSplineLst))  
-    
-            elif Configuration.SETUP_input_type == 4: #4)generate 3D-Shape from twist,taper,1/4-line and airfoils, --- examples/UH-60A, R=4089, theta is given from twist distribution
-                genblade = Blade(Configuration.SETUP_datasource,Configuration.SETUP_datasource,False,False)
-                BSplineLst = genblade.get_crosssection(Configuration.SETUP_radial_station,Configuration.SETUP_scale_factor)
-                SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], Theta = genblade.get_Theta(Configuration.SETUP_radial_station), OCC=True, Boundary = BSplineLst))  
-                
-            else:
-                print 'ERROR:\t WRONG input_type'
-     
-        else:
-            SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i],Theta = Configuration.SETUP_Theta))
-    sorted(SegmentLst, key=getID)  
-    
-    #====================Build SEGMENT 0:========================================
+    #Generate SegmentLst from Configuration:
+    SegmentLst = generate_SegmentLst(Configuration)
+    #Build Segment 0:
     SegmentLst[0].build_wire()
     SegmentLst[0].build_layers()
-    SegmentLst[0].determine_final_boundary()    #Determine Boundary from Segment 0:
-        
-    #==================== Build Webs:============================================
-    #TODO: CHECK IF WEB DEFINITION INTERSECT EACH OTHER
-    #TODO: SORT WEBS BY POS1 VALUES:
+    SegmentLst[0].determine_final_boundary()        
+    #Build Webs:
+        #TODO: CHECK IF WEB DEFINITION INTERSECT EACH OTHER
+        #TODO: SORT WEBS BY POS1 VALUES:
     WebLst = []
     if Configuration.SETUP_NbOfWebs > 0:
         for i in range(0,Configuration.SETUP_NbOfWebs):
@@ -139,26 +107,23 @@ if FLAG_TOPO:
             WebLst.append(Web(Configuration.WEB_ID[i],Configuration.WEB_Pos1[i],Configuration.WEB_Pos2[i],SegmentLst[0].BSplineLst, SegmentLst[0].final_Boundary_BSplineLst))
         sorted(SegmentLst, key=getID)  
         
-    #======================Build remaining SEGMENTS =============================
+    #Build remaining Segments:
     if Configuration.SETUP_NbOfWebs > 0:
         for i,seg in enumerate(SegmentLst[1:],start=1):
             seg.build_segment_boundary_from_WebLst(WebLst,SegmentLst[0].final_Boundary_BSplineLst)
             seg.build_layers()
     
-    
-    #======================Balance Weight========================================
+    #Balance Weight:
     if Configuration.SETUP_BalanceWeight == True:
         print 'STATUS:\t Building Balance Weight'   
         BW = Weight(0,Configuration.BW_XPos,Configuration.BW_YPos,Configuration.BW_Diameter,Configuration.BW_MatID)
 
     #====================STEP-EXPORT=============================================
-    #step_writer = STEPControl_Writer()  # initialize the STEP exporte
-    #Interface_Static_SetCVal("write.step.schema", "AP203")
-    #step_writer.Transfer(SegmentLst[0].wire, STEPControl_AsIs)
-    #step_writer.Transfer(layer.wire, STEPControl_AsIs)
-    #step_writer.Transfer(BW.Curve, STEPControl_AsIs)      
-    #status = step_writer.Write("SONATA.stp")    
-    #assert(status == IFSelect_RetDone)
+    if FLAG_EXPORT_STEP:
+        exportLst = [SegmentLst[0].wire]
+        export_filename = filename.replace('.input', '.stp')
+        print 'STATUS:\t Exporting Topology to: ', filename   
+        export_to_step(exportLst,"SONATA.stp")
     
     #=====================PICKLE TOPOLOGY:======================================
     output_filename = filename.replace('.input', '.pkl')
@@ -180,22 +145,12 @@ else:
 #%%============================================================================ 
 #                           M E S H
 #==============================================================================
-
-
-
-if FLAG_MESH:
-     
-#    display2, start_display, add_menu, add_function_to_menu = init_display('wx')
-#    display2.Context.SetDeviationAngle(1e-6)       # 0.001 default. Be careful to scale it to the problem.
-#    display2.Context.SetDeviationCoefficient(1e-6) # 0.001 default. Be careful to scale it to the problem. 
-        
+if FLAG_MESH: 
+    #meshing parameters:  
     Resolution = Configuration.SETUP_mesh_resolution # Nb of Points on Segment0
     length = get_BSplineLst_length(SegmentLst[0].BSplineLst)
     global_minLen = round(length/Resolution,5)
-    
-    mesh = []
-    
-    #===meshing parameters===============================
+       
     proj_tol_1 = 5e-2
     proj_tol_2 = 5e-2
     non_dct_factor = 2.6
@@ -207,6 +162,7 @@ if FLAG_MESH:
     core_cell_area = 0.8*global_minLen**2
     web_consolidate_tol = 0.5*global_minLen
     
+    mesh = []
     #===================MESH SEGMENT===============================================
     disco_nodes = []
     for j,seg in enumerate(reversed(SegmentLst)):
@@ -332,7 +288,7 @@ else:
     mesh,nodes = sort_and_reassignID(mesh)
       
     #====================REVIEW==================================================
-    print 'STATUS: MESH LOADED:'
+    print 'STATUS:\t MESH LOADED:'
     print '\t   - from file: %s' % input_filename 
     print '\t   - Total Number of Cells: %s' %(len(mesh))
     minarea = min([c.area for c in mesh])
@@ -425,15 +381,15 @@ if FLAG_VABS:
 
 #====================2D: MATPLOTLIB-DISPLAY======================
 if FLAG_SHOW_2D_MESH:   
-    plot_cells(mesh, nodes, 'MatID', BeamProperties, )
+    plot_cells(mesh, nodes, 'MatID')
     
     #plt.savefig('SONATA_MESH.pdf', dpi=900, facecolor='w', edgecolor='w',
     #    orientation='landscape', papertype='a4', format='pdf')
 
-#    from matplotlib2tikz import save as tikz_save
+#   from matplotlib2tikz import save as tikz_save
 #   folder = 'publication/preprocessor_paper/img/'
 #   tikz_filename = folder + filename.replace('.input', '.tex')
-#    tikz_save(tikz_filename, figureheight = '\\figureheight', figurewidth = '\\figurewidth' )    
+#   tikz_save(tikz_filename, figureheight = '\\figureheight', figurewidth = '\\figurewidth' )    
 #    
 #    import os  
 #    os.system("img/lualatex minimal_latex.tex")
@@ -476,6 +432,7 @@ if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
             display.Context.SetDeviationAngle(1e-5)       # 0.001 default. Be careful to scale it to the problem, or else it will crash :) 
             display.Context.SetDeviationCoefficient(1e-5) 
             
+            genblade = Blade(Configuration.SETUP_datasource,Configuration.SETUP_datasource,False,False)
             display_SONATA_SegmentLst(display,SegmentLst,Configuration.SETUP_radial_station,-math.pi/2,-math.pi/2) 
             display.DisplayShape(genblade.surface,color=None, transparency=0.7, update=True)
        

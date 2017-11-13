@@ -6,13 +6,17 @@ from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
 from OCC.gp import gp_Pnt, gp_Pnt2d, gp_Pln, gp_Dir, gp_Vec
 
 
+from SONATA.fileIO.readinput import UIUCAirfoil2d, AirfoilDat2d
+from SONATA.bladegen.blade import Blade
+from SONATA.fileIO.CADinput import import_2d_stp, import_3d_stp
+
+from SONATA.topo.utils import  getID  
 from SONATA.topo.utils import  calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, point2d_list_to_TColgp_Array1OfPnt2d
 from SONATA.topo.BSplineLst_utils import get_BSpline_length, get_BSplineLst_length, \
                             find_BSplineLst_coordinate, get_BSplineLst_Pnt2d, \
                             trim_BSplineLst, seg_boundary_from_dct, set_BSplineLst_to_Origin, \
                             copy_BSplineLst, trim_BSplineLst_by_Pnt2d
 from SONATA.topo.wire_utils import trim_wire, build_wire_from_BSplineLst
-from SONATA.fileIO.readinput import UIUCAirfoil2d, AirfoilDat2d
 from SONATA.topo.projection import layup_to_projection
 from SONATA.topo.layer import Layer
 from SONATA.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
@@ -184,4 +188,36 @@ class Segment(object):
             Boundary_BSplineLst = set_BSplineLst_to_Origin(Boundary_BSplineLst)
             self.BSplineLst = Boundary_BSplineLst
             self.build_wire()
-        
+       
+
+def generate_SegmentLst(Configuration):
+    #generate Segment Lst
+    SegmentLst = []   #List of Segment Objects
+    for i,item in enumerate(Configuration.SEG_ID):
+        if item == 0:        
+            if Configuration.SETUP_input_type == 0:   #0) Airfoil from UIUC Database  --- naca23012
+                SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], scale_factor = Configuration.SETUP_scale_factor, Theta = Configuration.SETUP_Theta, OCC=False, airfoil = Configuration.SETUP_datasource))
+            
+            elif Configuration.SETUP_input_type == 1: #1) Geometry from .dat file --- AREA_R250.dat
+                SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], scale_factor = Configuration.SETUP_scale_factor,  Theta = Configuration.SETUP_Theta, OCC=False, filename = Configuration.SETUP_datasource))
+            
+            elif Configuration.SETUP_input_type == 2: #2)2d .step or .iges  --- AREA_R230.stp
+                BSplineLst = import_2d_stp(Configuration.SETUP_datasource, Configuration.SETUP_scale_factor,Configuration.SETUP_Theta)
+                SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], Theta = Configuration.SETUP_Theta, OCC=True, Boundary = BSplineLst))
+            
+            elif Configuration.SETUP_input_type == 3: #3)3D .step or .iges and radial station of crosssection --- AREA_Blade.stp, R=250
+                BSplineLst = import_3d_stp(Configuration.SETUP_datasource,Configuration.SETUP_radial_station,Configuration.SETUP_scale_factor,Configuration.SETUP_Theta)
+                SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], Theta = Configuration.SETUP_Theta, OCC=True, Boundary = BSplineLst))  
+    
+            elif Configuration.SETUP_input_type == 4: #4)generate 3D-Shape from twist,taper,1/4-line and airfoils, --- examples/UH-60A, R=4089, theta is given from twist distribution
+                genblade = Blade(Configuration.SETUP_datasource,Configuration.SETUP_datasource,False,False)
+                BSplineLst = genblade.get_crosssection(Configuration.SETUP_radial_station,Configuration.SETUP_scale_factor)
+                SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], Theta = genblade.get_Theta(Configuration.SETUP_radial_station), OCC=True, Boundary = BSplineLst))  
+                
+            else:
+                print 'ERROR:\t WRONG input_type'
+     
+        else:
+            SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i],Theta = Configuration.SETUP_Theta))
+    sorted(SegmentLst, key=getID)  
+    return SegmentLst
