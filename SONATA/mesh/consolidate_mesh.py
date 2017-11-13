@@ -114,8 +114,8 @@ def split_cells_to_consolidate(mesh,rem_nodes,display):
             #identify cells that are beeing intersected by the hanging node!  
             if c.cell_node_distance(rn) < 1e-4 and (rn not in c.nodes):
                 #calculate the minimun distance between the wire and the node.Pnt2d
-                display_custome_shape(display,c.wire,2.0, 0.0, [1,1,0]) #Yellow
-                display.DisplayShape(rn.Pnt2d, color="YELLOW")   
+                #display_custome_shape(display,c.wire,2.0, 0.0, [1,1,0]) #Yellow
+                #display.DisplayShape(rn.Pnt2d, color="YELLOW")   
                 edg_idx = c.closest_cell_edge(rn)     
                 #print rn, c, edg_idx 
                 
