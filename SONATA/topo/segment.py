@@ -17,7 +17,7 @@ from SONATA.topo.BSplineLst_utils import get_BSpline_length, get_BSplineLst_leng
                             trim_BSplineLst, seg_boundary_from_dct, set_BSplineLst_to_Origin, \
                             copy_BSplineLst, trim_BSplineLst_by_Pnt2d
 from SONATA.topo.wire_utils import trim_wire, build_wire_from_BSplineLst
-from SONATA.topo.projection import layup_to_projection
+from SONATA.topo.projection import cummulated_layup_boundaries
 from SONATA.topo.layer import Layer
 from SONATA.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
 
@@ -53,7 +53,7 @@ class Segment(object):
                 BSplineLst_tmp = self.BSplineLst_from_file(kwargs.get('filename'),30,self.scale_factor)  
             self.BSplineLst = set_BSplineLst_to_Origin(BSplineLst_tmp)
 
-        self.Projection = layup_to_projection(self.Layup)
+        self.Projection = cummulated_layup_boundaries(self.Layup)
     
     def __repr__(self):
         return '{}: {}'.format(self.__class__.__name__,self.ID) 
@@ -77,10 +77,24 @@ class Segment(object):
         for i in range(1,len(self.Layup)+1):
             print "STATUS:\t Building Segment %d, Layer: %d" % (self.ID,i)
             new_Boundary_BSplineLst = []
+            #print self.Projection[i-1]
+            #================new version under development... that works with the self.Projection!============
+            relevant_projection = []
+            for item in self.Projection[i-1]:
+                if item[0]<self.Layup[i-1][0]:
+                    relevant_projection.append(item)
+                #select only layers that have an effect of the new layer:
+            #print '\t\tLayer:',i, 'is defined from:',self.Layup[i-1][0],'-', self.Layup[i-1][1]
+            #print '\t\tLayer:',i, 'originiates on this relevant interval:',relevant_projection
+            
+            
+            
+            
+            #================old version-does not work with the Projection!============
             #get_boundary_layer
             if i == 1:
                 new_Boundary_BSplineLst = self.BSplineLst
-            
+                
             else:
                 new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, 0, self.LayerLst[-1].S1, 0, 1)  #start und ende der lage
                 new_Boundary_BSplineLst += copy_BSplineLst(self.LayerLst[-1].BSplineLst)

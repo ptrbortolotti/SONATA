@@ -32,10 +32,6 @@ def corners_of_BSplineLst(BSplineLst):
     return corners #gp_Pnt2d Lst
     
 
-
-
-
-
 def ProjectPointOnBSplineLst(BSplineLst,Pnt2d,tolerance_distance=100):
     p2 = []
     for idx,item in enumerate(BSplineLst):

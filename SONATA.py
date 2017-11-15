@@ -92,7 +92,7 @@ filename = 'sec_config.input'
 
 FLAG_TOPO = True
 FLAG_MESH = False
-FLAG_VABS = False
+FLAG_VABS = True
 FLAG_SHOW_3D_TOPO = True
 FLAG_SHOW_2D_MESH = False
 FLAG_SHOW_3D_MESH = False
