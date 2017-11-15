@@ -66,6 +66,7 @@ def datafunc2(interval,islower=None):
        
 #=====================================================
 def projection_of_layers2(layup,begin,end,idx):
+    '''Truthfully, I currently don'tknow the exact itend of this funtion.'''
     if layup.ndim == 1:
          layup = np.array([layup])     
     #print layup

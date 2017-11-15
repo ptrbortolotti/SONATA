@@ -19,10 +19,10 @@ from SONATA.mesh.cell import Cell
 from SONATA.display.display_utils import display_custome_shape    
 
 def consolidate_mesh_on_web(mesh,w_BSplineLst,w1_nodes,w2_nodes,w_tol,display):
-    '''Consolidates mesh on the web interface.
+    ''' Consolidates mesh on the web interface.
     
-    After the mesh has been generated for every segment. This function makes 
-    sure that no hanging nodes remain in the mesh. 
+    After the mesh has been generated for every segment. This function makes
+    sure that no hanging nodes remain in the mesh.
     
     Args:
         mesh: The overall mesh (list of cells) to consolidate and also to return

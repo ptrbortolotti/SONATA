@@ -79,34 +79,34 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
             
     if VABSProperties != None:
         pass
-#        CG, = plt.plot(VABSProperties.Xm2,VABSProperties.Xm3,'ro', label='CG: Mass Center')
-#        ax.annotate('CG', (VABSProperties.Xm2,VABSProperties.Xm3),fontsize=20)
-#        GC, = plt.plot(VABSProperties.Xg2,VABSProperties.Xg3,'bo', label='GC: Geometric Center')
-#        ax.annotate('GC', (VABSProperties.Xg2,VABSProperties.Xg3),fontsize=20)
-#        NA, = plt.plot(VABSProperties.Xt2,VABSProperties.Xt3,'go',  label='NA: Neutral Axes')
-#        ax.annotate('NA', (VABSProperties.Xt2,VABSProperties.Xt3),fontsize=20)
-#        plt.legend(handles=[CG,GC,NA])
+        CG, = plt.plot(VABSProperties.Xm2,VABSProperties.Xm3,'ro', label='CG: Mass Center')
+        ax.annotate('CG', (VABSProperties.Xm2,VABSProperties.Xm3),fontsize=20)
+        GC, = plt.plot(VABSProperties.Xg2,VABSProperties.Xg3,'bo', label='GC: Geometric Center')
+        ax.annotate('GC', (VABSProperties.Xg2,VABSProperties.Xg3),fontsize=20)
+        NA, = plt.plot(VABSProperties.Xt2,VABSProperties.Xt3,'go',  label='NA: Neutral Axes')
+        ax.annotate('NA', (VABSProperties.Xt2,VABSProperties.Xt3),fontsize=20)
+        plt.legend(handles=[CG,GC,NA])
         
         
-        # place a text box in upper left in axes coords
-#        textstr = 'mass per unit span \t\t\t\t\t = $%.2f$ [g/mm]\nmass moments of intertia about x1 axis \t= $%.2f$ [g/mm2]'%(VABSProperties.MpUS,VABSProperties.I1)
-#        props = dict(boxstyle='round', facecolor='white', alpha=0.5)
-#        ax.text(0.02, 0.97, textstr, transform=ax.transAxes, fontsize=10,
-#                verticalalignment='top', bbox=props)
+        #place a text box in upper left in axes coords
+        textstr = 'mass per unit span \t\t\t\t\t = $%.2f$ [g/mm]\nmass moments of intertia about x1 axis \t= $%.2f$ [g/mm2]'%(VABSProperties.MpUS,VABSProperties.I1)
+        props = dict(boxstyle='round', facecolor='white', alpha=0.5)
+        ax.text(0.02, 0.97, textstr, transform=ax.transAxes, fontsize=10,
+                verticalalignment='top', bbox=props)
                 
         
-        # place a text box in upper left in axes coords
-#        textstr = 'Classical Stiffness Matrix:\n'+np.array2string(VABSProperties.CS, precision=2, separator=',  ')
-#        props = dict(boxstyle='round', facecolor='white', alpha=0.5)
-#        ax.text(0.02, 0.12, textstr, transform=ax.transAxes, fontsize=10,
-#                verticalalignment='top', bbox=props)
+        #place a text box in upper left in axes coords
+        textstr = 'Classical Stiffness Matrix:\n'+np.array2string(VABSProperties.CS, precision=2, separator=',  ')
+        props = dict(boxstyle='round', facecolor='white', alpha=0.5)
+        ax.text(0.02, 0.12, textstr, transform=ax.transAxes, fontsize=10,
+                verticalalignment='top', bbox=props)
             
         
 
-#        if VABSProperties.Xs2 != None:
-#            SC, = plt.plot(VABSProperties.Xs2,VABSProperties.Xs3,'ko',label='SC: Generalized Shear Center')
-#           ax.annotate('SC', (VABSProperties.Xs2,VABSProperties.Xs3),fontsize=20)
-#            plt.legend(handles=[CG,GC,NA,SC])
+        if VABSProperties.Xs2 != None:
+            SC, = plt.plot(VABSProperties.Xs2,VABSProperties.Xs3,'ko',label='SC: Generalized Shear Center')
+            ax.annotate('SC', (VABSProperties.Xs2,VABSProperties.Xs3),fontsize=20)
+            plt.legend(handles=[CG,GC,NA,SC])
 
     
             

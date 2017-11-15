@@ -91,10 +91,10 @@ plt.close('all')
 filename = 'sec_config.input'
 
 FLAG_TOPO = True
-FLAG_MESH = False
+FLAG_MESH = True
 FLAG_VABS = True
-FLAG_SHOW_3D_TOPO = True
-FLAG_SHOW_2D_MESH = False
+FLAG_SHOW_3D_TOPO = False
+FLAG_SHOW_2D_MESH = True
 FLAG_SHOW_3D_MESH = False
 FLAG_EXPORT_STEP = False
 
@@ -182,7 +182,7 @@ if FLAG_MESH:
     growing_factor = 1.8   #critical growing factor of cell before splitting 
     shrinking_factor = 0.10  #critical shrinking factor for cells before merging nodes
     
-    core_cell_area = 0.8*global_minLen**2
+    core_cell_area = 0.9*global_minLen**2
     web_consolidate_tol = 0.5*global_minLen
     
     mesh = []
@@ -197,7 +197,7 @@ if FLAG_MESH:
             if BSplineLst_Orientation(b_BSplineLst,11) == False:
                 b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
              
-            if i == 0 and seg.ID != 0:
+            if (i == 0 and seg.ID != 0) or i == 0 and len(SegmentLst) == 1:
                 a_nodes = equidistant_nodes_on_BSplineLst(a_BSplineLst, True, True, True, minLen = global_minLen, LayerID = layer.ID[0])
             else: 
                 a_nodes = determine_a_nodes(mesh,a_BSplineLst,global_minLen,layer.ID[0],non_dct_factor)
@@ -222,9 +222,9 @@ if FLAG_MESH:
             layer.cells = enhanced_cells
             mesh.extend(enhanced_cells) 
             mesh,nodes = sort_and_reassignID(mesh)
-            
+        
         #===================MESH CORE================================================
-        if seg.ID==0 and len(SegmentLst)>0:
+        if seg.ID==0 and len(SegmentLst)>1:
             pass
         
         else:
@@ -235,12 +235,12 @@ if FLAG_MESH:
                 core_Boundary_BSplineLst += copy_BSplineLst(seg.LayerLst[-1].BSplineLst)
                 core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, seg.LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
             
-            #TODO: Why doesn't this occure in Segments.buildLayer?????
+            #FIX: Why doesn't this occure in Segments.buildLayer?????
             else:
                 core_Boundary_BSplineLst += copy_BSplineLst(seg.LayerLst[-1].BSplineLst)
                 core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, seg.LayerLst[-1].S2, seg.LayerLst[-1].S1, 0, 1)  #start und ende der lage
                    
-            a_nodes = determine_a_nodes(mesh,core_Boundary_BSplineLst,global_minLen,layer.ID[0])
+            a_nodes = determine_a_nodes(mesh,core_Boundary_BSplineLst,global_minLen,layer.ID[0])           
             [c_cells,c_nodes] = gen_core_cells(a_nodes,core_cell_area)
             
             for c in c_cells:
@@ -248,9 +248,9 @@ if FLAG_MESH:
                 c.theta_3 = 0
                 c.MatID = int(seg.CoreMaterial)
                 c.calc_theta_1()
-            
+               
             mesh.extend(c_cells)
-                
+
     #===================consolidate mesh on web interface==================   
     for seg in SegmentLst:
         for layer in seg.LayerLst:
@@ -328,7 +328,7 @@ else:
 if FLAG_VABS:
     #TODO: BE CAREFUL TO USE THE RIGHT COORDINATE SYSTEM FOR THE CALCULATIONS!!!!  
     vabs_filename = filename.replace('.input', '.vab')
-    VABSsetup = VABS_config(recover_flag=0)
+    VABSsetup = VABS_config(recover_flag=1)
     VABSsetup.F = [0,0,0]    #in Newton
     VABSsetup.M = [0,220e3,0]     #in Newton/mm
     
@@ -375,33 +375,14 @@ if FLAG_VABS:
 ##%%============================================================================ 
 ##                 P O S T  -  P R O C E S S I N G
 ## =============================================================================
-#A = []
-#for Res in Results:
-#    A.append(Res.CS)
-#
-#results = np.asarray(A) 
-#fig, ax = plt.subplots()
-#
-#for i,x in enumerate(results[0][0]):
-#    print i
-#    tmp = np.divide(results[:,i,i],results[-1,i,i])
-#    tmp_str = 'S'+str(i)+str(i)
-#    ax.plot(resLst,tmp, label=tmp_str)
-#
-#for a,b in itertools.combinations(enumerate(results[0]),2): 
-#    tmp = np.divide(results[:,a[0],b[0]],results[-1,a[0],b[0]])
-#    tmp_str = 'S'+str(a[0])+str(b[0])
-#    ax.plot(resLst,tmp, label=tmp_str)
-#        
-#ax.grid(True)
-#ax.legend(loc='right')
-#ax.set_xlabel('Resolution')
-#ax.set_ylabel('Change of Stiffness Matrix Entry in percent')
-
+print 	BeamProperties.Xm2
 
 #====================2D: MATPLOTLIB-DISPLAY======================
-if FLAG_SHOW_2D_MESH:   
-    plot_cells(mesh, nodes, 'MatID')
+if FLAG_SHOW_2D_MESH:
+    
+    if FLAG_VABS:
+        plot_cells(mesh, nodes, 'MatID', BeamProperties)
+    
     
     #plt.savefig('SONATA_MESH.pdf', dpi=900, facecolor='w', edgecolor='w',
     #    orientation='landscape', papertype='a4', format='pdf')
