@@ -173,7 +173,8 @@ if FLAG_MESH:
     Resolution = Configuration.SETUP_mesh_resolution # Nb of Points on Segment0
     length = get_BSplineLst_length(SegmentLst[0].BSplineLst)
     global_minLen = round(length/Resolution,5)
-       
+    
+    #TODO: Scale tolerance to problem size!  
     proj_tol_1 = 5e-2
     proj_tol_2 = 5e-2
     non_dct_factor = 2.6
@@ -202,7 +203,7 @@ if FLAG_MESH:
             else: 
                 a_nodes = determine_a_nodes(mesh,a_BSplineLst,global_minLen,layer.ID[0],non_dct_factor)
             
-            #TODO: Scale tolerance to problem size!    
+  
             if FLAG_SHOW_3D_MESH: 
                 displaymesh=display 
             else: 
@@ -328,7 +329,7 @@ else:
 if FLAG_VABS:
     #TODO: BE CAREFUL TO USE THE RIGHT COORDINATE SYSTEM FOR THE CALCULATIONS!!!!  
     vabs_filename = filename.replace('.input', '.vab')
-    VABSsetup = VABS_config(recover_flag=1)
+    VABSsetup = VABS_config(recover_flag=0)
     VABSsetup.F = [0,0,0]    #in Newton
     VABSsetup.M = [0,220e3,0]     #in Newton/mm
     

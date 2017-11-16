@@ -63,6 +63,17 @@ def triangle_mesh(nodes,options):
 
 
 def find_node(nodeLst,ID):
+    '''finds the node in the list of nodes (nodeLst) that has the id == ID
+        Args:
+            nodeLst: (list of nodes) this list of objects to search
+            ID: (int) the ID that is to be found
+        
+        Returns: 
+            tmp: the first node with the id==ID       
+        
+        TODO: There might be a quicker way to search for it. 
+                With dictionarys...?
+        '''
     for n in nodeLst:
         if n.id == ID:
             tmp = n

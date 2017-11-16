@@ -182,10 +182,28 @@ def move_node_on_BSplineLst(BSplineLst,node,dist,tol=1e-6):
 
 
 def grab_nodes_of_cells_on_BSplineLst(cells,BSplineLst):
-    disco_nodes = []
-    for c in cells:
-        disco_nodes.extend(grab_nodes_on_BSplineLst(c.nodes,BSplineLst))
+    '''the grab_nodes_of_cells_on_BSplineLst fuction determines the nodes of 
+    the cells that are located on the BSplineLst (list of geom2d_BSpline 
+    objects) with a given tolerance and uses the subfunction 
+    grab_nodes_on_BSplineLst
         
+                
+    Args:
+        cells: (list of cells)
+        BSplineLst: (list of geom2d_BSpline objects) to be searched
+            
+   Returns: 
+        disco_nodes: (list of nodes) the discovered nodes that are located on 
+        the BSplineLst 
+    '''
+        
+    disco_nodes = []
+    tmp_nodes = []
+    for c in cells:
+        tmp_nodes.extend(c.nodes)
+    
+    tmp_nodes = list(set(tmp_nodes))    
+    disco_nodes.extend(grab_nodes_on_BSplineLst(tmp_nodes,BSplineLst))
     disco_nodes = list(set(disco_nodes))               
     disco_nodes = sorted(disco_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))
     return disco_nodes
