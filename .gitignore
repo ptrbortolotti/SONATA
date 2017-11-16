@@ -12,6 +12,7 @@
 *.stp
 
 #ignored folders
+jobs/
 img/
 bugreport/
 publication/
