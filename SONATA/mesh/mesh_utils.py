@@ -186,8 +186,7 @@ def grab_nodes_of_cells_on_BSplineLst(cells,BSplineLst):
     the cells that are located on the BSplineLst (list of geom2d_BSpline 
     objects) with a given tolerance and uses the subfunction 
     grab_nodes_on_BSplineLst
-        
-                
+                    
     Args:
         cells: (list of cells)
         BSplineLst: (list of geom2d_BSpline objects) to be searched
@@ -209,10 +208,28 @@ def grab_nodes_of_cells_on_BSplineLst(cells,BSplineLst):
     return disco_nodes
 
 
-def grab_nodes_on_BSplineLst(nodes,BSplineLst):
-    disco_nodes = []
-    tolerance = 1e-5
+def grab_nodes_on_BSplineLst(nodes,BSplineLst, tolerance=1e-5):
+    '''the grab_nodes_on_BSplineLst fuction determines the nodes of the input 
+    argument list 'nodes' that are located on the BSplineLst. It loops though 
+    all nodes and for each nodes it generates a projection on all bsplins in 
+    the list of Bsplines (BSplineLst). If the projection distance is below a 
+    certain tolerance, the node is to be returned in the disco_nodes list.
+                
+    Args:
+        nodes: (list of nodes)
+        BSplineLst: (list of geom2d_BSpline objects) to be searched
+        tolerance: (float) to decide whether a node is on the BSpline, 
+                    the default value is 1e-5.
+            
+   Returns: 
+        disco_nodes: (list of nodes) the discovered nodes that are located on 
+        the BSplineLst 
+        
+    Notes: Projection is slow. It would be nice to not use this function very 
+        often.
+    '''
     
+    disco_nodes = []    
     for n in nodes:
         for idx,item in enumerate(BSplineLst):
             projection = Geom2dAPI_ProjectPointOnCurve(n.Pnt2d,item.GetHandle())
@@ -226,17 +243,9 @@ def grab_nodes_on_BSplineLst(nodes,BSplineLst):
                     
     disco_nodes = list(set(disco_nodes))               
     disco_nodes = sorted(disco_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))
-    
-#    splitter = None
-#    for j in range(1,len(disco_nodes)):
-#        if disco_nodes[j].parameters[1]-disco_nodes[j-1].parameters[1]>1:
-#            splitter = j
-#            break 
-#        
-#    #print 'splitter: ',splitter
-#    disco_nodes = disco_nodes[splitter:] + disco_nodes[:splitter] 
-    
+       
     return disco_nodes
+
 
 def determine_a_nodes(mesh,a_BSplineLst,global_minLen,LayerID,factor=5):
     disco_nodes = grab_nodes_of_cells_on_BSplineLst(mesh,a_BSplineLst)
