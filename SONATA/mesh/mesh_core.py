@@ -1,10 +1,18 @@
+# -*- coding: utf-8 -*-
+"""
+Functionalities concerning the unstructured discretization (triangulation) 
+of the core or balance weight. 
+
+Created on Thu Nov 02 10:46:29 2017
+@author: TPflumm
+"""
 
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 
 from OCC.gp import gp_Pnt2d
-from triangle import triangulate, plot as tplot 
+from triangle import triangulate
 
 from SONATA.topo.BSplineLst_utils import get_BSplineLst_length
 from SONATA.mesh.mesh_utils import equidistant_nodes_on_BSplineLst                   
@@ -14,6 +22,27 @@ from SONATA.mesh.cell import Cell
 #===================FUNCTIONALITIES==========================================
 
 def triangle_mesh(nodes,options):
+    '''The triangle_mesh function generates the triagular mesh within the 
+    a_nodes polygon. It uses the Python Triangle module, which is a python 
+    wrapper around Jonathan Richard Shewchuks two-dimensional quality mesh
+    generator and delaunay triangulator library, available here.  
+    
+    - http://dzhelil.info/triangle/
+    - http://www.cs.cmu.edu/~quake/triangle.html
+        
+    Args:
+        nodes: (list of nodes), the list contains all nodes that are on the
+            innermost boundary of the generated topology. And are the boundary 
+            for the triangulation
+            
+        options: the options can be passed to the triagle_mesh function,
+            default is the optionstring 'pa%s' % (area)
+            
+   Returns: 
+        mesh: a dictionary with 'vertices', 'segments', 'holes' and 'regions'
+            as keys
+    '''
+    
     points = []
     for n in nodes:
         points.append([n.Pnt2d.X(),n.Pnt2d.Y()])
@@ -29,13 +58,7 @@ def triangle_mesh(nodes,options):
     poly = {'vertices': None, 'holes': None, 'segments': None}
     poly['vertices'] = old_vertices
     poly['segments'] = segments_core
-
     mesh =  triangulate(poly, options)
-    
-    new_vertices = []
-    for v in mesh['vertices']:
-        if v not in old_vertices:
-            new_vertices.append(v)
     return mesh
 
 
@@ -45,8 +68,7 @@ def find_node(nodeLst,ID):
             tmp = n
             break
         else:
-            tmp = None
-            
+            tmp = None       
     return tmp
 
 
@@ -113,6 +135,7 @@ def gen_core_cells(a_nodes,area=1.0,**kwargs):
         c_cells.append(Cell(nodeLst))
             
     return [c_cells,nodes]
+
 
 #===================MAIN==========================================
 if __name__ == '__main__':   

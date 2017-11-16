@@ -10,6 +10,7 @@
 *.log
 *.py.out
 *.stp
+license
 
 #ignored folders
 jobs/
