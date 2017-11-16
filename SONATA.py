@@ -182,7 +182,7 @@ if FLAG_MESH:
     growing_factor = 1.8   #critical growing factor of cell before splitting 
     shrinking_factor = 0.10  #critical shrinking factor for cells before merging nodes
     
-    core_cell_area = 0.9*global_minLen**2
+    core_cell_area = 1.0*global_minLen**2
     web_consolidate_tol = 0.5*global_minLen
     
     mesh = []

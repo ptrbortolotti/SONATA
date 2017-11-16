@@ -78,31 +78,31 @@ def gen_core_cells(a_nodes,area=1.0,**kwargs):
         options = 'pa%s' % (area)
     
     mesh = triangle_mesh(a_nodes,options)  
+  
+    tmp = []
+    for n in a_nodes:
+        tmp.append([n.Pnt2d.X(),n.Pnt2d.Y(),n.id])
+    old_vertices = np.asarray(tmp)
     
-    #TODO: substract v from old_nodes, build norm, use argmin and check if argmin is below tol.!!!!! Schickies geniale idee!
-    existence = False
     c_nodes = []
     connector = []      #connector stores the information [tri_vertex_id, old_node_id]
     for tri_id,v in enumerate(mesh['vertices']):
-        for an in a_nodes:    
-            if np.all(np.isclose(np.asarray(v),np.asarray([an.Pnt2d.X(),an.Pnt2d.Y()]))):
-                #if the vertice allready exists as a_node, do not create a new node, and write id to connector
-                existence=True
-                connector.append([tri_id,an.id])
-                break
-            else:
-                existence=False
-         
-        if existence == False:
+        vec = np.linalg.norm(old_vertices[:,:2]-v,axis=1)
+        idx = np.argmin(vec)
+        value = vec[idx]
+        if value<=1e-8:
+             #checks if the vertex exists allready in the a_nodes list
+             connector.append([tri_id,old_vertices[idx,2]])
+        else: 
             #create new node for every new vertice that is not in a_nodes:
             tmp_node = Node(gp_Pnt2d(v[0],v[1]))
             connector.append([tri_id,tmp_node.id])
             c_nodes.append(tmp_node)
-
                 
     connector = np.asarray(connector)
     nodes = a_nodes+c_nodes
     
+    #create cells from connector array
     c_cells =[]
     for ele in mesh['triangles']:
         nodeLst = []
@@ -111,12 +111,7 @@ def gen_core_cells(a_nodes,area=1.0,**kwargs):
             nodeLst.append(find_node(nodes,NodeID))
     
         c_cells.append(Cell(nodeLst))
-        
-#    plt.figure(figsize=(20, 20))
-#    ax = plt.subplot(111)
-#    tplot.plot(ax, **mesh)
-#    plt.show()
-    
+            
     return [c_cells,nodes]
 
 #===================MAIN==========================================
