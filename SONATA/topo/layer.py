@@ -1,5 +1,9 @@
 import matplotlib.pyplot as plt
 
+from OCC.gp import gp_Pnt2d
+
+from SONATA.fileIO.CADinput import order_BSplineLst_Head2Tail
+
 from SONATA.topo.BSplineLst_utils import get_BSplineLst_length, get_BSplineLst_Pnt2d, trim_BSplineLst, copy_BSplineLst, BSplineLst_from_dct, discretize_BSplineLst 
 from SONATA.topo.wire_utils import build_wire_from_BSplineLst
 from SONATA.topo.cutoff import cutoff_layer
@@ -14,15 +18,15 @@ class Layer(object):
     ''' 
    
     def __init__(self, ID, Boundary_BSplineLst, globalStart, globalEnd, thickness, Orientation = 0, MatID = 1, **kwargs):
-        self.ID = ["%04d" % ID] 	                            #First single Digit: SegmentNb, Last 3 Digits: LayerNb; e.g.: 1029, Segment1, Layer29
+        self.ID = ["%04d" % ID] 	                          #First single Digit: SegmentNb, Last 3 Digits: LayerNb; e.g.: 1029, Segment1, Layer29
         self.Boundary_BSplineLst = Boundary_BSplineLst        #List of Geom2d_BSplineCurve, Geom_BSplineCurve
-        self.S1 = globalStart	                      #Starting Point in S coordinates
-        self.S2 = globalEnd		                      #End Point in S coordinates
-        self.thickness = thickness   	                      #in
-        self.Orientation = Orientation
+        self.S1 = globalStart	                              #Starting Point in S coordinates
+        self.S2 = globalEnd		                              #End Point in S coordinates
+        self.thickness = thickness   	                      #in mm
+        self.Orientation = Orientation                        #in deg
         self.MatID = MatID
         self.cells = []
-        
+
         #KWARGS:
         if kwargs.get('name') == None:
              self.name = 'DEFAULT'                             
@@ -42,9 +46,17 @@ class Layer(object):
             
 
         #self.wire = []                                     #Make Wire from BSplineSegments
-        #self.display_set = False
-        #self.DCTArrayIN = []		#Discrete point distribution over the layer from polygon offset
-        #self.DCTArrayOUT = []		#Discrete point distribution for the next layer from polygon offset	
+        #self.display_set = False  
+    
+    
+    @property
+    def StartPoint(self): #gp_Pnt2d
+        return self.BSplineLst[0].StartPoint()
+    
+    @property
+    def EndPoint(self): #gp_Pnt2d
+        return self.BSplineLst[-1].EndPoint()
+
     
     def __str__(self): 
         #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 
@@ -66,8 +78,7 @@ class Layer(object):
         self.ID, self.S1, self.S2, self.thickness, self.Orientation, self.MatID, self.Para_Boundary_BSplineLst, self.Para_BSplineLst = state
         self.Boundary_BSplineLst = BSplineLst_from_ParaLst(self.Para_Boundary_BSplineLst)
         self.BSplineLst = BSplineLst_from_ParaLst(self.Para_BSplineLst)
-
-
+        
         
     def copy(self):
         BSplineLstCopy =  copy_BSplineLst(self.BSplineLst)
@@ -75,20 +86,23 @@ class Layer(object):
         LayerCopy = Layer(self.ID,BSplineLstCopy,self.globalStart,self.globalEnd,self.thickness, self.Orientation, self.MatID, namecopy)
         return LayerCopy
   
+    
     def get_length(self): #Determine and return Legth of Layer self
          self.length = get_BSplineLst_length(self.BSplineLst)
          return self.length
          
-    def get_pnt2d(self,S,start,end): #Return, gp_Pnt of argument S of layer self  
+     
+    def get_pnt2d(self,S,start,end): #Return, gp_Pnt2d of argument S of layer self  
         return get_BSplineLst_Pnt2d(self.BSplineLst,S,start,end)
             
+    
     def build_wire(self): #Builds TopoDS_Wire from connecting BSplineSegments and returns it  
         self.wire = build_wire_from_BSplineLst(self.BSplineLst)   
         
     def trim(self,S1,S2,start, end): #Trims layer between S1 and S2
         return trim_BSplineLst(self.BSplineLst, S1, S2,  start, end)
         
-    def trim_to_coords(self):
+    def trim_to_coords(self, start, end):
         self.BSplineLst = trim_BSplineLst(self.BSplineLst, self.globalStart, self.globalEnd,  start, end)
         return self.BSplineLst
             
@@ -99,21 +113,14 @@ class Layer(object):
         OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
         OffsetBSplineLst = cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,self.S1,self.S2,self.cutoff_style)
         self.BSplineLst = OffsetBSplineLst
-        
     
-    def get_last():
-        pass
-    
- 
-    def check_layer():
-        pass
-    
-    def layer_from_wire(self,TopoDS_wire):
-        pass
-    
-    def layer_from_dctData(self,dctData):
-        pass    
-
+    def build_layer2(self):
+        npArray = discretize_BSplineLst(self.Boundary_BSplineLst, 1e-3) 
+        offlinepts = shp_parallel_offset(npArray,self.thickness,self.join_style)
+        OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
+        OffsetBSplineLst = cutoff_layer(self.Boundary_BSplineLst,OffsetBSplineLst,self.S1,self.S2,self.cutoff_style)
+        self.BSplineLst = OffsetBSplineLst
+         
     def show(self): #display the layer with pythonocc viewer module
         """
         TBD: renders the topological entity in the viewer: 
