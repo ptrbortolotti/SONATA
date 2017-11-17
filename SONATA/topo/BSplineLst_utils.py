@@ -185,6 +185,18 @@ def find_BSpline_coordinate(BSpline,s):
     return u                            
 
 def find_BSplineLst_coordinate(BSplineLst,S, start, end):
+    '''The function find_BSplineLst_coordinate returns the list index of 
+    the bspline and its parameter where the coordinate is located.
+    
+    Args:
+        S: (float) Coordinate to be found 
+        start: (float) start of the interval where the BSplineLst is defined
+        end: (float) end of the interval where the BSplineLst is defined
+        
+    Returns: 
+        [i,U]: #Return [index of the bspline,parameter U on the bspline]
+        
+    '''
     BSplineLstLength = get_BSplineLst_length(BSplineLst)
     x = BSplineLstLength*(S-start)/(end-start)
     CummLength = 0
@@ -201,7 +213,7 @@ def find_BSplineLst_coordinate(BSplineLst,S, start, end):
              U = tmp.Parameter()
              break
     #print 'idx: '+ str(i) + '     U: '+ str(U) 
-    return [i,U]  #Return index of edge and parameter U on edge!
+    return [i,U]
 
 
 def reverse_BSplineLst(BSplineLst):
@@ -276,6 +288,23 @@ def BSplineLst_Orientation(BSplineLst, NbPoints=31):
     
     
 def trim_BSplineLst(BSplineLst, S1, S2, start, end):
+    ''' the trim_BSplineLst function trims the BSplineLst that is defined on 
+    the interval between start and end to the interval defined by S1 and S2.
+    
+    Args:
+        BSplineLst: (list of geom2d_bsplines) is the object to be modified.
+        S1: (float) start of the interval to which the object is trimmed.
+        S2: (float) end of the interval to which the object is trimmed.
+        start: (float) start of the interval where the BSplineLst is defined
+        end: (float) end of the interval where the BSplineLst is defined
+            
+    Returns: 
+        trimmed_BSplineLst: (list of geom2d_bsplines) is the modified object.
+            
+    Example: a BSplineLst is defined between 0.0 and 1.0 and shall be trimmed 
+            to a interval S1=0.3 and S2=0.7
+    '''
+    
     if S1 > S2:
         trimmed_BSplineLst = []
         front_BSplineLst = []
@@ -369,8 +398,7 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
 #                 BSplineCopy.Segment(First,para2[1])
 #                 trimmed_BSplineLst.append(BSplineCopy)
 #                 break
-#                
-                
+               
     return trimmed_BSplineLst		
 
 
@@ -498,12 +526,6 @@ def trim_BSplineLst_by_Pnt2d(BSplineLst,Pos1_Pnt2d,Pos2_Pnt2d):
             trimmed_BSplineLst = rear_BSplineLst
 
     return trimmed_BSplineLst
-
-
-
-
-
-
 
 
 
