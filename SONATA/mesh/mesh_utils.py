@@ -242,8 +242,7 @@ def grab_nodes_on_BSplineLst(nodes,BSplineLst, tolerance=1e-5):
                     None           
                     
     disco_nodes = list(set(disco_nodes))               
-    disco_nodes = sorted(disco_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))
-       
+    disco_nodes = sorted(disco_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))     
     return disco_nodes
 
 

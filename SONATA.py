@@ -43,6 +43,7 @@ Created on Thu Nov 02 14:36:29 2017
 import numpy as np       
 import pickle
 import sys
+import os
 import math
 import subprocess
 import itertools
@@ -62,7 +63,9 @@ from SONATA.fileIO.CADoutput import export_to_step
 from SONATA.topo.segment import Segment, generate_SegmentLst
 from SONATA.topo.web import Web
 from SONATA.topo.weight import Weight
-from SONATA.topo.utils import  getID                 
+from SONATA.topo.utils import  getID         
+from SONATA.topo.projection import relevant_cummulated_layup_boundaries
+        
 from SONATA.bladegen.blade import Blade
 
 from SONATA.topo.BSplineLst_utils import reverse_BSplineLst, BSplineLst_Orientation, \
@@ -87,16 +90,22 @@ from SONATA.display.display_utils import export_to_JPEG, export_to_PNG, export_t
 ###############################################################################
 plt.close('all')
 
-#filename = str(sys.argv[1])#           #to run SONATA from command       
+cwd = os.getcwd()
+#filename = str(sys.argv[1])#           #to run SONATA from command
+
+
+#if not os.path.exists(directory):
+#    os.makedirs(directory)      
 filename = 'sec_config.input'
 
 FLAG_TOPO = True
 FLAG_MESH = True
 FLAG_VABS = True
-FLAG_SHOW_3D_TOPO = False
+FLAG_SHOW_3D_TOPO = True
 FLAG_SHOW_2D_MESH = True
 FLAG_SHOW_3D_MESH = False
 FLAG_EXPORT_STEP = False
+FLAG_MESH_CORE = False
 
 startTime = datetime.now()
 #=========READ INPUT:===============
@@ -119,7 +128,9 @@ if FLAG_TOPO:
     #Build Segment 0:
     SegmentLst[0].build_wire()
     SegmentLst[0].build_layers()
+    #last_relevant_boundary = SegmentLst[0].build_layers2()
     SegmentLst[0].determine_final_boundary()        
+    
     #Build Webs:
         #TODO: CHECK IF WEB DEFINITION INTERSECT EACH OTHER
         #TODO: SORT WEBS BY POS1 VALUES:
@@ -185,6 +196,7 @@ if FLAG_MESH:
     
     core_cell_area = 1.0*global_minLen**2
     web_consolidate_tol = 0.5*global_minLen
+
     
     mesh = []
     #===================MESH SEGMENT===============================================
@@ -194,7 +206,7 @@ if FLAG_MESH:
             print 'STATUS:\t Meshing Segment %s, Layer %s' %(seg.ID,len(seg.LayerLst)-i)
             
             a_BSplineLst = layer.BSplineLst       
-            b_BSplineLst = trim_BSplineLst(layer.Boundary_BSplineLst, layer.S1, layer.S2, 0, 1)
+            b_BSplineLst = trim_BSplineLst(layer.Boundary_BSplineLst, layer.S1, layer.S2, 0, 1) #use the releant boundary bsplinelst.
             if BSplineLst_Orientation(b_BSplineLst,11) == False:
                 b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
              
@@ -225,32 +237,33 @@ if FLAG_MESH:
             mesh,nodes = sort_and_reassignID(mesh)
         
         #===================MESH CORE================================================
-        if seg.ID==0 and len(SegmentLst)>1:
-            pass
-        
-        else:
-            print 'STATUS:\t Meshing Segment %s, Core' %(seg.ID)
-            core_Boundary_BSplineLst = []
-            if seg.LayerLst[-1].S1<seg.LayerLst[-1].S2:
-                core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, 0, seg.LayerLst[-1].S1, 0, 1)  #start und ende der lage
-                core_Boundary_BSplineLst += copy_BSplineLst(seg.LayerLst[-1].BSplineLst)
-                core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, seg.LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
+        if FLAG_MESH_CORE:
+            if seg.ID==0 and len(SegmentLst)>1:
+                pass
             
-            #FIX: Why doesn't this occure in Segments.buildLayer?????
             else:
-                core_Boundary_BSplineLst += copy_BSplineLst(seg.LayerLst[-1].BSplineLst)
-                core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, seg.LayerLst[-1].S2, seg.LayerLst[-1].S1, 0, 1)  #start und ende der lage
+                print 'STATUS:\t Meshing Segment %s, Core' %(seg.ID)
+                core_Boundary_BSplineLst = []
+                if seg.LayerLst[-1].S1<seg.LayerLst[-1].S2:
+                    core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, 0, seg.LayerLst[-1].S1, 0, 1)  #start und ende der lage
+                    core_Boundary_BSplineLst += copy_BSplineLst(seg.LayerLst[-1].BSplineLst)
+                    core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, seg.LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
+                
+                #FIX: Why doesn't this occure in Segments.buildLayer?????
+                else:
+                    core_Boundary_BSplineLst += copy_BSplineLst(seg.LayerLst[-1].BSplineLst)
+                    core_Boundary_BSplineLst += trim_BSplineLst(seg.LayerLst[-1].Boundary_BSplineLst, seg.LayerLst[-1].S2, seg.LayerLst[-1].S1, 0, 1)  #start und ende der lage
+                       
+                a_nodes = determine_a_nodes(mesh,core_Boundary_BSplineLst,global_minLen,layer.ID[0])           
+                [c_cells,c_nodes] = gen_core_cells(a_nodes,core_cell_area)
+                
+                for c in c_cells:
+                    c.structured = False
+                    c.theta_3 = 0
+                    c.MatID = int(seg.CoreMaterial)
+                    c.calc_theta_1()
                    
-            a_nodes = determine_a_nodes(mesh,core_Boundary_BSplineLst,global_minLen,layer.ID[0])           
-            [c_cells,c_nodes] = gen_core_cells(a_nodes,core_cell_area)
-            
-            for c in c_cells:
-                c.structured = False
-                c.theta_3 = 0
-                c.MatID = int(seg.CoreMaterial)
-                c.calc_theta_1()
-               
-            mesh.extend(c_cells)
+                mesh.extend(c_cells)
 
     #===================consolidate mesh on web interface==================   
     for seg in SegmentLst:
@@ -376,7 +389,6 @@ if FLAG_VABS:
 ##%%============================================================================ 
 ##                 P O S T  -  P R O C E S S I N G
 ## =============================================================================
-print 	BeamProperties.Xm2
 
 #====================2D: MATPLOTLIB-DISPLAY======================
 if FLAG_SHOW_2D_MESH:

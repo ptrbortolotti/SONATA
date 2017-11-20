@@ -32,6 +32,7 @@ Created on Mon Dec 19 16:32:15 2016
 import numpy as np
 import matplotlib.pyplot as plt
 import intervaltree 
+import collections
 
 #=====================================================
 def timelines(y, xstart, xstop, c='b'):
@@ -214,6 +215,44 @@ def chop_interval_from_layup(layup,begin,end):
     return Projection
 
 
+def sort_layup_projection(Projection):
+    '''The sort_layup_projection fuctions sorts the interval structure.
+        
+    Args:         
+        Projection: list of numpy array of the intervaltree structure of the form:
+                  start end layer#
+        np.array([[ 0.3  0.5  3. ]
+                  [ 0.7  1.   2. ]
+                  [ 0.   0.3  2. ]])    
+            
+    Returns: 
+        Projection: list of sorted numpy array of the intervaltree structure of the form:
+                  start end layer#
+        np.array([[ 0.7  1.   2. ]
+                  [ 0.   0.3  2. ]
+                  [ 0.3  0.5  3. ]])               
+    '''
+    sorted_Projection=[]
+    for i,proj in enumerate(Projection):
+        a =  proj[:,:2].flatten()
+        unique, counts = np.unique(a, return_counts=True)
+        iv_boundaries = np.sort(unique[np.where(counts == 1)])
+        b = proj[proj[:,0].argsort()]
+        #regular interval:
+        if np.all(a>=iv_boundaries[0]) and np.all(a<=iv_boundaries[1]):
+            tmp = b
+        #regular interval:  
+        else:
+            splitter =  np.asscalar(np.where(b[:,0]==iv_boundaries[2])[0])
+            c = [b[0:splitter,:],b[splitter::,:]]
+            #print i,"Split:",b, '@:', splitter, '\n C:', c
+            tmp = np.vstack((c[1],c[0]))
+        
+        sorted_Projection.append(tmp)  
+    
+    return sorted_Projection
+
+
 def cummulated_layup_boundaries(Layup):
     '''The cummulated_layup_boundaries fuctions generates a interval structure 
     from the Layup definitions so that for each layer the information of the 
@@ -255,8 +294,8 @@ def cummulated_layup_boundaries(Layup):
         tmp = insert_interval_in_layup(tmp,begin,end)
         tmp = tmp[np.lexsort(np.fliplr(tmp).T)]
         projectionlist.append(tmp)
-        
-    return projectionlist
+
+    return sort_layup_projection(projectionlist)
         
 
 def relevant_cummulated_layup_boundaries(Layup):
@@ -296,8 +335,9 @@ def relevant_cummulated_layup_boundaries(Layup):
         tmp = insert_interval_in_layup(tmp,begin,end)
         tmp = tmp[np.lexsort(np.fliplr(tmp).T)]
     
-    return relevant_projectionlist
-    
+
+    return sort_layup_projection(relevant_projectionlist)
+
  
 def plot_layup_projection(Layup):
     ''' the function plot_layup_projection uses the functions from above and 
@@ -341,7 +381,7 @@ def plot_layup_projection(Layup):
     
     #=====================================================
     #               PLOT
-    plt.figure()
+    plt.figure(2)
     #============================= 
     plt.subplot(231)
     plt.xlim(0,1)
@@ -386,7 +426,6 @@ def plot_layup_projection(Layup):
     projectionlist=cummulated_layup_boundaries(Layup)
     relevant_projectionlist = relevant_cummulated_layup_boundaries(Layup)
     
-    plt.figure(1)
     #============================= 
     plt.subplot(234)
     plt.xlim(0,1)
@@ -421,7 +460,7 @@ def plot_layup_projection(Layup):
     
     return None
     
-    
+
 #==============================================================================       
 if __name__ == '__main__':
     '''Executes the following code if the file is exceuted as the main file 
@@ -434,7 +473,11 @@ if __name__ == '__main__':
                   [  0.05 ,  0.6 ,  0.6  , 45.  ,   2.  ],
                   [  0.85  , 0.2  ,  0.6  , 45.  ,   2.  ],
                   [  0.9 ,  0.4 ,  0.6  , 45.  ,   2.  ],
+                  [  0.4 ,  0.6,  0.6  , 45.  ,   2.  ],
+                  [  0.3 ,  0.7,  0.6  , 45.  ,   2.  ],
                   [  0.20 ,  0.532,  0.6  , 45.  ,   2.  ],
                   [  0.25 ,  0.3 ,  0.6  , 45.  ,   2.  ]],)
     
+    Projection = relevant_cummulated_layup_boundaries(Layup)
     plot_layup_projection(Layup)
+    

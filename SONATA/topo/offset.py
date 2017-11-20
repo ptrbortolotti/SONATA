@@ -18,8 +18,7 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
     res = 16 #resolution
     closed = None
     
-    
-    
+
     #==============SHAPELY-OFFSET ALGORITHM====================================
     if P2Pdistance(arrPts[0],arrPts[-1])<=1e-6:
         closed = True
@@ -119,17 +118,17 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
 #    ax = fig.add_subplot(111)
 #    plt.clf()         
 #    plt.plot(*arrPts.T, color='black', marker='.')
-#    
-##    for i, item in enumerate(data):
-##            plt.annotate(i, (item[0],item[1]), color='red')
-#    
+    
+#    for i, item in enumerate(data):
+#            plt.annotate(i, (item[0],item[1]), color='red')
+    
 #    plt.plot(*arrPts[0].T, color='green', marker='o')
 #    plt.plot(*arrPts[-1].T, color='purple', marker='o')
 #    plt.plot(*arrPts.T,color='black',marker='.')
-#    
-#    #plt.plot(*data.T, color='red', marker='.')
-#    #plt.plot(*data[0].T, color='green', marker='>')
-#    #plt.plot(*data[-1].T, color='purple', marker='>')
+    
+    #plt.plot(*data.T, color='red', marker='.')
+    #plt.plot(*data[0].T, color='green', marker='>')
+    #plt.plot(*data[-1].T, color='purple', marker='>')
 #    plt.axis('equal')  
 #    plt.show()   
     
@@ -150,8 +149,6 @@ if __name__ == '__main__':
     #plt.plot(*data.T, color='red', marker='.')        
     
 
-    
-    
     
 #    #Find corners and edges of original data   
 #    DCT_angles1 = calc_DCT_angles(arrPts)

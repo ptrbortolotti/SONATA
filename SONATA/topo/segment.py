@@ -72,9 +72,9 @@ class Segment(object):
 
     
     def build_layers2(self):
-        '''new version2 under development. that works with the the projection'''
-        plot_layup_projection(self.Layup)
-
+        '''The build_layers member function of the class Segment generates all Layer objects and it's associated wires
+        and return the relevant_boundary_BSplineLst'''
+        #plot_layup_projection(self.Layup)
         for i in range(1,len(self.Layup)+1):
             print "STATUS:\t Building Segment %d, Layer: %d" % (self.ID,i)
             relevant_boundary_BSplineLst = []
@@ -90,16 +90,14 @@ class Segment(object):
                     start = layer.S1
                     end = layer.S2
                 
-                S1 = (iv[0]-start)/(end-start)
                 S1 = iv[0]
-                S2 = (iv[1]-start)/(end-start)
                 S2 = iv[1]
-                                
-                #print 'start',start,'end',end,'S1',S1,'S2',S2
                 relevant_boundary_BSplineLst.extend(trim_BSplineLst(BSplineLst,S1,S2,start,end)) 
             
             #CREATE LAYER Object
-            tmp_Layer = Layer(i,relevant_boundary_BSplineLst, self.Layup[i-1][0], self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],self.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
+            tmp_Layer = Layer(i,relevant_boundary_BSplineLst, self.Layup[i-1][0], 
+                              self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],
+                              self.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
             tmp_Layer.build_layer2() 
             tmp_Layer.build_wire()
             self.LayerLst.append(tmp_Layer)     
@@ -109,7 +107,7 @@ class Segment(object):
                 
     def build_layers(self):
         '''version1-does not work with the Projection'''
-        plot_layup_projection(self.Layup)
+        #plot_layup_projection(self.Layup)
         for i in range(1,len(self.Layup)+1):
             print "STATUS:\t Building Segment %d, Layer: %d" % (self.ID,i)
             new_Boundary_BSplineLst = []
