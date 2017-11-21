@@ -288,7 +288,7 @@ def cummulated_layup_boundaries(Layup):
     #Iterate over Layup
     projectionlist =  []
     projectionlist.append(tmp)
-    for i in range(1,nlayers,1):
+    for i in range(1,nlayers+1,1):
         begin   = float(clean_layup[i][0])
         end     = float(clean_layup[i][1])  
         tmp = insert_interval_in_layup(tmp,begin,end)
@@ -338,7 +338,23 @@ def relevant_cummulated_layup_boundaries(Layup):
 
     return sort_layup_projection(relevant_projectionlist)
 
- 
+
+def inverse_relevant_cummulated_layup_boundaries(Layup):
+    flipped_Projection = relevant_cummulated_layup_boundaries(np.flipud(Layup))
+    b = np.flipud(np.arange(1,len(Layup)+1))
+    d = dict(enumerate(b))
+    
+    inverse_projection = []
+    for iv_tree in flipped_Projection:
+        part1 = iv_tree[:,:2]
+        part2 = np.asarray([[d[l] for l in iv_tree[:,2]]])
+        inverse_projection.append(np.concatenate((part1, part2.T), axis=1))
+
+    inverse_projection = reversed(inverse_projection)
+    return inverse_projection
+
+
+
 def plot_layup_projection(Layup):
     ''' the function plot_layup_projection uses the functions from above and 
     plots the Layup as Timelines. Both for Layup and for the inverse Layup.
@@ -347,10 +363,7 @@ def plot_layup_projection(Layup):
     the inverse representation a light blue bar is displayed to show the 
     Segment0 intervals respectivally unmeshed intervals.
     
-    In the middle, the cummulated boudaries are illustrated. They are always 
-    defined in an interval [0,1].
-    
-    The right columnm shows the relenvant part of the cummulated boundaries by 
+    In the middle shows the relenvant part of the cummulated boundaries by 
     chopping them into the their relevant part 
     
     
@@ -361,101 +374,71 @@ def plot_layup_projection(Layup):
                   [  0.25 ,  0.3 ,  0.6  , 45.  ,   2.  ]],)
                   #Start[-]	End[-] thickness [mm] Orientation [deg] MatID
             
-    Returns: 
-        Projection: numpy array of the intervaltree structure of the form:
-                  start end layer#
-        np.array([[ 0.3  0.7  3. ]
-                  [ 0.7  1.   2. ]
-                  [ 0.   0.3  2. ]])                
+    Returns: None              
     '''
-    nlayers = int(np.size(Layup,0))
+    relevant_projectionlist = relevant_cummulated_layup_boundaries(Layup)
+    inverse_projection = inverse_relevant_cummulated_layup_boundaries(Layup)
     
-    #clean up Layup array
+
+    #=======PLOT=========
+    nlayers = int(np.size(Layup,0))
     a = np.delete(Layup,[2,3,4],1)
     b = np.transpose(np.linspace(1,nlayers,nlayers))
-    c = np.c_[a,b]
-    clean_layup = np.insert(c,0, np.array((0,1,0)),0)
+    clean_layup = np.c_[a,b]
+
+    plt.figure(3)
     
-    projectionlist=cummulated_layup_boundaries(Layup)
-    relevant_projectionlist = relevant_cummulated_layup_boundaries(Layup)
-    
-    #=====================================================
-    #               PLOT
-    plt.figure(2)
-    #============================= 
-    plt.subplot(231)
+    #=======PLOT LAYUP=========  
+    plt.subplot(131)
     plt.xlim(0,1)
-    plt.ylim(0,nlayers+1)
+    plt.ylim(-0.5,nlayers+2)
+    plt.yticks([])
     plt.title('Layup')    
     plt.xlabel('Coordinate')
-    color=plt.cm.Paired(np.linspace(0,1,nlayers+4))
+
+    color=plt.cm.Paired(np.linspace(0,1,nlayers+1))
+    color[0] = [0, 0, 0, 1]
+    color = np.vstack((color,np.array([0.7, 0.7, 0.7, 1])))
     
+    plt.hlines(0, 0, 1, lw=4)
+    plt.text(-0.05, 0, "Segment Boundary", fontsize=10, horizontalalignment='right')
     for i,item in enumerate(clean_layup):
-        timelines(i,item[0],item[1],color[int(item[2])])
-        
-    plt.subplot(232)
-    plt.xlim(0,1)
-    plt.ylim(0,nlayers+1)
-    plt.title('Cummulated Boundaries')    
-    plt.xlabel('Coordinate')
+        timelines(i+1,item[0],item[1],color[int(item[2])])
+        string = "Layer "+str(i+1)
+        plt.text(-0.05, i+1, string, fontsize=10, horizontalalignment='right')
+    plt.text(-0.05, i+2, "Final Segment Boundary", fontsize=10, horizontalalignment='right')    
     
-    for i,idx in enumerate(projectionlist):
-        for j,item in enumerate(idx):
-            timelines(i+1,item[0],item[1],color[int(item[2])])
     
-    plt.subplot(233)
+    #=======PLOT Relevant Cummulated Boundaries=========  
+    plt.subplot(132)
     plt.xlim(0,1)
-    plt.ylim(0,nlayers+1)
-    plt.title('Relevant Cummulated Boundaries')    
+    plt.ylim(-0.5,nlayers+2)
+    plt.yticks([])
+    plt.title('Relevant Cummulated Boundaries\n(for layer creation)')    
     plt.xlabel('Coordinate')
     
     for i,idx in enumerate(relevant_projectionlist):
         for j,item in enumerate(idx):
             timelines(i+1,item[0],item[1],color[int(item[2])])
     
-    #=====================================================
-    Layup = np.flipud(Layup)
-    nlayers = int(np.size(Layup,0))
-    
-    #clean up Layup array
-    a = np.delete(Layup,[2,3,4],1)
-    b = np.transpose(np.linspace(1,nlayers,nlayers))
-    c = np.c_[a,b]
-    clean_layup = np.insert(c,0, np.array((0,1,0)),0)
-    
-    projectionlist=cummulated_layup_boundaries(Layup)
-    relevant_projectionlist = relevant_cummulated_layup_boundaries(Layup)
-    
-    #============================= 
-    plt.subplot(234)
+    final_ivlist=cummulated_layup_boundaries(Layup)[-1]
+    for j,item in enumerate(final_ivlist):
+        timelines(i+2,item[0],item[1],color[int(item[2])])
+
+            
+    #=======PLOT Inverse Relevant Cummulated Boundaries=========  
+    plt.subplot(133)
     plt.xlim(0,1)
-    plt.ylim(0,nlayers+1)
-    plt.title('Inverse Layup')    
-    plt.xlabel('Coordinate')
-    color=plt.cm.Paired(np.linspace(0,1,nlayers+4))
-    
-    for i,item in enumerate(reversed(clean_layup)):
-        timelines(i,item[0],item[1],color[int(item[2])])
-        
-    plt.subplot(235)
-    plt.xlim(0,1)
-    plt.ylim(0,nlayers+1)
-    plt.title('Inverse Cummulated Boundaries')    
+    plt.ylim(-0.5,nlayers+2)
+    plt.yticks([])
+    plt.title('Inverse Relevant Cummulated Boundaries\n(to determine a_nodes during meshing)')    
     plt.xlabel('Coordinate')
     
-    for i,idx in enumerate(reversed(projectionlist)):
+    for i,idx in enumerate(inverse_projection):
         for j,item in enumerate(idx):
-            timelines(i+1,item[0],item[1],color[int(item[2])])
+            timelines(i+1,item[0],item[1],color[int(item[2])+1])
     
-    plt.subplot(236)
-    plt.xlim(0,1)
-    plt.ylim(0,nlayers+1)
-    plt.title('Inverse Relevant Cummulated Boundaries')    
-    plt.xlabel('Coordinate')
-    
-    for i,idx in enumerate(reversed(relevant_projectionlist)):
-        for j,item in enumerate(idx):
-            timelines(i+1,item[0],item[1],color[int(item[2])])
+    plt.text(item[1], i+1, "Grey: unmeshed layer intervals", fontsize=8) 
     
     
     return None
@@ -478,6 +461,5 @@ if __name__ == '__main__':
                   [  0.20 ,  0.532,  0.6  , 45.  ,   2.  ],
                   [  0.25 ,  0.3 ,  0.6  , 45.  ,   2.  ]],)
     
-    Projection = relevant_cummulated_layup_boundaries(Layup)
+
     plot_layup_projection(Layup)
-    

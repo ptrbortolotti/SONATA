@@ -26,6 +26,10 @@ class Layer(object):
         self.Orientation = Orientation                        #in deg
         self.MatID = MatID
         self.cells = []
+        self.ivLst = []
+        self.inverse_ivLst = []
+        self.NodeLst = [] #Container to collect all nodes that are on this Layer-BSplineLst!
+        self.Cells = [] #Container to collet all cells that are composing this layere
 
         #KWARGS:
         if kwargs.get('name') == None:

@@ -64,7 +64,7 @@ from SONATA.topo.segment import Segment, generate_SegmentLst
 from SONATA.topo.web import Web
 from SONATA.topo.weight import Weight
 from SONATA.topo.utils import  getID         
-from SONATA.topo.projection import relevant_cummulated_layup_boundaries
+from SONATA.topo.projection import relevant_cummulated_layup_boundaries,plot_layup_projection
         
 from SONATA.bladegen.blade import Blade
 
@@ -127,13 +127,15 @@ if FLAG_TOPO:
     SegmentLst = generate_SegmentLst(Configuration)
     #Build Segment 0:
     SegmentLst[0].build_wire()
-    SegmentLst[0].build_layers()
-    #last_relevant_boundary = SegmentLst[0].build_layers2()
-    SegmentLst[0].determine_final_boundary()        
+    #SegmentLst[0].build_layers()
+    last_relevant_boundary = SegmentLst[0].build_layers2()
+    SegmentLst[0].determine_final_boundary2()
+    #TODO: modify determine_final_boundary: to use the cummulated boundaries        
     
     #Build Webs:
         #TODO: CHECK IF WEB DEFINITION INTERSECT EACH OTHER
         #TODO: SORT WEBS BY POS1 VALUES:
+        
     WebLst = []
     if Configuration.SETUP_NbOfWebs > 0:
         for i in range(0,Configuration.SETUP_NbOfWebs):
@@ -145,7 +147,8 @@ if FLAG_TOPO:
     if Configuration.SETUP_NbOfWebs > 0:
         for i,seg in enumerate(SegmentLst[1:],start=1):
             seg.build_segment_boundary_from_WebLst(WebLst,SegmentLst[0].final_Boundary_BSplineLst)
-            seg.build_layers()
+            #seg.build_layers()
+            seg.build_layers2()
     
     #Balance Weight:
     if Configuration.SETUP_BalanceWeight == True:
@@ -197,16 +200,34 @@ if FLAG_MESH:
     core_cell_area = 1.0*global_minLen**2
     web_consolidate_tol = 0.5*global_minLen
 
-    
     mesh = []
     #===================MESH SEGMENT===============================================
     disco_nodes = []
     for j,seg in enumerate(reversed(SegmentLst)):
+        plot_layup_projection(seg.Layup)
         for i,layer in enumerate(reversed(seg.LayerLst)):
             print 'STATUS:\t Meshing Segment %s, Layer %s' %(seg.ID,len(seg.LayerLst)-i)
             
             a_BSplineLst = layer.BSplineLst       
-            b_BSplineLst = trim_BSplineLst(layer.Boundary_BSplineLst, layer.S1, layer.S2, 0, 1) #use the releant boundary bsplinelst.
+            b_BSplineLst = trim_BSplineLst(layer.Boundary_BSplineLst, layer.S1, layer.S2, 0, 1) 
+            #use the releant boundary bsplinelst.
+
+            #%% NEW: determine_a_nodes2
+            b_BSplineLst = layer.Boundary_BSplineLst
+            #TODO: modify determine_a_nodes: use the inverse of Layup_projection to determin the necessary empty semgemnts and the 
+            print layer.ID, layer.inverse_ivLst #be careful the iv[2] not the layer number!
+            for iv in layer.inverse_ivLst:
+                if iv[2]==0: 
+                    print "equidistand nodes on Bspline"            
+            
+            #%%
+            
+            
+            
+            
+            
+            
+            
             if BSplineLst_Orientation(b_BSplineLst,11) == False:
                 b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
              
@@ -457,6 +478,8 @@ if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
         for c in mesh:
             display.DisplayColoredShape(c.wire, 'BLACK')    
   
+    for spline in SegmentLst[0].final_Boundary_BSplineLst:
+        display.DisplayColoredShape(spline, 'BLACK')    
     display.View_Top()
     display.FitAll()
     start_display()

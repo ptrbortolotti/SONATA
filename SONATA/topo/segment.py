@@ -71,40 +71,73 @@ class Segment(object):
         self.BSplineLst = BSplineLst_from_ParaLst(self.Para_BSplineLst)
 
     
+    def ivLst_to_BSplineLst(self,ivLst):
+        '''The member function ivLst_to_BSplineLst generates the 
+        BSplineLst from the InvervalLst definitions. It loops through all 
+        intervals,trims them accordingly and assembles them into the 
+        iv_BSplineLst, which is returned.
+        
+        Args:   self: the attributes of the Segment class
+                iVLst: the iVLst is a entry of the Layup Projection. 
+                It has the following form: array([[ 0.2  ,  0.3  ,  6.   ],
+                                                  [ 0.3  ,  0.532,  8.   ]])
+        returns: iv_BSplineLst: (list of BSplines)
+        '''    
+        iv_BSplineLst = []
+        for iv in ivLst:
+            #print iv[0],iv[1],iv[2]
+            if int(iv[2]) == 0:
+                BSplineLst = self.BSplineLst
+                start = 0.0
+                end = 1.0
+            else:
+                layer = self.LayerLst[int(iv[2])-1]
+                BSplineLst = layer.BSplineLst
+                start = layer.S1
+                end = layer.S2
+            
+            S1 = iv[0]
+            S2 = iv[1]
+            iv_BSplineLst.extend(trim_BSplineLst(BSplineLst,S1,S2,start,end))
+        return iv_BSplineLst
+    
+    
     def build_layers2(self):
         '''The build_layers member function of the class Segment generates all Layer objects and it's associated wires
         and return the relevant_boundary_BSplineLst'''
         #plot_layup_projection(self.Layup)
         for i in range(1,len(self.Layup)+1):
             print "STATUS:\t Building Segment %d, Layer: %d" % (self.ID,i)
-            relevant_boundary_BSplineLst = []
-            for iv in self.Projection[i-1]:
-                #print iv[0],iv[1],iv[2]
-                if int(iv[2]) == 0:
-                    BSplineLst = self.BSplineLst
-                    start = 0.0
-                    end = 1.0
-                else:
-                    layer = self.LayerLst[int(iv[2])-1]
-                    BSplineLst = layer.BSplineLst
-                    start = layer.S1
-                    end = layer.S2
-                
-                S1 = iv[0]
-                S2 = iv[1]
-                relevant_boundary_BSplineLst.extend(trim_BSplineLst(BSplineLst,S1,S2,start,end)) 
-            
+            relevant_boundary_BSplineLst = self.ivLst_to_BSplineLst(self.Projection[i-1])
+          
             #CREATE LAYER Object
             tmp_Layer = Layer(i,relevant_boundary_BSplineLst, self.Layup[i-1][0], 
                               self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],
                               self.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
             tmp_Layer.build_layer2() 
+            tmp_Layer.ivLst = self.Projection[i-1]
+            tmp_Layer.inverse_ivLst = relevant_cummulated_layup_boundaries(np.flipud(self.Layup))[len(self.Layup)-i]
             tmp_Layer.build_wire()
             self.LayerLst.append(tmp_Layer)     
     
         return relevant_boundary_BSplineLst
                 
-                
+    def determine_final_boundary2(self):
+        '''The member function determin_final_boundary2 generates the 
+        BSplineLst that encloses all Layers of the Segement. This final 
+        boundary is needed for the generation of the subordinate segments, 
+        where the final boundary BSplineLst is intersected with the Webs.
+        
+        Args:   self: only the attributes of the Segment class itself.
+        
+        returns: None, but assignes the final_Boundary_BSplineLst class 
+            attribute
+        '''    
+        projectionlist=cummulated_layup_boundaries(self.Layup)
+        self.final_Boundary_BSplineLst = self.ivLst_to_BSplineLst(projectionlist[-1])
+        return None
+
+        
     def build_layers(self):
         '''version1-does not work with the Projection'''
         #plot_layup_projection(self.Layup)
@@ -127,6 +160,17 @@ class Segment(object):
             tmp_Layer.build_layer() 
             tmp_Layer.build_wire()
             self.LayerLst.append(tmp_Layer)     
+    
+    def determine_final_boundary(self):
+        '''version1-does not work with the Projection'''
+        new_Boundary_BSplineLst = []
+        new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, 0, self.LayerLst[-1].S1, 0, 1)  #start und ende der lage
+        new_Boundary_BSplineLst += copy_BSplineLst(self.LayerLst[-1].BSplineLst)
+        new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, self.LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
+        new_Boundary_BSplineLst = set_BSplineLst_to_Origin(new_Boundary_BSplineLst)
+        self.final_Boundary_BSplineLst = new_Boundary_BSplineLst
+        
+
     
     def copy(self):
         BSplineLstCopy =  copy_BSplineLst(self.BSplineLst)
@@ -170,13 +214,7 @@ class Segment(object):
         self.BSplineLst = seg_boundary_from_dct(DCT_data,angular_deflection)
         return seg_boundary_from_dct(DCT_data,angular_deflection)
             
-    def determine_final_boundary(self):
-        new_Boundary_BSplineLst = []
-        new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, 0, self.LayerLst[-1].S1, 0, 1)  #start und ende der lage
-        new_Boundary_BSplineLst += copy_BSplineLst(self.LayerLst[-1].BSplineLst)
-        new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, self.LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
-        new_Boundary_BSplineLst = set_BSplineLst_to_Origin(new_Boundary_BSplineLst)
-        self.final_Boundary_BSplineLst = new_Boundary_BSplineLst
+
         
     def build_segment_boundary_from_WebLst(self,WebLst,Segment0_final_Boundary_BSplineLst):
         """Input has to be a complete WebLst"""
@@ -226,7 +264,6 @@ class Segment(object):
        
 
 def generate_SegmentLst(Configuration):
-    
     
     #generate Segment Lst
     SegmentLst = []   #List of Segment Objects
