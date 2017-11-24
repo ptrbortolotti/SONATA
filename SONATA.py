@@ -96,7 +96,6 @@ plt.close('all')
 cwd = os.getcwd()
 #filename = str(sys.argv[1])#           #to run SONATA from command
 
-
 #if not os.path.exists(directory):
 #    os.makedirs(directory)      
 filename = 'sec_config.input'
@@ -104,7 +103,7 @@ filename = 'sec_config.input'
 FLAG_TOPO = True
 FLAG_MESH = True
 FLAG_VABS = True
-FLAG_SHOW_3D_TOPO = True
+FLAG_SHOW_3D_TOPO = False
 FLAG_SHOW_2D_MESH = True
 FLAG_SHOW_3D_MESH = False
 FLAG_EXPORT_STEP = False
@@ -130,14 +129,10 @@ if FLAG_TOPO:
     SegmentLst = generate_SegmentLst(Configuration)
     #Build Segment 0:
     SegmentLst[0].build_wire()
-    #SegmentLst[0].build_layers()
-    last_relevant_boundary = SegmentLst[0].build_layers2()
-    SegmentLst[0].determine_final_boundary2()
+    last_relevant_boundary = SegmentLst[0].build_layers()
+    SegmentLst[0].determine_final_boundary()
     
-    #Build Webs:
-        #TODO: CHECK IF WEB DEFINITION INTERSECT EACH OTHER
-        #TODO: SORT WEBS BY POS1 VALUES:
-        
+    #Build Webs:    
     WebLst = []
     if Configuration.SETUP_NbOfWebs > 0:
         for i in range(0,Configuration.SETUP_NbOfWebs):
@@ -149,8 +144,7 @@ if FLAG_TOPO:
     if Configuration.SETUP_NbOfWebs > 0:
         for i,seg in enumerate(SegmentLst[1:],start=1):
             seg.build_segment_boundary_from_WebLst(WebLst,SegmentLst[0].final_Boundary_BSplineLst)
-            #seg.build_layers()
-            seg.build_layers2()
+            seg.build_layers()
     
     #Balance Weight:
     if Configuration.SETUP_BalanceWeight == True:
@@ -204,82 +198,29 @@ if FLAG_MESH:
 
     mesh = []
     #===================MESH SEGMENT===============================================
-    disco_nodes = []
     for j,seg in enumerate(reversed(SegmentLst)):
         #core_a_nodes = []
-        plot_layup_projection(seg.Layup)
+        #plot_layup_projection(seg.Layup)
         for i,layer in enumerate(reversed(seg.LayerLst)):
             print 'STATUS:\t Meshing Segment %s, Layer %s' %(seg.ID,len(seg.LayerLst)-i)
+            if FLAG_SHOW_3D_MESH: 
+                displaymesh=display 
+            else: 
+                displaymesh=None   
             
-            a_BSplineLst = layer.a_BSplineLst  
-            b_BSplineLst = layer.b_BSplineLst 
-
-            #%% NEW: layer.determine_a_nodes()
-            nLayers = len(seg.LayerLst)
-            new_a_nodes=[]
-            for iv_counter,iv in enumerate(layer.inverse_ivLst):
-                if int(iv[2])==nLayers: 
-                    #print iv, "equidistand nodes on BsplineLst of LayerLst entry",
-                    eq_nodes = []
-                    BSplineLst = layer.a_BSplineLst             
-                    iv_BSplineLst = trim_BSplineLst(BSplineLst,iv[0],iv[1],layer.S1,layer.S2  )
-                    if iv_counter==0 and len(layer.inverse_ivLst)>1: #first but not last
-                        IncStart=True
-                        IncEnd=False
-                    
-                    elif iv_counter==0 and len(layer.inverse_ivLst)==1: #first and last
-                        IncStart=True
-                        IncEnd=True
-
-                    elif iv_counter==len(layer.inverse_ivLst)-1 and len(layer.inverse_ivLst)>1: #last but not first
-                        if  iv_counter==len(layer.inverse_ivLst)-1 and iv[1]==1 and layer.inverse_ivLst[0][0]==0:
-                            IncStart=False
-                            IncEnd=False
-                        else:
-                            IncStart=False
-                            IncEnd=True
-                                            
-                    else:
-                        IncStart=False
-                        IncEnd=False
-                    
-                    eq_nodes = equidistant_nodes_on_BSplineLst(iv_BSplineLst, True, IncStart, IncEnd, minLen = global_minLen, LayerID = layer.ID[0])
-                    #core_a_nodes.extend(eq_nodes)
-                    new_a_nodes.extend(eq_nodes)
-
-                    
-                else:
-                    #print iv, "use nodes b_nodes of layer", int(iv[2])
-                    tmp_layer = seg.LayerLst[int(iv[2])]
-                    iv_BSplineLst = trim_BSplineLst(tmp_layer.b_BSplineLst,iv[0],iv[1],tmp_layer.S1,tmp_layer.S2 )
-                    isClosed = iv_BSplineLst[0].StartPoint().IsEqual(iv_BSplineLst[-1].EndPoint(),1e-5)
-                   
-                    if isClosed:
-                        tmp_nodes = tmp_layer.b_nodes
-                    else: 
-                        tmp_nodes = [tmp_layer.a_nodes[0]]+tmp_layer.b_nodes+[tmp_layer.a_nodes[-1]]
-                    
-                    disco_nodes = grab_nodes_on_BSplineLst(tmp_nodes,iv_BSplineLst)
-                    new_a_nodes.extend(disco_nodes)
-                    
-            a_nodes = new_a_nodes
-                                       
-            #%%
-                    
-            if BSplineLst_Orientation(b_BSplineLst,11) == False:
-                b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
-             
-            #TODO: Adapt Systematic for multiple Segments.
+            #TODO: Adapt Systematic for multiple Segments to determine a_nodes
 #           if (i == 0 and seg.ID != 0) or i == 0 and len(SegmentLst) == 1: #if its the one and only Segment.
 #               a_nodes = equidistant_nodes_on_BSplineLst(a_BSplineLst, True, True, True, minLen = global_minLen, LayerID = layer.ID[0])
 #          else: 
 #                a_nodes = determine_a_nodes(mesh,a_BSplineLst,global_minLen,layer.ID[0],non_dct_factor)
             
-#            try:
-            if FLAG_SHOW_3D_MESH: 
-                displaymesh=display 
-            else: 
-                displaymesh=None   
+            layer.determine_a_nodes(seg.LayerLst,global_minLen)
+            a_BSplineLst = layer.a_BSplineLst  
+            a_nodes = layer.a_nodes
+            b_BSplineLst = layer.b_BSplineLst 
+                          
+#            if BSplineLst_Orientation(b_BSplineLst,11) == False:
+#                b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
                 
             a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, proj_tol_1,crit_angle_1, display=displaymesh) 
             #enhanced_cells = modify_cornerstyle_one(cells,b_BSplineLst)
@@ -287,8 +228,7 @@ if FLAG_MESH:
             b_nodes.extend(new_b_nodes)
             enhanced_cells, new_b_nodes = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen,growing_factor,shrinking_factor)
             b_nodes.extend(new_b_nodes)
-                        
-            disco_nodes = list(set(b_nodes))               
+                                    
             b_nodes = sorted(b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))  
             layer.a_nodes = a_nodes
             layer.b_nodes = b_nodes
@@ -308,6 +248,7 @@ if FLAG_MESH:
             if seg.ID==0 and len(SegmentLst)>1:
                 pass
             
+            #TODO: generate Core Object?
             else:
                 print 'STATUS:\t Meshing Segment %s, Core' %(seg.ID)
                 core_Boundary_BSplineLst = seg.final_Boundary_BSplineLst

@@ -10,7 +10,7 @@ from SONATA.topo.cutoff import cutoff_layer
 from SONATA.topo.offset import shp_parallel_offset
 from SONATA.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
 
-
+from SONATA.mesh.mesh_utils import equidistant_nodes_on_BSplineLst, grab_nodes_on_BSplineLst
 class Layer(object):
     ''' 
     The layer object is constructed from multiple BSplineCurveSegments. It is the basis for all future operations. 
@@ -123,21 +123,73 @@ class Layer(object):
         self.BSplineLst = trim_BSplineLst(self.BSplineLst, self.globalStart, self.globalEnd,  start, end)
         return self.BSplineLst
             
-    def build_layer(self):
-        Trimmed_BSplineLst = trim_BSplineLst(self.Boundary_BSplineLst, self.S1, self.S2, 0, 1)
-        npArray = discretize_BSplineLst(Trimmed_BSplineLst, 1e-3) 
-        offlinepts = shp_parallel_offset(npArray,self.thickness,self.join_style)
-        OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
-        OffsetBSplineLst = cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,self.S1,self.S2,self.cutoff_style)
-        self.BSplineLst = OffsetBSplineLst
+#    def build_layer(self):
+#        Obsolete
+#        Trimmed_BSplineLst = trim_BSplineLst(self.Boundary_BSplineLst, self.S1, self.S2, 0, 1)
+#        npArray = discretize_BSplineLst(Trimmed_BSplineLst, 1e-3) 
+#        offlinepts = shp_parallel_offset(npArray,self.thickness,self.join_style)
+#        OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
+#        OffsetBSplineLst = cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,self.S1,self.S2,self.cutoff_style)
+#        self.BSplineLst = OffsetBSplineLst
     
-    def build_layer2(self):
+    def build_layer(self):
         npArray = discretize_BSplineLst(self.Boundary_BSplineLst, 1e-3) 
         offlinepts = shp_parallel_offset(npArray,self.thickness,self.join_style)
         OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
         OffsetBSplineLst = cutoff_layer(self.Boundary_BSplineLst,OffsetBSplineLst,self.S1,self.S2,self.cutoff_style)
         self.BSplineLst = OffsetBSplineLst
          
+        
+    def determine_a_nodes(self,LayerLst,global_minLen):
+        nLayers = len(LayerLst)
+        new_a_nodes=[]
+        for iv_counter,iv in enumerate(self.inverse_ivLst):
+            if int(iv[2])==nLayers: 
+                #print iv, "equidistand nodes on BsplineLst of LayerLst entry",
+                eq_nodes = []
+                BSplineLst = self.a_BSplineLst             
+                iv_BSplineLst = trim_BSplineLst(BSplineLst,iv[0],iv[1],self.S1,self.S2  )
+                if iv_counter==0 and len(self.inverse_ivLst)>1: #first but not last
+                    IncStart=True
+                    IncEnd=False
+                
+                elif iv_counter==0 and len(self.inverse_ivLst)==1: #first and last
+                    IncStart=True
+                    IncEnd=True
+
+                elif iv_counter==len(self.inverse_ivLst)-1 and len(self.inverse_ivLst)>1: #last but not first
+                    if  iv_counter==len(self.inverse_ivLst)-1 and iv[1]==1 and self.inverse_ivLst[0][0]==0:
+                        IncStart=False
+                        IncEnd=False
+                    else:
+                        IncStart=False
+                        IncEnd=True
+                                        
+                else:
+                    IncStart=False
+                    IncEnd=False
+                
+                eq_nodes = equidistant_nodes_on_BSplineLst(iv_BSplineLst, True, IncStart, IncEnd, minLen = global_minLen, LayerID = self.ID[0])
+                new_a_nodes.extend(eq_nodes)
+
+                
+            else:
+                #print iv, "use nodes b_nodes of layer", int(iv[2])
+                tmp_layer = LayerLst[int(iv[2])]
+                iv_BSplineLst = trim_BSplineLst(tmp_layer.b_BSplineLst,iv[0],iv[1],tmp_layer.S1,tmp_layer.S2 )
+                isClosed = iv_BSplineLst[0].StartPoint().IsEqual(iv_BSplineLst[-1].EndPoint(),1e-5)
+               
+                if isClosed:
+                    tmp_nodes = tmp_layer.b_nodes
+                else: 
+                    tmp_nodes = [tmp_layer.a_nodes[0]]+tmp_layer.b_nodes+[tmp_layer.a_nodes[-1]]
+                
+                disco_nodes = grab_nodes_on_BSplineLst(tmp_nodes,iv_BSplineLst)
+                new_a_nodes.extend(disco_nodes)
+        
+        self.a_nodes = new_a_nodes
+
+    
     def show(self): #display the layer with pythonocc viewer module
         """
         TBD: renders the topological entity in the viewer: 

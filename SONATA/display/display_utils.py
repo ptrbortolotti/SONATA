@@ -197,17 +197,17 @@ def display_SONATA_SegmentLst(display,SegmentLst,Dx=0,alpha=0,beta=0):
             wire = translate_wire(wire,gp_Pnt(0,0,0),gp_Pnt(Dx,0,0))
             
             display.DisplayColoredShape(wire, Quantity_Color(R, G, B, 0),update=True)
-            #display Start Point
-            string = 'Layer:'+str(layer.ID)+'(S1='+str(layer.S1)+')'
-            P = gp_Pnt(layer.StartPoint.X(),layer.StartPoint.Y(),0)
-            display.DisplayShape(P,color="BLUE")
-            display.DisplayMessage(P,string,message_color=(0.0,0.0,0.0))
-            
-            #display End Point
-            string = 'Layer:'+str(layer.ID)+'(S1='+str(layer.S2)+')'
-            P = gp_Pnt(layer.EndPoint.X(),layer.EndPoint.Y(),0)
-            display.DisplayShape(P,color="RED")
-            display.DisplayMessage(P,string,message_color=(0.0,0.0,0.0))
+#            #display Start Point
+#            string = 'Layer:'+str(layer.ID)+'(S1='+str(layer.S1)+')'
+#            P = gp_Pnt(layer.StartPoint.X(),layer.StartPoint.Y(),0)
+#            display.DisplayShape(P,color="BLUE")
+#            display.DisplayMessage(P,string,message_color=(0.0,0.0,0.0))
+#            
+#            #display End Point
+#            string = 'Layer:'+str(layer.ID)+'(S1='+str(layer.S2)+')'
+#            P = gp_Pnt(layer.EndPoint.X(),layer.EndPoint.Y(),0)
+#            display.DisplayShape(P,color="RED")
+#            display.DisplayMessage(P,string,message_color=(0.0,0.0,0.0))
             k = k+1;
             if k>5:
                 k = 0

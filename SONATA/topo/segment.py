@@ -103,7 +103,7 @@ class Segment(object):
         return iv_BSplineLst
     
     
-    def build_layers2(self):
+    def build_layers(self):
         '''The build_layers member function of the class Segment generates all Layer objects and it's associated wires
         and return the relevant_boundary_BSplineLst'''
         #plot_layup_projection(self.Layup)
@@ -115,7 +115,7 @@ class Segment(object):
             tmp_Layer = Layer(i,relevant_boundary_BSplineLst, self.Layup[i-1][0], 
                               self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],
                               self.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
-            tmp_Layer.build_layer2() 
+            tmp_Layer.build_layer() 
             tmp_Layer.ivLst = self.Projection[i-1]
             tmp_Layer.inverse_ivLst = inverse_relevant_cummulated_layup_boundaries(self.Layup)[i-1]
             tmp_Layer.build_wire()
@@ -123,7 +123,7 @@ class Segment(object):
     
         return relevant_boundary_BSplineLst
                 
-    def determine_final_boundary2(self):
+    def determine_final_boundary(self):
         '''The member function determin_final_boundary2 generates the 
         BSplineLst that encloses all Layers of the Segement. This final 
         boundary is needed for the generation of the subordinate segments, 
@@ -139,41 +139,7 @@ class Segment(object):
         self.final_Boundary_BSplineLst = self.ivLst_to_BSplineLst(projectionlist[-1])
         return None
 
-        
-    def build_layers(self):
-        '''version1-does not work with the Projection'''
-        #plot_layup_projection(self.Layup)
-        for i in range(1,len(self.Layup)+1):
-            print "STATUS:\t Building Segment %d, Layer: %d" % (self.ID,i)
-            new_Boundary_BSplineLst = []
-           
-            #get_boundary_layer
-            if i == 1:
-                new_Boundary_BSplineLst = self.BSplineLst
-                
-            else:
-                new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, 0, self.LayerLst[-1].S1, 0, 1)  #start und ende der lage
-                new_Boundary_BSplineLst += copy_BSplineLst(self.LayerLst[-1].BSplineLst)
-                new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, self.LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
-                new_Boundary_BSplineLst = set_BSplineLst_to_Origin(new_Boundary_BSplineLst,self.Theta)
-        
-            #CREATE LAYER Object
-            tmp_Layer = Layer(i,new_Boundary_BSplineLst, self.Layup[i-1][0], self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],self.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
-            tmp_Layer.build_layer() 
-            tmp_Layer.build_wire()
-            self.LayerLst.append(tmp_Layer)     
-    
-    def determine_final_boundary(self):
-        '''version1-does not work with the Projection'''
-        new_Boundary_BSplineLst = []
-        new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, 0, self.LayerLst[-1].S1, 0, 1)  #start und ende der lage
-        new_Boundary_BSplineLst += copy_BSplineLst(self.LayerLst[-1].BSplineLst)
-        new_Boundary_BSplineLst += trim_BSplineLst(self.LayerLst[-1].Boundary_BSplineLst, self.LayerLst[-1].S2, 1, 0, 1)  #start und ende der lage
-        new_Boundary_BSplineLst = set_BSplineLst_to_Origin(new_Boundary_BSplineLst)
-        self.final_Boundary_BSplineLst = new_Boundary_BSplineLst
-        
 
-    
     def copy(self):
         BSplineLstCopy =  copy_BSplineLst(self.BSplineLst)
         SegmentCopy = Segment(self.ID, Layup = self.Layup, CoreMaterial = self.CoreMaterial, OCC = True, Boundary = BSplineLstCopy)

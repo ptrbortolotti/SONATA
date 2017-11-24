@@ -10,46 +10,9 @@ from SONATA.topo.BSplineLst_utils import get_BSplineLst_Pnt2d, intersect_BSpline
 from SONATA.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
 
 class Web(object):
-    """
-    Does nothing more than demonstrate syntax.
-    
-    This is an example of how a Pythonic human-readable docstring can
-    get parsed by doxypypy and marked up with Doxygen commands as a
-    regular input filter to Doxygen.
-    
-    Args:
-    arg1: A positional argument.
-    arg2: Another positional argument.
-    
-    Kwargs:
-    kwarg: A keyword argument.
-    
-    Returns:
-    A string holding the result.
-    
-    Raises:
-    ZeroDivisionError, AssertionError, & ValueError.
-    
-    Examples:
-    >>> myfunction(2, 3)
-    '5 - 0, whatever.'
-    >>> myfunction(5, 0, 'oops.')
-    Traceback (most recent call last):
-    ...
-    ZeroDivisionError: integer division or modulo by zero
-    >>> myfunction(4, 1, 'got it.')
-    '5 - 4, got it.'
-    >>> myfunction(23.5, 23, 'oh well.')
-    Traceback (most recent call last):
-    ...
-    AssertionError
-    >>> myfunction(5, 50, 'too big.')
-    Traceback (most recent call last):
-    ...
-    ValueError
-    """
-
-   
+      #Build Webs:
+        #TODO: CHECK IF WEB DEFINITION INTERSECT EACH OTHER
+        #TODO: SORT WEBS BY POS1 VALUES:
     def __init__(self, ID, Pos1, Pos2, Segment0_BSplineLst, Segment0_Boundary_BSplineLst):
         self.ID = ID
         self.Pos1 = Pos1
@@ -67,5 +30,3 @@ class Web(object):
         
         #Intersect Segment0_Boundary_BSplineLst with self.BSpline
         [self.IntPnts,self.IntPnts_Pnt2d] = intersect_BSplineLst_with_BSpline(self.Segment0_Boundary_BSplineLst,self.BSpline_Line)
-        
-        
