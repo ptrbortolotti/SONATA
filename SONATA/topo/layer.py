@@ -190,6 +190,8 @@ class Layer(object):
         self.a_nodes = new_a_nodes
 
     
+    
+    
     def show(self): #display the layer with pythonocc viewer module
         """
         TBD: renders the topological entity in the viewer: 

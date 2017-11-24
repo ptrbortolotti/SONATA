@@ -221,7 +221,9 @@ if FLAG_MESH:
                           
 #            if BSplineLst_Orientation(b_BSplineLst,11) == False:
 #                b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
-                
+            
+            #def mesh_layer()
+            
             a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, proj_tol_1,crit_angle_1, display=displaymesh) 
             #enhanced_cells = modify_cornerstyle_one(cells,b_BSplineLst)
             enhanced_cells, new_b_nodes = modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer.thickness, proj_tol_2,alpha_crit_2,display=displaymesh)
@@ -375,7 +377,7 @@ if FLAG_VABS:
     stdout = stdout.replace('\r\n','\n\t   -')
     stdout = 'STATUS:\t VABS CALCULATIONS COMPLETED: \n\t   -' + stdout
     print stdout 
-    
+    print 'STATUS:\t Total Elapsed Time: %s' % (datetime.now() - startTime)
     
     #VABS Postprocessing:
     BeamProperties = XSectionalProperties(vabs_filename+'.K')

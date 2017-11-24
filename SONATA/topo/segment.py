@@ -99,6 +99,7 @@ class Segment(object):
             
             S1 = iv[0]
             S2 = iv[1]
+            print S1,S2,start,end
             iv_BSplineLst.extend(trim_BSplineLst(BSplineLst,S1,S2,start,end))
         return iv_BSplineLst
     
