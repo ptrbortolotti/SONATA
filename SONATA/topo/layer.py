@@ -19,7 +19,7 @@ class Layer(object):
    
     def __init__(self, ID, Boundary_BSplineLst, globalStart, globalEnd, thickness, Orientation = 0, MatID = 1, **kwargs):
         self.ID = ["%04d" % ID] 	                          #First single Digit: SegmentNb, Last 3 Digits: LayerNb; e.g.: 1029, Segment1, Layer29
-        self.Boundary_BSplineLst = Boundary_BSplineLst        #List of Geom2d_BSplineCurve, Geom_BSplineCurve
+        self.Boundary_BSplineLst = Boundary_BSplineLst        #List of Geom2d_BSplineCurve, Geom_BSplineCurve 
         self.S1 = globalStart	                              #Starting Point in S coordinates
         self.S2 = globalEnd		                              #End Point in S coordinates
         self.thickness = thickness   	                      #in mm
@@ -28,8 +28,9 @@ class Layer(object):
         self.cells = []
         self.ivLst = []
         self.inverse_ivLst = []
-        self.NodeLst = [] #Container to collect all nodes that are on this Layer-BSplineLst!
-        self.Cells = [] #Container to collet all cells that are composing this layere
+        self.a_nodes = []
+        self.b_nodes = []
+        self.cells = [] #Container to collet all cells that are composing this layere
 
         #KWARGS:
         if kwargs.get('name') == None:
@@ -52,6 +53,7 @@ class Layer(object):
         #self.wire = []                                     #Make Wire from BSplineSegments
         #self.display_set = False  
     
+
     
     @property
     def StartPoint(self): #gp_Pnt2d
@@ -60,7 +62,18 @@ class Layer(object):
     @property
     def EndPoint(self): #gp_Pnt2d
         return self.BSplineLst[-1].EndPoint()
+    
+    @property
+    def a_BSplineLst(self): #gp_Pnt2d
+        return self.BSplineLst
+    
+    @property
+    def b_BSplineLst(self): #gp_Pnt2d
+        return self.Boundary_BSplineLst
 
+    @property
+    def IsClosed(self):
+        return self.a_BSplineLst[0].StartPoint().IsEqual(self.a_BSplineLst[-1].EndPoint(),1e-5)
     
     def __str__(self): 
         #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 

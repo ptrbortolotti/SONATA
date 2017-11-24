@@ -32,7 +32,6 @@ Created on Mon Dec 19 16:32:15 2016
 import numpy as np
 import matplotlib.pyplot as plt
 import intervaltree 
-import collections
 
 #=====================================================
 def timelines(y, xstart, xstop, c='b'):
@@ -310,13 +309,13 @@ def relevant_cummulated_layup_boundaries(Layup):
                   [  0.25 ,  0.3 ,  0.6  , 45.  ,   2.  ]],)
                   #Start[-]	End[-] thickness [mm] Orientation [deg] MatID
             
-    Returns: 
-        Projection: numpy array of the intervaltree structure of the form:
-                  start end layer#
-        np.array([[ 0.3  0.7  3. ]
-                  [ 0.7  1.   2. ]
-                  [ 0.   0.3  2. ]])                
-    '''
+        Returns: Projection: list of numpy arrays of the intervaltree structure 
+            of the form:
+                          start end layer#
+                  np.array([[ 0.3  0.7  3. ]
+                          [ 0.7  1.   2. ]
+                          [ 0.   0.3  2. ]])                
+    '''              
     nlayers = int(np.size(Layup,0))
     #clean up Layup array
     a = np.delete(Layup,[2,3,4],1)
@@ -340,6 +339,25 @@ def relevant_cummulated_layup_boundaries(Layup):
 
 
 def inverse_relevant_cummulated_layup_boundaries(Layup):
+    ''' The function inverse_relevant_cummulated_layup_boundaries is helpful to
+    determine the a_nodes during the meshing process.
+    It basically uses the relevant_cummulated_layup_boundaries with a flipped
+    Layup definition and assigns the correct layer number.
+    
+    Args:         
+        Layup = np.array([[  0.  ,   0.5  ,   0.23 , 45.  ,   1.  ],
+                  [  0.   ,  1.  ,   0.23 , 45.  ,   1.  ],
+                  [  0.20 ,  0.532,  0.6  , 45.  ,   2.  ],
+                  [  0.25 ,  0.3 ,  0.6  , 45.  ,   2.  ]],)
+                  #Start[-]	End[-] thickness [mm] Orientation [deg] MatID
+            
+    Returns: Projection: list of numpy arrays of the intervaltree structure 
+            of the form:
+                      start end layer#
+            np.array([[ 0.3  0.7  3. ]
+                      [ 0.7  1.   2. ]
+                      [ 0.   0.3  2. ]])                
+    '''              
     flipped_Projection = relevant_cummulated_layup_boundaries(np.flipud(Layup))
     b = np.flipud(np.arange(1,len(Layup)+1))
     d = dict(enumerate(b))
@@ -351,7 +369,7 @@ def inverse_relevant_cummulated_layup_boundaries(Layup):
         inverse_projection.append(np.concatenate((part1, part2.T), axis=1))
 
     inverse_projection = reversed(inverse_projection)
-    return inverse_projection
+    return sort_layup_projection(inverse_projection)
 
 
 
@@ -364,8 +382,13 @@ def plot_layup_projection(Layup):
     Segment0 intervals respectivally unmeshed intervals.
     
     In the middle shows the relenvant part of the cummulated boundaries by 
-    chopping them into the their relevant part 
+    chopping them into the their relevant part . On the top the final Segment
+    boundary is displayed as a cummulated interval between 0 and 1. 
     
+    The right plot shows the inverse relevant cummulated boundaries that are 
+    needed to determine the a_nodes during the meshing procedure. The color 
+    grey marks the unmeshed intervals that need to me discretized by the the 
+    equidistant function.
     
     Args:         
         Layup = np.array([[  0.  ,   0.5  ,   0.23 , 45.  ,   1.  ],
@@ -463,3 +486,5 @@ if __name__ == '__main__':
     
 
     plot_layup_projection(Layup)
+    relevant_projectionlist = relevant_cummulated_layup_boundaries(Layup)
+    inverse_projection = inverse_relevant_cummulated_layup_boundaries(Layup)

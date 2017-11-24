@@ -97,6 +97,7 @@ def isPnt_on_2dcurve(Pnt2d,Curve2d,tolerance=1e-6):
             None           
     return Trigger
 
+
 def isPnt_on_BSplineLst(Pnt2d,BSplineLst,tolerance=1e-6):
     Bool = False
     for item in BSplineLst:
@@ -148,11 +149,6 @@ def get_BSplineLst_length(BSplineLst):
     for i,item in enumerate(BSplineLst):
          CummLength += get_BSpline_length(item)
     return CummLength  
-
-
-
-
-
 
 
 def equidistant_Points_on_BSplineLst(BSplineLst,minLen):
@@ -214,6 +210,22 @@ def find_BSplineLst_coordinate(BSplineLst,S, start, end):
              break
     #print 'idx: '+ str(i) + '     U: '+ str(U) 
     return [i,U]
+
+def find_BSplineLst_pos(BSplineLst,para):
+    idx = para[0]
+    U = para[1]
+    tol=1e-7
+    BSplineLst_length = get_BSplineLst_length(BSplineLst)
+    CummLength = 0
+    for x in range(0, idx):
+        #print 'x',x
+        CummLength += get_BSpline_length(BSplineLst[x])    
+
+    Adaptor = Geom2dAdaptor_Curve(BSplineLst[idx].GetHandle())
+    First = BSplineLst[idx].FirstParameter() 
+    partial_length = GCPnts_AbscissaPoint().Length(Adaptor, First, U, tol)     
+    S = (CummLength + partial_length)/float(BSplineLst_length)
+    return S
 
 
 def reverse_BSplineLst(BSplineLst):

@@ -5,6 +5,7 @@ Created on Fri Mar 03 13:37:55 2017
 @author: TPflumm
 """
 from OCC.gp import gp_Pnt,gp_Pnt2d
+from SONATA.topo.BSplineLst_utils import find_BSplineLst_pos, findPnt_on_BSplineLst
 
 class Node(object):
     class_counter= 1
@@ -13,7 +14,9 @@ class Node(object):
         self.__class__.class_counter += 1
         
         self.Pnt2d = Pnt2d  #gp_Pnt2d
-        self.parameters = parameters    #[LayerID, idx, U]
+        self.parameters = parameters    #[LayerID, idx, U]  'a_0010','b_0010',
+        #self.a_BSplineLst_pos = None   # position between 0 and 1 on a_BSplineLst
+        #self.b_BSplineLst_pos = None   # position between 0 and 1 on b_BSplineLst
         self.corner = False
         self.regular_corner = None
         self.cornerstyle = None
@@ -26,6 +29,16 @@ class Node(object):
     @property
     def coordinates(self):
         return [self.Pnt2d.X(),self.Pnt2d.Y()]  #[x,y]
+    
+    def b_BSplineLst_pos(self,b_BSplineLst):
+        para = findPnt_on_BSplineLst(self.Pnt2d,b_BSplineLst)   #slow but robust
+        #para = [self.parameters[1],self.parameters[2]]          #fast but not so sure if it's robust
+        try:
+            return find_BSplineLst_pos(b_BSplineLst,para)
+        
+        except:
+            print 'Node',self.id,'not on b_BSplineLst'
+            return None
     
     def __repr__(self): 
         return  str('Node: %s @ [%.3f,%.3f]' % (self.id, self.coordinates[0],self.coordinates[1]))
@@ -46,8 +59,7 @@ class Node(object):
     def Distance(self,other):
        return self.Pnt2d.Distance(other.Pnt2d)
    
-    
-        
+
 
 def Pnt2dLst_to_NodeLst(Pnt2dLst):
     NodeLst = []

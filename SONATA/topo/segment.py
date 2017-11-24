@@ -17,7 +17,8 @@ from SONATA.topo.BSplineLst_utils import get_BSpline_length, get_BSplineLst_leng
                             trim_BSplineLst, seg_boundary_from_dct, set_BSplineLst_to_Origin, \
                             copy_BSplineLst, trim_BSplineLst_by_Pnt2d
 from SONATA.topo.wire_utils import trim_wire, build_wire_from_BSplineLst
-from SONATA.topo.projection import cummulated_layup_boundaries, relevant_cummulated_layup_boundaries, plot_layup_projection
+from SONATA.topo.projection import cummulated_layup_boundaries, relevant_cummulated_layup_boundaries,\
+                                    plot_layup_projection, inverse_relevant_cummulated_layup_boundaries
 from SONATA.topo.layer import Layer
 from SONATA.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
 
@@ -116,7 +117,7 @@ class Segment(object):
                               self.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
             tmp_Layer.build_layer2() 
             tmp_Layer.ivLst = self.Projection[i-1]
-            tmp_Layer.inverse_ivLst = relevant_cummulated_layup_boundaries(np.flipud(self.Layup))[len(self.Layup)-i]
+            tmp_Layer.inverse_ivLst = inverse_relevant_cummulated_layup_boundaries(self.Layup)[i-1]
             tmp_Layer.build_wire()
             self.LayerLst.append(tmp_Layer)     
     
@@ -134,6 +135,7 @@ class Segment(object):
             attribute
         '''    
         projectionlist=cummulated_layup_boundaries(self.Layup)
+        self.final_Boundary_ivLst = projectionlist[-1]
         self.final_Boundary_BSplineLst = self.ivLst_to_BSplineLst(projectionlist[-1])
         return None
 

@@ -50,7 +50,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
     #KWARGS:
     if kwargs.get('display') !=  None:
         display = kwargs.get('display')
-    
+
     LayerID = 'T_' + a_nodes[0].parameters[0]
     b_nodes = []
     cellLst = []

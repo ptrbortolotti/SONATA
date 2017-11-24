@@ -104,7 +104,6 @@ def equidistant_nodes_on_BSplineLst(BSplineLst, IC=False, IncStart=True, IncEnd=
             node = Node(Pnt, [LayerID,idx,para])
             nodes.append(node)       
                     
-            
 
     else:
         wire = build_wire_from_BSplineLst(BSplineLst)
@@ -247,6 +246,7 @@ def grab_nodes_on_BSplineLst(nodes,BSplineLst, tolerance=1e-5):
 
 
 def determine_a_nodes(mesh,a_BSplineLst,global_minLen,LayerID,factor=5):
+    #is not needed anymore!
     disco_nodes = grab_nodes_of_cells_on_BSplineLst(mesh,a_BSplineLst)
     #determine distance between neighboring nodes and discover the remaining segments to discretize mit equidistant points!
     non_dct_segments = []
@@ -512,8 +512,11 @@ def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1
                 enhanced_cells.append(c)
         else:
             enhanced_cells.append(c)
-    
-    return enhanced_cells
+    try:
+        new_b_nodes = FrontNodes+BackNodes
+    except:
+        new_b_nodes = []
+    return enhanced_cells,new_b_nodes
 
 
 
@@ -532,6 +535,7 @@ def theta_1_from_2nodes(node1,node2):
 
 def second_stage_improvements(cells,b_BSplineLst,global_minLen,factor1=1.8,factor2=0.15):
     enhanced_cells2 = []
+    new_b_nodes = []
     for i,c in enumerate(cells):
         if len(c.nodes)==4:
             v = gp_Vec2d(c.nodes[1].Pnt2d,c.nodes[2].Pnt2d)
@@ -575,10 +579,16 @@ def second_stage_improvements(cells,b_BSplineLst,global_minLen,factor1=1.8,facto
                 
             else:
                 enhanced_cells2.append(c)
-
+                
         else:
-            enhanced_cells2.append(c) 
-    return enhanced_cells2
+            enhanced_cells2.append(c)
+        
+        try:
+            new_b_nodes.append(newNode)
+        except: 
+            None
+            
+    return enhanced_cells2, new_b_nodes
 
 
 
