@@ -83,7 +83,8 @@ class Segment(object):
                 It has the following form: array([[ 0.2  ,  0.3  ,  6.   ],
                                                   [ 0.3  ,  0.532,  8.   ]])
         returns: iv_BSplineLst: (list of BSplines)
-        '''    
+        '''  
+        
         iv_BSplineLst = []
         for iv in ivLst:
             #print iv[0],iv[1],iv[2]
@@ -96,10 +97,10 @@ class Segment(object):
                 BSplineLst = layer.BSplineLst
                 start = layer.S1
                 end = layer.S2
+
             
             S1 = iv[0]
             S2 = iv[1]
-            print S1,S2,start,end
             iv_BSplineLst.extend(trim_BSplineLst(BSplineLst,S1,S2,start,end))
         return iv_BSplineLst
     

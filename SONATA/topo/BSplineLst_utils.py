@@ -316,6 +316,12 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
     Example: a BSplineLst is defined between 0.0 and 1.0 and shall be trimmed 
             to a interval S1=0.3 and S2=0.7
     '''
+    if start>end: #transfrom the interval if start>end to a basic interval [0..]
+        D = 1-start
+        S1 = (S1+D)%1
+        S2 = (S2+D)%1
+        end = (end+D)%1
+        start = (start+D)%1 
     
     if S1 > S2:
         trimmed_BSplineLst = []
@@ -761,5 +767,6 @@ def set_BSplineLst_to_Origin(BSplineLst,Theta=0):
 
 
 if __name__ == '__main__':
-    execfile("SONATA.py")
+    pass
+    
 
