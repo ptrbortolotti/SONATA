@@ -140,9 +140,10 @@ class Layer(object):
         self.BSplineLst = OffsetBSplineLst
          
         
-    def determine_a_nodes(self,LayerLst,global_minLen):
+    def determine_a_nodes(self,LayerLst,global_minLen,display=None):
         nLayers = len(LayerLst)
         new_a_nodes=[]
+        #print self.inverse_ivLst
         for iv_counter,iv in enumerate(self.inverse_ivLst):
             if int(iv[2])==nLayers: 
                 #print iv, "equidistand nodes on BsplineLst of LayerLst entry",
@@ -174,9 +175,12 @@ class Layer(object):
 
                 
             else:
+                #only use once for each layer!
                 #print iv, "use nodes b_nodes of layer", int(iv[2])
                 tmp_layer = LayerLst[int(iv[2])]
-                iv_BSplineLst = trim_BSplineLst(tmp_layer.b_BSplineLst,iv[0],iv[1],tmp_layer.S1,tmp_layer.S2 )
+                #iv_BSplineLst = trim_BSplineLst(tmp_layer.b_BSplineLst,iv[0],iv[1],tmp_layer.S1,tmp_layer.S2)
+                iv_BSplineLst = trim_BSplineLst(self.a_BSplineLst,iv[0],iv[1],self.S1,self.S2)
+                #iv_BSplineLst = self.a_BSplineLst
                 isClosed = iv_BSplineLst[0].StartPoint().IsEqual(iv_BSplineLst[-1].EndPoint(),1e-5)
                
                 if isClosed:
