@@ -161,7 +161,7 @@ def display_points_of_array(array,display):
 
 
 
-def display_custome_shape(display,shape,linewidth,transparency,RGB):
+def display_custome_shape(display,shape,linewidth=1.0,transparency=0.0,RGB=[0,0,0]):
     s = shape
     ais_shp = AIS_Shape(s)
     ais_shp.SetWidth(linewidth)

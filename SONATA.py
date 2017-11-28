@@ -54,6 +54,7 @@ from datetime import datetime
 #PythonOCC Modules
 from OCC.Display.SimpleGui import init_display
 from OCC.gp import gp_Vec2d
+from OCC.Geom2d import Handle_Geom2d_BSplineCurve_DownCast, Geom2d_Line
 
 #SONATA modules:
 from SONATA.fileIO.readinput import section_config, read_material_input,str2bool
@@ -70,7 +71,11 @@ from SONATA.bladegen.blade import Blade
 
 from SONATA.topo.BSplineLst_utils import reverse_BSplineLst, BSplineLst_Orientation, \
                             get_BSplineLst_length,copy_BSplineLst, trim_BSplineLst, \
-                            find_BSplineLst_pos
+                            find_BSplineLst_pos, get_BSplineLst_Pnt2d, find_BSplineLst_coordinate
+#Own Libraries:
+from SONATA.topo.utils import calc_DCT_angles, Pnt2dLst_to_npArray, \
+                    discrete_stepsize, curvature_of_curve, isclose, unique_rows, \
+                    P2Pdistance, PolygonArea
                             
 from SONATA.mesh.mesh_byprojection import mesh_by_projecting_nodes_on_BSplineLst
 from SONATA.mesh.mesh_core import gen_core_cells
@@ -102,12 +107,12 @@ filename = 'sec_config.input'
 
 FLAG_TOPO = True
 FLAG_MESH = True
-FLAG_VABS = True
-FLAG_SHOW_3D_TOPO = False
-FLAG_SHOW_2D_MESH = True
+FLAG_VABS = False
+FLAG_SHOW_3D_TOPO = True
+FLAG_SHOW_2D_MESH = False
 FLAG_SHOW_3D_MESH = False
 FLAG_EXPORT_STEP = False
-FLAG_MESH_CORE = True
+FLAG_MESH_CORE = False
 
 startTime = datetime.now()
 #=========READ INPUT:===============
@@ -175,6 +180,16 @@ else:
         for layer in seg.LayerLst:
             layer.build_wire()
 
+#%%============================================================================ s
+if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
+    display.set_bg_gradient_color(20,6,111,200,200,200)
+    show_coordinate_system(display,5)
+    
+    if FLAG_SHOW_3D_TOPO:
+        #display_SONATA_SegmentLst(display,SegmentLst)
+        display.View_Top()
+        display.FitAll()
+
 #%%============================================================================ 
 #                           M E S H
 #==============================================================================
@@ -213,23 +228,35 @@ if FLAG_MESH:
 #               a_nodes = equidistant_nodes_on_BSplineLst(a_BSplineLst, True, True, True, minLen = global_minLen, LayerID = layer.ID[0])
 #          else: 
 #                a_nodes = determine_a_nodes(mesh,a_BSplineLst,global_minLen,layer.ID[0],non_dct_factor)
+
             
-            layer.determine_a_nodes(seg.LayerLst,global_minLen)
+            layer.determine_a_nodes(seg.LayerLst,global_minLen,display)
             a_BSplineLst = layer.a_BSplineLst  
             a_nodes = layer.a_nodes
-            b_BSplineLst = layer.b_BSplineLst 
-                          
-#            if BSplineLst_Orientation(b_BSplineLst,11) == False:
-#                b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
+            b_BSplineLst = layer.b_BSplineLst
             
+            
+#            if i==3:
+#                for n in layer.a_nodes:
+#                    display.DisplayShape(n.Pnt2d, color="YELLOW")
+#                    
+#                for s in layer.b_BSplineLst:
+#                    display.DisplayShape(s, color="RED")
+#                
+#                for s in layer.a_BSplineLst:
+#                    display.DisplayShape(s, color="GREEN")
+                
             #def mesh_layer()
             
-            a_nodes, b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, proj_tol_1,crit_angle_1, display=displaymesh) 
+            if BSplineLst_Orientation(b_BSplineLst,11) == False:
+                    b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
+                    
+            a_nodes, b_nodes, enhanced_cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, proj_tol_1,crit_angle_1, display=displaymesh) 
             #enhanced_cells = modify_cornerstyle_one(cells,b_BSplineLst)
-            enhanced_cells, new_b_nodes = modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer.thickness, proj_tol_2,alpha_crit_2,display=displaymesh)
+            enhanced_cells, new_b_nodes = modify_sharp_corners(enhanced_cells,b_BSplineLst,global_minLen,layer.thickness, proj_tol_2,alpha_crit_2,display=displaymesh)
             b_nodes.extend(new_b_nodes)
-            enhanced_cells, new_b_nodes = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen,growing_factor,shrinking_factor)
-            b_nodes.extend(new_b_nodes)
+            #enhanced_cells, new_b_nodes = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen,growing_factor,shrinking_factor)
+            #b_nodes.extend(new_b_nodes)
                                     
             b_nodes = sorted(b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))  
             layer.a_nodes = a_nodes
@@ -240,12 +267,16 @@ if FLAG_MESH:
                 c.theta_3 = layer.Orientation
                 c.MatID = int(layer.MatID)
                 c.structured = True
+                display.DisplayShape(c.wire, color="BLACK")
 
             layer.cells = enhanced_cells
             mesh.extend(enhanced_cells) 
+                        
             mesh,nodes = sort_and_reassignID(mesh)
-        
+            
+
         #===================MESH CORE================================================
+        
         if FLAG_MESH_CORE:
             if seg.ID==0 and len(SegmentLst)>1:
                 pass
@@ -405,7 +436,7 @@ if FLAG_SHOW_2D_MESH:
     if FLAG_VABS:
         plot_cells(mesh, nodes, 'MatID', BeamProperties)
     
-    
+ 
     #plt.savefig('SONATA_MESH.pdf', dpi=900, facecolor='w', edgecolor='w',
     #    orientation='landscape', papertype='a4', format='pdf')
 
@@ -437,7 +468,7 @@ if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
 #    add_function_to_menu('screencapture', 'export to TIFF', partial(export_to_TIFF,display))
     
     if FLAG_SHOW_3D_TOPO:
-        display_SONATA_SegmentLst(display,SegmentLst)
+        
         if Configuration.SETUP_BalanceWeight:
             display.DisplayShape(BW.Curve, color="BLACK")
         #display.DisplayShape(SegmentLst[0].BSplineLst[0].StartPoint())
@@ -461,13 +492,14 @@ if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
        
         else:
             display_SONATA_SegmentLst(display,SegmentLst)
-             
+            pass 
+        
     if FLAG_SHOW_3D_MESH:        
         for c in mesh:
             display.DisplayColoredShape(c.wire, 'BLACK')    
   
-    for spline in SegmentLst[0].final_Boundary_BSplineLst:
-        display.DisplayColoredShape(spline, 'BLACK')    
+#    for spline in SegmentLst[0].final_Boundary_BSplineLst:
+#        display.DisplayColoredShape(spline, 'BLACK')    
     display.View_Top()
     display.FitAll()
     start_display()

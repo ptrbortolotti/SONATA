@@ -57,10 +57,12 @@
 #	0.43		0.55	0.6				0					2		#Spar_3
 	0.44		0.57	0.6				0					2		#Spar_4
 	0.20		0.70	0.6				0					2		#Spar_5
+	0.8			0.2		0.6				0					2		#Trailing Edge Fillers
 	0.40		0.60	0.6				0					2		#Spar_6
 #	0.27		0.73	0.6				0					2		#Spar_7
 #	0.27		0.73	0.6				0					2		#Spar_8
-	0.8			0.2		0.6				0					2		#Trailing Edge Filler
+	0.7			0.25		0.6				0					2		#Trailing Edge Filler
+	0.0			1.0		0.6				0					2		#Trailing Edge Filler
 	&END
 &END 
 

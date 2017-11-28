@@ -417,8 +417,9 @@ def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1
                                 vnP = gp_Vec2d(n.Pnt2d,P)
 
                                 if  len(pPnts)>2:
-                                    print vnP.Dot(v01)
-                                
+                                    print 'vnP.Dot(v01): ', vnP.Dot(v01)
+                                    
+                                    
                                 if vnP.Dot(v01)>0 and trigger_f :
                                     trigger_f = False
                                     FrontNodes.append(Node(P,['',pIdx[i],pPara[i]]))
