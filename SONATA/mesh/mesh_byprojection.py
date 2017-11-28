@@ -61,13 +61,13 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
     closed_a = False
     if a_BSplineLst[0].StartPoint().IsEqual(a_BSplineLst[-1].EndPoint(),1e-5):
         closed_a = True
-                       
+
     #==================PROJECT POINTS ON LOWER BOUNDARY =======================            
     if closed_a == True:
         prj_nodes = a_nodes
     else:
         prj_nodes = a_nodes[1:-1]
-    
+            
     for i,node in enumerate(prj_nodes, start=1):
         Pnt2d = node.Pnt2d
         pPnts = []
@@ -143,7 +143,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
             b_BSplineLst[pIdx[0]].D1(pPara[0],p_tmp,vp0)
             b_BSplineLst[pIdx[1]].D1(pPara[1],p_tmp,vp1)
             dot0 = vres.Dot(vp0)
-            dot1 = vres.Dot(vp1)
+            #dot1 = vres.Dot(vp1)
             
             if dot0<0:
                 node.regular_corner = False
@@ -198,7 +198,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
                         exterior_corners_para.append([LayerID,idx,u1])  
                         #display.DisplayShape(item.EndPoint(),color='WHITE')
     
-            #=======================generate b_nodes 
+            #=======================generate b_nodes===========================
             #print node,'corner: ', node.corner, ', regular_corner = ',node.regular_corner, ',  Len:exterior_corners =',len(exterior_corners)
             if len(exterior_corners) == 0 and node.corner==True:
                 node.cornerstyle = 2
@@ -305,63 +305,63 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
     
         
     #==============REVERSED PROJECTION=========================================
-    leftover_exterior = [] 
-    leftover_exterior_para = []
-    for i,item in enumerate(b_BSplineLst[:-1]):
-        spline1 = item
-        spline2 = b_BSplineLst[i+1]
-        u1,p1,v1 = spline1.LastParameter(),gp_Pnt2d(),gp_Vec2d()
-        u2,p2,v2  = spline2.FirstParameter(),gp_Pnt2d(),gp_Vec2d()
-        spline1.D1(u1,p1,v1)
-        spline2.D1(u2,p2,v2)
-        
-        Angle = abs(v1.Angle(v2))*180/np.pi       
-        if Angle>0.5:
-            leftover_exterior.append(item.EndPoint())
-            leftover_exterior_para.append([LayerID,i,u1])  
-    
-    #find exterior corner Points that are not part of b_nodes
-    to_delete = []
-    LinearTolerance = 1e-3
-    for idx,corn in enumerate(leftover_exterior):
-        for node in b_nodes:
-            if node.Pnt2d.IsEqual(corn, LinearTolerance):
-                to_delete.append(idx)
-                break                
-    
-    for offset,idx in enumerate(to_delete):
-        idx -= offset
-        del leftover_exterior[idx]
-        del leftover_exterior_para[idx]
-    
-    #print len(leftover_exterior)
-    #do the reversed projection! -> the original Pnt2dLst must be modified and be returned as well!
-    leftover_interior = []
-    leftover_interior_para = []
-    for Pnt2d in leftover_exterior:
-        pPnts = []
-        pIdx = []
-        pPara = []
-        for idx,item in enumerate(a_BSplineLst):
-            projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item.GetHandle())
-            for i in range(1,projection.NbPoints()+1):
-                if projection.Distance(i)<=distance:
-                    pPnts.append(projection.Point(i))
-                    pPara.append(projection.Parameter(i))
-                    pIdx.append(idx)
-              
-        if len(pPnts) == 1:
-            leftover_interior.append(pPnts[0])
-            leftover_interior_para.append([a_nodes[0].parameters[0],pIdx[0],pPara[0]]) 
-
-
-    
-    leftover_exterior_nodes = []
-    leftover_interior_nodes = []
-    #print len(leftover_exterior), len(leftover_interior)
-    for i,p in enumerate(leftover_interior):
-        leftover_exterior_nodes.append(Node(leftover_exterior[i],leftover_exterior_para[i]))
-        leftover_interior_nodes.append(Node(leftover_interior[i],leftover_interior_para[i]))
+#    leftover_exterior = [] 
+#    leftover_exterior_para = []
+#    for i,item in enumerate(b_BSplineLst[:-1]):
+#        spline1 = item
+#        spline2 = b_BSplineLst[i+1]
+#        u1,p1,v1 = spline1.LastParameter(),gp_Pnt2d(),gp_Vec2d()
+#        u2,p2,v2  = spline2.FirstParameter(),gp_Pnt2d(),gp_Vec2d()
+#        spline1.D1(u1,p1,v1)
+#        spline2.D1(u2,p2,v2)
+#        
+#        Angle = abs(v1.Angle(v2))*180/np.pi       
+#        if Angle>0.5:
+#            leftover_exterior.append(item.EndPoint())
+#            leftover_exterior_para.append([LayerID,i,u1])  
+#    
+#    #find exterior corner Points that are not part of b_nodes
+#    to_delete = []
+#    LinearTolerance = 1e-3
+#    for idx,corn in enumerate(leftover_exterior):
+#        for node in b_nodes:
+#            if node.Pnt2d.IsEqual(corn, LinearTolerance):
+#                to_delete.append(idx)
+#                break                
+#    
+#    for offset,idx in enumerate(to_delete):
+#        idx -= offset
+#        del leftover_exterior[idx]
+#        del leftover_exterior_para[idx]
+#    
+#    #print len(leftover_exterior)
+#    #do the reversed projection! -> the original Pnt2dLst must be modified and be returned as well!
+#    leftover_interior = []
+#    leftover_interior_para = []
+#    for Pnt2d in leftover_exterior:
+#        pPnts = []
+#        pIdx = []
+#        pPara = []
+#        for idx,item in enumerate(a_BSplineLst):
+#            projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item.GetHandle())
+#            for i in range(1,projection.NbPoints()+1):
+#                if projection.Distance(i)<=distance:
+#                    pPnts.append(projection.Point(i))
+#                    pPara.append(projection.Parameter(i))
+#                    pIdx.append(idx)
+#              
+#        if len(pPnts) == 1:
+#            leftover_interior.append(pPnts[0])
+#            leftover_interior_para.append([a_nodes[0].parameters[0],pIdx[0],pPara[0]]) 
+#
+#
+#    
+#    leftover_exterior_nodes = []
+#    leftover_interior_nodes = []
+#    #print len(leftover_exterior), len(leftover_interior)
+#    for i,p in enumerate(leftover_interior):
+#        leftover_exterior_nodes.append(Node(leftover_exterior[i],leftover_exterior_para[i]))
+#        leftover_interior_nodes.append(Node(leftover_interior[i],leftover_interior_para[i]))
     
 
     #======INSERT LEFTOVER NODES ==============================================
@@ -388,7 +388,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
 
 
     #==============CREATE CELLS PROJECTION=========================================
-    #Last Cell as Triangle:
+    
     b = 0   #b_nodes idx
     if closed_a == True:
         start = 0
@@ -406,6 +406,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
         elif closed_a == False and a == len(a_nodes)-2: #End Triangle
             cellLst.append(Cell([a_nodes[a-1],b_nodes[b-1],b_nodes[b],a_nodes[a]]))
             cellLst.append(Cell([a_nodes[a],b_nodes[b],a_nodes[a+1]]))
+            #print cellLst[-1]
 
         else: #Regular Cell Creation
             if a_nodes[a].cornerstyle == 2 or a_nodes[a].cornerstyle==3:
@@ -423,7 +424,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
             
             else:
                 cellLst.append(Cell([a_nodes[a-1],b_nodes[b-1],b_nodes[b],a_nodes[a]]))
-        
+
         b += 1
         
         
