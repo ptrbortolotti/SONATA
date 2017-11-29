@@ -310,6 +310,15 @@ def remove_dublicate_nodes(nodes,tol=1e-6):
         nodes.remove(dn)
     return nodes
 
+
+def remove_duplicates_from_list_preserving_order(seq):
+    seen = set()
+    seen_add = seen.add
+    return [x for x in seq if not (x in seen or seen_add(x))]
+
+
+
+
 def modify_cornerstyle_one(cells,b_BSplineLst,**kwargs):
     
     #KWARGS:
@@ -382,7 +391,8 @@ def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1
                 
                 #print c,angle
                 if angle < alpha_crit:
-                    #display.DisplayShape(c.nodes[0].Pnt2d,color='RED')
+#                    display.DisplayShape(c.nodes[0].Pnt2d,color='RED')
+#                    display.DisplayShape(c.nodes[2].Pnt2d,color='GREEN')
                     L = c.nodes[0].Pnt2d.Distance(c.nodes[2].Pnt2d)*1.5
                     BS_Vec2d = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[2].Pnt2d)
                     MiddleNodes = []
@@ -403,17 +413,20 @@ def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1
                             projection = Geom2dAPI_ProjectPointOnCurve(n.Pnt2d,item.GetHandle())
                             for j in range(1,projection.NbPoints()+1):
                                 if projection.Distance(j)<=distance:
-                                    pPnts.append(projection.Point(j))
-                                    pPara.append(projection.Parameter(j))
-                                    pIdx.append(idx)
+                                    if not any(item.IsEqual(projection.Point(j),1e-6) for item in pPnts):
+                                        pPnts.append(projection.Point(j))
+                                        pPara.append(projection.Parameter(j))
+                                        pIdx.append(idx)
                                 else: None
                         
-                        #print 'Nuber of Projected Middle Nodes pPnts:', len(pPnts)
+
+                        
+                        #print 'Nuber of Projected Middle Nodes pPnts:', len(pPnts)                        
                         trigger_f = True
                         trigger_b = True
                         for i,P in enumerate(pPnts):
                                 v01 = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[1].Pnt2d)
-                                v03 = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[3].Pnt2d)
+                                #v03 = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[3].Pnt2d)
                                 vnP = gp_Vec2d(n.Pnt2d,P)
 
                                 if  len(pPnts)>2:
@@ -429,9 +442,8 @@ def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1
                                     BackNodes.append(Node(P,['',pIdx[i],pPara[i]]))
                                 
                                 else:
-                                    print 'ERROR: cannot determine FRONT and BACK nodes because vnp and v01 are orthogonal'
-            
-                                
+                                    print 'ERROR: cannot determine FRONT and BACK nodes @ ',c.nodes[0], 'because vnp and v01 are orthogonal'
+                                    print pPara
 #                            if c.nodes[1].Pnt2d.Distance(P)<c.nodes[3].Pnt2d.Distance(P):
 #                                FrontNodes.append(Node(P,['',pIdx[i],pPara[i]]))
 #                            else: 
@@ -440,7 +452,7 @@ def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1
 #                        for mn in MiddleNodes:
 #                              display.DisplayShape(mn.Pnt2d,color='BLUE')
 #                              display.DisplayMessage(mn.Pnt,str(mn.id),message_color=(1,1,1))    
-#                            
+#                          
 #                        for fn in FrontNodes:
 #                              display.DisplayShape(fn.Pnt2d,color='ORANGE')
 #                              display.DisplayMessage(fn.Pnt,str(fn.id),message_color=(1,1,1))
@@ -452,7 +464,7 @@ def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1
                           
                     #=====================CREATE FRONT CELLS
                     FrontCellLst = []
-                    #print 'len(Middle):',len(MiddleNodes),'len(Front):',len(FrontNodes),'len(Back):',len(BackNodes)
+                    #print '@', c.nodes[0],'  len(Middle):',len(MiddleNodes),'len(Front):',len(FrontNodes),'len(Back):',len(BackNodes)
                     
                     for i in range(0,len(MiddleNodes)):
         
@@ -541,14 +553,13 @@ def second_stage_improvements(cells,b_BSplineLst,global_minLen,factor1=1.8,facto
         if len(c.nodes)==4:
             v = gp_Vec2d(c.nodes[1].Pnt2d,c.nodes[2].Pnt2d)
             magnitude = v.Magnitude()
-            cP = c.nodes[1].Pnt2d.Translated(v.Multiplied(0.5)) 
-            #display.DisplayColoredShape(cP, 'GREEN')  
-            p2 = ProjectPointOnBSplineLst(b_BSplineLst,cP,1)
-            #display.DisplayColoredShape(p2[0], 'YELLOW')  
-            
+
             #SPLIT CELLS INTO TRIANGLES AND ADD NODE!
             if magnitude>=factor1*global_minLen:
-                #display.DisplayColoredShape(p2[0], 'ORANGE')
+                cP = c.nodes[1].Pnt2d.Translated(v.Multiplied(0.5)) 
+                #display.DisplayColoredShape(cP, 'GREEN')  
+                p2 = ProjectPointOnBSplineLst(b_BSplineLst,cP,1)
+                #display.DisplayColoredShape(p2[0], 'YELLOW')  
                 nodeLst = c.nodes
                 newNode = Node(p2[0],['test',p2[1],p2[2]])
                 #MODIFY EXISTING CELL
@@ -564,6 +575,9 @@ def second_stage_improvements(cells,b_BSplineLst,global_minLen,factor1=1.8,facto
                 
             #MERGE NODES when to small
             elif magnitude<=factor2*global_minLen:
+                cP = c.nodes[1].Pnt2d.Translated(v.Multiplied(0.5)) 
+                #display.DisplayColoredShape(cP, 'GREEN')  
+                p2 = ProjectPointOnBSplineLst(b_BSplineLst,cP,1)
                 #display.DisplayColoredShape(p2[0], 'RED')
                 nodeLst = c.nodes
                 #Modify Node 2
@@ -592,10 +606,24 @@ def second_stage_improvements(cells,b_BSplineLst,global_minLen,factor1=1.8,facto
     return enhanced_cells2, new_b_nodes
 
 
+def merge_nodes_if_too_close(nodes,BSplineLst,global_minLen,tol=0.1):
+    rm_idx=[]
+    for i,n1 in enumerate(nodes[1:], start=1):
+        n2 = nodes[i-1]
+        v = gp_Vec2d(n1.Pnt2d,n2.Pnt2d)
+        magnitude = v.Magnitude()
 
-
-
-
+        if magnitude<=tol*global_minLen:
+            cP = n1.Pnt2d.Translated(v.Multiplied(0.5))
+            p2 = ProjectPointOnBSplineLst(BSplineLst,cP,1)
+            n1.Pnt2d = p2[0]
+            n1.parameters = ['modified',p2[1],p2[2]]
+            rm_idx.append(i-1)
+            
+    for index in sorted(rm_idx, reverse=True):
+        del nodes[index] 
+            
+    return nodes
 
 def export_cells(cells, filename):
     #Get all nodes in cells

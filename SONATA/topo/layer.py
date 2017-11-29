@@ -9,8 +9,11 @@ from SONATA.topo.wire_utils import build_wire_from_BSplineLst
 from SONATA.topo.cutoff import cutoff_layer
 from SONATA.topo.offset import shp_parallel_offset
 from SONATA.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
-
-from SONATA.mesh.mesh_utils import equidistant_nodes_on_BSplineLst, grab_nodes_on_BSplineLst
+                                
+from SONATA.mesh.mesh_byprojection import mesh_by_projecting_nodes_on_BSplineLst
+from SONATA.mesh.mesh_utils import modify_cornerstyle_one, modify_sharp_corners,second_stage_improvements,grab_nodes_of_cells_on_BSplineLst,\
+                                 equidistant_nodes_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
+                                 grab_nodes_on_BSplineLst, remove_duplicates_from_list_preserving_order, merge_nodes_if_too_close
 class Layer(object):
     ''' 
     The layer object is constructed from multiple BSplineCurveSegments. It is the basis for all future operations. 
@@ -123,17 +126,10 @@ class Layer(object):
         self.BSplineLst = trim_BSplineLst(self.BSplineLst, self.globalStart, self.globalEnd,  start, end)
         return self.BSplineLst
             
-#    def build_layer(self):
-#        Obsolete
-#        Trimmed_BSplineLst = trim_BSplineLst(self.Boundary_BSplineLst, self.S1, self.S2, 0, 1)
-#        npArray = discretize_BSplineLst(Trimmed_BSplineLst, 1e-3) 
-#        offlinepts = shp_parallel_offset(npArray,self.thickness,self.join_style)
-#        OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
-#        OffsetBSplineLst = cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,self.S1,self.S2,self.cutoff_style)
-#        self.BSplineLst = OffsetBSplineLst
     
     def build_layer(self):
-        npArray = discretize_BSplineLst(self.Boundary_BSplineLst, 1e-3) 
+        deflection = 1e-3
+        npArray = discretize_BSplineLst(self.Boundary_BSplineLst, deflection) 
         offlinepts = shp_parallel_offset(npArray,self.thickness,self.join_style)
         OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
         OffsetBSplineLst = cutoff_layer(self.Boundary_BSplineLst,OffsetBSplineLst,self.S1,self.S2,self.cutoff_style)
@@ -172,7 +168,7 @@ class Layer(object):
                 
                 eq_nodes = equidistant_nodes_on_BSplineLst(iv_BSplineLst, True, IncStart, IncEnd, minLen = global_minLen, LayerID = self.ID[0])
                 new_a_nodes.extend(eq_nodes)
-
+                
                 
             else:
                 #only use once for each layer!
@@ -191,9 +187,54 @@ class Layer(object):
                 disco_nodes = grab_nodes_on_BSplineLst(tmp_nodes,iv_BSplineLst)
                 new_a_nodes.extend(disco_nodes)
         
-        self.a_nodes = new_a_nodes
+        
+        self.a_nodes = remove_duplicates_from_list_preserving_order(new_a_nodes)
+        self.a_nodes =  merge_nodes_if_too_close(self.a_nodes,self.a_BSplineLst,global_minLen,0.1)
+        
+        
+        
+    def mesh_layer(self, LayerLst, global_minLen, proj_tol_1= 5e-2, 
+                   proj_tol_2= 5e-2, crit_angle_1 = 115, alpha_crit_2 = 60, 
+                   growing_factor=1.8, shrinking_factor=0.1, **kwargs):
+        '''
+        Args:
+            proj_tol_1 = 5e-2
+            proj_tol_2 = 5e-2
+            crit_angle_1 = 115
+            alpha_crit_2 = 60
+            growing_factor = 1.8   #critical growing factor of cell before splitting 
+            shrinking_factor = 0.10  #critical shrinking factor for cells before merging nodes
+        '''
+        
+        if kwargs.get('display') !=  None:
+            displaymesh = kwargs.get('display')
+        else: 
+             displaymesh=None 
+        
+        b_nodes = []
+        self.determine_a_nodes(LayerLst,global_minLen,displaymesh)
+                   
+#        if BSplineLst_Orientation(b_BSplineLst,11) == False:
+#                b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
+                
+        self.a_nodes, self.b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(self.a_BSplineLst,self.a_nodes,self.b_BSplineLst,self.thickness, proj_tol_1,crit_angle_1, display=displaymesh) 
+        #enhanced_cells = modify_cornerstyle_one(cells,self.b_BSplineLst)
+        cells, nb_nodes = modify_sharp_corners(cells,self.b_BSplineLst,global_minLen,self.thickness, proj_tol_2,alpha_crit_2,display=displaymesh)
+        self.b_nodes.extend(nb_nodes)
+        cells, nb_nodes = second_stage_improvements(cells,self.b_BSplineLst,global_minLen,growing_factor,shrinking_factor)
+        b_nodes.extend(nb_nodes)
+                                
+        self.b_nodes = sorted(self.b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))  
+        
+        for c in cells:
+            c.calc_theta_1()
+            c.theta_3 = self.Orientation
+            c.MatID = int(self.MatID)
+            c.structured = True
+            #display.DisplayShape(c.wire, color="BLACK")
 
-    
+        self.cells = cells
+        return self.cells
     
     
     def show(self): #display the layer with pythonocc viewer module

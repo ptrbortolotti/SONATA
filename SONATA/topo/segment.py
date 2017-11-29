@@ -111,12 +111,17 @@ class Segment(object):
         for i in range(1,len(self.Layup)+1):
             print "STATUS:\t Building Segment %d, Layer: %d" % (self.ID,i)
             relevant_boundary_BSplineLst = self.ivLst_to_BSplineLst(self.Projection[i-1])
-
+            
             #CREATE LAYER Object
             tmp_Layer = Layer(i,relevant_boundary_BSplineLst, self.Layup[i-1][0], 
                               self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],
                               self.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
+            
             tmp_Layer.build_layer() 
+            
+            if tmp_Layer.S1 == 0.0 and tmp_Layer.S2 == 1.0:
+                tmp_Layer.BSplineLst = set_BSplineLst_to_Origin(tmp_Layer.BSplineLst,self.Theta)
+            
             tmp_Layer.ivLst = self.Projection[i-1]
             tmp_Layer.inverse_ivLst = inverse_relevant_cummulated_layup_boundaries(self.Layup)[i-1]
             tmp_Layer.build_wire()
