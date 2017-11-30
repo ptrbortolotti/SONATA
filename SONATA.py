@@ -112,7 +112,7 @@ FLAG_SHOW_3D_TOPO = True
 FLAG_SHOW_2D_MESH = True
 FLAG_SHOW_3D_MESH = False
 FLAG_EXPORT_STEP = False
-FLAG_MESH_CORE = False
+FLAG_MESH_CORE = True
 
 startTime = datetime.now()
 #=========READ INPUT:===============
@@ -441,9 +441,9 @@ if FLAG_SHOW_2D_MESH:
 #    
 #    import os  
 #    os.system("img/lualatex minimal_latex.tex")
-    
-    if VABSsetup.recover_flag == 1:
-        plot_cells(mesh, nodes, 'stress.sigma11', BeamProperties,'NACA0012, 150mm chord')
+    if FLAG_VABS:
+        if VABSsetup.recover_flag == 1:
+            plot_cells(mesh, nodes, 'stress.sigma11', BeamProperties,'NACA0012, 150mm chord')
 
 
 #====================3D: OCC-DISPLAY=====================

@@ -17,28 +17,28 @@
 &DEFN Setup
 	mat_filename = mat_database.input	#Path and filename of the Material Database
 	NbOfWebs = 0						#Number of Webs (0=CSpar, 1=Dspar,...)		[int]			DEFAULT=0
-	BalanceWeight = False 				#True or False for Balance Weight			[boolean]		DEFAULT=FALSE
+	BalanceWeight = True 				#True or False for Balance Weight			[boolean]		DEFAULT=FALSE
 	input_type = 0						#0) Airfoil from UIUC Database; 1) Geometry from .dat file; 2)2d .step or .iges 3)3D .step or .iges and radial station of crosssection 	4) generate 3D-Blade from twist,taper,airfoils,1/4-line			[int] DEFAULT=0	
 	datasource = n0012					#0)	naca23012					1) AREA_R250.dat			2)AREA_R230.stp	 			3)AREA_Blatt_L.stp	 4)folder of data 						[string] DEFAULT=NONE
 	radial_station = 250				#Radial station of crosssection. Only necessary for input type 3. [float]	Default=NONE
 	scale_factor = 150	 				#use as reference scale factor				[float] 		DEFAULT=1
 	Theta = 0							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
-	mesh_resolution = 300				#Scales approximately to the number of points on Segment0
+	mesh_resolution = 240				#Scales approximately to the number of points on Segment0
 &END 
 
 
 #===============================WEB DEFINITION==========================
-&DEFN Web
-	WebID = 1						#Web ID 									[int]													
-	Pos1 = 0.35						#first Position (between 0 and 1) 			[float]
-	Pos2 = 0.68						#second Position (between 0 and 1) 			[float]
-&END
+#&DEFN Web
+#	WebID = 1						#Web ID 									[int]													
+#	Pos1 = 0.35						#first Position (between 0 and 1) 			[float]
+#	Pos2 = 0.68						#second Position (between 0 and 1) 			[float]
+#&END
 
-&DEFN Web
-	WebID = 2						#Web ID 									[int]													
-	Pos1 = 0.28						#first Position (between 0 and 1) 			[float]
-	Pos2 = 0.80						#second Position (between 0 and 1) 			[float]
-&END
+#&DEFN Web
+#	WebID = 2						#Web ID 									[int]													
+#	Pos1 = 0.28						#first Position (between 0 and 1) 			[float]
+#	Pos2 = 0.80						#second Position (between 0 and 1) 			[float]
+#&END
 
 
 #===============================COMPOSITE LAYUP DEFINITION==============
@@ -51,20 +51,16 @@
 	0.0			1.0		0.24			45					1		#Skin_1	
  	0.0			1.0		0.24			45					1		#Skin_2
 	0.0			1.0		0.24			45					1		#Skin_3	
-	0.0			1.0		0.24			45					1		#Skin_4
+ #	0.0			1.0		0.24			45					1		#Skin_4
 	0.36		0.63	0.6				0					2		#Spar_1
 	0.43		0.55	0.6				0					2		#Spar_2
-	0.44		0.57	0.6				0					2		#Spar_4
-	0.20		0.70	0.6				0					2		#Spar_5
-	0.8			0.2		0.6				0					2		#Trailing Edge Fillers
+	0.44		0.56	0.6				0					2		#Spar_3
+	0.45		0.57	0.6				0					2		#Spar_4
+	0.35		0.65	0.6				0					2		#Spar_5
 	0.40		0.60	0.6				0					2		#Spar_6
-	0.27		0.73	0.6				0					2		#Spar_7
-	0.29		0.78	0.6				0					2		#Spar_8
-	0.7			0.25	0.6				0					2		#Trailing Edge Filler
-	0.0			1.0		0.6				0					2		#Trailing Edge Filler
-	0.3			0.6		0.2				0					2		#Trailing Edge Filler
-	0.45		0.55	0.45			45					1		#Trailing Edge Filler
-	0.7			0.2		0.45			0					3		#Trailing Edge Filler
+	0.33		0.67	0.6				0					2		#Spar_7
+	0.27		0.73	0.6				0					2		#Spar_8
+#	0.8			0.2		0.6				0					2		#Trailing Edge Filler
 	&END
 &END 
 
@@ -81,15 +77,15 @@
 
 
 #&DEFN Seg
-#	SegID = 2							#Segment ID									[int]
-#	CoreMaterial = 	5					#Material ID of core filling 				[int]
+#SegID = 2							#Segment ID									[int]
+#CoreMaterial = 	5					#Material ID of core filling 				[int]
 #	&DEFN Layup
 #		#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
 #		0.0		1.0 	0.3				45					4		#Skin1s
 #		0.0		1.0		0.3				45					2		#Skin1s
 #	&END
 #&END 
-
+#
 #&DEFN Seg
 #	SegID = 3															#Segment ID															[int]
 #	CoreMaterial = 	4												#give material id of core fillings in that segment					[int]
