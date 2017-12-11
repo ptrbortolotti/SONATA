@@ -53,11 +53,6 @@ class Layer(object):
             self.join_style = kwargs.get('join_style')          
             
 
-        #self.wire = []                                     #Make Wire from BSplineSegments
-        #self.display_set = False  
-    
-
-    
     @property
     def StartPoint(self): #gp_Pnt2d
         return self.BSplineLst[0].StartPoint()
@@ -137,6 +132,7 @@ class Layer(object):
          
         
     def determine_a_nodes(self,LayerLst,global_minLen,display=None):
+        ''' '''
         nLayers = len(LayerLst)
         new_a_nodes=[]
         #print self.inverse_ivLst
