@@ -208,67 +208,24 @@ if FLAG_MESH:
     growing_factor = 1.8   #critical growing factor of cell before splitting 
     shrinking_factor = 0.10  #critical shrinking factor for cells before merging nodes
     
-    core_cell_area = 1.0*global_minLen**2
+    core_cell_area = 1.2*global_minLen**2
     web_consolidate_tol = 0.5*global_minLen
 
     mesh = []
+    displaymesh=None
+    
     #===================MESH SEGMENT===============================================
     for j,seg in enumerate(reversed(SegmentLst)):
-        #core_a_nodes = []
-        plot_layup_projection(seg.Layup)
+        #plot_layup_projection(seg.Layup)
         for i,layer in enumerate(reversed(seg.LayerLst)):
             print 'STATUS:\t Meshing Segment %s, Layer %s' %(seg.ID,len(seg.LayerLst)-i)
             if FLAG_SHOW_3D_MESH: 
                 displaymesh=display 
-            else: 
-                displaymesh=None   
              
-            #layer.mesh_layer(seg.LayerLst, global_minLen, proj_tol_1, crit_angle_1, proj_tol_2,alpha_crit_2, growing_factor, shrinking_factor, display = displaymesh) 
-            layer.determine_a_nodes(seg.LayerLst,global_minLen,display)
-            a_BSplineLst = layer.a_BSplineLst  
-            a_nodes = layer.a_nodes
-            b_BSplineLst = layer.b_BSplineLst
-            
-#            if BSplineLst_Orientation(b_BSplineLst,11) == False:
-#                    b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
-                    
-            a_nodes, b_nodes, enhanced_cells = mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer.thickness, proj_tol_1,crit_angle_1, display=displaymesh) 
-            
-            #enhanced_cells = modify_cornerstyle_one(cells,b_BSplineLst)
-            enhanced_cells, new_b_nodes = modify_sharp_corners(enhanced_cells,b_BSplineLst,global_minLen,layer.thickness, proj_tol_2,alpha_crit_2,display=displaymesh)
-            b_nodes.extend(new_b_nodes)
-            enhanced_cells, new_b_nodes = second_stage_improvements(enhanced_cells,b_BSplineLst,global_minLen,growing_factor,shrinking_factor)
-            b_nodes.extend(new_b_nodes)
-                                    
-            #b_nodes = sorted(b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))  
-            layer.a_nodes = a_nodes
-            layer.b_nodes = b_nodes
-
-            for c in enhanced_cells:
-                c.calc_theta_1()
-                c.theta_3 = layer.Orientation
-                c.MatID = int(layer.MatID)
-                c.structured = True
-            
-            if len(seg.LayerLst)-i==14:
-                for i,b_spline in enumerate(layer.b_BSplineLst):
-                    #display_custome_shape(display,b_spline,1.0,0.0,[0.1,0.5,1.0 ])
-                    display.DisplayShape(b_spline,color='BLACK')
-                    p = gp_Pnt2d()
-                    v = gp_Vec2d()
-                    u = (b_spline.LastParameter()-b_spline.FirstParameter())/2+b_spline.FirstParameter()
-                    b_spline.D1(u,p,v)
-                    display.DisplayMessage(p,str(i),height=30,message_color=(0,0,1))   
-                    
-                p = gp_Pnt2d()
-                layer.b_BSplineLst[0].D0(0,p)
-                display.DisplayShape(p, color="GREEN")
-            layer.cells = enhanced_cells
-            
+            layer.mesh_layer(seg.LayerLst, global_minLen) 
             mesh.extend(layer.cells)  
 
         #mesh,nodes = sort_and_reassignID(mesh)
-            
         #===================MESH CORE================================================
         
         if FLAG_MESH_CORE:

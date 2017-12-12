@@ -21,19 +21,18 @@ class Layer(object):
     ''' 
    
     def __init__(self, ID, Boundary_BSplineLst, globalStart, globalEnd, thickness, Orientation = 0, MatID = 1, **kwargs):
-        self.ID = ["%04d" % ID] 	                          #First single Digit: SegmentNb, Last 3 Digits: LayerNb; e.g.: 1029, Segment1, Layer29
-        self.Boundary_BSplineLst = Boundary_BSplineLst        #List of Geom2d_BSplineCurve, Geom_BSplineCurve 
-        self.S1 = globalStart	                              #Starting Point in S coordinates
-        self.S2 = globalEnd		                              #End Point in S coordinates
-        self.thickness = thickness   	                      #in mm
-        self.Orientation = Orientation                        #in deg
-        self.MatID = MatID
-        self.cells = []
-        self.ivLst = []
-        self.inverse_ivLst = []
-        self.a_nodes = []
-        self.b_nodes = []
-        self.cells = [] #Container to collet all cells that are composing this layere
+        self.ID = ["%04d" % ID] 	                        #First single Digit: SegmentNb, Last 3 Digits: LayerNb; e.g.: 1029, Segment1, Layer29
+        self.Boundary_BSplineLst = Boundary_BSplineLst    #List of Geom2d_BSplineCurve, Geom_BSplineCurve 
+        self.S1 = globalStart	                           #Starting Point in S coordinates
+        self.S2 = globalEnd		                           #End Point in S coordinates
+        self.thickness = thickness   	                    #in mm
+        self.Orientation = Orientation                    #in deg
+        self.MatID = MatID                                #type: int
+        self.cells = []                                   #type: List
+        self.ivLst = []                                   #type: List
+        self.inverse_ivLst = []                           #type: List
+        self.a_nodes = []                                 #type: List
+        self.b_nodes = []                                 #type: List
 
         #KWARGS:
         if kwargs.get('name') == None:
@@ -52,6 +51,29 @@ class Layer(object):
         else:
             self.join_style = kwargs.get('join_style')          
             
+
+    def __str__(self): 
+        #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 
+        return  str('LayerID: \tStart[-]: \tEnd[-]: \tthickness[-]: \tOrientation[deg]: \tMatID \tName:\t\n' \
+                    '%s, \t%s, \t%s, \t%s, \t\t%s, \t\t%s, \t%s, ' % (self.ID, self.S1, self.S2, self.thickness, self.Orientation, self.MatID, self.name))
+     
+        
+    def __getstate__(self):
+        """Return state values to be pickled."""
+
+        self.Para_BSplineLst = ParaLst_from_BSplineLst(self.BSplineLst)
+        self.Para_Boundary_BSplineLst = ParaLst_from_BSplineLst(self.Boundary_BSplineLst)
+        
+        return (self.ID, self.S1, self.S2, self.thickness, self.Orientation, self.MatID, self.Para_Boundary_BSplineLst, self.Para_BSplineLst)   
+    
+    
+    def __setstate__(self, state):
+        """Restore state from the unpickled state values."""
+        self.ID, self.S1, self.S2, self.thickness, self.Orientation, self.MatID, self.Para_Boundary_BSplineLst, self.Para_BSplineLst = state
+        self.Boundary_BSplineLst = BSplineLst_from_ParaLst(self.Para_Boundary_BSplineLst)
+        self.BSplineLst = BSplineLst_from_ParaLst(self.Para_BSplineLst)
+
+
 
     @property
     def StartPoint(self): #gp_Pnt2d
@@ -73,28 +95,7 @@ class Layer(object):
     def IsClosed(self):
         return self.a_BSplineLst[0].StartPoint().IsEqual(self.a_BSplineLst[-1].EndPoint(),1e-5)
     
-    def __str__(self): 
-        #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 
-        return  str('LayerID: \tStart[-]: \tEnd[-]: \tthickness[-]: \tOrientation[deg]: \tMatID \tName:\t\n' \
-                    '%s, \t%s, \t%s, \t%s, \t\t%s, \t\t%s, \t%s, ' % (self.ID, self.S1, self.S2, self.thickness, self.Orientation, self.MatID, self.name))
-     
-        
-    def __getstate__(self):
-        """Return state values to be pickled."""
-
-        self.Para_BSplineLst = ParaLst_from_BSplineLst(self.BSplineLst)
-        self.Para_Boundary_BSplineLst = ParaLst_from_BSplineLst(self.Boundary_BSplineLst)
-        
-        return (self.ID, self.S1, self.S2, self.thickness, self.Orientation, self.MatID, self.Para_Boundary_BSplineLst, self.Para_BSplineLst)   
     
-    
-    def __setstate__(self, state):
-        """Restore state from the unpickled state values."""
-        self.ID, self.S1, self.S2, self.thickness, self.Orientation, self.MatID, self.Para_Boundary_BSplineLst, self.Para_BSplineLst = state
-        self.Boundary_BSplineLst = BSplineLst_from_ParaLst(self.Para_Boundary_BSplineLst)
-        self.BSplineLst = BSplineLst_from_ParaLst(self.Para_BSplineLst)
-        
-        
     def copy(self):
         BSplineLstCopy =  copy_BSplineLst(self.BSplineLst)
         namecopy = self.name + '_Copy'
@@ -191,60 +192,64 @@ class Layer(object):
         
     def mesh_layer(self, LayerLst, global_minLen, proj_tol_1= 5e-2, 
                    proj_tol_2= 5e-2, crit_angle_1 = 115, alpha_crit_2 = 60, 
-                   growing_factor=1.8, shrinking_factor=0.1, **kwargs):
+                   growing_factor=1.8, shrinking_factor=0.1, display=None):
         '''
+        The mesh layer function discretizes the layer, which is composed of a 
+        a_BsplineLst and a b_BsplineLst. Between the a_BsplineLst and the 
+        b_BsplineLst the cells are created. First nodes on the a_BSplineLst are
+        determined with the determine_a_nodes procedure. Subsequently the 
+        a_nodes are projected onto the b_BsplineLst. The following functions 
+        (modify_cornerstyle_one, modify_sharp_corners and
+        second_stage_improvements) try to imporve the quality of the mesh. 
+        everything is stored in the layer.cells and is returned
+        
         Args:
-            proj_tol_1 = 5e-2
-            proj_tol_2 = 5e-2
-            crit_angle_1 = 115
-            alpha_crit_2 = 60
-            growing_factor = 1.8   #critical growing factor of cell before splitting 
-            shrinking_factor = 0.10  #critical shrinking factor for cells before merging nodes
+            LayerLst:               The overall list of Layers within the 
+                                    segemet. This list is needed to determine
+                                    the a_nodes
+            global_minLen:          
+            proj_tol_1 = 5e-2:      tolerance value 
+            proj_tol_2 = 5e-2:
+            crit_angle_1 = 115:
+            alpha_crit_2 = 60:
+            growing_factor = 1.8:   critical growing factor of cell before 
+                                    splitting 
+            shrinking_factor = 0.10:  critical shrinking factor for cells 
+                                    before merging nodes
+            
+            
+        returns: self.cells: (list of cells) 
         '''
         
-        if kwargs.get('display') !=  None:
-            displaymesh = kwargs.get('display')
-        else: 
-             displaymesh=None 
-        
-        b_nodes = []
-        self.determine_a_nodes(LayerLst,global_minLen,displaymesh)
-                   
+        self.determine_a_nodes(LayerLst,global_minLen,display)
 #        if BSplineLst_Orientation(b_BSplineLst,11) == False:
 #                b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
                 
-        self.a_nodes, self.b_nodes, cells = mesh_by_projecting_nodes_on_BSplineLst(self.a_BSplineLst,self.a_nodes,self.b_BSplineLst,self.thickness, proj_tol_1,crit_angle_1, display=displaymesh) 
+        self.a_nodes, self.b_nodes, self.cells = mesh_by_projecting_nodes_on_BSplineLst(self.a_BSplineLst,self.a_nodes,self.b_BSplineLst,self.thickness, proj_tol_1,crit_angle_1, display=display) 
         #enhanced_cells = modify_cornerstyle_one(cells,self.b_BSplineLst)
-        cells, nb_nodes = modify_sharp_corners(cells,self.b_BSplineLst,global_minLen,self.thickness, proj_tol_2,alpha_crit_2,display=displaymesh)
+        self.cells, nb_nodes = modify_sharp_corners(self.cells,self.b_BSplineLst,global_minLen,self.thickness, proj_tol_2,alpha_crit_2,display=display)
         self.b_nodes.extend(nb_nodes)
-        cells, nb_nodes = second_stage_improvements(cells,self.b_BSplineLst,global_minLen,growing_factor,shrinking_factor)
-        b_nodes.extend(nb_nodes)
+        self.cells, nb_nodes = second_stage_improvements(self.cells,self.b_BSplineLst,global_minLen,growing_factor,shrinking_factor)
+        self.b_nodes.extend(nb_nodes)
                                 
-        self.b_nodes = sorted(self.b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))  
+        #self.b_nodes = sorted(self.b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))  
         
-        for c in cells:
+        for c in self.cells:
             c.calc_theta_1()
             c.theta_3 = self.Orientation
             c.MatID = int(self.MatID)
             c.structured = True
             #display.DisplayShape(c.wire, color="BLACK")
 
-        self.cells = cells
         return self.cells
     
     
-    def show(self): #display the layer with pythonocc viewer module
+    def show(self,display): #display the layer with pythonocc viewer module
         """
         TBD: renders the topological entity in the viewer: 
         """
-        if not self.display_set:
-            display.Display()(self, *args, **kwargs)
-        else:
-            self.disp.DisplayShape(*args, **kwargs)
 
 
-    
-   
 #execute the following code if this file is executed as __main__   
 if __name__ == '__main__':   
      L1 = Layer()
