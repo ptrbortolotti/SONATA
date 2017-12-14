@@ -124,7 +124,7 @@ def projection_of_layers2(layup,begin,end,idx):
     
     return Projection
 
-def insert_interval_in_layup(layup,begin,end):
+def insert_interval_in_layup(layup,begin,end,**kw):
     ''' insert_interval_in_layup generates a intervaltree structure t1 from layup 
     and inserts a new intervaltree set t2 [begin, end] or [0,end][begin,1] into
     the existing the set t1. First t1 is chopped with t2, then t2 is added to t1.
@@ -145,7 +145,13 @@ def insert_interval_in_layup(layup,begin,end):
                   [ 0.   0.3  2. ]])                
     '''
     
-    idx = max(layup[:,2])+1
+    #KWARGS:
+    if kw.get('value') !=  None:
+        idx = kw.get('value')
+    else:
+        idx = max(layup[:,2])+1
+        
+    
     t1 = intervaltree.IntervalTree()
     for i,item in enumerate(layup):
         t1.addi(float(item[0]),float(item[1]),int(item[2]))
