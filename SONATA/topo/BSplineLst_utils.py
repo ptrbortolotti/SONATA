@@ -38,7 +38,7 @@ def ProjectPointOnBSplineLst(BSplineLst,Pnt2d,tolerance_distance=100):
         projection2 = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item.GetHandle())
         for j in range(1,projection2.NbPoints()+1):
             if projection2.Distance(j)<=tolerance_distance:
-                p2.append([projection2.Point(j),idx,projection2.Parameter(j),projection2.Distance(j)])
+                p2.append([projection2.Point(j), idx, projection2.Parameter(j),projection2.Distance(j)])
             else: None   
     
     p2 = np.asarray(p2)
@@ -180,7 +180,7 @@ def find_BSpline_coordinate(BSpline,s):
              u = tmp.Parameter()
     return u                            
 
-def find_BSplineLst_coordinate(BSplineLst,S, start, end):
+def find_BSplineLst_coordinate(BSplineLst, S, start, end):
     '''The function find_BSplineLst_coordinate returns the list index of 
     the bspline and its parameter where the coordinate is located.
     
@@ -196,7 +196,7 @@ def find_BSplineLst_coordinate(BSplineLst,S, start, end):
     BSplineLstLength = get_BSplineLst_length(BSplineLst)
     x = BSplineLstLength*(S-start)/(end-start)
     CummLength = 0
-    tolerance=1e-10
+    tolerance=1e-8
     #print 'S: '+ str(S)
     for i,item in enumerate(BSplineLst):
         first = item.FirstParameter()

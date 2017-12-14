@@ -65,7 +65,8 @@ from SONATA.topo.segment import Segment, generate_SegmentLst
 from SONATA.topo.web import Web
 from SONATA.topo.weight import Weight
 from SONATA.topo.utils import  getID         
-from SONATA.topo.projection import relevant_cummulated_layup_boundaries,plot_layup_projection
+from SONATA.topo.projection import chop_interval_from_layup, insert_interval_in_layup, \
+                                sort_layup_projection, plot_layup_projection
         
 from SONATA.bladegen.blade import Blade
 
@@ -92,7 +93,9 @@ from SONATA.vabs.stress import Stress
 
 from SONATA.display.display_mesh import plot_cells
 from SONATA.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, export_to_SVG, export_to_PS, export_to_EnhPS, export_to_TEX, \
-                                          export_to_BMP,export_to_TIFF, show_coordinate_system, display_SONATA_SegmentLst, display_custome_shape                        
+                                          export_to_BMP,export_to_TIFF, show_coordinate_system, display_SONATA_SegmentLst, display_custome_shape    
+                                          
+                                          
 #%%#############################################################################
 #                           M    A    I    N                                  #
 ###############################################################################
@@ -103,11 +106,12 @@ cwd = os.getcwd()
 
 #if not os.path.exists(directory):
 #    os.makedirs(directory)      
-filename = 'sec_config.input'
+filename = 'sec_config_web.input'
+
 
 FLAG_TOPO = True
-FLAG_MESH = True
-FLAG_VABS = True
+FLAG_MESH = False
+FLAG_VABS = False
 FLAG_SHOW_3D_TOPO = True
 FLAG_SHOW_2D_MESH = True
 FLAG_SHOW_3D_MESH = False
@@ -137,19 +141,22 @@ if FLAG_TOPO:
     last_relevant_boundary = SegmentLst[0].build_layers()
     SegmentLst[0].determine_final_boundary()
     
+
+    
     #Build Webs:    
     WebLst = []
     if Configuration.SETUP_NbOfWebs > 0:
         for i in range(0,Configuration.SETUP_NbOfWebs):
             print 'STATUS:\t Building Web %s' %(i+1)
-            WebLst.append(Web(Configuration.WEB_ID[i],Configuration.WEB_Pos1[i],Configuration.WEB_Pos2[i],SegmentLst[0].BSplineLst, SegmentLst[0].final_Boundary_BSplineLst))
+            WebLst.append(Web(Configuration.WEB_ID[i],Configuration.WEB_Pos1[i],Configuration.WEB_Pos2[i],SegmentLst[0]))
         sorted(SegmentLst, key=getID)  
         
+
     #Build remaining Segments:
     if Configuration.SETUP_NbOfWebs > 0:
         for i,seg in enumerate(SegmentLst[1:],start=1):
-            seg.build_segment_boundary_from_WebLst(WebLst,SegmentLst[0].final_Boundary_BSplineLst)
-            seg.build_layers()
+            seg.build_segment_boundary_from_WebLst2(WebLst,SegmentLst[0])            
+            seg.build_layers(WebLst,SegmentLst[0])
     
     #Balance Weight:
     if Configuration.SETUP_BalanceWeight == True:
@@ -190,6 +197,17 @@ if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
         display.View_Top()
         display.FitAll()
 
+
+    #test
+    L = -1
+    S = 0.5
+    tmp_Pnt2d = SegmentLst[1].get_Pnt2d(L,S)
+    display.DisplayShape(tmp_Pnt2d, color="WHITE")
+    string = 'L:'+str(L+1)+' S:'+str(S)    
+    display.DisplayMessage(tmp_Pnt2d,string,message_color=(1.0,0.5,0.0))
+
+
+
 #%%============================================================================ 
 #                           M E S H
 #==============================================================================
@@ -216,7 +234,7 @@ if FLAG_MESH:
     
     #===================MESH SEGMENT===============================================
     for j,seg in enumerate(reversed(SegmentLst)):
-        #plot_layup_projection(seg.Layup)
+        plot_layup_projection(seg.Layup)
         for i,layer in enumerate(reversed(seg.LayerLst)):
             print 'STATUS:\t Meshing Segment %s, Layer %s' %(seg.ID,len(seg.LayerLst)-i)
             if FLAG_SHOW_3D_MESH: 
@@ -308,29 +326,30 @@ if FLAG_MESH:
     #print '\t   - Orientation [CC]: %s' % orientation 
 
 
-else:
-    #LOAD PICKLED MESH 
-    input_filename = filename.replace('.input', '_mesh.pkl')
-    with open(input_filename, 'rb') as handle:
-        mesh = pickle.load(handle)   
-    mesh,nodes = sort_and_reassignID(mesh)
-      
-    #====================REVIEW==================================================
-    print 'STATUS:\t MESH LOADED:'
-    print '\t   - from file: %s' % input_filename 
-    print '\t   - Total Number of Cells: %s' %(len(mesh))
-    minarea = min([c.area for c in mesh])
-    print '\t   - smallest cell area: %s' % minarea 
-    minimum_angle = min([c.minimum_angle for c in mesh])
-    print '\t   - smallest angle [deg]: %s' % minimum_angle 
-    #orientation = all([c.orientation for c in mesh])
-    #print '\t   - Orientation [CC]: %s' % orientation 
-
-
 #%%============================================================================ 
 #                           V A B S
 #==============================================================================
 if FLAG_VABS:
+    
+    if not FLAG_MESH:
+        #LOAD PICKLED MESH 
+        input_filename = filename.replace('.input', '_mesh.pkl')
+        with open(input_filename, 'rb') as handle:
+            mesh = pickle.load(handle)   
+        mesh,nodes = sort_and_reassignID(mesh)
+          
+        #====================REVIEW==================================================
+        print 'STATUS:\t MESH LOADED:'
+        print '\t   - from file: %s' % input_filename 
+        print '\t   - Total Number of Cells: %s' %(len(mesh))
+        minarea = min([c.area for c in mesh])
+        print '\t   - smallest cell area: %s' % minarea 
+        minimum_angle = min([c.minimum_angle for c in mesh])
+        print '\t   - smallest angle [deg]: %s' % minimum_angle 
+        #orientation = all([c.orientation for c in mesh])
+        #print '\t   - Orientation [CC]: %s' % orientation 
+   
+    
     #TODO: BE CAREFUL TO USE THE RIGHT COORDINATE SYSTEM FOR THE CALCULATIONS!!!!  
     vabs_filename = filename.replace('.input', '.vab')
     VABSsetup = VABS_config(recover_flag=0)
