@@ -146,7 +146,6 @@ class Segment(object):
         for i in range(1,len(self.Layup)+1):
             print "STATUS:\t Building Segment %d, Layer: %d" % (self.ID,i)
 
-            #TODO:!!!!!!! for each Layer generate the ivList! by inserting and chopping!
             begin = float(self.Layup[i-1][0])
             end = float(self.Layup[i-1][1])
             #print cum_ivLst, begin, end
@@ -163,7 +162,7 @@ class Segment(object):
             
             tmp_Layer.build_layer() 
             
-            if tmp_Layer.S1 == 0.0 and tmp_Layer.S2 == 1.0:
+            if tmp_Layer.IsClosed:
                 tmp_Layer.BSplineLst = set_BSplineLst_to_Origin(tmp_Layer.BSplineLst,self.Theta)
             
             tmp_Layer.ivLst = self.Projection[i-1]

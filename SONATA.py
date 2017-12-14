@@ -106,11 +106,11 @@ cwd = os.getcwd()
 
 #if not os.path.exists(directory):
 #    os.makedirs(directory)      
-filename = 'sec_config_web.input'
+filename = 'sec_config.input'
 
 
 FLAG_TOPO = True
-FLAG_MESH = False
+FLAG_MESH = True
 FLAG_VABS = False
 FLAG_SHOW_3D_TOPO = True
 FLAG_SHOW_2D_MESH = True
@@ -142,7 +142,6 @@ if FLAG_TOPO:
     SegmentLst[0].determine_final_boundary()
     
 
-    
     #Build Webs:    
     WebLst = []
     if Configuration.SETUP_NbOfWebs > 0:
@@ -198,13 +197,13 @@ if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
         display.FitAll()
 
 
-    #test
-    L = -1
-    S = 0.5
-    tmp_Pnt2d = SegmentLst[1].get_Pnt2d(L,S)
-    display.DisplayShape(tmp_Pnt2d, color="WHITE")
-    string = 'L:'+str(L+1)+' S:'+str(S)    
-    display.DisplayMessage(tmp_Pnt2d,string,message_color=(1.0,0.5,0.0))
+#    #test
+#    L = -1
+#    S = 0.5
+#    tmp_Pnt2d = SegmentLst[1].get_Pnt2d(L,S)
+#    display.DisplayShape(tmp_Pnt2d, color="WHITE")
+#    string = 'L:'+str(L+1)+' S:'+str(S)    
+#    display.DisplayMessage(tmp_Pnt2d,string,message_color=(1.0,0.5,0.0))
 
 
 
@@ -234,7 +233,7 @@ if FLAG_MESH:
     
     #===================MESH SEGMENT===============================================
     for j,seg in enumerate(reversed(SegmentLst)):
-        plot_layup_projection(seg.Layup)
+        #plot_layup_projection(seg.Layup)
         for i,layer in enumerate(reversed(seg.LayerLst)):
             print 'STATUS:\t Meshing Segment %s, Layer %s' %(seg.ID,len(seg.LayerLst)-i)
             if FLAG_SHOW_3D_MESH: 
@@ -405,7 +404,8 @@ if FLAG_SHOW_2D_MESH:
     
     if FLAG_VABS:
         plot_cells(mesh, nodes, 'MatID', BeamProperties)
-    
+    else:
+        plot_cells(mesh, nodes, 'MatID')
  
     #plt.savefig('SONATA_MESH.pdf', dpi=900, facecolor='w', edgecolor='w',
     #    orientation='landscape', papertype='a4', format='pdf')
