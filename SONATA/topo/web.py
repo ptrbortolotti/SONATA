@@ -13,20 +13,18 @@ class Web(object):
       #Build Webs:
         #TODO: CHECK IF WEB DEFINITION INTERSECT EACH OTHER
         #TODO: SORT WEBS BY POS1 VALUES:
-    def __init__(self, ID, Pos1, Pos2, Segment0_BSplineLst, Segment0_Boundary_BSplineLst):
+    def __init__(self, ID, Pos1, Pos2, Segment0):
         self.ID = ID
         self.Pos1 = Pos1
         self.Pos2 = Pos2
-        self.Segment0_BSplineLst = Segment0_BSplineLst
-        self.Segment0_Boundary_BSplineLst = Segment0_Boundary_BSplineLst
         
-        self.Pos1_Pnt2d = get_BSplineLst_Pnt2d(self.Segment0_BSplineLst,self.Pos1,0,1)
-        self.Pos2_Pnt2d = get_BSplineLst_Pnt2d(self.Segment0_BSplineLst,self.Pos2,0,1)
-        self.BSpline_Line = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([self.Pos1_Pnt2d,self.Pos2_Pnt2d])).Curve().GetObject()
-        self.BSplineLst = [self.BSpline_Line]
-        
+        self.Pos1_Pnt2d = Segment0.get_Pnt2d(-1,Pos1)
+        self.Pos2_Pnt2d = Segment0.get_Pnt2d(-1,Pos2)
+        self.BSplineLst = [Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([self.Pos1_Pnt2d,self.Pos2_Pnt2d])).Curve().GetObject()]
+
         self.wr_nodes =[] 
         self.wl_nodes = []
         
+        #self.BackBSplineLst = trim_BSplineLst(BSplineLst, S1, S2, start, end):
         #Intersect Segment0_Boundary_BSplineLst with self.BSpline
-        [self.IntPnts,self.IntPnts_Pnt2d] = intersect_BSplineLst_with_BSpline(self.Segment0_Boundary_BSplineLst,self.BSpline_Line)
+        #[self.IntPnts,self.IntPnts_Pnt2d] = intersect_BSplineLst_with_BSpline(self.Segment0_Boundary_BSplineLst,self.BSpline_Line)
