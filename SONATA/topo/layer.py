@@ -4,12 +4,16 @@ from OCC.gp import gp_Pnt2d
 
 from SONATA.fileIO.CADinput import order_BSplineLst_Head2Tail
 
-from SONATA.topo.BSplineLst_utils import get_BSplineLst_length, get_BSplineLst_Pnt2d, trim_BSplineLst, copy_BSplineLst, BSplineLst_from_dct, discretize_BSplineLst 
+from SONATA.topo.BSplineLst_utils import get_BSplineLst_length, get_BSplineLst_Pnt2d, \
+                                         trim_BSplineLst, copy_BSplineLst, \
+                                         BSplineLst_from_dct, discretize_BSplineLst, \
+                                         find_BSplineLst_pos
 from SONATA.topo.wire_utils import build_wire_from_BSplineLst
 from SONATA.topo.cutoff import cutoff_layer
 from SONATA.topo.offset import shp_parallel_offset
 from SONATA.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
                                 
+
 from SONATA.mesh.mesh_byprojection import mesh_by_projecting_nodes_on_BSplineLst
 from SONATA.mesh.mesh_utils import modify_cornerstyle_one, modify_sharp_corners,second_stage_improvements,grab_nodes_of_cells_on_BSplineLst,\
                                  equidistant_nodes_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
@@ -30,6 +34,8 @@ class Layer(object):
         self.MatID = MatID                                #type: int
         self.cells = []                                   #type: List
         self.ivLst = []                                   #type: List
+        self.cumA_ivLst = []                               #type: List
+        self.cumB_ivLst = []                               #type: List
         self.inverse_ivLst = []                           #type: List
         self.a_nodes = []                                 #type: List
         self.b_nodes = []                                 #type: List
@@ -108,10 +114,22 @@ class Layer(object):
          return self.length
          
      
-    def get_pnt2d(self,S,start,end): #Return, gp_Pnt2d of argument S of layer self  
-        return get_BSplineLst_Pnt2d(self.BSplineLst,S,start,end)
-            
+    #def get_pnt2d(self,S,start,end): #Return, gp_Pnt2d of argument S of layer self  
+    #    return get_BSplineLst_Pnt2d(self.BSplineLst,S,start,end)
     
+    def get_Pnt2d(self,S,LayerLst):
+        #print self.ID
+        #print 'cum_ivLst:',self.cumA_ivLst
+        for iv in self.cumA_ivLst:
+            if iv[0]<=S<iv[1]:
+                #print 'Coordinate',S,'is on layer',int(iv[2])
+                break
+            
+        tmp_layer = LayerLst[int(iv[2])-1] 
+        Pnt2d = get_BSplineLst_Pnt2d(tmp_layer.a_BSplineLst,S,tmp_layer.S1,tmp_layer.S2)
+        return Pnt2d      
+                
+                
     def build_wire(self): #Builds TopoDS_Wire from connecting BSplineSegments and returns it  
         self.wire = build_wire_from_BSplineLst(self.BSplineLst)   
         
@@ -208,15 +226,20 @@ class Layer(object):
                                     segemet. This list is needed to determine
                                     the a_nodes
             global_minLen:          
-            proj_tol_1 = 5e-2:      tolerance value 
-            proj_tol_2 = 5e-2:
-            crit_angle_1 = 115:
-            alpha_crit_2 = 60:
+            proj_tol_1 = 5e-2:      tolerance value to determine a distance, 
+                                    in which the resulting projection point 
+                                    has to be. 
+                                    (mesh_by_projecting_nodes_on_BSplineLst)
+            proj_tol_2 = 5e-2:      tolerance value to determine a distance, 
+                                    in which the resulting projection point 
+                                    has to be. (modify_sharp_corners)
+            crit_angle_1 = 115:     is the critical angle to determine a corner 
+                                    if 2 projection points are found.    
+            alpha_crit_2 = 60:      is the critical angle to refine  a corner 
             growing_factor = 1.8:   critical growing factor of cell before 
                                     splitting 
             shrinking_factor = 0.10:  critical shrinking factor for cells 
                                     before merging nodes
-            
             
         returns: self.cells: (list of cells) 
         '''
