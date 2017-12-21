@@ -16,11 +16,12 @@ from OCC.Display.SimpleGui import init_display
 from SONATA.mesh.node import Node
 from SONATA.mesh.cell import Cell
 from SONATA.display.display_utils import display_custome_shape
-from SONATA.topo.BSplineLst_utils import get_BSplineLst_length, find_BSplineLst_coordinate
+from SONATA.topo.BSplineLst_utils import get_BSplineLst_length, find_BSplineLst_coordinate, \
+                                        ProjectPointOnBSplineLst
 
 
 
-def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer_thickness, tol=1e-2, crit_angle = 95, **kwargs):
+def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,layer_thickness, tol=1e-2, crit_angle = 95, LayerID = 0, **kw):
     """
     *function to mesh the SONATA topologies by projecting nodes onto the 
     generated BSplineLists.   
@@ -48,10 +49,11 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
     """
     
     #KWARGS:
-    if kwargs.get('display') !=  None:
-        display = kwargs.get('display')
+    if kw.get('display') !=  None:
+        display = kw.get('display')
 
-    LayerID = 'T_' + a_nodes[0].parameters[0]
+    #LayerID = 'T_' + a_nodes[0].parameters[0]
+    #TODO:
     b_nodes = []
     cellLst = []
     distance = (1+tol)*layer_thickness
@@ -298,17 +300,25 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
             #===CORNERSTYLE 0====== 
             if len(exterior_corners) == 0 and node.corner==False:
                 node.cornerstyle = 0
-                #TODO: a more robust possibilit is to use a bisector vres
-                if pIdx[0] == pIdx[1]:
-                    newPnt = gp_Pnt2d()
-                    newPara = (pPara[0]+pPara[1])/2                    
-                    b_BSplineLst[pIdx[0]].D0(newPara,newPnt)
+                #TODO: a more robust possibilit is to use a bisector vres               
+
+                if pIdx[0] == pIdx[1]:#
+                    v = gp_Vec2d(pPnts[0],pPnts[1])
+                    cP = pPnts[0].Translated(v.Multiplied(0.5))
+                    p2 = ProjectPointOnBSplineLst(b_BSplineLst,cP,1)
+                    newPnt = p2[0]
+                    newPara = ['modified',p2[1],p2[2]]
                     b_nodes.append(Node(newPnt,[LayerID,pIdx[0],newPara]))
+                    
                 elif node.regular_corner == False:
-                    print 'ERROR: this possibility has not been implemented yet.'
+                    print 'WARNING: cornerstyle 0: this possibility has not been implemented yet.'
+                    b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
                 
                 else:
-                    print 'ERROR: this possibility has not been implemented yet. pIdx[0] != pIdx[0]. Create Bisector and intersect with bsplinelist!'                     
+                    if pPnts[0].IsEqual(pPnts[1],1e-4):
+                        b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
+                    else:
+                        print 'ERROR: cornerstyle 0: this possibility has not been implemented yet. pIdx[0] != pIdx[0]. Create Bisector and intersect with bsplinelist!'                     
                     
             #===CORNERSTYLE 1======     
             if len(exterior_corners) == 1 and node.corner==False:
@@ -363,23 +373,24 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
         
 
     #==============OCC3DVIEWER========================================
-    if kwargs.get('display') !=  None:
-        #print a_nodes
-        for i,a in enumerate(a_nodes):
-                if a.corner == True:
-                    display.DisplayShape(a.Pnt,color='WHITE')  
-                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
-                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
-                    
-                elif a.cornerstyle == 1 or a.cornerstyle == 10 :
-                    display.DisplayShape(a.Pnt,color='WHITE')  
-                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
-                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
-                    
-                    
-                else: 
-                    display.DisplayShape(a.Pnt,color='WHITE')  
-                    display.DisplayMessage(a.Pnt,str(a.id))
+    if kw.get('display') !=  None:
+        pass
+#        #print a_nodes
+#        for i,a in enumerate(a_nodes):
+#                if a.corner == True:
+#                    display.DisplayShape(a.Pnt,color='WHITE')  
+#                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
+#                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
+#                    
+#                elif a.cornerstyle == 1 or a.cornerstyle == 0 :
+#                    display.DisplayShape(a.Pnt,color='WHITE')  
+#                    string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
+#                    display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
+#                    
+#                    
+#                else: 
+#                    display.DisplayShape(a.Pnt,color='WHITE')  
+#                    display.DisplayMessage(a.Pnt,str(a.id))
                     
 #        for i,b in enumerate(b_nodes):
 #                display.DisplayShape(b.Pnt,color='GREEN')  
@@ -396,14 +407,14 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
 #            display.DisplayMessage(p,str(i),height=30,message_color=(0,1,1))
 #            #display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
 #            
-        for i,b_spline in enumerate(b_BSplineLst):
-            #display_custome_shape(display,b_spline,1.0,0.0,[0.1,0.5,1.0 ])
-            display.DisplayShape(b_spline,color='BLUE')
-            p = gp_Pnt2d()
-            v = gp_Vec2d()
-            u = (b_spline.LastParameter()-b_spline.FirstParameter())/2+b_spline.FirstParameter()
-            b_spline.D1(u,p,v)
-            display.DisplayMessage(p,str(i),height=30,message_color=(0,0,1))    
-            #display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
+#        for i,b_spline in enumerate(b_BSplineLst):
+#            #display_custome_shape(display,b_spline,1.0,0.0,[0.1,0.5,1.0 ])
+#            display.DisplayShape(b_spline,color='BLUE')
+#            p = gp_Pnt2d()
+#            v = gp_Vec2d()
+#            u = (b_spline.LastParameter()-b_spline.FirstParameter())/2+b_spline.FirstParameter()
+#            b_spline.D1(u,p,v)
+#            display.DisplayMessage(p,str(i),height=30,message_color=(0,0,1))    
+#            #display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
 #            
     return a_nodes, b_nodes, cellLst
