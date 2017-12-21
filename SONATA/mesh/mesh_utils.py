@@ -546,7 +546,11 @@ def theta_1_from_2nodes(node1,node2):
     return theta_1
 
 
-def second_stage_improvements(cells,b_BSplineLst,global_minLen,factor1=1.8,factor2=0.15):
+def second_stage_improvements(cells,b_BSplineLst,global_minLen,factor1=1.8,factor2=0.15, **kw):
+    
+    if kw.get('display') !=  None:
+        display = kw.get('display')
+
     enhanced_cells2 = []
     new_b_nodes = []
     for i,c in enumerate(cells):
@@ -608,7 +612,7 @@ def second_stage_improvements(cells,b_BSplineLst,global_minLen,factor1=1.8,facto
 
 def merge_nodes_if_too_close(nodes,BSplineLst,global_minLen,tol=0.1):
     rm_idx=[]
-    for i,n1 in enumerate(nodes[1:], start=1):
+    for i,n1 in enumerate(nodes[0:], start=0):
         n2 = nodes[i-1]
         v = gp_Vec2d(n1.Pnt2d,n2.Pnt2d)
         magnitude = v.Magnitude()
@@ -618,8 +622,8 @@ def merge_nodes_if_too_close(nodes,BSplineLst,global_minLen,tol=0.1):
             p2 = ProjectPointOnBSplineLst(BSplineLst,cP,1)
             n1.Pnt2d = p2[0]
             n1.parameters = ['modified',p2[1],p2[2]]
-            rm_idx.append(i-1)
-            
+            rm_idx.append(i-1)         
+   
     for index in sorted(rm_idx, reverse=True):
         del nodes[index] 
             
