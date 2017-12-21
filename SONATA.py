@@ -106,15 +106,14 @@ cwd = os.getcwd()
 
 #if not os.path.exists(directory):
 #    os.makedirs(directory)      
-filename = 'sec_config.input'
-
+filename = 'jobs/EPiet/AREA_R250/sec_config.input'
 
 FLAG_TOPO = True
 FLAG_MESH = True
 FLAG_VABS = False
 FLAG_SHOW_3D_TOPO = True
 FLAG_SHOW_2D_MESH = True
-FLAG_SHOW_3D_MESH = False
+FLAG_SHOW_3D_MESH = True
 FLAG_EXPORT_STEP = False
 FLAG_MESH_CORE = True
 
@@ -154,8 +153,12 @@ if FLAG_TOPO:
     #Build remaining Segments:
     if Configuration.SETUP_NbOfWebs > 0:
         for i,seg in enumerate(SegmentLst[1:],start=1):
+            seg.Segment0 = SegmentLst[0]
+            seg.WebLst = WebLst
             seg.build_segment_boundary_from_WebLst2(WebLst,SegmentLst[0])            
             seg.build_layers(WebLst,SegmentLst[0])
+            seg.determine_final_boundary(WebLst,SegmentLst[0])
+    
     
     #Balance Weight:
     if Configuration.SETUP_BalanceWeight == True:
@@ -196,13 +199,13 @@ if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
         display.View_Top()
         display.FitAll()
 
-
 #    #test
-#    L = -1
-#    S = 0.5
-#    tmp_Pnt2d = SegmentLst[1].get_Pnt2d(L,S)
+#    lid = 1001
+#    S = 0.7
+#    segid = int(lid/1000)
+#    tmp_Pnt2d = SegmentLst[segid].get_Pnt2d(lid,S,SegmentLst[0])
 #    display.DisplayShape(tmp_Pnt2d, color="WHITE")
-#    string = 'L:'+str(L+1)+' S:'+str(S)    
+#    string = 'L:'+str(lid)+'; S:'+str(S)    
 #    display.DisplayMessage(tmp_Pnt2d,string,message_color=(1.0,0.5,0.0))
 
 
@@ -215,16 +218,7 @@ if FLAG_MESH:
     Resolution = Configuration.SETUP_mesh_resolution # Nb of Points on Segment0
     length = get_BSplineLst_length(SegmentLst[0].BSplineLst)
     global_minLen = round(length/Resolution,5)
-    
-    #TODO: Scale tolerance to problem size!  
-    proj_tol_1 = 5e-2
-    proj_tol_2 = 5e-2
-    non_dct_factor = 2.6
-    crit_angle_1 = 115
-    alpha_crit_2 = 60
-    growing_factor = 1.8   #critical growing factor of cell before splitting 
-    shrinking_factor = 0.10  #critical shrinking factor for cells before merging nodes
-    
+        
     core_cell_area = 1.2*global_minLen**2
     web_consolidate_tol = 0.5*global_minLen
 
@@ -239,12 +233,11 @@ if FLAG_MESH:
             if FLAG_SHOW_3D_MESH: 
                 displaymesh=display 
              
-            layer.mesh_layer(seg.LayerLst, global_minLen) 
+            layer.mesh_layer(seg.LayerLst, global_minLen, display=display) 
             mesh.extend(layer.cells)  
 
         #mesh,nodes = sort_and_reassignID(mesh)
-        #===================MESH CORE================================================
-        
+        #===================MESH CORE================================================     
         if FLAG_MESH_CORE:
             if seg.ID==0 and len(SegmentLst)>1:
                 pass
@@ -351,9 +344,9 @@ if FLAG_VABS:
     
     #TODO: BE CAREFUL TO USE THE RIGHT COORDINATE SYSTEM FOR THE CALCULATIONS!!!!  
     vabs_filename = filename.replace('.input', '.vab')
-    VABSsetup = VABS_config(recover_flag=0)
+    VABSsetup = VABS_config(recover_flag=1)
     VABSsetup.F = [0,0,0]    #in Newton
-    VABSsetup.M = [0,220e3,0]     #in Newton/mm
+    VABSsetup.M = [0,1300e3,0]     #in Newton/mm
     
     print 'STATUS:\t RUNNING VABS for Constitutive modeling:'
     #EXECUTE VABS:
@@ -420,8 +413,8 @@ if FLAG_SHOW_2D_MESH:
     if FLAG_VABS:
         if VABSsetup.recover_flag == 1:
             plot_cells(mesh, nodes, 'stress.sigma11', BeamProperties,'NACA0012, 150mm chord')
-
-
+            plot_cells(mesh, nodes, 'stressM.sigma11', BeamProperties,'NACA0012, 150mm chord')
+            plot_cells(mesh, nodes, 'strainM.epsilon11', BeamProperties,'NACA0012, 150mm chord')
 #====================3D: OCC-DISPLAY=====================
 if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
     display.set_bg_gradient_color(20,6,111,200,200,200)
@@ -470,7 +463,7 @@ if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
   
 #    for spline in SegmentLst[0].final_Boundary_BSplineLst:
 #        display.DisplayColoredShape(spline, 'BLACK')    
-    display.View_Top()
+    display.View_Left()
     display.FitAll()
     start_display()
 

@@ -215,7 +215,7 @@ class Layer(object):
         
         
     def mesh_layer(self, LayerLst, global_minLen, proj_tol_1= 5e-2, 
-                   proj_tol_2= 5e-2, crit_angle_1 = 115, alpha_crit_2 = 60, 
+                   proj_tol_2= 2e-1, crit_angle_1 = 115, alpha_crit_2 = 60, 
                    growing_factor=1.8, shrinking_factor=0.1, display=None):
         '''
         The mesh layer function discretizes the layer, which is composed of a 
