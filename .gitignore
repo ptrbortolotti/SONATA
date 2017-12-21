@@ -20,3 +20,4 @@ publication/
 docs/source/
 docs/build/
 SONATA/sectionbuilder/PatranMesh_example/
+*.pdf_tex
