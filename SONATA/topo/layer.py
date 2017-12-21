@@ -7,7 +7,7 @@ from SONATA.fileIO.CADinput import order_BSplineLst_Head2Tail
 from SONATA.topo.BSplineLst_utils import get_BSplineLst_length, get_BSplineLst_Pnt2d, \
                                          trim_BSplineLst, copy_BSplineLst, \
                                          BSplineLst_from_dct, discretize_BSplineLst, \
-                                         find_BSplineLst_pos
+                                         find_BSplineLst_pos, get_BSpline_length
 from SONATA.topo.wire_utils import build_wire_from_BSplineLst
 from SONATA.topo.cutoff import cutoff_layer
 from SONATA.topo.offset import shp_parallel_offset
@@ -25,7 +25,7 @@ class Layer(object):
     ''' 
    
     def __init__(self, ID, Boundary_BSplineLst, globalStart, globalEnd, thickness, Orientation = 0, MatID = 1, **kwargs):
-        self.ID = ["%04d" % ID] 	                        #First single Digit: SegmentNb, Last 3 Digits: LayerNb; e.g.: 1029, Segment1, Layer29
+        self.ID = ID                                     #First single Digit: SegmentNb, Last 3 Digits: LayerNb; e.g.: 1029, Segment1, Layer29
         self.Boundary_BSplineLst = Boundary_BSplineLst    #List of Geom2d_BSplineCurve, Geom_BSplineCurve 
         self.S1 = globalStart	                           #Starting Point in S coordinates
         self.S2 = globalEnd		                           #End Point in S coordinates
@@ -117,16 +117,22 @@ class Layer(object):
     #def get_pnt2d(self,S,start,end): #Return, gp_Pnt2d of argument S of layer self  
     #    return get_BSplineLst_Pnt2d(self.BSplineLst,S,start,end)
     
-    def get_Pnt2d(self,S,LayerLst):
+    def get_Pnt2d(self,S,LayerLst,WebLst):
         #print self.ID
         #print 'cum_ivLst:',self.cumA_ivLst
         for iv in self.cumA_ivLst:
             if iv[0]<=S<iv[1]:
                 #print 'Coordinate',S,'is on layer',int(iv[2])
                 break
-            
-        tmp_layer = LayerLst[int(iv[2])-1] 
-        Pnt2d = get_BSplineLst_Pnt2d(tmp_layer.a_BSplineLst,S,tmp_layer.S1,tmp_layer.S2)
+        
+        print iv[2]
+        tmp_layer = next((x for x in LayerLst if x.ID == int(iv[2])), None)
+        if not tmp_layer == None: 
+            Pnt2d = get_BSplineLst_Pnt2d(tmp_layer.a_BSplineLst,S,tmp_layer.S1,tmp_layer.S2)
+        else: #Web
+            WebID = -int(iv[2])-1
+            Pnt2d = get_BSplineLst_Pnt2d(WebLst[WebID].BSplineLst, S, start = WebLst[WebID].Pos2, end = WebLst[WebID].Pos1)
+
         return Pnt2d      
                 
                 
@@ -181,7 +187,7 @@ class Layer(object):
                     IncStart=False
                     IncEnd=False
                 
-                eq_nodes = equidistant_nodes_on_BSplineLst(iv_BSplineLst, True, IncStart, IncEnd, minLen = global_minLen, LayerID = self.ID[0])
+                eq_nodes = equidistant_nodes_on_BSplineLst(iv_BSplineLst, True, IncStart, IncEnd, minLen = global_minLen, LayerID = self.ID)
                 new_a_nodes.extend(eq_nodes)
                 
                 
@@ -245,16 +251,14 @@ class Layer(object):
         '''
         
         self.determine_a_nodes(LayerLst,global_minLen,display)
-#        if BSplineLst_Orientation(b_BSplineLst,11) == False:
-#                b_BSplineLst = reverse_BSplineLst(b_BSplineLst)  
-                
-        self.a_nodes, self.b_nodes, self.cells = mesh_by_projecting_nodes_on_BSplineLst(self.a_BSplineLst,self.a_nodes,self.b_BSplineLst,self.thickness, proj_tol_1,crit_angle_1, display=display) 
+
+        self.a_nodes, self.b_nodes, self.cells = mesh_by_projecting_nodes_on_BSplineLst(self.a_BSplineLst,self.a_nodes,self.b_BSplineLst,self.thickness, proj_tol_1,crit_angle_1, LayerID = self.ID, display=display) 
         #enhanced_cells = modify_cornerstyle_one(cells,self.b_BSplineLst)
         self.cells, nb_nodes = modify_sharp_corners(self.cells,self.b_BSplineLst,global_minLen,self.thickness, proj_tol_2,alpha_crit_2,display=display)
         self.b_nodes.extend(nb_nodes)
-        self.cells, nb_nodes = second_stage_improvements(self.cells,self.b_BSplineLst,global_minLen,growing_factor,shrinking_factor)
+        self.cells, nb_nodes = second_stage_improvements(self.cells,self.b_BSplineLst,global_minLen,growing_factor,shrinking_factor,display=display)
         self.b_nodes.extend(nb_nodes)
-                                
+        
         #self.b_nodes = sorted(self.b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))  
         
         for c in self.cells:

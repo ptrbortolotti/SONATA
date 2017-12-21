@@ -18,8 +18,9 @@ class Web(object):
         self.Pos1 = Pos1
         self.Pos2 = Pos2
         
-        self.Pos1_Pnt2d = Segment0.get_Pnt2d(-1,Pos1)
-        self.Pos2_Pnt2d = Segment0.get_Pnt2d(-1,Pos2)
+        lid = Segment0.LayerLst[-1].ID
+        self.Pos1_Pnt2d = Segment0.get_Pnt2d(lid,Pos1)
+        self.Pos2_Pnt2d = Segment0.get_Pnt2d(lid,Pos2)
         self.BSplineLst = [Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([self.Pos1_Pnt2d,self.Pos2_Pnt2d])).Curve().GetObject()]
 
         self.wr_nodes =[] 

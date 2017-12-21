@@ -35,6 +35,8 @@ class Segment(object):
             Initialize with airfoil database:       Segment(ID, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, airfoil = 'naca23012')
             Initialize from file:                   Segment(ID, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, filename = 'naca23012.dat')   
         #empty initialization with no Boundary: Segment(item, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i])'''
+        self.Segment0 = None
+        self.WebLst = None
         self.BSplineLst = None
         self.ID = ID
         self.Layup = kwargs.get('Layup') 
@@ -75,7 +77,7 @@ class Segment(object):
         self.BSplineLst = BSplineLst_from_ParaLst(self.Para_BSplineLst)
    
     
-    def ivLst_to_BSplineLst(self, ivLst, WebLst = None, Segment0 = None):
+    def ivLst_to_BSplineLst(self, ivLst):
         '''The member function ivLst_to_BSplineLst generates the 
         BSplineLst from the InvervalLst definitions. It loops through all 
         intervals,trims them accordingly and assembles them into the 
@@ -88,7 +90,7 @@ class Segment(object):
         returns: iv_BSplineLst: (list of BSplines)
         '''  
         if self.ID == 0:
-            Segment0 = self
+            self.Segment0 = self
         
         iv_BSplineLst = []
         for iv in ivLst:
@@ -101,15 +103,15 @@ class Segment(object):
             elif int(iv[2]) < 0:
                 WebID = -int(iv[2])-1
                 if self.ID == WebID+1: #BACK
-                    BSplineLst = reverse_BSplineLst(copy_BSplineLst(WebLst[WebID].BSplineLst))
-                    start = WebLst[WebID].Pos2
-                    end = WebLst[WebID].Pos1
+                    BSplineLst = reverse_BSplineLst(copy_BSplineLst(self.WebLst[WebID].BSplineLst))
+                    start = self.WebLst[WebID].Pos2
+                    end = self.WebLst[WebID].Pos1
                     #print '(',start,end,')',' (',iv[0],iv[1],')'
                 
                 else: #FRONT
-                    BSplineLst = WebLst[WebID].BSplineLst
-                    start = WebLst[WebID].Pos1
-                    end = WebLst[WebID].Pos2
+                    BSplineLst = self.WebLst[WebID].BSplineLst
+                    start = self.WebLst[WebID].Pos1
+                    end = self.WebLst[WebID].Pos2
 
                     
             elif self.ID*1000 < int(iv[2]) < self.ID*1000+1000:
@@ -121,7 +123,7 @@ class Segment(object):
                 end = layer.S2
                 
             else:
-                layer = Segment0.LayerLst[int(iv[2])-1]
+                layer = self.Segment0.LayerLst[int(iv[2])-1]
                 BSplineLst = layer.BSplineLst
                 start = layer.S1
                 end = layer.S2
@@ -133,9 +135,38 @@ class Segment(object):
     
     
 
-    def get_Pnt2d(self,L,S):
+    def get_Pnt2d(self,lid,S,Segment0=None):
         '''returns a Pnt2d for the coresponding layer number and the coordinate S'''
-        return self.LayerLst[L].get_Pnt2d(S,self.LayerLst)
+        if Segment0 == None:
+            tmp_LayerLst = []
+        else:
+            tmp_LayerLst = Segment0.LayerLst 
+            
+        cummLayerLst = tmp_LayerLst+self.LayerLst
+        tmp_layer = next((x for x in self.LayerLst if x.ID == lid), None)
+        
+        
+        #print self.ID
+        #print 'cum_ivLst:',self.cumA_ivLst
+        for iv in tmp_layer.cumA_ivLst:
+            if iv[0]<=S<iv[1]:
+                #print 'Coordinate',S,'is on layer',int(iv[2])
+                break
+        
+        print iv[2]
+        tmp_layer = next((x for x in LayerLst if x.ID == int(iv[2])), None)
+        if not tmp_layer == None: 
+            Pnt2d = get_BSplineLst_Pnt2d(tmp_layer.a_BSplineLst,S,tmp_layer.S1,tmp_layer.S2)
+        else: #Web
+            WebID = -int(iv[2])-1
+            Pnt2d = get_BSplineLst_Pnt2d(WebLst[WebID].BSplineLst, S, start = WebLst[WebID].Pos2, end = WebLst[WebID].Pos1)
+        
+        
+        
+        
+        
+        
+        return tmp_layer.get_Pnt2d(S,cummLayerLst,self.WebLst)
         
     
     def build_layers(self, WebLst = None, Segment0 = None, display = None):
@@ -151,12 +182,11 @@ class Segment(object):
             #print cum_ivLst, begin, end
             ivLst = chop_interval_from_layup(cum_ivLst,begin,end)
             ivLst = sort_layup_projection([ivLst])[0]
-            relevant_boundary_BSplineLst = self.ivLst_to_BSplineLst(ivLst, WebLst, Segment0)
-            cum_ivLst = insert_interval_in_layup(cum_ivLst,begin,end,value=self.ID*1000+i)
-            cum_ivLst = sort_layup_projection([cum_ivLst])[0]
+            relevant_boundary_BSplineLst = self.ivLst_to_BSplineLst(ivLst)
         
             #CREATE LAYER Object
-            tmp_Layer = Layer(i,relevant_boundary_BSplineLst, self.Layup[i-1][0], 
+            lid = int((self.ID*1000)+i)
+            tmp_Layer = Layer(lid,relevant_boundary_BSplineLst, self.Layup[i-1][0], 
                               self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],
                               self.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
             
@@ -165,19 +195,25 @@ class Segment(object):
             if tmp_Layer.IsClosed:
                 tmp_Layer.BSplineLst = set_BSplineLst_to_Origin(tmp_Layer.BSplineLst,self.Theta)
             
-            tmp_Layer.ivLst = self.Projection[i-1]
-            tmp_Layer.cumB_ivLst = cummulated_layup_boundaries(self.Layup)[i-1]
-            tmp_Layer.cumA_ivLst = cummulated_layup_boundaries(self.Layup)[i]
+            tmp_Layer.ivLst = ivLst
+            #tmp_Layer.cumB_ivLst = cummulated_layup_boundaries(self.Layup)[i-1]
+            tmp_Layer.cumB_ivLst = cum_ivLst
+            cum_ivLst = insert_interval_in_layup(cum_ivLst,begin,end,value=self.ID*1000+i)
+            cum_ivLst = sort_layup_projection([cum_ivLst])[0]
+            #tmp_Layer.cumA_ivLst = cummulated_layup_boundaries(self.Layup)[i]
+            tmp_Layer.cumA_ivLst = cum_ivLst
+            
+            
             tmp_Layer.inverse_ivLst = inverse_relevant_cummulated_layup_boundaries(self.Layup)[i-1]
+                        
             tmp_Layer.build_wire()
-
             
             self.LayerLst.append(tmp_Layer)     
     
         return relevant_boundary_BSplineLst
               
     
-    def determine_final_boundary(self):
+    def determine_final_boundary(self, WebLst = None, Segment0 = None):
         '''The member function determin_final_boundary2 generates the 
         BSplineLst that encloses all Layers of the Segement. This final 
         boundary is needed for the generation of the subordinate segments, 
@@ -187,10 +223,16 @@ class Segment(object):
         
         returns: None, but assignes the final_Boundary_BSplineLst class 
             attribute
-        '''    
-        projectionlist=cummulated_layup_boundaries(self.Layup)
-        self.final_Boundary_ivLst = projectionlist[-1]
-        self.final_Boundary_BSplineLst = self.ivLst_to_BSplineLst(projectionlist[-1])
+        '''
+        cum_ivLst = self.boundary_ivLst
+        for i in range(1,len(self.Layup)+1):
+            cum_ivLst = insert_interval_in_layup(cum_ivLst,float(self.Layup[i-1][0]),float(self.Layup[i-1][1]),value=self.ID*1000+i)
+         
+        self.final_Boundary_ivLst = sort_layup_projection([cum_ivLst])[0]
+        self.final_Boundary_BSplineLst = self.ivLst_to_BSplineLst(self.final_Boundary_ivLst)
+        
+        
+        
         return None
 
 
@@ -268,7 +310,7 @@ class Segment(object):
             self.boundary_ivLst = sort_layup_projection([ivLst])[0]  
              
         #print self.boundary_ivLst
-        self.BSplineLst = self.ivLst_to_BSplineLst(self.boundary_ivLst, WebLst, Segment0)  
+        self.BSplineLst = self.ivLst_to_BSplineLst(self.boundary_ivLst)  
         self.build_wire()
         
         return None
