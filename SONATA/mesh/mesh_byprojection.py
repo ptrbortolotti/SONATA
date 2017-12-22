@@ -248,8 +248,11 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
             elif len(exterior_corners) == 2 and node.corner==True:
                 node.cornerstyle = 4
                 #print node, Angle
-                #display.DisplayShape(exterior_corners[0],color='RED')
-                #display.DisplayShape(exterior_corners[1],color='CYAN')
+#                display.DisplayShape(node.Pnt2d)
+#                display.DisplayShape(pPnts[0], color='GREEN')
+#                display.DisplayShape(pPnts[1], color='ORANGE')
+#                display.DisplayShape(exterior_corners[0],color='RED')
+#                display.DisplayShape(exterior_corners[1],color='CYAN')
                 #print 'exterior_corners_para0:', exterior_corners_para[0]
                 #print 'exterior_corners_para1:', exterior_corners_para[1]
                 #print ' pIdx[0]:', pIdx[0],pPara[0]
@@ -268,27 +271,24 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
                     newPara = tmp_u
                     b_BSplineLst[newIdx].D0(newPara,newPnt)
                     #display.DisplayShape(newPnt,color='RED')
-                    b_nodes.append(Node(newPnt,[LayerID,newIdx,newPara]))
                     
+                    b_nodes.append(Node(newPnt,[LayerID,newIdx,newPara]))
                     b_nodes.append(Node(exterior_corners[1],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]))
                     b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
                     
                 else:
+                    display.DisplayShape(node.Pnt2d)
                     #print 'IR',[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]
                     b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
                     b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
                     
-                    #TODO: Use something similar to regular corner to find the middle Point on b_SplineLst!
                     v = gp_Vec2d(exterior_corners[0],exterior_corners[1])
-                    p = exterior_corners[0].Translated(v.Multiplied(0.5))
-                    p2 = []
-                    for idx_2,item_2 in enumerate(b_BSplineLst):
-                        projection2 = Geom2dAPI_ProjectPointOnCurve(p,item_2.GetHandle())
-                        p2.append([projection2.NearestPoint(),idx_2,projection2.LowerDistanceParameter(),projection2.LowerDistance()])
-                    p2 = np.asarray(p2)
-                    min_index = p2[:,3].argmin()                       
+                    cP = exterior_corners[0].Translated(v.Multiplied(0.5))
+                    p2 = ProjectPointOnBSplineLst(b_BSplineLst,cP,distance)
+                    newPnt = p2[0]
+                    newPara = [LayerID,p2[1],p2[2]]
                     
-                    b_nodes.append(Node(p2[min_index,0],[LayerID,p2[min_index,1],p2[min_index,2]]))  
+                    b_nodes.append(Node(newPnt,[LayerID,pIdx[0],newPara]))
                     b_nodes.append(Node(exterior_corners[1],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]))
                     b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
             
@@ -312,7 +312,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
                     cP = pPnts[0].Translated(v.Multiplied(0.5))
                     p2 = ProjectPointOnBSplineLst(b_BSplineLst,cP,1)
                     newPnt = p2[0]
-                    newPara = ['modified',p2[1],p2[2]]
+                    newPara = [LayerID,p2[1],p2[2]]
                     b_nodes.append(Node(newPnt,[LayerID,pIdx[0],newPara]))
                     
                 elif node.regular_corner == False:
