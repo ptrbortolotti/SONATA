@@ -162,9 +162,7 @@ class Segment(object):
             Pnt2d = get_BSplineLst_Pnt2d(WebLst[WebID].BSplineLst, S, start = WebLst[WebID].Pos2, end = WebLst[WebID].Pos1)
         
         
-        
-        
-        
+
         
         return tmp_layer.get_Pnt2d(S,cummLayerLst,self.WebLst)
         

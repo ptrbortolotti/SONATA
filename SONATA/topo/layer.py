@@ -15,9 +15,10 @@ from SONATA.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplin
                                 
 
 from SONATA.mesh.mesh_byprojection import mesh_by_projecting_nodes_on_BSplineLst
-from SONATA.mesh.mesh_utils import modify_cornerstyle_one, modify_sharp_corners,second_stage_improvements,grab_nodes_of_cells_on_BSplineLst,\
-                                 equidistant_nodes_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
+from SONATA.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, equidistant_nodes_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
                                  grab_nodes_on_BSplineLst, remove_duplicates_from_list_preserving_order, merge_nodes_if_too_close
+                                 
+from SONATA.mesh.mesh_improvements import modify_sharp_corners, modify_cornerstyle_one, second_stage_improvements
 class Layer(object):
     ''' 
     The layer object is constructed from multiple BSplineCurveSegments. It is the basis for all future operations. 
@@ -163,7 +164,7 @@ class Layer(object):
         #print self.inverse_ivLst
         for iv_counter,iv in enumerate(self.inverse_ivLst):
             if int(iv[2])==nLayers: 
-                #print iv, "equidistand nodes on BsplineLst of LayerLst entry",
+                print iv, "equidistand nodes on BsplineLst of LayerLst entry"
                 eq_nodes = []
                 BSplineLst = self.a_BSplineLst             
                 iv_BSplineLst = trim_BSplineLst(BSplineLst,iv[0],iv[1],self.S1,self.S2  )
@@ -176,6 +177,7 @@ class Layer(object):
                     IncEnd=True
 
                 elif iv_counter==len(self.inverse_ivLst)-1 and len(self.inverse_ivLst)>1: #last but not first
+                    print iv, 'Last but not first'
                     if  iv_counter==len(self.inverse_ivLst)-1 and iv[1]==1 and self.inverse_ivLst[0][0]==0:
                         IncStart=False
                         IncEnd=False
@@ -210,7 +212,7 @@ class Layer(object):
         
         
         self.a_nodes = remove_duplicates_from_list_preserving_order(new_a_nodes)
-        self.a_nodes =  merge_nodes_if_too_close(self.a_nodes,self.a_BSplineLst,global_minLen,0.1)
+        self.a_nodes = merge_nodes_if_too_close(self.a_nodes,self.a_BSplineLst,global_minLen,0.1)
         
         
         
@@ -251,6 +253,9 @@ class Layer(object):
         '''
         
         self.determine_a_nodes(LayerLst,global_minLen,display)
+
+        
+        
 
         self.a_nodes, self.b_nodes, self.cells = mesh_by_projecting_nodes_on_BSplineLst(self.a_BSplineLst,self.a_nodes,self.b_BSplineLst,self.thickness, proj_tol_1,crit_angle_1, LayerID = self.ID, display=display) 
         #enhanced_cells = modify_cornerstyle_one(cells,self.b_BSplineLst)

@@ -80,8 +80,7 @@ from SONATA.topo.utils import calc_DCT_angles, Pnt2dLst_to_npArray, \
                             
 from SONATA.mesh.mesh_byprojection import mesh_by_projecting_nodes_on_BSplineLst
 from SONATA.mesh.mesh_core import gen_core_cells
-from SONATA.mesh.mesh_utils import modify_cornerstyle_one, modify_sharp_corners,second_stage_improvements,grab_nodes_of_cells_on_BSplineLst,\
-                                 determine_a_nodes, equidistant_nodes_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
+from SONATA.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
                                  grab_nodes_on_BSplineLst                                        
 from SONATA.mesh.mesh_intersect import map_mesh_by_intersect_curve2d
 from SONATA.mesh.consolidate_mesh import consolidate_mesh_on_web
@@ -106,7 +105,9 @@ cwd = os.getcwd()
 
 #if not os.path.exists(directory):
 #    os.makedirs(directory)      
-filename = 'jobs/EPiet/AREA_R250/sec_config.input'
+#filename = 'jobs/EPiet/AREA_R250/sec_config.input'
+filename = 'jobs/VHeuschneider/sec_config.input'
+
 
 FLAG_TOPO = True
 FLAG_MESH = True
