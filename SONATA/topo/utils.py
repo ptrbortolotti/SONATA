@@ -17,7 +17,7 @@ from OCC.TopoDS import topods
 #Own Modules:
 
     
-#######################UTILITIE FUNCTIONS######################################
+#######################UTILITY FUNCTIONS######################################
 def partition(alist, indices):
     return [alist[i:j] for i, j in zip([0]+indices, indices+[None])]
 
