@@ -12,7 +12,7 @@ from SONATA.topo.wire_utils import build_wire_from_BSplineLst
 from SONATA.topo.cutoff import cutoff_layer
 from SONATA.topo.offset import shp_parallel_offset
 from SONATA.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
-                                
+from SONATA.topo.layer_utils import get_layer, get_web, get_segment       
 
 from SONATA.mesh.mesh_byprojection import mesh_by_projecting_nodes_on_BSplineLst
 from SONATA.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, equidistant_nodes_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
@@ -157,14 +157,17 @@ class Layer(object):
         self.BSplineLst = OffsetBSplineLst
          
         
-    def determine_a_nodes(self,LayerLst,global_minLen,display=None):
+    def determine_a_nodes(self,SegmentLst,global_minLen,display=None):
         ''' '''
-        nLayers = len(LayerLst)
+        unmeshed_ids = []
+        for seg in SegmentLst:
+            unmeshed_ids.append(int(seg.LayerLst[-1].ID+1))
+            
         new_a_nodes=[]
         #print self.inverse_ivLst
         for iv_counter,iv in enumerate(self.inverse_ivLst):
-            if int(iv[2])==nLayers: 
-                print iv, "equidistand nodes on BsplineLst of LayerLst entry"
+            if int(iv[2]) in unmeshed_ids: #if 
+                #print iv, "equidistand nodes on BsplineLst of LayerLst entry"
                 eq_nodes = []
                 BSplineLst = self.a_BSplineLst             
                 iv_BSplineLst = trim_BSplineLst(BSplineLst,iv[0],iv[1],self.S1,self.S2  )
@@ -177,7 +180,7 @@ class Layer(object):
                     IncEnd=True
 
                 elif iv_counter==len(self.inverse_ivLst)-1 and len(self.inverse_ivLst)>1: #last but not first
-                    print iv, 'Last but not first'
+                    #print iv, 'Last but not first'
                     if  iv_counter==len(self.inverse_ivLst)-1 and iv[1]==1 and self.inverse_ivLst[0][0]==0:
                         IncStart=False
                         IncEnd=False
@@ -196,7 +199,7 @@ class Layer(object):
             else:
                 #only use once for each layer!
                 #print iv, "use nodes b_nodes of layer", int(iv[2])
-                tmp_layer = LayerLst[int(iv[2])]
+                tmp_layer = get_layer(int(iv[2]),SegmentLst)
                 #iv_BSplineLst = trim_BSplineLst(tmp_layer.b_BSplineLst,iv[0],iv[1],tmp_layer.S1,tmp_layer.S2)
                 iv_BSplineLst = trim_BSplineLst(self.a_BSplineLst,iv[0],iv[1],self.S1,self.S2)
                 #iv_BSplineLst = self.a_BSplineLst
@@ -216,7 +219,7 @@ class Layer(object):
         
         
         
-    def mesh_layer(self, LayerLst, global_minLen, proj_tol_1= 5e-2, 
+    def mesh_layer(self, SegmentLst, global_minLen, proj_tol_1= 5e-2, 
                    proj_tol_2= 2e-1, crit_angle_1 = 115, alpha_crit_2 = 60, 
                    growing_factor=1.8, shrinking_factor=0.1, display=None):
         '''
@@ -230,7 +233,7 @@ class Layer(object):
         everything is stored in the layer.cells and is returned
         
         Args:
-            LayerLst:               The overall list of Layers within the 
+            SegmentLst:               The overall list of Segments within the 
                                     segemet. This list is needed to determine
                                     the a_nodes
             global_minLen:          
@@ -252,10 +255,7 @@ class Layer(object):
         returns: self.cells: (list of cells) 
         '''
         
-        self.determine_a_nodes(LayerLst,global_minLen,display)
-
-        
-        
+        self.determine_a_nodes(SegmentLst,global_minLen,display)
 
         self.a_nodes, self.b_nodes, self.cells = mesh_by_projecting_nodes_on_BSplineLst(self.a_BSplineLst,self.a_nodes,self.b_BSplineLst,self.thickness, proj_tol_1,crit_angle_1, LayerID = self.ID, display=display) 
         #enhanced_cells = modify_cornerstyle_one(cells,self.b_BSplineLst)
@@ -271,7 +271,7 @@ class Layer(object):
             c.theta_3 = self.Orientation
             c.MatID = int(self.MatID)
             c.structured = True
-            #display.DisplayShape(c.wire, color="BLACK")
+            display.DisplayShape(c.wire, color="BLACK")
 
         return self.cells
     
