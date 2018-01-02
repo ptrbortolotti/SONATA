@@ -77,7 +77,8 @@ from SONATA.topo.BSplineLst_utils import reverse_BSplineLst, BSplineLst_Orientat
 from SONATA.topo.utils import calc_DCT_angles, Pnt2dLst_to_npArray, \
                     discrete_stepsize, curvature_of_curve, isclose, unique_rows, \
                     P2Pdistance, PolygonArea
-                            
+from SONATA.topo.layer_utils import get_layer, get_web, get_segment
+                          
 from SONATA.mesh.mesh_byprojection import mesh_by_projecting_nodes_on_BSplineLst
 from SONATA.mesh.mesh_core import gen_core_cells
 from SONATA.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
@@ -107,7 +108,7 @@ cwd = os.getcwd()
 #    os.makedirs(directory)      
 #filename = 'jobs/EPiet/AREA_R250/sec_config.input'
 filename = 'jobs/VHeuschneider/sec_config.input'
-
+filename = 'sec_config_web.input'
 
 FLAG_TOPO = True
 FLAG_MESH = True
@@ -116,7 +117,7 @@ FLAG_SHOW_3D_TOPO = True
 FLAG_SHOW_2D_MESH = True
 FLAG_SHOW_3D_MESH = True
 FLAG_EXPORT_STEP = False
-FLAG_MESH_CORE = True
+FLAG_MESH_CORE = False
 
 startTime = datetime.now()
 #=========READ INPUT:===============
@@ -200,16 +201,14 @@ if FLAG_SHOW_3D_TOPO or FLAG_SHOW_3D_MESH:
         display.View_Top()
         display.FitAll()
 
-#    #test
-#    lid = 1001
-#    S = 0.7
-#    segid = int(lid/1000)
-#    tmp_Pnt2d = SegmentLst[segid].get_Pnt2d(lid,S,SegmentLst[0])
-#    display.DisplayShape(tmp_Pnt2d, color="WHITE")
-#    string = 'L:'+str(lid)+'; S:'+str(S)    
-#    display.DisplayMessage(tmp_Pnt2d,string,message_color=(1.0,0.5,0.0))
-
-
+    #test
+    lid = 2002
+    S = 0.7
+    segid = int(lid/1000)
+    tmp_Pnt2d = SegmentLst[segid].get_Pnt2d(lid,S,SegmentLst[0])
+    display.DisplayShape(tmp_Pnt2d, color="WHITE")
+    string = 'L:'+str(lid)+'; S:'+str(S)    
+    display.DisplayMessage(tmp_Pnt2d,string,message_color=(1.0,0.5,0.0))
 
 #%%============================================================================ 
 #                           M E S H
@@ -228,16 +227,9 @@ if FLAG_MESH:
     
     #===================MESH SEGMENT===============================================
     for j,seg in enumerate(reversed(SegmentLst)):
-        #plot_layup_projection(seg.Layup)
-        for i,layer in enumerate(reversed(seg.LayerLst)):
-            print 'STATUS:\t Meshing Segment %s, Layer %s' %(seg.ID,len(seg.LayerLst)-i)
-            if FLAG_SHOW_3D_MESH: 
-                displaymesh=display 
-             
-            layer.mesh_layer(seg.LayerLst, global_minLen, display=display) 
-            mesh.extend(layer.cells)  
-
+        mesh.extend(seg.mesh_layers(SegmentLst, global_minLen, WebLst, display=display))
         #mesh,nodes = sort_and_reassignID(mesh)
+        
         #===================MESH CORE================================================     
         if FLAG_MESH_CORE:
             if seg.ID==0 and len(SegmentLst)>1:
@@ -249,10 +241,12 @@ if FLAG_MESH:
                 core_Boundary_BSplineLst = seg.final_Boundary_BSplineLst
                 
                 core_a_nodes = []
-                for iv in seg.final_Boundary_ivLst:                       
+                for iv in seg.final_Boundary_ivLst:
+                    (BSplineLst,start,end) = seg.get_BsplineLst_plus(iv[2],SegmentLst,WebLst,layer_attr='a_BSplineLst')
+                
                     #print iv, "use nodes a_nodes of layer", int(iv[2])
-                    tmp_layer = seg.LayerLst[int(iv[2])-1]                   
-                    iv_BSplineLst = trim_BSplineLst(tmp_layer.a_BSplineLst,iv[0],iv[1],tmp_layer.S1,tmp_layer.S2 )           
+                    tmp_layer = get_layer(iv[2],SegmentLst)                
+                    iv_BSplineLst = trim_BSplineLst(BSplineLst,iv[0],iv[1],start,end)           
                     disco_nodes = grab_nodes_on_BSplineLst(tmp_layer.a_nodes,iv_BSplineLst)
                     core_a_nodes.extend(disco_nodes[:-1])
 

@@ -22,6 +22,7 @@ from SONATA.topo.projection import cummulated_layup_boundaries, relevant_cummula
                                     chop_interval_from_layup, insert_interval_in_layup, sort_layup_projection
 
 from SONATA.topo.layer import Layer
+from SONATA.topo.layer_utils import get_layer, get_web, get_segment
 from SONATA.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
 
 class Segment(object):
@@ -47,6 +48,7 @@ class Segment(object):
         self.LayerLst = []
         self.cells = []
         self.boundary_ivLst = np.array([[ 0.,  1.0,  0. ]])
+        self.inv_cumivLst = None
 
         if self.OCC == True:
             self.BSplineLst = kwargs.get('Boundary')
@@ -134,6 +136,38 @@ class Segment(object):
         return iv_BSplineLst
     
     
+    def get_BsplineLst_plus(self,lid,SegmentLst,WebLst,layer_attr='a_BSplineLst'):
+        BSplineLst =  []
+        start = None
+        end = None
+        
+        if lid==0:
+            get_segment(lid,SegmentLst)
+            BSplineLst = SegmentLst[0].BSplineLst
+            start = 0.0
+            end = 1.0
+            
+        elif lid<0:
+            web = get_web(lid,WebLst)
+            if self.ID == web.ID+1: #BACK
+                    BSplineLst = reverse_BSplineLst(copy_BSplineLst(web.BSplineLst))
+                    start = web.Pos2
+                    end = web.Pos1
+                    
+            else: #FRONT
+                    BSplineLst = web.BSplineLst
+                    start = web.Pos1
+                    end = web.Pos2
+                      
+        elif lid>0:
+             layer = get_layer(lid,SegmentLst)
+             BSplineLst = getattr(layer,layer_attr)
+             start = layer.S1
+             end = layer.S2
+                
+        return (BSplineLst, start, end)
+    
+
 
     def get_Pnt2d(self,lid,S,Segment0=None):
         '''returns a Pnt2d for the coresponding layer number and the coordinate S'''
@@ -141,30 +175,21 @@ class Segment(object):
             tmp_LayerLst = []
         else:
             tmp_LayerLst = Segment0.LayerLst 
-            
-        cummLayerLst = tmp_LayerLst+self.LayerLst
-        tmp_layer = next((x for x in self.LayerLst if x.ID == lid), None)
         
-        
-        #print self.ID
-        #print 'cum_ivLst:',self.cumA_ivLst
+        cummLayerLst = tmp_LayerLst+self.LayerLst    
+        tmp_layer = next((x for x in cummLayerLst if x.ID == lid), None)  
+#        print 'lid:', lid, 'S:' ,S
+#        print tmp_layer.cumA_ivLst     
+
         for iv in tmp_layer.cumA_ivLst:
             if iv[0]<=S<iv[1]:
-                #print 'Coordinate',S,'is on layer',int(iv[2])
+            
+                
+                tmp_layer2 = next((x for x in cummLayerLst if x.ID == iv[2]), None)  
+                Pnt2d = get_BSplineLst_Pnt2d(tmp_layer2.a_BSplineLst,S,tmp_layer2.S1,tmp_layer2.S2)
                 break
-        
-        print iv[2]
-        tmp_layer = next((x for x in LayerLst if x.ID == int(iv[2])), None)
-        if not tmp_layer == None: 
-            Pnt2d = get_BSplineLst_Pnt2d(tmp_layer.a_BSplineLst,S,tmp_layer.S1,tmp_layer.S2)
-        else: #Web
-            WebID = -int(iv[2])-1
-            Pnt2d = get_BSplineLst_Pnt2d(WebLst[WebID].BSplineLst, S, start = WebLst[WebID].Pos2, end = WebLst[WebID].Pos1)
-        
-        
-
-        
-        return tmp_layer.get_Pnt2d(S,cummLayerLst,self.WebLst)
+                
+        return Pnt2d
         
     
     def build_layers(self, WebLst = None, Segment0 = None, display = None):
@@ -209,7 +234,57 @@ class Segment(object):
             self.LayerLst.append(tmp_Layer)     
     
         return relevant_boundary_BSplineLst
-              
+    
+    
+    def mesh_layers(self, SegmentLst, global_minLen, WebLst = None, display = None):
+        '''
+        More Commenting!!!!
+        '''
+            
+        np.set_printoptions(suppress=True)
+        #initialize inv_ivLst
+        self.inv_cumivLst = np.array([[0,1,self.LayerLst[-1].ID+1]])
+        
+        if self.ID == 0: #concatenate ivLsts of the previous segments!
+            ivCollector = self.inv_cumivLst
+            for seg in SegmentLst[1:]:
+                if seg.ID == 1:
+                    tmp_ivLst = chop_interval_from_layup(seg.inv_cumivLst,WebLst[0].Pos1,WebLst[0].Pos2)
+                    for iv in tmp_ivLst:
+                        ivCollector = insert_interval_in_layup(ivCollector,iv[0],iv[1],value=iv[2])  
+                        
+                elif seg.ID == len(WebLst)+1:
+                    tmp_ivLst = chop_interval_from_layup(seg.inv_cumivLst,WebLst[-1].Pos2,WebLst[-1].Pos1)
+                    for iv in tmp_ivLst:
+                        ivCollector = insert_interval_in_layup(ivCollector,iv[0],iv[1],value=iv[2])  
+                else:
+                    #print seg.inv_cumivLst, WebLst[seg.ID-2].Pos2,WebLst[seg.ID-1].Pos2
+                    tmp_ivLst = chop_interval_from_layup(seg.inv_cumivLst,WebLst[seg.ID-1].Pos1,WebLst[seg.ID-2].Pos1)
+                    for iv in tmp_ivLst:
+                        ivCollector = insert_interval_in_layup(ivCollector,iv[0],iv[1],value=iv[2])  
+                    tmp_ivLst = chop_interval_from_layup(seg.inv_cumivLst,WebLst[seg.ID-2].Pos2,WebLst[seg.ID-1].Pos2)
+                    for iv in tmp_ivLst:
+                        ivCollector = insert_interval_in_layup(ivCollector,iv[0],iv[1],value=iv[2])  
+                #print sort_layup_projection([ivCollector])[0]
+                
+            ivCollector = sort_layup_projection([ivCollector])[0]
+            self.inv_cumivLst = ivCollector                
+
+        for i,layer in enumerate(reversed(self.LayerLst)):
+            print 'STATUS:\t Meshing Segment %s, Layer %s' %(self.ID,len(self.LayerLst)-i)  
+
+            layer.inverse_ivLst = chop_interval_from_layup(self.inv_cumivLst,layer.S1,layer.S2)
+            layer.inverse_ivLst =  sort_layup_projection([layer.inverse_ivLst])[0]
+            layer.mesh_layer(SegmentLst, global_minLen, display=display) 
+            self.inv_cumivLst = insert_interval_in_layup(self.inv_cumivLst,layer.S1,layer.S2,value=layer.ID)
+            self.cells.extend(layer.cells)  
+
+        return self.cells
+        
+
+        
+        
+        
     
     def determine_final_boundary(self, WebLst = None, Segment0 = None):
         '''The member function determin_final_boundary2 generates the 
