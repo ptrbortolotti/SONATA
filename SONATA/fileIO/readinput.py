@@ -2,8 +2,8 @@
 #This file provides the class and its function to read the input information for the structural design of the rotorblade crosssection
 # - The format must be according to the sec_config.input file. 
 # 
-#TBD: Include more checks for input format
-#TBD: Include Definition of an erosion protection   
+#TODO: Include more checks for input format
+#TODO: Include Definition of an erosion protection   
 #
 #Author: Tobias Pflumm
 #Date:	09/21/2016
@@ -11,7 +11,7 @@
 import numpy as np 
 import ast
 import urllib2  
-from SONATA.topo.utils import allunique
+
 
 def read_segment(STR,seg2find):
     str2find = '&DEFN '+seg2find
@@ -26,6 +26,7 @@ def read_segment(STR,seg2find):
     temp = STR[start1:end]
     return temp,start1,end
     
+
 def read_rowstring(STR,STR2Find):  
     Start = STR.find(STR2Find)
     End = STR[Start::].find('\n')+Start
@@ -33,8 +34,10 @@ def read_rowstring(STR,STR2Find):
         End=len(STR)
     return Start,End    
     
+
 def str2bool(v):
   return v.lower() in ("yes", "true", "t", "1")
+
 
 def read_INTrowSTR(STR,STR2Find):
     Start,End = read_rowstring(STR,STR2Find)
@@ -43,6 +46,7 @@ def read_INTrowSTR(STR,STR2Find):
     temp = temp.replace(" ", "")
     return int(temp)
 
+
 def read_FLOATrowSTR(STR,STR2Find):
     Start,End = read_rowstring(STR,STR2Find)
     temp = STR[Start:End]
@@ -50,12 +54,14 @@ def read_FLOATrowSTR(STR,STR2Find):
     temp = temp.replace(" ", "")
     return float(temp)
    
+    
 def read_BOOLrowSTR(STR,STR2Find):
     Start,End = read_rowstring(STR,STR2Find)
     temp = STR[Start:End]
     temp = temp.split('=')[1]
     temp = temp.replace(" ", "")
     return str2bool(temp)    
+
 
 def read_TXTrowSTR(STR,STR2Find):
     Start,End = read_rowstring(STR,STR2Find)
@@ -64,6 +70,7 @@ def read_TXTrowSTR(STR,STR2Find):
     temp = temp.replace(" ", "")
     return temp
 
+
 def read_LISTrowSTR(STR,STR2Find):
     Start,End = read_rowstring(STR,STR2Find)
     temp = STR[Start:End]
@@ -71,6 +78,7 @@ def read_LISTrowSTR(STR,STR2Find):
     temp = temp.replace(" ", "")
     temp = ast.literal_eval(temp)
     return temp 
+
 
 def read_CMATRIX(STR,STR2Find):
     Start,End = read_rowstring(STR,STR2Find)
@@ -90,6 +98,7 @@ def read_CMATRIX(STR,STR2Find):
     a[a==696969] = float('nan') #replace all 696969's with nan's
     return a
     
+
 def read_layup(STR):
     str2find = '&DEFN Layup'
     start1 = STR.find(str2find)
@@ -132,6 +141,7 @@ def UIUCAirfoil(name):
         temp_x.append(float(0))                                                                     # data[2] = z coord 
     return np.array([temp_x,temp_y,temp_z])                                                         # return AirfoilCoordinate as np.arrray
 
+
 def UIUCAirfoil2d(name):
     foil_dat_url = 'http://m-selig.ae.illinois.edu/ads/coord_seligFmt/%s.dat' % name
     f = urllib2.urlopen(foil_dat_url)
@@ -143,6 +153,7 @@ def UIUCAirfoil2d(name):
         temp_x.append(float(data[0]))                                                               # data[0] = x coord.
         temp_y.append(float(data[1]))                                                               # data[1] = y coord.
     return np.array([temp_x,temp_y])    
+
 
 def AirfoilDat(name):
     string = "%s" %(name)
@@ -158,6 +169,7 @@ def AirfoilDat(name):
         temp_x.append(float(0))                                                                     # data[2] = z coord 
     return np.array([temp_x,temp_y,temp_z])                                                         # return AirfoilCoordinate as np.arrray    
     
+
 def AirfoilDat2d(name):
     string = "%s" %(name)
     f = open(string)
@@ -170,127 +182,6 @@ def AirfoilDat2d(name):
         temp_x.append(float(data[0]))                                                             
         temp_y.append(float(data[1]))                                                                                                       
     return np.array([temp_x,temp_y])                                                                # return AirfoilCoordinate as np.arrray    
-
-    
-
-#================ SECTION-CONFIG OBJECT ========================================
-
-class section_config(object):
-    
-    def __init__(self, filename):
-        self.SETUP_scale_factor = 1
-        self.SETUP_Theta = 0
-
-        
-        self.WEB_ID = []
-        self.WEB_Pos1 = []
-        self.WEB_Pos2 = []
-        self.SEG_ID = []    
-        self.SEG_CoreMaterial = []
-        self.SEG_Layup = []
-        self.SEG_Boundary_OCC = []      #Segment Boundaries in Opencascade format (TOPO_DSwire)
-        self.SEG_Boundary_DCT = []      #Segment Boundaries in discrete values (np.array) 
-
-        self.read_config(filename)
-
-        
-    def read_config(self,filename):
-
-        #READ FILE AND CLEAN UP COMMENTS, EMPTY LINES WITH SPACES AND NEWLINES
-        a = ''
-        with open(filename) as f:
-            for line in f:
-                line = line.partition('#')[0]
-                line = line.rstrip()
-                a += line 
-                a += '\n'
-             
-        STR = ''.join([s for s in a.strip().splitlines(True) if s.strip("\r\n").strip()])
-        
-        
-        #READ SETUP SEGMENT OF INPUT FILE
-        SETUP_str,SETUP_start,SETUP_end = read_segment(STR,'Setup')  
-        #print SETUP_str,SETUP_start,SETUP_end,'\n'
-        self.SETUP_mat_filename = read_TXTrowSTR(SETUP_str,'mat_filename')
-        self.SETUP_NbOfWebs = read_INTrowSTR(SETUP_str,'NbOfWebs')
-        self.SETUP_BalanceWeight = read_BOOLrowSTR(SETUP_str,'BalanceWeight')
-        self.SETUP_input_type = read_INTrowSTR(SETUP_str,'input_type')
-        self.SETUP_datasource = read_TXTrowSTR(SETUP_str,'datasource')
-        if self.SETUP_input_type == 3 or self.SETUP_input_type == 4:
-            self.SETUP_radial_station = read_FLOATrowSTR(SETUP_str,'radial_station')
-        self.SETUP_scale_factor = read_FLOATrowSTR(SETUP_str,'scale_factor')
-        self.SETUP_Theta = read_FLOATrowSTR(SETUP_str,'Theta')
-        self.SETUP_mesh_resolution = read_INTrowSTR(SETUP_str,'mesh_resolution')
-        #self.SETUP_Airfoil = read_TXTrowSTR(SETUP_str,'Airfoil')
-        #self.SETUP_chord = read_FLOATrowSTR(SETUP_str,'chord')
-                                            
-                     
-        #======================================================================
-        #CHECK and READ BALANCE WEIGHT DEFINITION!   
-        if self.SETUP_BalanceWeight == True:
-            #READ Balance Weight Definition
-            BW_str,BW_start,BW_end = read_segment(STR,'BalanceWeight')  
-            #print BW_str,BW_start,BW_end,'\n'
-            self.BW_MatID   = read_INTrowSTR(BW_str,'MatID')
-            self.BW_XPos    = read_FLOATrowSTR(BW_str,'XPos')
-            self.BW_YPos    = read_FLOATrowSTR(BW_str,'YPos')
-            self.BW_Diameter= read_FLOATrowSTR(BW_str,'Diameter')
-    
-    
-        #======================================================================
-        #CHECK and READ WEB DEFINITION!
-        if self.SETUP_NbOfWebs != STR.count('&DEFN Web'):
-            print 'WARNING: \t Setup variable "NbOfWebs" is not equal to the number of web definitions'
-            
-        if self.SETUP_NbOfWebs > 0:
-            #READ Balance Weight Definition
-            for j in range(0,self.SETUP_NbOfWebs):    
-                WEB_str,WEB_start,WEB_end = read_segment(STR,'Web')              
-        
-                self.WEB_ID.append(read_INTrowSTR(WEB_str,'WebID'))
-                self.WEB_Pos1.append(read_FLOATrowSTR(WEB_str,'Pos1'))
-                self.WEB_Pos2.append(read_FLOATrowSTR(WEB_str,'Pos2'))
-
-                #Replace Characters from WEB_start to WEB_end with whitspaces
-                for k in range(WEB_start,WEB_end):  
-                    templist = list(STR)
-                    templist[k] = ' '
-                    STR = ''.join(templist)
-                #WEB_str,WEB_start,WEB_end = read_segment(STR,'Web')      
-                
-        if not allunique(self.WEB_ID):
-            print 'WARNING: \t WEB IDs are not unique!'
-  
-  
-        #======================================================================
-        #CHECK and READ SEGMENT COMPOSITE LAYUP DEFINITION!
-        SEG_str,SEG_start,SEG_end = read_segment(STR,'Seg')
-             
-                
-        while SEG_str!= '':
-            self.SEG_ID.append(read_INTrowSTR(SEG_str,'SegID'))
-            self.SEG_CoreMaterial.append(read_INTrowSTR(SEG_str,'CoreMaterial'))
-            self.SEG_Layup.append(read_layup(SEG_str))
-            
-             #Replace Characters from SEG_start to SEG_end with whitspaces
-            for k in range(SEG_start,SEG_end):  
-                templist = list(STR)
-                templist[k] = ' '
-                STR = ''.join(templist)
-                
-            SEG_str,SEG_start,SEG_end = read_segment(STR,'Seg')       
-        
-        #CHECK FOR SOME INPUT MISTAKES:
-        if not allunique(self.SEG_ID):
-            print 'WARNING: \t SEG IDs are not unique'        
-        
-        if not(self.SETUP_NbOfWebs == 0 and len(self.SEG_ID) == 1) and (not(self.SETUP_NbOfWebs+2 == len(self.SEG_ID))):   
-            print 'WARNING: \t The number of segments does not corresponds to the number of Webs'
-
-
-
-
-
 
 
 class Material(object):
@@ -387,13 +278,12 @@ def read_material_input(filename):
     return MaterialLst
 
 
-
 #======================================================
 #       MAIN
 #======================================================       
 if __name__ == '__main__':
     filename = 'sec_config.input'
-    section1 = section_config(filename)
+    #section1 = Configuration(filename)
     
     filename='mat_database.input'
     MaterialLst = read_material_input(filename)
