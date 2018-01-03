@@ -115,9 +115,9 @@ FLAG_MESH = True
 FLAG_VABS = False
 FLAG_SHOW_3D_TOPO = True
 FLAG_SHOW_2D_MESH = True
-FLAG_SHOW_3D_MESH = True
+FLAG_SHOW_3D_MESH = False
 FLAG_EXPORT_STEP = False
-FLAG_MESH_CORE = False
+FLAG_MESH_CORE = True
 
 startTime = datetime.now()
 #=========READ INPUT:===============
@@ -223,43 +223,16 @@ if FLAG_MESH:
     web_consolidate_tol = 0.5*global_minLen
 
     mesh = []
-    displaymesh=None
-    
+
     #===================MESH SEGMENT===============================================
     for j,seg in enumerate(reversed(SegmentLst)):
-        mesh.extend(seg.mesh_layers(SegmentLst, global_minLen, WebLst, display=display))
+        mesh.extend(seg.mesh_layers(SegmentLst, global_minLen, WebLst, display=None))
         #mesh,nodes = sort_and_reassignID(mesh)
         
         #===================MESH CORE================================================     
-        if FLAG_MESH_CORE:
-            if seg.ID==0 and len(SegmentLst)>1:
-                pass
-            
-            #TODO: generate Core Object?
-            else:
-                print 'STATUS:\t Meshing Segment %s, Core' %(seg.ID)
-                core_Boundary_BSplineLst = seg.final_Boundary_BSplineLst
-                
-                core_a_nodes = []
-                for iv in seg.final_Boundary_ivLst:
-                    (BSplineLst,start,end) = seg.get_BsplineLst_plus(iv[2],SegmentLst,WebLst,layer_attr='a_BSplineLst')
-                
-                    #print iv, "use nodes a_nodes of layer", int(iv[2])
-                    tmp_layer = get_layer(iv[2],SegmentLst)                
-                    iv_BSplineLst = trim_BSplineLst(BSplineLst,iv[0],iv[1],start,end)           
-                    disco_nodes = grab_nodes_on_BSplineLst(tmp_layer.a_nodes,iv_BSplineLst)
-                    core_a_nodes.extend(disco_nodes[:-1])
-
-                #core_a_nodes = determine_a_nodes(mesh,core_Boundary_BSplineLst,global_minLen,layer.ID[0])           
-                [c_cells,c_nodes] = gen_core_cells(core_a_nodes,core_cell_area)
-                
-                for c in c_cells:
-                    c.structured = False
-                    c.theta_3 = 0
-                    c.MatID = int(seg.CoreMaterial)
-                    c.calc_theta_1()
-                   
-                mesh.extend(c_cells)
+    if FLAG_MESH_CORE:
+        for j,seg in enumerate(reversed(SegmentLst)):
+            mesh.extend(seg.mesh_core(SegmentLst,WebLst,core_cell_area,display=display))
 
     #===================consolidate mesh on web interface==================   
     for seg in SegmentLst:

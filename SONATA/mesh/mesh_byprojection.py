@@ -277,7 +277,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
                     b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
                     
                 else:
-                    display.DisplayShape(node.Pnt2d)
+                    #display.DisplayShape(node.Pnt2d)
                     #print 'IR',[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]
                     b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
                     b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))

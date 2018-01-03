@@ -31,7 +31,7 @@ def get_web(lid,WebLst):
         return None
     
     else:
-        WebID = -lid-1
+        WebID = int(-lid-1)
         return WebLst[WebID]
     
 

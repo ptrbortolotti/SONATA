@@ -25,6 +25,11 @@ from SONATA.topo.layer import Layer
 from SONATA.topo.layer_utils import get_layer, get_web, get_segment
 from SONATA.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
 
+from SONATA.mesh.mesh_core import gen_core_cells
+from SONATA.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
+                                 grab_nodes_on_BSplineLst, remove_duplicates_from_list_preserving_order, remove_dublicate_nodes
+
+
 class Segment(object):
     ''' 
     The Segment object is constructed from multiple Layers obejcts. 
@@ -46,7 +51,9 @@ class Segment(object):
         self.Theta = kwargs.get('Theta') 
         self.scale_factor  = kwargs.get('scale_factor') 
         self.LayerLst = []
-        self.cells = []
+        self.cells = []   #list of both layer and c_cells
+        self.l_cells = [] #list of layer cells
+        self.c_cells = [] #list of core cells
         self.boundary_ivLst = np.array([[ 0.,  1.0,  0. ]])
         self.inv_cumivLst = None
 
@@ -149,7 +156,7 @@ class Segment(object):
             
         elif lid<0:
             web = get_web(lid,WebLst)
-            if self.ID == web.ID+1: #BACK
+            if self.ID == web.ID: #BACK
                     BSplineLst = reverse_BSplineLst(copy_BSplineLst(web.BSplineLst))
                     start = web.Pos2
                     end = web.Pos1
@@ -240,7 +247,9 @@ class Segment(object):
         '''
         More Commenting!!!!
         '''
-            
+        
+        
+
         np.set_printoptions(suppress=True)
         #initialize inv_ivLst
         self.inv_cumivLst = np.array([[0,1,self.LayerLst[-1].ID+1]])
@@ -277,13 +286,67 @@ class Segment(object):
             layer.inverse_ivLst =  sort_layup_projection([layer.inverse_ivLst])[0]
             layer.mesh_layer(SegmentLst, global_minLen, display=display) 
             self.inv_cumivLst = insert_interval_in_layup(self.inv_cumivLst,layer.S1,layer.S2,value=layer.ID)
-            self.cells.extend(layer.cells)  
-
-        return self.cells
+            self.l_cells.extend(layer.cells)   
+        
+        self.cells.extend(self.l_cells)
+        return self.l_cells
         
 
-        
-        
+    def mesh_core(self,SegmentLst,WebLst,core_cell_area,display=None)  :
+        if self.ID==0 and len(SegmentLst)>1:
+            pass
+            
+        else:
+            print 'STATUS:\t Meshing Segment %s, Core' %(self.ID)
+            #print self.final_Boundary_ivLst
+            core_a_nodes = []
+            for iv in self.final_Boundary_ivLst:
+                (BSplineLst,start,end) = self.get_BsplineLst_plus(int(iv[2]),SegmentLst,WebLst,layer_attr='a_BSplineLst')
+                iv_BSplineLst = trim_BSplineLst(BSplineLst,iv[0],iv[1],start,end)        
+                
+                if iv[2]<0:
+                    disco_nodes = []
+                    web = get_web(iv[2],WebLst)
+                    #find nodes on the other side of the web interface
+                    #if no other nodes are found on that interface. Raise Error Message
+                    if self.ID == web.ID: #BACK
+                        disco_nodes = grab_nodes_of_cells_on_BSplineLst(SegmentLst[self.ID+1].l_cells,iv_BSplineLst)
+
+                    else: #Front
+                        disco_nodes = grab_nodes_of_cells_on_BSplineLst(SegmentLst[self.ID-1].l_cells,iv_BSplineLst)
+                    
+                    
+                    if disco_nodes == []:
+                        print 'ERROR:\t No nodes are found on the web interface',web.id
+                    else: 
+                        core_a_nodes.extend(disco_nodes[1:-1])
+
+                else:
+                    #print iv, "use nodes a_nodes of layer", int(iv[2])
+                    tmp_layer = get_layer(iv[2],SegmentLst)   
+                    disco_nodes = grab_nodes_on_BSplineLst(tmp_layer.a_nodes,iv_BSplineLst)
+                    core_a_nodes.extend(disco_nodes)
+            
+            core_a_nodes = remove_dublicate_nodes(core_a_nodes)
+            core_a_nodes = remove_duplicates_from_list_preserving_order(core_a_nodes)
+            [c_cells,c_nodes] = gen_core_cells(core_a_nodes,core_cell_area)
+            
+            for c in c_cells:
+                c.structured = False
+                c.theta_3 = 0
+                c.MatID = int(self.CoreMaterial)
+                c.calc_theta_1()
+                if c.area<1e-7:
+                    print c.nodes
+                    display.DisplayShape(c.nodes[0].Pnt2d)
+                    display.DisplayShape(c.nodes[1].Pnt2d, color='RED')
+                    display.DisplayShape(c.nodes[2].Pnt2d, color='GREEN')
+                    
+                    display.DisplayShape(c.wire,color='WHITE')
+            
+            self.c_cells.extend(c_cells)
+            self.cells.extend(self.c_cells)
+        return self.c_cells
         
     
     def determine_final_boundary(self, WebLst = None, Segment0 = None):

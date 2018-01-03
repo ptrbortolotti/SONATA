@@ -295,7 +295,8 @@ def determine_a_nodes(mesh,a_BSplineLst,global_minLen,LayerID,factor=5):
 
 
 def remove_dublicate_nodes(nodes,tol=1e-6):
-    nodes = list(set(nodes))
+    #nodes = list(set(nodes))
+    nodes = remove_duplicates_from_list_preserving_order(nodes)
     doublicated_nodes = [] 
     for i,a in enumerate(nodes):
         for b in nodes[i:]:

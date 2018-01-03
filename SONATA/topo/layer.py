@@ -271,7 +271,7 @@ class Layer(object):
             c.theta_3 = self.Orientation
             c.MatID = int(self.MatID)
             c.structured = True
-            display.DisplayShape(c.wire, color="BLACK")
+            #display.DisplayShape(c.wire, color="BLACK")
 
         return self.cells
     
