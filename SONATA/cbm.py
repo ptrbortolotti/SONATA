@@ -4,17 +4,6 @@ Created on Wed Jan 03 13:56:37 2018
 
 @author: TPflumm
 
-    ''' This function includes the SONATA Dicipline Module for Structural 
-    Composite Beam Modelling (CBM).
-    Design Variables are passed in form of the config file. 
-        
-    NOTE: For computational efficiency it is sometimes not suitable to 
-    recalculate the topology or the crosssection every iteration,
-          -maybe design flags to account for that.
-    
-    return: BeamProperties(allready inlcude Postprocessed parameters such 
-    as Failure Critirion and Safety Margin...)
-    '''
 """
 #Basic PYTHON Modules:
 import pickle as pkl
@@ -57,7 +46,19 @@ from SONATA.display.display_utils import export_to_JPEG, export_to_PNG, export_t
 
 
 class CBM(object):
-
+    ''' This Class includes the SONATA Dicipline Module for Structural 
+    Composite Beam Modelling (CBM).
+    Design Variables are passed in form of the configuration Object or a 
+    configuration file. 
+        
+    NOTE: For computational efficiency it is sometimes not suitable to 
+    recalculate the topology or the crosssection every iteration,
+          -maybe design flags to account for that.
+    
+    return: BeamProperties(allready inlcude Postprocessed parameters such 
+    as Failure Critirion and Safety Margin...)
+    '''
+        
     #__slots__ = ('Configuration','MaterialLst','__tel','__email','__alter','__partner')
     def __init__(self,Configuration,MaterialLst):
         self.config = Configuration
@@ -71,19 +72,7 @@ class CBM(object):
         self.BeamProperties = None
         self.display = None
         
-        #Option Flags:
-        self.flag_topo = True
-        self.flag_export_step = False
-
-        self.flag_mesh = True
-        self.flag_mesh_core = True
-        
-        self.flag_vabs = False
-        
-        self.flag_show_3d_topo = True
-        self.flag_show_2d_mesh = True
-        self.flag_show_3d_mesh = True
-        
+       
         self.startTime = datetime.now()
            
 
@@ -164,7 +153,7 @@ class CBM(object):
             #mesh,nodes = sort_and_reassignID(mesh)
             
         #===================MESH CORE  
-        if self.flag_mesh_core:
+        if self.config.flag_mesh_core:
             for j,seg in enumerate(reversed(self.SegmentLst)):
                 self.mesh.extend(seg.mesh_core(self.SegmentLst, self.WebLst, core_cell_area, display=self.display))
                 
@@ -217,29 +206,28 @@ class CBM(object):
         return None
     
     
+    
+    
     def cbm_run_vabs(self,filename):
         self.mesh,nodes = sort_and_reassignID(self.mesh)
         #TODO: BE CAREFUL TO USE THE RIGHT COORDINATE SYSTEM FOR THE CALCULATIONS!!!!  
         vabs_filename = filename.replace('.input', '.vab')
-        VABSsetup = VABS_config(recover_flag=1)
-        VABSsetup.F = [0,0,0]    #in Newton
-        VABSsetup.M = [0,1300e3,0]     #in Newton/mm
         
         print 'STATUS:\t RUNNING VABS for Constitutive modeling:'
         #EXECUTE VABS:
-        if VABSsetup.recover_flag == 1:
-            VABSsetup.recover_flag=0
-            export_cells_for_VABS(self.mesh,nodes,vabs_filename,VABSsetup,self.MaterialLst)
+        if self.config.VABS.recover_flag == 1:
+            self.config.VABS.recover_flag=0
+            export_cells_for_VABS(self.mesh,nodes,vabs_filename,self.config.VABS,self.MaterialLst)
             command = 'VABSIII.exe '+ vabs_filename
             stdout = subprocess.check_output(command, shell=True)
-            VABSsetup.recover_flag=1
-            export_cells_for_VABS(self.mesh,nodes,vabs_filename,VABSsetup,self.MaterialLst)
+            self.config.VABS.recover_flag=1
+            export_cells_for_VABS(self.mesh,nodes,vabs_filename,self.config.VABS,self.MaterialLst)
             print 'STATUS:\t RUNNING VABS for 3D Recovery:'
             command = 'VABSIII.exe '+ vabs_filename
             stdout = stdout + subprocess.check_output(command, shell=True)
             
         else:
-            export_cells_for_VABS(self.mesh,nodes,vabs_filename,VABSsetup,self.MaterialLst)
+            export_cells_for_VABS(self.mesh,nodes,vabs_filename,self.config.VABS,self.MaterialLst)
             command = 'VABSIII.exe '+ vabs_filename
             stdout = subprocess.check_output(command, shell=True)
         
@@ -251,7 +239,7 @@ class CBM(object):
         
         #VABS Postprocessing:
         self.BeamProperties = XSectionalProperties(vabs_filename+'.K')
-        if VABSsetup.recover_flag == 1:
+        if self.config.VABS.recover_flag == 1:
             self.BeamProperties.read_all_VABS_Results()
             #ASSIGN Stress and strains to elements:
             for i,c in enumerate(self.mesh):

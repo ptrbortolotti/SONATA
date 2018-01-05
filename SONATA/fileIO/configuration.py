@@ -9,16 +9,20 @@ from SONATA.topo.utils import allunique
 from SONATA.fileIO.readinput import read_segment, read_TXTrowSTR, read_INTrowSTR,\
                                     read_BOOLrowSTR, read_FLOATrowSTR, read_layup
 
-
+from SONATA.vabs.VABS_interface import VABS_config, export_cells_for_VABS, XSectionalProperties
 #================ SECTION-CONFIGURATION OBJECT ========================================
 
 class Configuration(object):
+    '''
+    Configuration Class for the SONATA_CBM Disciplin  
+    
+    '''
+    
     
     def __init__(self, filename=None):
         self.SETUP_scale_factor = 1
         self.SETUP_Theta = 0
-
-        
+            
         self.WEB_ID = []
         self.WEB_Pos1 = []
         self.WEB_Pos2 = []
@@ -28,9 +32,22 @@ class Configuration(object):
         self.SEG_Boundary_OCC = []      #Segment Boundaries in Opencascade format (TOPO_DSwire)
         self.SEG_Boundary_DCT = []      #Segment Boundaries in discrete values (np.array) 
 
+        self.flag_topo = True
+        self.flag_export_step = False
+
+        self.flag_mesh = True
+        self.flag_mesh_core = True
+        
+        self.flag_vabs = False
+        
+        self.flag_show_3d_topo = False
+        self.flag_show_2d_mesh = True
+        self.flag_show_3d_mesh = False
+
         if filename:
             self.read_config(filename)
-
+        
+        self.VABS = VABS_config()       #Contains the VABS configuration
 
     def read_config(self,filename):
 

@@ -25,7 +25,6 @@ Date: 01/02/2017
 """
 
 import matplotlib.pyplot as plt
-import copy
 
 from SONATA.fileIO.configuration import Configuration
 from SONATA.fileIO.readinput import read_material_input
@@ -44,7 +43,7 @@ MaterialLst = read_material_input(config.SETUP_mat_filename)
 job1 = CBM(config,MaterialLst)
 job1.cbm_gen_topo()
 job1.cbm_gen_mesh()
-#job1.cbm_run_vabs(filename)
+job1.cbm_run_vabs(filename)
 job1.cbm_post_2dmesh()
 #job1.cbm_post_3dtopo()
 #job1.cbm_post_3dmesh()
@@ -56,3 +55,4 @@ job2.config.SEG_Layup[0][4][2] = job1.config.SEG_Layup[0][4][2]+0.3
 job2.cbm_gen_topo()
 job2.cbm_gen_mesh()
 job2.cbm_post_2dmesh()
+job1.cbm_run_vabs(filename)
