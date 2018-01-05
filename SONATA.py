@@ -45,14 +45,14 @@ job1.cbm_gen_topo()
 job1.cbm_gen_mesh()
 job1.cbm_run_vabs(filename)
 job1.cbm_post_2dmesh()
-#job1.cbm_post_3dtopo()
+job1.cbm_post_3dtopo()
 #job1.cbm_post_3dmesh()
 
 
-job2 = CBM(config,MaterialLst)
-job2.config.BW_XPos = job1.config.BW_XPos+5
-job2.config.SEG_Layup[0][4][2] = job1.config.SEG_Layup[0][4][2]+0.3
-job2.cbm_gen_topo()
-job2.cbm_gen_mesh()
-job2.cbm_post_2dmesh()
-job1.cbm_run_vabs(filename)
+#job2 = CBM(config,MaterialLst)
+#job2.config.BW_XPos = job1.config.BW_XPos+5
+#job2.config.SEG_Layup[0][4][2] = job1.config.SEG_Layup[0][4][2]+0.3
+#job2.cbm_gen_topo()
+#job2.cbm_gen_mesh()
+##job2.cbm_post_3dmesh()
+#job1.cbm_run_vabs(filename)

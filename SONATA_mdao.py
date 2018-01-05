@@ -38,13 +38,14 @@ class CBM_Component(ExplicitComponent):
         
         # Inputs
         self.add_input('BW_XPos', val=-34.0, units='mm', desc='x coordinate of the balance weight center')   
-        self.add_input('BW_YPos', val=0.0,   units='mm', desc='y coordinate of the balance weight center') 
+        #self.add_input('BW_YPos', val=0.0,   units='mm', desc='y coordinate of the balance weight center') 
         #self.add_input('BW_Diameter', val = 5.0, units='mm', desc='blance weight diameter')
 
         # Outputs
-        self.add_output('Xm2', units='mm', desc='x coordinate of the mass center of gravity')
-        self.add_output('Xm3', units='mm', desc='y coordinate of the mass center of gravity')
-            
+        #self.add_output('Xm2', units='mm', desc='x coordinate of the mass center of gravity')
+        #self.add_output('Xm3', units='mm', desc='y coordinate of the mass center of gravity')
+        self.add_output('obj1', units='mm', desc='objective function1')   
+        
         # Finite difference all partials.
         self.declare_partials('*', '*', method='fd')
         
@@ -55,7 +56,7 @@ class CBM_Component(ExplicitComponent):
         MaterialLst = read_material_input(config.SETUP_mat_filename)
 
         config.BW_XPos = inputs['BW_XPos'][0]
-        config.BW_YPos = inputs['BW_YPos'][0]
+        #config.BW_YPos = inputs['BW_YPos'][0]
         #config.BW_Diameter = inputs['BW_Diameter']
 
         job1 = CBM(config,MaterialLst)
@@ -63,54 +64,41 @@ class CBM_Component(ExplicitComponent):
         job1.cbm_gen_mesh()
         job1.cbm_run_vabs(filename)
         
-        outputs['Xm2'] = job1.BeamProperties.Xm2
-        outputs['Xm3'] = job1.BeamProperties.Xm3 
+        #outputs['Xm2'] = job1.BeamProperties.Xm2
+        #outputs['Xm3'] = job1.BeamProperties.Xm3 
+        outputs['obj1'] = abs(job1.BeamProperties.Xm2-2)
 
+        print abs(job1.BeamProperties.Xm2-5), job1.BeamProperties.Xm2, config.BW_XPos
 
 if __name__ == '__main__':
     from openmdao.api import Problem, Group, ScipyOptimizer, IndepVarComp
     
     p = Problem()
     #Generate independentVariableComponent
-    ivc = IndepVarComp()
-    ivc.add_output('BW_XPos', -34.0)
-    ivc.add_output('BW_YPos', 0.0)
+    ivc = p.model.add_subsystem('ivc', IndepVarComp())
+    ivc.add_output('x', -33.5, units='mm')
+    #ivc.add_output('y', 0.0, units='mm')
     
     #Generate Group of two Components
-    p.model.add_subsystem('des_vars', ivc)
     p.model.add_subsystem('cbm_comp', CBM_Component())
-    p.model.connect('des_vars.BW_XPos', 'cbm_comp.BW_XPos')
-    p.model.connect('des_vars.BW_YPos', 'cbm_comp.BW_YPos')
+    p.model.connect('ivc.x', 'cbm_comp.BW_XPos')
+    #p.model.connect('ivc.y', 'cbm_comp.BW_YPos')
     
-    p.model.add_design_var('ivc.BW_XPos', lower=-36, upper=0)
-    p.model.add_design_var('ivc.BW_YPos', lower=-2, upper=2)
-    p.model.add_objective('cbm_comp.Xm2')
+    p.model.add_design_var('ivc.x', lower=-34, upper=0)
+    #p.model.add_design_var('ivc.y', lower=-2, upper=2)
+    p.model.add_objective('cbm_comp.obj1')
     
     #Setup the Problem
 
     p.driver = ScipyOptimizer()
-    p.driver.options['optimizer'] = 'COBYLA'
+    p.driver.options['optimizer'] = 'SLSQP'
+    p.driver.options['disp'] = True
+    p.driver.options['tol'] = 1e-2
+    p.driver.options['maxiter'] = 25
+
+    #p.driver.options['optimizer'] = 'COBYLA'
     p.setup()
-#    #setup the optimization
-    
-#    #
-#    
-
-#    prob
-#
-#    
-#    prob.setup()
-#    prob.run_driver()
-#    prob.run_model()
-#    
-#    print prob['cbm_comp.Xm2'], prob['ivc.BW_XPos'], prob['ivc.BW_YPos']
+    p.run_driver()
+    print p['cbm_comp.obj1'], p['ivc.x'], 
 
     
-    #print prob['des_vars.BW_YPos']
-
-
-#    prob.setup()
-#    prob.run_driver()
-#    # minimum value
-#    print prob['parab.f_xy']
-#    # location of the minimum
