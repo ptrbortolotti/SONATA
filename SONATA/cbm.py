@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
+"""Define the Composite Beam Model (CBM) class
 Created on Wed Jan 03 13:56:37 2018
-
 @author: TPflumm
+ """
 
-"""
 #Basic PYTHON Modules:
 import pickle as pkl
 import matplotlib.pyplot as plt
@@ -47,20 +46,41 @@ from SONATA.display.display_utils import export_to_JPEG, export_to_PNG, export_t
 
 class CBM(object):
     ''' This Class includes the SONATA Dicipline Module for Structural 
-    Composite Beam Modelling (CBM).
+    Composite Beam Modelling (CBM). 
     Design Variables are passed in form of the configuration Object or a 
-    configuration file. 
-        
-    NOTE: For computational efficiency it is sometimes not suitable to 
-    recalculate the topology or the crosssection every iteration,
-          -maybe design flags to account for that.
+    configuration file.          
+
+    Attributes
+    ----------
+    config : <Configuration>
+        Pointer to the <Configuration> object.
+    MaterialLst: list of <Materials> object instances.
+    SegmentLst: list of <Segment> object instances
     
-    return: BeamProperties(allready inlcude Postprocessed parameters such 
-    as Failure Critirion and Safety Margin...)
+    Notes
+    ----------
+    -For computational efficiency it is sometimes not suitable to 
+     recalculate the topology or the crosssection every iteration, 
+     maybe design flags to account for that.
+    -make it possible to construct an instance by passing the 
+     topology and/or mesh
+
     '''
         
     #__slots__ = ('Configuration','MaterialLst','__tel','__email','__alter','__partner')
     def __init__(self,Configuration,MaterialLst):
+        """
+        Initialize attributes.
+
+        Parameters
+        ----------
+        Configuration : <Configuration>
+            Pointer to the <Configuration> object.
+        MaterialLst : <MaterialLst>
+        Pointer to the  <MaterialLst> object.
+
+        """
+        
         self.config = Configuration
         self.MaterialLst = MaterialLst
         
@@ -71,8 +91,7 @@ class CBM(object):
         self.mesh = []
         self.BeamProperties = None
         self.display = None
-        
-       
+              
         self.startTime = datetime.now()
            
 
@@ -139,6 +158,15 @@ class CBM(object):
         
     
     def cbm_gen_mesh(self):
+        """
+        generates the dicretization of topology and stores the cells and nodes
+        in both the <Layer> instances, the <Segment> instances and the attribute 
+        self.mesh that is a list of <Cell> instances
+
+        Returns
+        -------
+        None
+        """
         #meshing parameters:  
         Resolution = self.config.SETUP_mesh_resolution # Nb of Points on Segment0
         length = get_BSplineLst_length(self.SegmentLst[0].BSplineLst)
@@ -149,7 +177,7 @@ class CBM(object):
 
         #===================MESH SEGMENT
         for j,seg in enumerate(reversed(self.SegmentLst)):
-            self.mesh.extend(seg.mesh_layers(self.SegmentLst, global_minLen, self.WebLst, display=None))
+            self.mesh.extend(seg.mesh_layers(self.SegmentLst, global_minLen, self.WebLst, display=self.display))
             #mesh,nodes = sort_and_reassignID(mesh)
             
         #===================MESH CORE  
@@ -196,7 +224,7 @@ class CBM(object):
         print 'STATUS:\t Review Mesh:'
         print '\t   - Total Number of Cells: %s' %(len(self.mesh))
         print '\t   - Duration: %s' % (datetime.now() - self.startTime)
-        print '\t   - Saved as: %s' % filename 
+        #print '\t   - Saved as: %s' % filename 
         minarea = min([c.area for c in self.mesh])
         print '\t   - smallest cell area: %s' % minarea 
         minimum_angle = min([c.minimum_angle for c in self.mesh])

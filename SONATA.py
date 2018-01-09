@@ -31,9 +31,14 @@ from SONATA.fileIO.readinput import read_material_input
 from SONATA.cbm import CBM
 
 plt.close('all')    
-filename = 'jobs/VHeuschneider/sec_config.input'
+filename = 'jobs/EPiet/AREA_R1000/sec_config.input'
 
 config = Configuration(filename)
+#config.SETUP_radial_station = 160
+#config.flag_mesh_core = True
+#config.VABS.recover_flag = 1
+#config.VABS.M = [0,2000e3,0]
+
 MaterialLst = read_material_input(config.SETUP_mat_filename)
 
 #TODO: Comment the CBM Class and memeber functions properly!
@@ -42,10 +47,12 @@ MaterialLst = read_material_input(config.SETUP_mat_filename)
 
 job1 = CBM(config,MaterialLst)
 job1.cbm_gen_topo()
+job1.cbm_display_config()
 job1.cbm_gen_mesh()
-job1.cbm_run_vabs(filename)
+job1.cbm_review_mesh()
+#job1.cbm_run_vabs(filename)
 job1.cbm_post_2dmesh()
-job1.cbm_post_3dtopo()
+#job1.cbm_post_3dtopo()
 #job1.cbm_post_3dmesh()
 
 

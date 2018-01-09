@@ -40,6 +40,8 @@ class Configuration(object):
         
         self.flag_vabs = False
         
+        self.flag_print = True
+        
         self.flag_show_3d_topo = False
         self.flag_show_2d_mesh = True
         self.flag_show_3d_mesh = False

@@ -247,8 +247,6 @@ class Segment(object):
         '''
         More Commenting!!!!
         '''
-        
-        
 
         np.set_printoptions(suppress=True)
         #initialize inv_ivLst
