@@ -53,13 +53,12 @@ class Cell(object):
         self.structured = True
         self.interior_nodes = []
         #Element quality critiria
-        # self.minimum_edge = None
+        #self.minimum_edge = None
 #        self.maximum_edge = None
 #        self.shape_quality = None
 #        self.minimum_jacobinan = None
         #AREA RATIO to neighbors
         
-
         #THE AVERAGE OF 3D strain and Stress Results at Gaussian Points within each element.
 #        self.strain = Strain()      #[psilon11,2epsilon12,2epsilon13,epsilon22,2epsilon24,epsilon33
 #        self.strainM = Strain()   #[epsilon11,2epsilon12,2epsilon13,epsilon22,2epsilon24,epsilon33]M
@@ -194,9 +193,3 @@ class Cell(object):
         min_index, min_value = min(enumerate(P_distances), key=operator.itemgetter(1))       
         return min_value[1]
     
-    
-            
-            
-
-
-        

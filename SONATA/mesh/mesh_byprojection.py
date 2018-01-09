@@ -337,11 +337,9 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
                 #b_nodes.append(Node(b_BSplineLst[pIdx[0]].EndPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].LastParameter()]))
                 #b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))    
             
-            
         else:
             print 'Projection Error, number of projection points: ', len(pPnts)
             
-
     #==============CREATE CELLS PROJECTION=========================================
     
     b = 0   #b_nodes idx
@@ -382,11 +380,8 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
 
         b += 1
         
-        
-
     #==============OCC3DVIEWER========================================
     if kw.get('display') !=  None:
-        
         
         flag_display_a_nodes = False
         flag_display_b_nodes = False
@@ -405,7 +400,6 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
                         string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
                         display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
                         
-                        
                     else: 
                         display.DisplayShape(a.Pnt,color='WHITE')  
                         display.DisplayMessage(a.Pnt,str(a.id))
@@ -416,7 +410,6 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
                     display.DisplayShape(b.Pnt,color='GREEN')  
                     display.DisplayMessage(b.Pnt,str(b.id),message_color=(1.0,0.5,0.0))
     
-        
         if flag_display_a_BSplineLst: 
             for i,a_spline in enumerate(a_BSplineLst):
                 #display_custome_shape(display,a_spline,1.0,0.0,[0.2,0.9,0.8])

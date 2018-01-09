@@ -95,7 +95,32 @@ class CBM(object):
         self.startTime = datetime.now()
            
 
+    def cbm_save(self, filename):
+        '''saves the complete <CBM> object as pickle
+        Args:
+            filename: <string> of the configuration file with path.        
+        '''
+        output_filename = filename.replace('.input', '.pkl')
+        with open(output_filename, 'wb') as output:
+            pkl.dump(self, output, protocol=pkl.HIGHEST_PROTOCOL)        
+        return None
+
+
+    def cbm_load(self, filename):
+        '''loads the complete <CBM> object as pickle
+        Args:
+            filename: <string> of the configuration file with path.    
+        '''
+        input_filename = filename.replace('.input', '.pkl')
+        with open(input_filename, 'rb') as handle:
+            tmp_dict = pkl.load(handle).__dict__
+         
+            self.__dict__.update(tmp_dict)    
+
+
     def cbm_gen_topo(self):
+        '''generates the topology 
+        '''
         #Generate SegmentLst from config:
         self.SegmentLst = generate_SegmentLst(self.config)
         #Build Segment 0:
@@ -132,22 +157,27 @@ class CBM(object):
         print 'STATUS:\t Exporting Topology to: ', export_filename   
         export_to_step(exportLst,export_filename)
         return None
-    
+         
     
     def cbm_save_topo(self,filename):
-        #PICKLE TOPOLOGY:
-        #TODO: Export SegmentLst,WebLst,BW,
-        output_filename = filename.replace('.input', '.pkl')
+        '''saves the topology (SegmentLst, WebLst, and BW) as pickle
+        Args:
+            filename: <string> of the configuration file with path.        
+        '''
+        output_filename = filename.replace('.input', '_topo.pkl')
         with open(output_filename, 'wb') as output:
-            pkl.dump(self.SegmentLst, output, protocol=pkl.HIGHEST_PROTOCOL)
+            pkl.dump((self.SegmentLst, self.WebLst, self.BW), output, protocol=pkl.HIGHEST_PROTOCOL)
         return None
 
 
     def cbm_load_topo(self,filename):
-        #LOAD PICKLED TOPO
-        input_filename = filename.replace('.input', '.pkl')
+        '''loads the topology (SegmentLst, WebLst, and BW) as pickle
+        Args:
+            filename: <string> of the configuration file with path.        
+        '''
+        input_filename = filename.replace('.input', '_topo.pkl')
         with open(input_filename, 'rb') as handle:
-            self.SegmentLst = pkl.load(handle)
+            (self.SegmentLst, self.WebLst, self.BW) = pkl.load(handle)
     
         #Build wires for each layer and segment
         for seg in self.SegmentLst:
@@ -213,10 +243,25 @@ class CBM(object):
     
     
     def cbm_save_mesh(self,filename):
-        #PICKLE MESH 
+        '''saves the mesh (self.mesh) as pickle
+        Args:
+            filename: <string> of the configuration file with path.        
+        '''
         output_filename = filename.replace('.input', '_mesh.pkl')
         with open(output_filename, 'wb') as output:
-            pkl.dump(self.mesh, output, protocol=self.pickle.HIGHEST_PROTOCOL)
+            pkl.dump(self.mesh, output, protocol=pkl.HIGHEST_PROTOCOL)
+        return None
+    
+    
+    def cbm_load_mesh(self,filename):
+        '''loads the mesh (self.mesh) as pickle
+        Args:
+            filename: <string> of the configuration file with path.        
+        '''
+        input_filename = filename.replace('.input', '_mesh.pkl')
+        with open(input_filename, 'rb') as handle:
+            mesh = pkl.load(handle)   
+        (self.mesh, nodes) = sort_and_reassignID(mesh)
         return None
     
     
@@ -232,9 +277,7 @@ class CBM(object):
         #orientation = all([c.orientation for c in mesh])
         #print '\t   - Orientation [CC]: %s' % orientation 
         return None
-    
-    
-    
+
     
     def cbm_run_vabs(self,filename):
         self.mesh,nodes = sort_and_reassignID(self.mesh)
@@ -279,6 +322,7 @@ class CBM(object):
             #ASSIGN Displacement U to nodes:
             for i,n in enumerate(nodes):
                 n.displacement = self.BeamProperties.U[i][3:6]
+    
     
     def cbm_post_2dmesh(self, attribute='MatID',title='NOTITLE'):
         mesh,nodes = sort_and_reassignID(self.mesh)

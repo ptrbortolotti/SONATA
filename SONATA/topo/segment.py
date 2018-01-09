@@ -55,7 +55,9 @@ class Segment(object):
         self.l_cells = [] #list of layer cells
         self.c_cells = [] #list of core cells
         self.boundary_ivLst = np.array([[ 0.,  1.0,  0. ]])
-        self.inv_cumivLst = None
+        self.inv_cumivLst = []
+        self.final_Boundary_ivLst = []
+        self.Projection = relevant_cummulated_layup_boundaries(self.Layup)
 
         if self.OCC == True:
             self.BSplineLst = kwargs.get('Boundary')
@@ -68,7 +70,7 @@ class Segment(object):
                 BSplineLst_tmp = self.BSplineLst_from_file(kwargs.get('filename'),30,self.scale_factor)  
             self.BSplineLst = set_BSplineLst_to_Origin(BSplineLst_tmp)
 
-        self.Projection = relevant_cummulated_layup_boundaries(self.Layup)
+
     
     def __repr__(self):
         return '{}: {}'.format(self.__class__.__name__,self.ID) 
@@ -77,12 +79,18 @@ class Segment(object):
     def __getstate__(self):
         """Return state values to be pickled."""
         self.Para_BSplineLst = ParaLst_from_BSplineLst(self.BSplineLst)
-        return (self.ID, self.Layup, self.CoreMaterial, self.OCC, self.Theta, self.scale_factor, self.Projection, self.LayerLst, self.Para_BSplineLst)   
+        return (self.ID, self.Layup, self.CoreMaterial, self.OCC, self.Theta, \
+                self.scale_factor, self.Projection, self.LayerLst, \
+                self.Para_BSplineLst, self.cells, self.l_cells, self.c_cells,\
+                self.boundary_ivLst, self.inv_cumivLst, self.final_Boundary_ivLst)   
     
     
     def __setstate__(self, state):
         """Restore state from the unpickled state values."""
-        self.ID, self.Layup, self.CoreMaterial, self.OCC, self.Theta, self.scale_factor, self.Projection, self.LayerLst,  self.Para_BSplineLst = state
+        (self.ID, self.Layup, self.CoreMaterial, self.OCC, self.Theta, \
+        self.scale_factor, self.Projection, self.LayerLst,\
+        self.Para_BSplineLst, self.cells, self.l_cells, self.c_cells,\
+        self.boundary_ivLst, self.inv_cumivLst, self.final_Boundary_ivLst)  = state
         self.BSplineLst = BSplineLst_from_ParaLst(self.Para_BSplineLst)
    
     

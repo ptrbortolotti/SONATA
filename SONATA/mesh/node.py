@@ -15,11 +15,9 @@ class Node(object):
         
         self.Pnt2d = Pnt2d  #gp_Pnt2d
         self.parameters = parameters    #[LayerID, idx, U]  'a_0010','b_0010',
-        #self.a_BSplineLst_pos = None   # position between 0 and 1 on a_BSplineLst
-        #self.b_BSplineLst_pos = None   # position between 0 and 1 on b_BSplineLst
         self.corner = False
-        self.regular_corner = None
         self.cornerstyle = None
+        self.regular_corner = None
         self.displacement = [None,None,None]
 
     @property
@@ -49,18 +47,16 @@ class Node(object):
     
     def __getstate__(self):
         """Return state values to be pickled."""
-        return (self.id, self.parameters, self.corner, self.cornerstyle, self.coordinates)   
+        return (self.id, self.parameters, self.corner, self.cornerstyle, self.regular_corner, self.displacement, self.coordinates)   
     
     def __setstate__(self, state):
         """Restore state from the unpickled state values."""
-        self.id, self.parameters, self.corner, self.cornerstyle, tmp_coords   = state
+        self.id, self.parameters, self.corner, self.cornerstyle, self.regular_corner, self.displacement, tmp_coords  = state
         self.Pnt2d = gp_Pnt2d(tmp_coords[0],tmp_coords[1])
     
     def Distance(self,other):
        return self.Pnt2d.Distance(other.Pnt2d)
    
-
-
 
 
 def Pnt2dLst_to_NodeLst(Pnt2dLst):
