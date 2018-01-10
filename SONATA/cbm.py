@@ -9,7 +9,7 @@ import pickle as pkl
 import matplotlib.pyplot as plt
 from datetime import datetime
 import subprocess
-import math
+import sys,os,math
 
 
 #PythonOCC Modules
@@ -18,6 +18,7 @@ from OCC.Display.SimpleGui import init_display
 #SONATA modules:
 from SONATA.fileIO.CADoutput import export_to_step
 from SONATA.fileIO.CADinput import load_3D
+from SONATA.fileIO.hiddenprints import HiddenPrints, blockPrint, enablePrint
 
 from SONATA.bladegen.blade import Blade
 
@@ -93,34 +94,114 @@ class CBM(object):
         self.display = None
               
         self.startTime = datetime.now()
-           
+        self.exportLst = [] #list that contains all objects to be exported as step   
 
-    def cbm_save(self, filename):
+    def cbm_save(self, output_filename=None):
         '''saves the complete <CBM> object as pickle
         Args:
             filename: <string> of the configuration file with path.        
         '''
-        output_filename = filename.replace('.input', '.pkl')
+        if output_filename is None:
+            output_filename = self.config.filename
+            output_filename = output_filename.replace('.input', '.pkl')
+   
         with open(output_filename, 'wb') as output:
             pkl.dump(self, output, protocol=pkl.HIGHEST_PROTOCOL)        
         return None
 
 
-    def cbm_load(self, filename):
+    def cbm_load(self, input_filename=None):
         '''loads the complete <CBM> object as pickle
         Args:
             filename: <string> of the configuration file with path.    
         '''
-        input_filename = filename.replace('.input', '.pkl')
+        if input_filename is None:
+            input_filename = self.config.filename
+            input_filename = input_filename.replace('.input', '.pkl') 
+        
         with open(input_filename, 'rb') as handle:
             tmp_dict = pkl.load(handle).__dict__
-         
             self.__dict__.update(tmp_dict)    
+        return None
+
+
+    def cbm_save_topo(self, output_filename=None):
+        '''saves the topology (SegmentLst, WebLst, and BW) as pickle
+        Args:
+            filename: <string> of the configuration file with path.        
+        '''
+        if output_filename is None:
+            output_filename = self.config.filename
+            output_filename = output_filename.replace('.input', '_topo.pkl')
+            
+        with open(output_filename, 'wb') as output:
+            pkl.dump((self.SegmentLst, self.WebLst, self.BW), output, protocol=pkl.HIGHEST_PROTOCOL)
+        return None
+
+
+    def cbm_load_topo(self, input_filename=None):
+        '''loads the topology (SegmentLst, WebLst, and BW) as pickle
+        Args:
+            filename: <string> of the configuration file with path.        
+        '''
+        if input_filename is None:
+            input_filename = self.config.filename
+            input_filename = input_filename.replace('.input', '_topo.pkl')
+        
+        with open(input_filename, 'rb') as handle:
+            (self.SegmentLst, self.WebLst, self.BW) = pkl.load(handle)
+    
+        #Build wires for each layer and segment
+        for seg in self.SegmentLst:
+            seg.build_wire()
+            for layer in seg.LayerLst:
+                layer.build_wire()
+        return None
+        
+    
+    def cbm_stpexport_topo(self, export_filename=None):
+        if export_filename is None:
+            export_filename = self.config.filename
+            export_filename = export_filename.replace('.input', '.stp')
+        
+        self.exportLst.append(self.SegmentLst[0].wire)
+        for seg in self.SegmentLst:
+            for layer in seg.LayerLst:
+                self.exportLst.append(layer.wire)            
+            
+        print 'STATUS:\t Exporting Topology to: ', export_filename   
+        export_to_step(self.exportLst, export_filename)
+        return None
+    
+    
+    def cbm_save_mesh(self, output_filename=None):
+        '''saves the mesh (self.mesh) as pickle 
+        '''
+        if output_filename is None:
+            output_filename = self.config.filename
+            output_filename = output_filename.replace('.input', '_mesh.pkl')
+            
+        with open(output_filename, 'wb') as output:
+            pkl.dump(self.mesh, output, protocol=pkl.HIGHEST_PROTOCOL)
+        return None
+    
+    
+    def cbm_load_mesh(self, input_filename=None):
+        '''loads the mesh (self.mesh) as pickle
+        '''
+        if input_filename is None:
+            input_filename = self.config.filename
+            input_filename = input_filename.replace('.input', '_mesh.pkl')
+        
+        with open(input_filename, 'rb') as handle:
+            mesh = pkl.load(handle)   
+        (self.mesh, nodes) = sort_and_reassignID(mesh)
+        return None
 
 
     def cbm_gen_topo(self):
         '''generates the topology 
-        '''
+        '''               
         #Generate SegmentLst from config:
         self.SegmentLst = generate_SegmentLst(self.config)
         #Build Segment 0:
@@ -143,50 +224,19 @@ class CBM(object):
                 seg.build_segment_boundary_from_WebLst2(self.WebLst,self.SegmentLst[0])            
                 seg.build_layers(self.WebLst,self.SegmentLst[0])
                 seg.determine_final_boundary(self.WebLst,self.SegmentLst[0])
-        
+                seg.build_wire()
         #Balance Weight:
         if self.config.SETUP_BalanceWeight == True:
             print 'STATUS:\t Building Balance Weight'   
             self.BW = Weight(0,self.config.BW_XPos,self.config.BW_YPos,self.config.BW_Diameter,self.config.BW_MatID)
+            
+            
         return None
 
 
-    def cbm_stpexport_topo(self,filename):
-        exportLst = [self.SegmentLst[0].wire]
-        export_filename = filename.replace('.input', '.stp')
-        print 'STATUS:\t Exporting Topology to: ', export_filename   
-        export_to_step(exportLst,export_filename)
-        return None
-         
+
     
-    def cbm_save_topo(self,filename):
-        '''saves the topology (SegmentLst, WebLst, and BW) as pickle
-        Args:
-            filename: <string> of the configuration file with path.        
-        '''
-        output_filename = filename.replace('.input', '_topo.pkl')
-        with open(output_filename, 'wb') as output:
-            pkl.dump((self.SegmentLst, self.WebLst, self.BW), output, protocol=pkl.HIGHEST_PROTOCOL)
-        return None
 
-
-    def cbm_load_topo(self,filename):
-        '''loads the topology (SegmentLst, WebLst, and BW) as pickle
-        Args:
-            filename: <string> of the configuration file with path.        
-        '''
-        input_filename = filename.replace('.input', '_topo.pkl')
-        with open(input_filename, 'rb') as handle:
-            (self.SegmentLst, self.WebLst, self.BW) = pkl.load(handle)
-    
-        #Build wires for each layer and segment
-        for seg in self.SegmentLst:
-            seg.build_wire()
-            for layer in seg.LayerLst:
-                layer.build_wire()
-        return None
-        
-    
     def cbm_gen_mesh(self):
         """
         generates the dicretization of topology and stores the cells and nodes
@@ -241,31 +291,9 @@ class CBM(object):
         (self.mesh, nodes) = sort_and_reassignID(self.mesh)
         return None
     
-    
-    def cbm_save_mesh(self,filename):
-        '''saves the mesh (self.mesh) as pickle
-        Args:
-            filename: <string> of the configuration file with path.        
-        '''
-        output_filename = filename.replace('.input', '_mesh.pkl')
-        with open(output_filename, 'wb') as output:
-            pkl.dump(self.mesh, output, protocol=pkl.HIGHEST_PROTOCOL)
-        return None
-    
-    
-    def cbm_load_mesh(self,filename):
-        '''loads the mesh (self.mesh) as pickle
-        Args:
-            filename: <string> of the configuration file with path.        
-        '''
-        input_filename = filename.replace('.input', '_mesh.pkl')
-        with open(input_filename, 'rb') as handle:
-            mesh = pkl.load(handle)   
-        (self.mesh, nodes) = sort_and_reassignID(mesh)
-        return None
-    
-    
+
     def cbm_review_mesh(self):
+        '''prints a summary of the mesh properties to the screen '''
         print 'STATUS:\t Review Mesh:'
         print '\t   - Total Number of Cells: %s' %(len(self.mesh))
         print '\t   - Duration: %s' % (datetime.now() - self.startTime)
@@ -279,10 +307,15 @@ class CBM(object):
         return None
 
     
-    def cbm_run_vabs(self,filename):
+    def cbm_run_vabs(self):
+        '''runs the solver
+        
+        Args:
+            filename: <string> of the configuration file with path.        
+        '''
         self.mesh,nodes = sort_and_reassignID(self.mesh)
         #TODO: BE CAREFUL TO USE THE RIGHT COORDINATE SYSTEM FOR THE CALCULATIONS!!!!  
-        vabs_filename = filename.replace('.input', '.vab')
+        vabs_filename = self.config.filename.replace('.input', '.vab')
         
         print 'STATUS:\t RUNNING VABS for Constitutive modeling:'
         #EXECUTE VABS:
@@ -324,11 +357,12 @@ class CBM(object):
                 n.displacement = self.BeamProperties.U[i][3:6]
     
     
-    def cbm_post_2dmesh(self, attribute='MatID',title='NOTITLE'):
+    def cbm_post_2dmesh(self, attribute='MatID',title='NOTITLE', save=None):
         mesh,nodes = sort_and_reassignID(self.mesh)
-        plot_cells(self.mesh,nodes,attribute,self.BeamProperties,title)
+        plot_cells(self.mesh,nodes,attribute,self.BeamProperties,title, save)
         
-    
+        
+        
     def cbm_display_config(self):
         #===========DISPLAY CONFIG:===============
         self.display, self.start_display, self.add_menu, self.add_function_to_menu = init_display()

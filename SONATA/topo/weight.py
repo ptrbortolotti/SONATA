@@ -32,7 +32,6 @@ class Weight(object):
         self.MatID = MatID
         self.style = weight_style
         
-
         #Circ = gp_Circ2d(Ax2d,R)
         Center = gp_Pnt2d(self.X,self.Y)
         Ax2d = gp_Ax2d(Center,gp_Dir2d(1,0))
@@ -41,6 +40,21 @@ class Weight(object):
     @property
     def wire(self):
         return self.build_wire()
+    
+    
+    def __getstate__(self):
+        """Return state values to be pickled."""
+        return (self.ID, self.X, self.Y, self.D, self.MatID, self.style)   
+    
+    
+    def __setstate__(self, state):
+        """Restore state from the unpickled state values."""
+        (self.ID, self.X, self.Y, self.D, self.MatID, self.style) = state
+        Center = gp_Pnt2d(self.X,self.Y)
+        Ax2d = gp_Ax2d(Center,gp_Dir2d(1,0))
+        self.Curve = Geom2d_Circle(Ax2d,self.D/2)
+    
+    
     
     def build_wire(self):
         Center = gp_Pnt(self.X,self.Y,0)

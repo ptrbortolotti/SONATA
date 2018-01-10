@@ -45,9 +45,11 @@ class Configuration(object):
         self.flag_show_3d_topo = False
         self.flag_show_2d_mesh = True
         self.flag_show_3d_mesh = False
-
+        
+        self.filename = 'default_filename.input'
         if filename:
             self.read_config(filename)
+            self.filename = filename
         
         self.VABS = VABS_config()       #Contains the VABS configuration
 

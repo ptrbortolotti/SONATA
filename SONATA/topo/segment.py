@@ -92,7 +92,8 @@ class Segment(object):
         self.Para_BSplineLst, self.cells, self.l_cells, self.c_cells,\
         self.boundary_ivLst, self.inv_cumivLst, self.final_Boundary_ivLst)  = state
         self.BSplineLst = BSplineLst_from_ParaLst(self.Para_BSplineLst)
-   
+        self.build_wire()
+    
     
     def ivLst_to_BSplineLst(self, ivLst):
         '''The member function ivLst_to_BSplineLst generates the 
@@ -372,9 +373,6 @@ class Segment(object):
          
         self.final_Boundary_ivLst = sort_layup_projection([cum_ivLst])[0]
         self.final_Boundary_BSplineLst = self.ivLst_to_BSplineLst(self.final_Boundary_ivLst)
-        
-        
-        
         return None
 
 

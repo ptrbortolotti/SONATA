@@ -79,7 +79,7 @@ class Layer(object):
         self.ID, self.S1, self.S2, self.thickness, self.Orientation, self.MatID, self.Para_Boundary_BSplineLst, self.Para_BSplineLst = state
         self.Boundary_BSplineLst = BSplineLst_from_ParaLst(self.Para_Boundary_BSplineLst)
         self.BSplineLst = BSplineLst_from_ParaLst(self.Para_BSplineLst)
-
+        self.build_wire()
 
 
     @property

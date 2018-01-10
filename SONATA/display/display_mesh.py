@@ -7,6 +7,7 @@ Created on Thu Jan 19 11:01:06 2017
 import scipy.io
 import numpy as np
 import math
+import datetime
 
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
@@ -114,7 +115,7 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
 
     
 
-def plot_cells(cells,nodes,attr1,VABSProperties=None,title='None',plotTheta11=False, plotDisplacement=False,):
+def plot_cells(cells,nodes,attr1,VABSProperties=None,title='None', savepath=None, plotTheta11=False, plotDisplacement=False,):
     nodes_array = []
     for n in nodes:
         if plotDisplacement:
@@ -153,6 +154,14 @@ def plot_cells(cells,nodes,attr1,VABSProperties=None,title='None',plotTheta11=Fa
     
     
     plot_mesh(nodes_array,element_array,theta_11,data,data_name,title,VABSProperties,False,False)    
+    
+    if savepath!=None:
+        #savepath = 'jobs/VHeuschneider/figures/R90_config.svg'
+        #datestr = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+        tmp_fig = plt.gcf()
+        tmp_fig.set_size_inches(11.69, 8.27)    #a4 landscape
+        tmp_fig.savefig(savepath, dpi=300, orientation='landscape', papertype='a4')
+   
     
     return None
 
