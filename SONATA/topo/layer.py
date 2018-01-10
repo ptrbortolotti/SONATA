@@ -57,8 +57,32 @@ class Layer(object):
              self.join_style = 1                             
         else:
             self.join_style = kwargs.get('join_style')          
-            
+        
+    @property
+    def StartPoint(self): #gp_Pnt2d
+        return self.BSplineLst[0].StartPoint()
+    
+    
+    @property
+    def EndPoint(self): #gp_Pnt2d
+        return self.BSplineLst[-1].EndPoint()
+    
+    
+    @property
+    def a_BSplineLst(self): #gp_Pnt2d
+        return self.BSplineLst
+    
+    
+    @property
+    def b_BSplineLst(self): #gp_Pnt2d
+        return self.Boundary_BSplineLst
 
+
+    @property
+    def IsClosed(self):
+        return self.a_BSplineLst[0].StartPoint().IsEqual(self.a_BSplineLst[-1].EndPoint(),1e-5)   
+        
+    
     def __str__(self): 
         #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 
         return  str('LayerID: \tStart[-]: \tEnd[-]: \tthickness[-]: \tOrientation[deg]: \tMatID \tName:\t\n' \
@@ -82,25 +106,7 @@ class Layer(object):
         self.build_wire()
 
 
-    @property
-    def StartPoint(self): #gp_Pnt2d
-        return self.BSplineLst[0].StartPoint()
-    
-    @property
-    def EndPoint(self): #gp_Pnt2d
-        return self.BSplineLst[-1].EndPoint()
-    
-    @property
-    def a_BSplineLst(self): #gp_Pnt2d
-        return self.BSplineLst
-    
-    @property
-    def b_BSplineLst(self): #gp_Pnt2d
-        return self.Boundary_BSplineLst
 
-    @property
-    def IsClosed(self):
-        return self.a_BSplineLst[0].StartPoint().IsEqual(self.a_BSplineLst[-1].EndPoint(),1e-5)
     
     
     def copy(self):
@@ -161,7 +167,8 @@ class Layer(object):
         ''' '''
         unmeshed_ids = []
         for seg in SegmentLst:
-            unmeshed_ids.append(int(seg.LayerLst[-1].ID+1))
+            if seg.LayerLst:
+                unmeshed_ids.append(int(seg.LayerLst[-1].ID+1))
             
         new_a_nodes=[]
         #print self.inverse_ivLst
@@ -220,7 +227,7 @@ class Layer(object):
         
         
     def mesh_layer(self, SegmentLst, global_minLen, proj_tol_1= 5e-2, 
-                   proj_tol_2= 2e-1, crit_angle_1 = 115, alpha_crit_2 = 60, 
+                   proj_tol_2= 3e-1, crit_angle_1 = 115, alpha_crit_2 = 60, 
                    growing_factor=1.8, shrinking_factor=0.1, display=None):
         '''
         The mesh layer function discretizes the layer, which is composed of a 
@@ -241,7 +248,7 @@ class Layer(object):
                                     in which the resulting projection point 
                                     has to be. 
                                     (mesh_by_projecting_nodes_on_BSplineLst)
-            proj_tol_2 = 5e-2:      tolerance value to determine a distance, 
+            proj_tol_2 = 2e-1:      tolerance value to determine a distance, 
                                     in which the resulting projection point 
                                     has to be. (modify_sharp_corners)
             crit_angle_1 = 115:     is the critical angle to determine a corner 
@@ -259,7 +266,7 @@ class Layer(object):
 
         self.a_nodes, self.b_nodes, self.cells = mesh_by_projecting_nodes_on_BSplineLst(self.a_BSplineLst,self.a_nodes,self.b_BSplineLst,self.thickness, proj_tol_1,crit_angle_1, LayerID = self.ID, display=display) 
         #enhanced_cells = modify_cornerstyle_one(cells,self.b_BSplineLst)
-        self.cells, nb_nodes = modify_sharp_corners(self.cells,self.b_BSplineLst,global_minLen,self.thickness, proj_tol_2,alpha_crit_2,display=display)
+        self.cells, nb_nodes = modify_sharp_corners(self.cells, self.b_BSplineLst, global_minLen,self.thickness, proj_tol_2, alpha_crit_2, display=display)
         self.b_nodes.extend(nb_nodes)
         self.cells, nb_nodes = second_stage_improvements(self.cells,self.b_BSplineLst,global_minLen,growing_factor,shrinking_factor,display=display)
         self.b_nodes.extend(nb_nodes)

@@ -18,13 +18,14 @@ from SONATA.topo.utils import TColgp_HArray1OfPnt_from_nparray,point_list_to_TCo
 
 class Airfoil(object):
     class_counter= 0
-    def __init__(self, name):
+    def __init__(self, name, trailing_edge_style=0):
         self.id = self.__class__.class_counter
         self.__class__.class_counter += 1
         self.name = name  
+        self.trailing_edge_style = trailing_edge_style
         self.array = UIUCAirfoil(self.name)
         self.wire = self.gen_wire()
-    
+
     def gen_wire(self):
         harray = TColgp_HArray1OfPnt_from_nparray(self.array)
         anInterpolation = GeomAPI_Interpolate(harray.GetHandle(), False, 0.001)
@@ -50,10 +51,13 @@ class Airfoil(object):
             P1 = StartPnt.Translated(V1.Multiplied(-2e-3))
             P2 = EndPnt.Translated(V2.Multiplied(2e-3))
             
-            bezier = Geom_BezierCurve(point_list_to_TColgp_Array1OfPnt([StartPnt,P1,P2,EndPnt]))
-            trailing_edge = BRepBuilderAPI_MakeEdge(bezier.GetHandle())
-            #display.DisplayShape(bezier, color='BLUE')
-            #display.DisplayShape(edge.Edge())
+            if self.trailing_edge_style == 1:
+                bezier = Geom_BezierCurve(point_list_to_TColgp_Array1OfPnt([StartPnt,P1,P2,EndPnt]))
+                #display.DisplayShape(bezier, color='BLUE')
+                trailing_edge = BRepBuilderAPI_MakeEdge(bezier.GetHandle())
+            
+            else:
+                trailing_edge = BRepBuilderAPI_MakeEdge(StartPnt,EndPnt)
             
             wire = BRepBuilderAPI_MakeWire(edge.Edge(),trailing_edge.Edge()).Wire()
         else:

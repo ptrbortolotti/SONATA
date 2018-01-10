@@ -322,27 +322,30 @@ def relevant_cummulated_layup_boundaries(Layup):
                   np.array([[ 0.3  0.7  3. ]
                           [ 0.7  1.   2. ]
                           [ 0.   0.3  2. ]])                
-    '''              
-    nlayers = int(np.size(Layup,0))
-    #clean up Layup array
-    a = np.delete(Layup,[2,3,4],1)
-    b = np.transpose(np.linspace(1,nlayers,nlayers))
-    c = np.c_[a,b]  
-    clean_layup = np.insert(c,0, np.array((0,1,0)),0)
-    tmp = clean_layup[[0]]
-    #print clean_layup
+    '''
+    if Layup.size == 0:
+        return []    
     
-    #Iterate over Layup
-    relevant_projectionlist =  []
-    for i in range(1,nlayers+1,1):
-        begin   = float(clean_layup[i][0])
-        end     = float(clean_layup[i][1])
-        relevant_projectionlist.append(chop_interval_from_layup(tmp,begin,end))
-        tmp = insert_interval_in_layup(tmp,begin,end)
-        tmp = tmp[np.lexsort(np.fliplr(tmp).T)]
-    
+    else:
+        nlayers = int(np.size(Layup,0))
+        #clean up Layup array
+        a = np.delete(Layup,[2,3,4],1)
+        b = np.transpose(np.linspace(1,nlayers,nlayers))
+        c = np.c_[a,b]  
+        clean_layup = np.insert(c,0, np.array((0,1,0)),0)
+        tmp = clean_layup[[0]]
+        #print clean_layup
+        
+        #Iterate over Layup
+        relevant_projectionlist =  []
+        for i in range(1,nlayers+1,1):
+            begin   = float(clean_layup[i][0])
+            end     = float(clean_layup[i][1])
+            relevant_projectionlist.append(chop_interval_from_layup(tmp,begin,end))
+            tmp = insert_interval_in_layup(tmp,begin,end)
+            tmp = tmp[np.lexsort(np.fliplr(tmp).T)]
 
-    return sort_layup_projection(relevant_projectionlist)
+        return sort_layup_projection(relevant_projectionlist)
 
 
 def inverse_relevant_cummulated_layup_boundaries(Layup):

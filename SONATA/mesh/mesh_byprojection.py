@@ -383,9 +383,9 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst,a_nodes,b_BSplineLst,lay
     #==============OCC3DVIEWER========================================
     if kw.get('display') !=  None:
         
-        flag_display_a_nodes = False
+        flag_display_a_nodes = True
         flag_display_b_nodes = False
-        flag_display_a_BSplineLst = False
+        flag_display_a_BSplineLst = True
         flag_display_b_BSplineLst = True
         
         if flag_display_a_nodes:

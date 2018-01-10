@@ -152,7 +152,7 @@ class Segment(object):
         return iv_BSplineLst
     
     
-    def get_BsplineLst_plus(self,lid,SegmentLst,WebLst,layer_attr='a_BSplineLst'):
+    def get_BsplineLst_plus(self, lid, SegmentLst, WebLst, layer_attr='a_BSplineLst'):
         BSplineLst =  []
         start = None
         end = None
@@ -184,28 +184,14 @@ class Segment(object):
         return (BSplineLst, start, end)
     
 
-
-    def get_Pnt2d(self,lid,S,Segment0=None):
+    def get_Pnt2d(self, S, SegmentLst, WebLst = None):
         '''returns a Pnt2d for the coresponding layer number and the coordinate S'''
-        if Segment0 == None:
-            tmp_LayerLst = []
-        else:
-            tmp_LayerLst = Segment0.LayerLst 
-        
-        cummLayerLst = tmp_LayerLst+self.LayerLst    
-        tmp_layer = next((x for x in cummLayerLst if x.ID == lid), None)  
-#        print 'lid:', lid, 'S:' ,S
-#        print tmp_layer.cumA_ivLst     
-
-        for iv in tmp_layer.cumA_ivLst:
-            if iv[0]<=S<iv[1]:
-            
-                
-                tmp_layer2 = next((x for x in cummLayerLst if x.ID == iv[2]), None)  
-                Pnt2d = get_BSplineLst_Pnt2d(tmp_layer2.a_BSplineLst,S,tmp_layer2.S1,tmp_layer2.S2)
-                break
-                
-        return Pnt2d
+        a = self.final_Boundary_ivLst
+        #select interval were S can be found
+        b = a[np.where(a[:,0] <= S < a[:,1])]
+        lid = int(b[0][2])
+        (BSplineLst, start, end) = self.get_BsplineLst_plus(lid, SegmentLst, WebLst)
+        return get_BSplineLst_Pnt2d(BSplineLst, S, start, end)
         
     
     def build_layers(self, WebLst = None, Segment0 = None, display = None):
@@ -213,93 +199,96 @@ class Segment(object):
         and return the relevant_boundary_BSplineLst'''
         #plot_layup_projection(self.Layup)
         cum_ivLst = self.boundary_ivLst
-        for i in range(1,len(self.Layup)+1):
-            print "STATUS:\t Building Segment %d, Layer: %d" % (self.ID,i)
-
-            begin = float(self.Layup[i-1][0])
-            end = float(self.Layup[i-1][1])
-            #print cum_ivLst, begin, end
-            ivLst = chop_interval_from_layup(cum_ivLst,begin,end)
-            ivLst = sort_layup_projection([ivLst])[0]
-            relevant_boundary_BSplineLst = self.ivLst_to_BSplineLst(ivLst)
         
-            #CREATE LAYER Object
-            lid = int((self.ID*1000)+i)
-            tmp_Layer = Layer(lid,relevant_boundary_BSplineLst, self.Layup[i-1][0], 
-                              self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],
-                              self.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
-            
-            tmp_Layer.build_layer() 
-            
-            if tmp_Layer.IsClosed:
-                tmp_Layer.BSplineLst = set_BSplineLst_to_Origin(tmp_Layer.BSplineLst,self.Theta)
-            
-            tmp_Layer.ivLst = ivLst
-            #tmp_Layer.cumB_ivLst = cummulated_layup_boundaries(self.Layup)[i-1]
-            tmp_Layer.cumB_ivLst = cum_ivLst
-            cum_ivLst = insert_interval_in_layup(cum_ivLst,begin,end,value=self.ID*1000+i)
-            cum_ivLst = sort_layup_projection([cum_ivLst])[0]
-            #tmp_Layer.cumA_ivLst = cummulated_layup_boundaries(self.Layup)[i]
-            tmp_Layer.cumA_ivLst = cum_ivLst
-            
-            
-            tmp_Layer.inverse_ivLst = inverse_relevant_cummulated_layup_boundaries(self.Layup)[i-1]
-                        
-            tmp_Layer.build_wire()
-            
-            self.LayerLst.append(tmp_Layer)     
+        if self.Layup.size != 0:
+            for i in range(1,len(self.Layup)+1):
+                print "STATUS:\t Building Segment %d, Layer: %d" % (self.ID,i)
     
-        return relevant_boundary_BSplineLst
+                begin = float(self.Layup[i-1][0])
+                end = float(self.Layup[i-1][1])
+                #print cum_ivLst, begin, end
+                ivLst = chop_interval_from_layup(cum_ivLst,begin,end)
+                ivLst = sort_layup_projection([ivLst])[0]
+                relevant_boundary_BSplineLst = self.ivLst_to_BSplineLst(ivLst)
+            
+                #CREATE LAYER Object
+                lid = int((self.ID*1000)+i)
+                tmp_Layer = Layer(lid,relevant_boundary_BSplineLst, self.Layup[i-1][0], 
+                                  self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],
+                                  self.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
+                
+                tmp_Layer.build_layer() 
+                
+                if tmp_Layer.IsClosed:
+                    tmp_Layer.BSplineLst = set_BSplineLst_to_Origin(tmp_Layer.BSplineLst, self.Theta)
+                
+                tmp_Layer.ivLst = ivLst
+                #tmp_Layer.cumB_ivLst = cummulated_layup_boundaries(self.Layup)[i-1]
+                tmp_Layer.cumB_ivLst = cum_ivLst
+                cum_ivLst = insert_interval_in_layup(cum_ivLst,begin,end,value=self.ID*1000+i)
+                cum_ivLst = sort_layup_projection([cum_ivLst])[0]
+                #tmp_Layer.cumA_ivLst = cummulated_layup_boundaries(self.Layup)[i]
+                tmp_Layer.cumA_ivLst = cum_ivLst
+                
+                
+                tmp_Layer.inverse_ivLst = inverse_relevant_cummulated_layup_boundaries(self.Layup)[i-1]
+                            
+                tmp_Layer.build_wire()
+                
+                self.LayerLst.append(tmp_Layer)     
+        
+            return relevant_boundary_BSplineLst
     
     
     def mesh_layers(self, SegmentLst, global_minLen, WebLst = None, display = None):
         '''
         More Commenting!!!!
         '''
+        if self.LayerLst:
+            np.set_printoptions(suppress=True)
+            #initialize inv_ivLst
+            self.inv_cumivLst = np.array([[0,1,self.LayerLst[-1].ID+1]])
+            
+            if self.ID == 0: #concatenate ivLsts of the previous segments!
+                ivCollector = self.inv_cumivLst
+                for seg in SegmentLst[1:]:
+                    if seg.ID == 1:
+                        tmp_ivLst = chop_interval_from_layup(seg.inv_cumivLst,WebLst[0].Pos1,WebLst[0].Pos2)
+                        for iv in tmp_ivLst:
+                            ivCollector = insert_interval_in_layup(ivCollector,iv[0],iv[1],value=iv[2])  
+                            
+                    elif seg.ID == len(WebLst)+1:
+                        tmp_ivLst = chop_interval_from_layup(seg.inv_cumivLst,WebLst[-1].Pos2,WebLst[-1].Pos1)
+                        for iv in tmp_ivLst:
+                            ivCollector = insert_interval_in_layup(ivCollector,iv[0],iv[1],value=iv[2])  
+                    else:
+                        #print seg.inv_cumivLst, WebLst[seg.ID-2].Pos2,WebLst[seg.ID-1].Pos2
+                        tmp_ivLst = chop_interval_from_layup(seg.inv_cumivLst,WebLst[seg.ID-1].Pos1,WebLst[seg.ID-2].Pos1)
+                        for iv in tmp_ivLst:
+                            ivCollector = insert_interval_in_layup(ivCollector,iv[0],iv[1],value=iv[2])  
+                        tmp_ivLst = chop_interval_from_layup(seg.inv_cumivLst,WebLst[seg.ID-2].Pos2,WebLst[seg.ID-1].Pos2)
+                        for iv in tmp_ivLst:
+                            ivCollector = insert_interval_in_layup(ivCollector,iv[0],iv[1],value=iv[2])  
+                    #print sort_layup_projection([ivCollector])[0]
+                    
+                ivCollector = sort_layup_projection([ivCollector])[0]
+                self.inv_cumivLst = ivCollector                
+    
+            for i,layer in enumerate(reversed(self.LayerLst)):
+                print 'STATUS:\t Meshing Segment %s, Layer %s' %(self.ID,len(self.LayerLst)-i)  
+    
+                layer.inverse_ivLst = chop_interval_from_layup(self.inv_cumivLst,layer.S1,layer.S2)
+                layer.inverse_ivLst =  sort_layup_projection([layer.inverse_ivLst])[0]
+                layer.mesh_layer(SegmentLst, global_minLen, display=display) 
+                self.inv_cumivLst = insert_interval_in_layup(self.inv_cumivLst,layer.S1,layer.S2,value=layer.ID)
+                self.l_cells.extend(layer.cells)   
+            
+            self.cells.extend(self.l_cells)
+            return self.l_cells
+        else:
+            return []
 
-        np.set_printoptions(suppress=True)
-        #initialize inv_ivLst
-        self.inv_cumivLst = np.array([[0,1,self.LayerLst[-1].ID+1]])
-        
-        if self.ID == 0: #concatenate ivLsts of the previous segments!
-            ivCollector = self.inv_cumivLst
-            for seg in SegmentLst[1:]:
-                if seg.ID == 1:
-                    tmp_ivLst = chop_interval_from_layup(seg.inv_cumivLst,WebLst[0].Pos1,WebLst[0].Pos2)
-                    for iv in tmp_ivLst:
-                        ivCollector = insert_interval_in_layup(ivCollector,iv[0],iv[1],value=iv[2])  
-                        
-                elif seg.ID == len(WebLst)+1:
-                    tmp_ivLst = chop_interval_from_layup(seg.inv_cumivLst,WebLst[-1].Pos2,WebLst[-1].Pos1)
-                    for iv in tmp_ivLst:
-                        ivCollector = insert_interval_in_layup(ivCollector,iv[0],iv[1],value=iv[2])  
-                else:
-                    #print seg.inv_cumivLst, WebLst[seg.ID-2].Pos2,WebLst[seg.ID-1].Pos2
-                    tmp_ivLst = chop_interval_from_layup(seg.inv_cumivLst,WebLst[seg.ID-1].Pos1,WebLst[seg.ID-2].Pos1)
-                    for iv in tmp_ivLst:
-                        ivCollector = insert_interval_in_layup(ivCollector,iv[0],iv[1],value=iv[2])  
-                    tmp_ivLst = chop_interval_from_layup(seg.inv_cumivLst,WebLst[seg.ID-2].Pos2,WebLst[seg.ID-1].Pos2)
-                    for iv in tmp_ivLst:
-                        ivCollector = insert_interval_in_layup(ivCollector,iv[0],iv[1],value=iv[2])  
-                #print sort_layup_projection([ivCollector])[0]
-                
-            ivCollector = sort_layup_projection([ivCollector])[0]
-            self.inv_cumivLst = ivCollector                
-
-        for i,layer in enumerate(reversed(self.LayerLst)):
-            print 'STATUS:\t Meshing Segment %s, Layer %s' %(self.ID,len(self.LayerLst)-i)  
-
-            layer.inverse_ivLst = chop_interval_from_layup(self.inv_cumivLst,layer.S1,layer.S2)
-            layer.inverse_ivLst =  sort_layup_projection([layer.inverse_ivLst])[0]
-            layer.mesh_layer(SegmentLst, global_minLen, display=display) 
-            self.inv_cumivLst = insert_interval_in_layup(self.inv_cumivLst,layer.S1,layer.S2,value=layer.ID)
-            self.l_cells.extend(layer.cells)   
-        
-        self.cells.extend(self.l_cells)
-        return self.l_cells
-        
-
-    def mesh_core(self,SegmentLst,WebLst,core_cell_area,display=None)  :
+    def mesh_core(self, SegmentLst, WebLst, core_cell_area, display=None)  :
         if self.ID==0 and len(SegmentLst)>1:
             pass
             
@@ -336,7 +325,7 @@ class Segment(object):
             
             core_a_nodes = remove_dublicate_nodes(core_a_nodes)
             core_a_nodes = remove_duplicates_from_list_preserving_order(core_a_nodes)
-            [c_cells,c_nodes] = gen_core_cells(core_a_nodes,core_cell_area)
+            [c_cells,c_nodes] = gen_core_cells(core_a_nodes, core_cell_area)
             
             for c in c_cells:
                 c.structured = False
@@ -368,9 +357,10 @@ class Segment(object):
             attribute
         '''
         cum_ivLst = self.boundary_ivLst
-        for i in range(1,len(self.Layup)+1):
-            cum_ivLst = insert_interval_in_layup(cum_ivLst,float(self.Layup[i-1][0]),float(self.Layup[i-1][1]),value=self.ID*1000+i)
-         
+        if self.Layup.size != 0:
+            for i in range(1,len(self.Layup)+1):
+                cum_ivLst = insert_interval_in_layup(cum_ivLst,float(self.Layup[i-1][0]),float(self.Layup[i-1][1]),value=self.ID*1000+i)
+             
         self.final_Boundary_ivLst = sort_layup_projection([cum_ivLst])[0]
         self.final_Boundary_BSplineLst = self.ivLst_to_BSplineLst(self.final_Boundary_ivLst)
         return None
@@ -381,23 +371,10 @@ class Segment(object):
         SegmentCopy = Segment(self.ID, Layup = self.Layup, CoreMaterial = self.CoreMaterial, OCC = True, Boundary = BSplineLstCopy)
         return SegmentCopy
     
+    
     def build_wire(self): #Builds TopoDS_Wire from connecting BSplineSegments and returns it                  
         self.wire = build_wire_from_BSplineLst(self.BSplineLst)   
 
-
-#    def get_length(self): #Determine and return Legth of Layer self
-#         self.length = get_BSplineLst_length(self.BSplineLst)
-#         return self.length
-#        
-#    def pnt2d(self,S): #Return, gp_Pnt2d of argument S of Segment self  
-#        return get_BSplineLst_Pnt2d(self.BSplineLst,S)
-#          
-#    def trim(self,S1,S2, start, end): #Trims layer between S1 and S2
-#        return trim_BSplineLst(self.BSplineLst, S1, S2, start, end)
-#    
-#    def trim_SEGwire(self, S1, S2):
-#        return trim_wire(self.wire, S1, S2)
-        
 
     def BSplineLst_from_airfoil_database(self,string,angular_deflection=30,scale_factor=1.0):
         '''
@@ -420,9 +397,8 @@ class Segment(object):
         self.BSplineLst = seg_boundary_from_dct(DCT_data,angular_deflection)
         return seg_boundary_from_dct(DCT_data,angular_deflection)
             
-    
 
-    def build_segment_boundary_from_WebLst2(self,WebLst,Segment0):
+    def build_segment_boundary_from_WebLst(self,WebLst,Segment0):
         print 'STATUS:\t Building Segment Boundaries %s' %(self.ID)
         i = self.ID - 1    
                     
@@ -454,85 +430,3 @@ class Segment(object):
         self.build_wire()
         
         return None
-             
-        
-#    def build_segment_boundary_from_WebLst(self,WebLst,Segment0_final_Boundary_BSplineLst):
-#        """Input has to be a complete WebLst"""
-#        print 'STATUS:\t Building Segment Boundaries %s' %(self.ID)
-#        NbOfWebs = len(WebLst)
-#        i = self.ID - 1    
-#            
-#        if self.ID == 0:
-#            None
-#        
-#        if self.ID == 1:
-#            #CREATE SEGMENT BOUNDARY 1
-#            P1 = WebLst[i].IntPnts_Pnt2d[0]
-#            P2 = WebLst[i].IntPnts_Pnt2d[1]
-#            trimmed_Boundary = trim_BSplineLst_by_Pnt2d(Segment0_final_Boundary_BSplineLst,P1,P2)
-#            Boundary_WEB_BSplineLst = [Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([P2,P1])).Curve().GetObject()]
-#            Boundary_BSplineLst = trimmed_Boundary + Boundary_WEB_BSplineLst                                  
-#            Boundary_BSplineLst = set_BSplineLst_to_Origin(Boundary_BSplineLst)
-#            self.BSplineLst = Boundary_BSplineLst
-#            self.build_wire()   
-#            
-#        elif self.ID == NbOfWebs+1:
-#            #CREATE LAST BOUNDARY
-#            P1 = WebLst[i-1].IntPnts_Pnt2d[0]
-#            P2 = WebLst[i-1].IntPnts_Pnt2d[1]
-#            trimmed_Boundary = trim_BSplineLst_by_Pnt2d(Segment0_final_Boundary_BSplineLst,P2,P1)
-#            Boundary_WEB_BSplineLst = [Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([P1,P2])).Curve().GetObject()]
-#            Boundary_BSplineLst = trimmed_Boundary + Boundary_WEB_BSplineLst                                  
-#            Boundary_BSplineLst = set_BSplineLst_to_Origin(Boundary_BSplineLst)
-#            self.BSplineLst = Boundary_BSplineLst
-#            self.build_wire()   
-#            
-#        else:
-#            #CREATE INTERMEDIATE BOUNDARIES
-#            P1 = WebLst[i-1].IntPnts_Pnt2d[0]
-#            P2 = WebLst[i-1].IntPnts_Pnt2d[1]
-#            P3 = WebLst[i].IntPnts_Pnt2d[0]
-#            P4 = WebLst[i].IntPnts_Pnt2d[1]
-#            Boundary_WEB_BSplineLst_1 = [Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([P1,P2])).Curve().GetObject()]
-#            Boundary_WEB_BSplineLst_2 = [Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([P4,P3])).Curve().GetObject()]
-#            trimmed_Boundary1 = trim_BSplineLst_by_Pnt2d(Segment0_final_Boundary_BSplineLst,P3,P1)
-#            trimmed_Boundary2 = trim_BSplineLst_by_Pnt2d(Segment0_final_Boundary_BSplineLst,P2,P4)
-#            Boundary_BSplineLst = trimmed_Boundary1 + Boundary_WEB_BSplineLst_1 + trimmed_Boundary2 + Boundary_WEB_BSplineLst_2
-#            Boundary_BSplineLst = set_BSplineLst_to_Origin(Boundary_BSplineLst)
-#            self.BSplineLst = Boundary_BSplineLst
-#            self.build_wire()
-#      
-#        return None
-
-def generate_SegmentLst(Configuration):
-    
-    #generate Segment Lst
-    SegmentLst = []   #List of Segment Objects
-    for i,item in enumerate(Configuration.SEG_ID):
-        if item == 0:        
-            if Configuration.SETUP_input_type == 0:   #0) Airfoil from UIUC Database  --- naca23012
-                SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], scale_factor = Configuration.SETUP_scale_factor, Theta = Configuration.SETUP_Theta, OCC=False, airfoil = Configuration.SETUP_datasource))
-            
-            elif Configuration.SETUP_input_type == 1: #1) Geometry from .dat file --- AREA_R250.dat
-                SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], scale_factor = Configuration.SETUP_scale_factor,  Theta = Configuration.SETUP_Theta, OCC=False, filename = Configuration.SETUP_datasource))
-            
-            elif Configuration.SETUP_input_type == 2: #2)2d .step or .iges  --- AREA_R230.stp
-                BSplineLst = import_2d_stp(Configuration.SETUP_datasource, Configuration.SETUP_scale_factor,Configuration.SETUP_Theta)
-                SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], Theta = Configuration.SETUP_Theta, OCC=True, Boundary = BSplineLst))
-            
-            elif Configuration.SETUP_input_type == 3: #3)3D .step or .iges and radial station of crosssection --- AREA_Blade.stp, R=250
-                BSplineLst = import_3d_stp(Configuration.SETUP_datasource,Configuration.SETUP_radial_station,Configuration.SETUP_scale_factor,Configuration.SETUP_Theta)
-                SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], Theta = Configuration.SETUP_Theta, OCC=True, Boundary = BSplineLst))  
-    
-            elif Configuration.SETUP_input_type == 4: #4)generate 3D-Shape from twist,taper,1/4-line and airfoils, --- examples/UH-60A, R=4089, theta is given from twist distribution
-                genblade = Blade(Configuration.SETUP_datasource,Configuration.SETUP_datasource,False,False)
-                BSplineLst = genblade.get_crosssection(Configuration.SETUP_radial_station,Configuration.SETUP_scale_factor)
-                SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i], Theta = genblade.get_Theta(Configuration.SETUP_radial_station), OCC=True, Boundary = BSplineLst))  
-                
-            else:
-                print 'ERROR:\t WRONG input_type'
-     
-        else:
-            SegmentLst.append(Segment(item, Layup = Configuration.SEG_Layup[i], CoreMaterial = Configuration.SEG_CoreMaterial[i],Theta = Configuration.SETUP_Theta))
-    sorted(SegmentLst, key=getID)  
-    return SegmentLst

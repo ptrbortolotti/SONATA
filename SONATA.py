@@ -30,36 +30,30 @@ from SONATA.fileIO.configuration import Configuration
 from SONATA.fileIO.readinput import read_material_input
 from SONATA.cbm import CBM
 
-plt.close('all')    
-filename = 'jobs/EPiet/AREA_R1000/sec_config.input'
-
-config = Configuration(filename)
-#config.SETUP_radial_station = 160
-#config.flag_mesh_core = True
-#config.VABS.recover_flag = 1
-#config.VABS.M = [0,2000e3,0]
-
-MaterialLst = read_material_input(config.SETUP_mat_filename)
+from SONATA.fileIO.CADinput import load_stp
 
 #TODO: Comment the CBM Class and memeber functions properly!
 #TODO: include optionflags and Vabs_setup in Configuration
 #TODO: include yaml style input files
+
+plt.close('all')    
+
+
+filename = 'jobs/VariSpeed/sec_config.input'
+
+config = Configuration(filename)
+MaterialLst = read_material_input(config.SETUP_mat_filename)
+
+#config.SETUP_radial_station = 160
+#config.flag_mesh_core = True
+#config.VABS.recover_flag = 1
+#config.VABS.M = [0,2000e3,0]
 
 job1 = CBM(config,MaterialLst)
 job1.cbm_gen_topo()
 job1.cbm_display_config()
 job1.cbm_gen_mesh()
 job1.cbm_review_mesh()
-#job1.cbm_run_vabs(filename)
+job1.cbm_run_vabs()
 job1.cbm_post_2dmesh()
-#job1.cbm_post_3dtopo()
-#job1.cbm_post_3dmesh()
-
-
-#job2 = CBM(config,MaterialLst)
-#job2.config.BW_XPos = job1.config.BW_XPos+5
-#job2.config.SEG_Layup[0][4][2] = job1.config.SEG_Layup[0][4][2]+0.3
-#job2.cbm_gen_topo()
-#job2.cbm_gen_mesh()
-##job2.cbm_post_3dmesh()
-#job1.cbm_run_vabs(filename)
+job1.cbm_post_3dtopo()

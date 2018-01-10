@@ -17,12 +17,12 @@ from OCC.Display.SimpleGui import init_display
 
 #SONATA modules:
 from SONATA.fileIO.CADoutput import export_to_step
-from SONATA.fileIO.CADinput import load_3D
+from SONATA.fileIO.CADinput import load_3D, import_2d_stp, import_3d_stp
 from SONATA.fileIO.hiddenprints import HiddenPrints, blockPrint, enablePrint
 
 from SONATA.bladegen.blade import Blade
 
-from SONATA.topo.segment import generate_SegmentLst
+from SONATA.topo.segment import Segment
 from SONATA.topo.web import Web
 from SONATA.topo.utils import  getID
 from SONATA.topo.weight import Weight
@@ -95,6 +95,16 @@ class CBM(object):
               
         self.startTime = datetime.now()
         self.exportLst = [] #list that contains all objects to be exported as step   
+        self.surface3d = None
+        self.Blade = None
+        
+        if self.config.SETUP_input_type == 3:
+            self.surface3d = load_3D(self.config.SETUP_datasource)
+        elif self.config.SETUP_input_type == 4:
+            self.blade =  Blade(self.config.SETUP_datasource, self.config.SETUP_datasource, False, False)
+            self.surface3d = self.blade.surface
+        
+
 
     def cbm_save(self, output_filename=None):
         '''saves the complete <CBM> object as pickle
@@ -198,12 +208,48 @@ class CBM(object):
         (self.mesh, nodes) = sort_and_reassignID(mesh)
         return None
 
+    def cbm_generate_SegmentLst(self):
+        ''' generate Segment Lst'''
+        self.SegmentLst = []   #List of Segment Objects
+        for i,item in enumerate(self.config.SEG_ID):
+            if item == 0:        
+                if self.config.SETUP_input_type == 0:   #0) Airfoil from UIUC Database  --- naca23012
+                    self.SegmentLst.append(Segment(item, Layup = self.config.SEG_Layup[i], CoreMaterial = self.config.SEG_CoreMaterial[i], scale_factor = self.config.SETUP_scale_factor, Theta = self.config.SETUP_Theta, OCC=False, airfoil = self.config.SETUP_datasource))
+                
+                elif self.config.SETUP_input_type == 1: #1) Geometry from .dat file --- AREA_R250.dat
+                    self.SegmentLst.append(Segment(item, Layup = self.config.SEG_Layup[i], CoreMaterial = self.config.SEG_CoreMaterial[i], scale_factor = self.config.SETUP_scale_factor,  Theta = self.config.SETUP_Theta, OCC=False, filename = self.config.SETUP_datasource))
+                
+                elif self.config.SETUP_input_type == 2: #2)2d .step or .iges  --- AREA_R230.stp
+                    BSplineLst = import_2d_stp(self.config.SETUP_datasource, self.config.SETUP_scale_factor,self.config.SETUP_Theta)
+                    self.SegmentLst.append(Segment(item, Layup = self.config.SEG_Layup[i], CoreMaterial = self.config.SEG_CoreMaterial[i], Theta = self.config.SETUP_Theta, OCC=True, Boundary = BSplineLst))
+                
+                elif self.config.SETUP_input_type == 3: #3)3D .step or .iges and radial station of crosssection --- AREA_Blade.stp, R=250
+                    BSplineLst = import_3d_stp(self.config.SETUP_datasource, self.config.SETUP_radial_station, self.config.SETUP_scale_factor, self.config.SETUP_Theta)
+                    self.SegmentLst.append(Segment(item, Layup = self.config.SEG_Layup[i], CoreMaterial = self.config.SEG_CoreMaterial[i], Theta = self.config.SETUP_Theta, OCC=True, Boundary = BSplineLst))  
+        
+                elif self.config.SETUP_input_type == 4: #4)generate 3D-Shape from twist,taper,1/4-line and airfoils, --- examples/UH-60A, R=4089, theta is given from twist distribution
+                    BSplineLst = self.blade.get_crosssection(self.config.SETUP_radial_station, self.config.SETUP_scale_factor)
+                    self.SegmentLst.append(Segment(item, Layup = self.config.SEG_Layup[i], CoreMaterial = self.config.SEG_CoreMaterial[i], Theta = self.blade.get_Theta(self.config.SETUP_radial_station), OCC=True, Boundary = BSplineLst))  
+                    
+                else:
+                    print 'ERROR:\t WRONG input_type'
+         
+            else:
+                if self.config.SETUP_input_type == 4:
+                    self.SegmentLst.append(Segment(item, Layup = self.config.SEG_Layup[i], CoreMaterial = self.config.SEG_CoreMaterial[i], Theta = self.blade.get_Theta(self.config.SETUP_radial_station)))
+                
+                else:
+                    self.SegmentLst.append(Segment(item, Layup = self.config.SEG_Layup[i], CoreMaterial = self.config.SEG_CoreMaterial[i], Theta = self.config.SETUP_Theta))
+        
+        sorted(self.SegmentLst, key=getID)  
+        return None
+
 
     def cbm_gen_topo(self):
         '''generates the topology 
         '''               
         #Generate SegmentLst from config:
-        self.SegmentLst = generate_SegmentLst(self.config)
+        self.cbm_generate_SegmentLst()
         #Build Segment 0:
         self.SegmentLst[0].build_wire()
         self.SegmentLst[0].build_layers()
@@ -213,7 +259,7 @@ class CBM(object):
         if self.config.SETUP_NbOfWebs > 0:
             for i in range(0,self.config.SETUP_NbOfWebs):
                 print 'STATUS:\t Building Web %s' %(i+1)
-                self.WebLst.append(Web(self.config.WEB_ID[i],self.config.WEB_Pos1[i],self.config.WEB_Pos2[i],self.SegmentLst[0]))
+                self.WebLst.append(Web(self.config.WEB_ID[i],self.config.WEB_Pos1[i],self.config.WEB_Pos2[i],self.SegmentLst))
             sorted(self.SegmentLst, key=getID)  
             
         #Build remaining Segments:
@@ -221,7 +267,7 @@ class CBM(object):
             for i,seg in enumerate(self.SegmentLst[1:],start=1):
                 seg.Segment0 = self.SegmentLst[0]
                 seg.WebLst = self.WebLst
-                seg.build_segment_boundary_from_WebLst2(self.WebLst,self.SegmentLst[0])            
+                seg.build_segment_boundary_from_WebLst(self.WebLst,self.SegmentLst[0])            
                 seg.build_layers(self.WebLst,self.SegmentLst[0])
                 seg.determine_final_boundary(self.WebLst,self.SegmentLst[0])
                 seg.build_wire()
@@ -234,8 +280,6 @@ class CBM(object):
         return None
 
 
-
-    
 
     def cbm_gen_mesh(self):
         """
@@ -268,6 +312,7 @@ class CBM(object):
         #===================consolidate mesh on web interface         
         for web in self.WebLst:
             #print web.ID,  'Left:', SegmentLst[web.ID].ID, 'Right:', SegmentLst[web.ID+1].ID,
+            print 'STATUS:\t Consolidate Mesh on Web Interface'  
             web.wl_nodes = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID].cells, web.BSplineLst)
             web.wr_nodes = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID+1].cells, web.BSplineLst)
             self.mesh = consolidate_mesh_on_web(self.mesh,web.BSplineLst, web.wl_nodes, web.wr_nodes, web_consolidate_tol,self.display)
@@ -381,22 +426,13 @@ class CBM(object):
         #display.DisplayShape(SegmentLst[0].BSplineLst[0].StartPoint())
         #display_custome_shape(display,SegmentLst[0].wire,2,0,[0,0,0])
 
-        if self.config.SETUP_input_type == 3:
+        if self.config.SETUP_input_type == 3 or self.config.SETUP_input_type == 4:
             self.display.Context.SetDeviationAngle(1e-5)       # 0.001 default. Be careful to scale it to the problem, or else it will crash :) 
             self.display.Context.SetDeviationCoefficient(1e-5) 
             
             display_SONATA_SegmentLst(self.display,self.SegmentLst,self.config.SETUP_radial_station,-math.pi/2,-math.pi/2)
-            aResShape = load_3D(self.config.SETUP_datasource)
-            self.display.DisplayShape(aResShape,color=None, transparency=0.7, update=True)
-        
-        elif self.config.SETUP_input_type == 4:
-            self.display.Context.SetDeviationAngle(1e-5)       # 0.001 default. Be careful to scale it to the problem, or else it will crash :) 
-            self.display.Context.SetDeviationCoefficient(1e-5) 
-            
-            genblade = Blade(self.config.SETUP_datasource,self.config.SETUP_datasource,False,False)
-            display_SONATA_SegmentLst(self.display, self.SegmentLst, self.config.SETUP_radial_station, -math.pi/2, -math.pi/2) 
-            self.display.DisplayShape(genblade.surface,color=None, transparency=0.7, update=True)
-       
+            self.display.DisplayShape(self.surface3d, color=None, transparency=0.7, update=True)
+               
         else:
             display_SONATA_SegmentLst(self.display,self.SegmentLst)
         

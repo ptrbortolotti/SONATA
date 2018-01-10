@@ -4,7 +4,7 @@ Created on Fri Mar 03 13:37:55 2017
 
 @author: TPflumm
 """
-from OCC.gp import gp_Pnt,gp_Pnt2d
+from OCC.gp import gp_Pnt, gp_Pnt2d
 from SONATA.topo.BSplineLst_utils import find_BSplineLst_pos, findPnt_on_BSplineLst
 
 class Node(object):
