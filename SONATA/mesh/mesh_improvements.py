@@ -7,15 +7,16 @@ Created on Fri Dec 22 10:30:01 2017
 
 import numpy as np
 
-from OCC.gp import gp_Vec2d
+from OCC.gp import gp_Vec2d, gp_Pnt2d
 from OCC.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
+from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
 
 from SONATA.mesh.node import Node
 from SONATA.mesh.cell import Cell
 from SONATA.mesh.mesh_utils import move_node_on_BSplineLst, theta_1_from_2nodes
 from SONATA.topo.BSplineLst_utils import ProjectPointOnBSplineLst
 
-def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1e-2,alpha_crit = 50,**kwargs):
+def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, LayerID = 0, tol=1e-2,alpha_crit = 50,**kwargs):
     '''
     
     '''
@@ -90,11 +91,11 @@ def modify_sharp_corners(cells,b_BSplineLst,global_minLen,layer_thickness, tol=1
                                     
                                 if vnP.Dot(v01)>0 and trigger_f :
                                     trigger_f = False
-                                    FrontNodes.append(Node(P,['',pIdx[i],pPara[i]]))
+                                    FrontNodes.append(Node(P,[LayerID, pIdx[i],pPara[i]]))
                                 
                                 elif vnP.Dot(v01)<0 and  trigger_b:
                                     trigger_b = False
-                                    BackNodes.append(Node(P,['',pIdx[i],pPara[i]]))
+                                    BackNodes.append(Node(P,[LayerID, pIdx[i],pPara[i]]))
                                 
                                 else:
                                     print 'ERROR: cannot determine FRONT and BACK nodes @ ',c.nodes[0], 'because vnp and v01 are orthogonal'
@@ -236,7 +237,7 @@ def modify_cornerstyle_one(cells,b_BSplineLst,**kwargs):
     return enhanced_cells
 
 
-def second_stage_improvements(cells,b_BSplineLst,global_minLen,factor1=1.8,factor2=0.15, **kw):
+def second_stage_improvements(cells,b_BSplineLst,global_minLen, LayerID = 0,factor1=1.8,factor2=0.15, **kw):
     
     if kw.get('display') !=  None:
         display = kw.get('display')
@@ -255,7 +256,7 @@ def second_stage_improvements(cells,b_BSplineLst,global_minLen,factor1=1.8,facto
                 p2 = ProjectPointOnBSplineLst(b_BSplineLst,cP,1)
                 #display.DisplayColoredShape(p2[0], 'YELLOW')  
                 nodeLst = c.nodes
-                newNode = Node(p2[0],['test',p2[1],p2[2]])
+                newNode = Node(p2[0],[LayerID,p2[1],p2[2]])
                 #MODIFY EXISTING CELL
                 c.nodes = [nodeLst[0],nodeLst[1],newNode]
                 enhanced_cells2.append(c)
@@ -276,7 +277,7 @@ def second_stage_improvements(cells,b_BSplineLst,global_minLen,factor1=1.8,facto
                 nodeLst = c.nodes
                 #Modify Node 2
                 nodeLst[2].Pnt2d = p2[0]
-                nodeLst[2].parameters = ['modified',p2[1],p2[2]]
+                nodeLst[2].parameters = [LayerID,p2[1],p2[2]]
                 #MODIFY EXISTING CELL
                 c.nodes = [nodeLst[0],nodeLst[2],nodeLst[3]]
                 c.theta_1 = theta_1_from_2nodes(nodeLst[0],nodeLst[3])
@@ -298,3 +299,49 @@ def second_stage_improvements(cells,b_BSplineLst,global_minLen,factor1=1.8,facto
             None
             
     return enhanced_cells2, new_b_nodes
+
+
+
+
+def integrate_leftover_interior_nodes(a_nodes, a_BSplineLst, b_nodes, b_BSplineLst, cells, thickness, LayerID, **kw):
+    
+    if kw.get('display') !=  None:
+        display = kw.get('display')
+    
+    aglTol = 0.5
+    linTol = 1e-6
+    prjTol = 1e-2
+    celTol = 0.1
+    leftover_exterior_corners = []
+    for i,item in enumerate(b_BSplineLst[:-1]):
+        spline1 = item
+        spline2 = b_BSplineLst[i+1]
+        u1,p1,v1 = spline1.LastParameter(),gp_Pnt2d(),gp_Vec2d()
+        u2,p2,v2  = spline2.FirstParameter(),gp_Pnt2d(),gp_Vec2d()
+        spline1.D1(u1,p1,v1)
+        spline2.D1(u2,p2,v2)
+        
+        Angle = abs(v1.Angle(v2))*180/np.pi       
+        if Angle>aglTol and not any(n.Pnt2d.IsEqual(item.EndPoint(), linTol) for n in b_nodes):
+            leftover_exterior_corners.append((item.EndPoint(),[LayerID,i,u1]))
+                
+    #reversed projection:
+    for p1 in leftover_exterior_corners:
+        new_b_node = Node(p1[0], p1[1])
+        p2 = ProjectPointOnBSplineLst(a_BSplineLst, p1[0], (1+prjTol)*thickness)
+        
+        if len(p2) > 0:
+            for c in cells:
+                if c.cell_node_distance(new_b_node) < (1+celTol)*thickness:
+                    print len(leftover_exterior_corners)
+                    display.DisplayShape(p2[0], color='YELLOW')
+                    display.DisplayShape(c.wire, color='ORANGE')
+                    
+
+    if kw.get('display') !=  None:
+        for p in leftover_exterior_corners:
+            display.DisplayShape(p[0], color='RED')
+
+
+
+    return None
