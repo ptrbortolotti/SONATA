@@ -134,7 +134,7 @@ class Blade(object):
     
 #===========================MAIN===============================================
 if __name__ == '__main__':
-    UH60A_blade = Blade('UH-60A','UH-60A',True,True)
+    UH60A_blade = Blade('UH-60A_zeroTwist','UH-60A',True,True)
     display, start_display, add_menu, add_function_to_menu = init_display('qt-pyqt5')
     BSplineLst = UH60A_blade.get_crosssection(7600)
     UH60A_blade.display(display)

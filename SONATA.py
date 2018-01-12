@@ -39,7 +39,7 @@ from SONATA.fileIO.CADinput import load_stp
 plt.close('all')    
 
 
-filename = 'jobs/VariSpeed/sec_config.input'
+filename = 'jobs/EPiet/AREA_R180/sec_config.input'
 
 config = Configuration(filename)
 MaterialLst = read_material_input(config.SETUP_mat_filename)
@@ -51,9 +51,9 @@ MaterialLst = read_material_input(config.SETUP_mat_filename)
 
 job1 = CBM(config,MaterialLst)
 job1.cbm_gen_topo()
-job1.cbm_display_config()
+#job1.cbm_display_config()
 job1.cbm_gen_mesh()
 job1.cbm_review_mesh()
 job1.cbm_run_vabs()
 job1.cbm_post_2dmesh()
-job1.cbm_post_3dtopo()
+#job1.cbm_post_3dtopo()

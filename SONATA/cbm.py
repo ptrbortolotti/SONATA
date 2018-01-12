@@ -312,7 +312,7 @@ class CBM(object):
         #===================consolidate mesh on web interface         
         for web in self.WebLst:
             #print web.ID,  'Left:', SegmentLst[web.ID].ID, 'Right:', SegmentLst[web.ID+1].ID,
-            print 'STATUS:\t Consolidate Mesh on Web Interface'  
+            print 'STATUS:\t Consolidate Mesh on Web Interface ', web.ID  
             web.wl_nodes = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID].cells, web.BSplineLst)
             web.wr_nodes = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID+1].cells, web.BSplineLst)
             self.mesh = consolidate_mesh_on_web(self.mesh,web.BSplineLst, web.wl_nodes, web.wr_nodes, web_consolidate_tol,self.display)
@@ -361,7 +361,6 @@ class CBM(object):
         self.mesh,nodes = sort_and_reassignID(self.mesh)
         #TODO: BE CAREFUL TO USE THE RIGHT COORDINATE SYSTEM FOR THE CALCULATIONS!!!!  
         vabs_filename = self.config.filename.replace('.input', '.vab')
-        
         print 'STATUS:\t RUNNING VABS for Constitutive modeling:'
         #EXECUTE VABS:
         if self.config.VABS.recover_flag == 1:
