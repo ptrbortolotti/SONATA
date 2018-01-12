@@ -18,7 +18,7 @@ from SONATA.mesh.mesh_byprojection import mesh_by_projecting_nodes_on_BSplineLst
 from SONATA.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, equidistant_nodes_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
                                  grab_nodes_on_BSplineLst, remove_duplicates_from_list_preserving_order, merge_nodes_if_too_close
                                  
-from SONATA.mesh.mesh_improvements import modify_sharp_corners, modify_cornerstyle_one, second_stage_improvements
+from SONATA.mesh.mesh_improvements import modify_sharp_corners, modify_cornerstyle_one, second_stage_improvements, integrate_leftover_interior_nodes
 class Layer(object):
     ''' 
     The layer object is constructed from multiple BSplineCurveSegments. It is the basis for all future operations. 
@@ -222,7 +222,7 @@ class Layer(object):
         
         
         self.a_nodes = remove_duplicates_from_list_preserving_order(new_a_nodes)
-        self.a_nodes = merge_nodes_if_too_close(self.a_nodes,self.a_BSplineLst,global_minLen,0.1)
+        self.a_nodes = merge_nodes_if_too_close(self.a_nodes,self.a_BSplineLst,global_minLen,0.01)
         
         
         
@@ -266,11 +266,13 @@ class Layer(object):
 
         self.a_nodes, self.b_nodes, self.cells = mesh_by_projecting_nodes_on_BSplineLst(self.a_BSplineLst,self.a_nodes,self.b_BSplineLst,self.thickness, proj_tol_1,crit_angle_1, LayerID = self.ID, display=display) 
         #enhanced_cells = modify_cornerstyle_one(cells,self.b_BSplineLst)
-        self.cells, nb_nodes = modify_sharp_corners(self.cells, self.b_BSplineLst, global_minLen,self.thickness, proj_tol_2, alpha_crit_2, display=display)
+        self.cells, nb_nodes = modify_sharp_corners(self.cells, self.b_BSplineLst, global_minLen, self.thickness, self.ID, proj_tol_2, alpha_crit_2, display=display)
         self.b_nodes.extend(nb_nodes)
-        self.cells, nb_nodes = second_stage_improvements(self.cells,self.b_BSplineLst,global_minLen,growing_factor,shrinking_factor,display=display)
+        self.cells, nb_nodes = second_stage_improvements(self.cells, self.b_BSplineLst, global_minLen, self.ID, growing_factor, shrinking_factor, display=display)
         self.b_nodes.extend(nb_nodes)
         
+        
+        #TODO: find 
         #self.b_nodes = sorted(self.b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))  
         
         for c in self.cells:
