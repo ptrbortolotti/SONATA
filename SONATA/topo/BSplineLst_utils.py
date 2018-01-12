@@ -41,9 +41,12 @@ def ProjectPointOnBSplineLst(BSplineLst,Pnt2d,tolerance_distance=100):
                 p2.append([projection2.Point(j), idx, projection2.Parameter(j),projection2.Distance(j)])
             else: None   
     
-    p2 = np.asarray(p2)
-    min_index = p2[:,3].argmin() 
-    return p2[min_index,:]
+    if p2:
+        p2 = np.asarray(p2)
+        min_index = p2[:,3].argmin() 
+        return p2[min_index,:]
+    else:
+        return []
 
 def distance_on_BSplineLst(BSplineLst,para1,para2):
 #    para1 = findPnt_on_BSplineLst(P1,BSplineLst)
