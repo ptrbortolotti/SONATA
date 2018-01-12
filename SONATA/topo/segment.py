@@ -292,6 +292,9 @@ class Segment(object):
         if self.ID==0 and len(SegmentLst)>1:
             pass
             
+        elif self.CoreMaterial == 0:
+            pass
+        
         else:
             print 'STATUS:\t Meshing Segment %s, Core' %(self.ID)
             #print self.final_Boundary_ivLst
@@ -313,7 +316,7 @@ class Segment(object):
                     
                     
                     if disco_nodes == []:
-                        print 'ERROR:\t No nodes are found on the web interface',web.id
+                        print 'ERROR:\t No nodes are found on the web interface',web.ID
                     else: 
                         core_a_nodes.extend(disco_nodes[1:-1])
 
