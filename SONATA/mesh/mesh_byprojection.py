@@ -58,7 +58,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
     b_nodes = []
     cellLst = []
     distance = (1+tol)*layer_thickness
-               
+    flag_integrate_leftover_interior_nodes = False           
                
     #Is a_BSplineLst closed? 
     closed_a = False
@@ -272,11 +272,13 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                 if node.regular_corner == True:
                     b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
                     b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
+                    b_nodes[-1].corner = True
                     b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
                 
                 else:
                     b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
                     b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
+                    b_nodes[-1].corner = True
                     b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
                 
                 
@@ -298,7 +300,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     #print 'R',[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]
                     b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
                     b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
-                    
+                    b_nodes[-1].corner = True
                     #Find Middle between the two exterior corners on b_BsplineLst
                     newPnt = gp_Pnt2d()
                     c_BSplineLst = b_BSplineLst[exterior_corners_para[0][1]+1:exterior_corners_para[1][1]+1]
@@ -310,6 +312,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     
                     b_nodes.append(Node(newPnt,[LayerID,newIdx,newPara]))
                     b_nodes.append(Node(exterior_corners[1],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]))
+                    b_nodes[-1].corner = True
                     b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
                     
                 else:
@@ -317,6 +320,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     #print 'IR',[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]
                     b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
                     b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
+                    b_nodes[-1].corner = True
                     
                     v = gp_Vec2d(exterior_corners[0],exterior_corners[1])
                     cP = exterior_corners[0].Translated(v.Multiplied(0.5))
@@ -326,6 +330,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     
                     b_nodes.append(Node(newPnt,[LayerID,pIdx[0],newPara]))
                     b_nodes.append(Node(exterior_corners[1],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]))
+                    b_nodes[-1].corner = True
                     b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
             
             
@@ -347,40 +352,46 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
 
     #==============integrate_leftover_interior_nodes=========================================
     #determin_leftover_pnts
-    aglTol = 0.5
-    linTol = 1e-6
-    prjTol = 1e-2
-    new_b_node = None
-    leftover_exterior_corners = []
-    for i,item in enumerate(b_BSplineLst[:-1]):
-        spline1 = item
-        spline2 = b_BSplineLst[i+1]
-        u1,p1,v1 = spline1.LastParameter(),gp_Pnt2d(),gp_Vec2d()
-        u2,p2,v2  = spline2.FirstParameter(),gp_Pnt2d(),gp_Vec2d()
-        spline1.D1(u1,p1,v1)
-        spline2.D1(u2,p2,v2)
-        
-        Angle = abs(v1.Angle(v2))*180/np.pi       
-        if Angle>aglTol and not any(n.Pnt2d.IsEqual(item.EndPoint(), linTol) for n in b_nodes):
-            leftover_exterior_corners.append((item.EndPoint(),[LayerID,i,u1]))
-                
-    #reversed projection and insert them into a_nodes and b_nodes
-    for p1 in leftover_exterior_corners:
-        new_b_node = Node(p1[0], p1[1])
-        b_nodes.append(new_b_node)
-        p2 = ProjectPointOnBSplineLst(a_BSplineLst, p1[0], (1+prjTol)*layer_thickness)
-        new_a_node = Node(p2[0], [LayerID, p2[1], p2[2]])
-    
-        for i,n in enumerate(a_nodes):
-            if n.parameters[0] == new_a_node.parameters[0] and n.parameters[1] == new_a_node.parameters[1] and new_a_node.parameters[2]>n.parameters[2]: 
-                #print new_a_node.parameters[2],n.parameters[2]          
-                insert_idx = i
-                break
+    if flag_integrate_leftover_interior_nodes:
+        new_b_node = None
+        new_a_node = None
+        aglTol = 0.5
+        linTol = 1e-6
+        prjTol = 1e-2
+        new_b_node = None
+        insert_idx = None
+        leftover_exterior_corners = []
+        for i,item in enumerate(b_BSplineLst[:-1]):
+            spline1 = item
+            spline2 = b_BSplineLst[i+1]
+            u1,p1,v1 = spline1.LastParameter(),gp_Pnt2d(),gp_Vec2d()
+            u2,p2,v2  = spline2.FirstParameter(),gp_Pnt2d(),gp_Vec2d()
+            spline1.D1(u1,p1,v1)
+            spline2.D1(u2,p2,v2)
             
-        a_nodes.insert(insert_idx+1,new_a_node)
-       
-    if new_b_node:
-        b_nodes =  sorted(b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))
+            Angle = abs(v1.Angle(v2))*180/np.pi       
+            if Angle>aglTol and not any(n.Pnt2d.IsEqual(item.EndPoint(), linTol) for n in b_nodes):
+                leftover_exterior_corners.append((item.EndPoint(),[LayerID,i,u1]))
+                    
+        #reversed projection and insert them into a_nodes and b_nodes
+        for p1 in leftover_exterior_corners:
+            p2 = ProjectPointOnBSplineLst(a_BSplineLst, p1[0], (1+prjTol)*layer_thickness)
+            if len(p2)>0:
+                new_b_node = Node(p1[0], p1[1])
+                new_a_node = Node(p2[0], [LayerID, p2[1], p2[2]])
+            
+                for i,n in enumerate(a_nodes):
+                    if n.parameters[0] == new_a_node.parameters[0] and n.parameters[1] == new_a_node.parameters[1] and new_a_node.parameters[2]>n.parameters[2]: 
+                        print new_a_node.parameters[2],n.parameters[2]          
+                        insert_idx = i
+                        break
+                
+                if insert_idx:
+                    b_nodes.append(new_b_node)
+                    a_nodes.insert(insert_idx+1,new_a_node)
+           
+        if new_b_node:
+            b_nodes =  sorted(b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))
 
         
     #==============CREATE CELLS PROJECTION=========================================
@@ -429,8 +440,8 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
         flag_display_a_nodes = True
         flag_display_b_nodes = True
         flag_display_a_BSplineLst = True
-        flag_display_b_BSplineLst = True
-        flag_display_cells = True
+        flag_display_b_BSplineLst = False
+        flag_display_cells = False
         
         if flag_display_a_nodes:
             for i,a in enumerate(a_nodes):

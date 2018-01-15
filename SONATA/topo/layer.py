@@ -16,7 +16,8 @@ from SONATA.topo.layer_utils import get_layer, get_web, get_segment
 
 from SONATA.mesh.mesh_byprojection import mesh_by_projecting_nodes_on_BSplineLst
 from SONATA.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, equidistant_nodes_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
-                                 grab_nodes_on_BSplineLst, remove_duplicates_from_list_preserving_order, merge_nodes_if_too_close
+                                 grab_nodes_on_BSplineLst, remove_duplicates_from_list_preserving_order, merge_nodes_if_too_close, \
+                                 find_node_by_ID
                                  
 from SONATA.mesh.mesh_improvements import modify_sharp_corners, modify_cornerstyle_one, second_stage_improvements, integrate_leftover_interior_nodes
 class Layer(object):
@@ -91,10 +92,8 @@ class Layer(object):
         
     def __getstate__(self):
         """Return state values to be pickled."""
-
         self.Para_BSplineLst = ParaLst_from_BSplineLst(self.BSplineLst)
         self.Para_Boundary_BSplineLst = ParaLst_from_BSplineLst(self.Boundary_BSplineLst)
-        
         return (self.ID, self.S1, self.S2, self.thickness, self.Orientation, self.MatID, self.Para_Boundary_BSplineLst, self.Para_BSplineLst)   
     
     
@@ -106,9 +105,6 @@ class Layer(object):
         self.build_wire()
 
 
-
-    
-    
     def copy(self):
         BSplineLstCopy =  copy_BSplineLst(self.BSplineLst)
         namecopy = self.name + '_Copy'
@@ -146,9 +142,11 @@ class Layer(object):
     def build_wire(self): #Builds TopoDS_Wire from connecting BSplineSegments and returns it  
         self.wire = build_wire_from_BSplineLst(self.BSplineLst)   
         
+        
     def trim(self,S1,S2,start, end): #Trims layer between S1 and S2
         return trim_BSplineLst(self.BSplineLst, S1, S2,  start, end)
         
+    
     def trim_to_coords(self, start, end):
         self.BSplineLst = trim_BSplineLst(self.BSplineLst, self.globalStart, self.globalEnd,  start, end)
         return self.BSplineLst
@@ -225,10 +223,9 @@ class Layer(object):
         self.a_nodes = merge_nodes_if_too_close(self.a_nodes,self.a_BSplineLst,global_minLen,0.01)
         
         
-        
     def mesh_layer(self, SegmentLst, global_minLen, proj_tol_1= 5e-2, 
                    proj_tol_2= 3e-1, crit_angle_1 = 115, alpha_crit_2 = 60, 
-                   growing_factor=1.8, shrinking_factor=0.1, display=None):
+                   growing_factor=1.8, shrinking_factor=0.01, display=None):
         '''
         The mesh layer function discretizes the layer, which is composed of a 
         a_BsplineLst and a b_BsplineLst. Between the a_BsplineLst and the 
@@ -270,9 +267,7 @@ class Layer(object):
         self.b_nodes.extend(nb_nodes)
         self.cells, nb_nodes = second_stage_improvements(self.cells, self.b_BSplineLst, global_minLen, self.ID, growing_factor, shrinking_factor, display=display)
         self.b_nodes.extend(nb_nodes)
-        
-        
-        #TODO: find 
+                
         #self.b_nodes = sorted(self.b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))  
         
         for c in self.cells:
@@ -280,15 +275,9 @@ class Layer(object):
             c.theta_3 = self.Orientation
             c.MatID = int(self.MatID)
             c.structured = True
-            #display.DisplayShape(c.wire, color="BLACK")
-
+            
         return self.cells
     
-    
-    def show(self,display): #display the layer with pythonocc viewer module
-        """
-        TBD: renders the topological entity in the viewer: 
-        """
 
 
 #execute the following code if this file is executed as __main__   

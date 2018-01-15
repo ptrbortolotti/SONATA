@@ -269,7 +269,7 @@ def second_stage_improvements(cells,b_BSplineLst,global_minLen, LayerID = 0,fact
                 enhanced_cells2[-1].calc_theta_1()
                 
             #MERGE NODES when to small
-            elif magnitude<=factor2*global_minLen:
+            elif magnitude<=factor2*global_minLen and c.nodes[1].corner == False and c.nodes[2].corner == False:
                 cP = c.nodes[1].Pnt2d.Translated(v.Multiplied(0.5)) 
                 #display.DisplayColoredShape(cP, 'GREEN')  
                 p2 = ProjectPointOnBSplineLst(b_BSplineLst,cP,1)

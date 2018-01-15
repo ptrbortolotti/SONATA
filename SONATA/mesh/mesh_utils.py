@@ -38,6 +38,9 @@ def find_cells_that_contain_node(cells,n2find):
             disco_cells.append(c)
     return disco_cells
 
+def find_node_by_ID(nodes, ID):
+    node = next((n for n in nodes if n.id == ID), None)
+    return node
 
 def sort_and_reassignID(mesh):
     #Get all nodes in cells

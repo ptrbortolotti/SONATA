@@ -30,8 +30,6 @@ from SONATA.fileIO.configuration import Configuration
 from SONATA.fileIO.readinput import read_material_input
 from SONATA.cbm import CBM
 
-from SONATA.fileIO.CADinput import load_stp
-
 #TODO: Comment the CBM Class and memeber functions properly!
 #TODO: include optionflags and Vabs_setup in Configuration
 #TODO: include yaml style input files
@@ -39,7 +37,7 @@ from SONATA.fileIO.CADinput import load_stp
 plt.close('all')    
 
 
-filename = 'jobs/EPiet/AREA_R180/sec_config.input'
+filename = 'jobs/VariSpeed/Rohl_sec_config.input'
 
 config = Configuration(filename)
 MaterialLst = read_material_input(config.SETUP_mat_filename)
