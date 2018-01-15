@@ -719,7 +719,9 @@ def set_BSplineLst_to_Origin(BSplineLst,Theta=0):
     x = math.cos(Theta)
     y = -math.sin(Theta)
     OPnt = gp_Pnt2d(0,0)
-    axis = Geom2d_Line(OPnt,gp_Dir2d(x,y))   #x-axis
+    dir2d = gp_Dir2d(x,y)
+    axis = Geom2d_Line(OPnt,dir2d)   #x-axis
+    v0 = gp_Vec2d(dir2d)
     tolerance=1e-10
     IntPnts = []
 
@@ -729,14 +731,15 @@ def set_BSplineLst_to_Origin(BSplineLst,Theta=0):
         intersection = Geom2dAPI_InterCurveCurve(axis.GetHandle(), item.GetHandle(),tolerance)
         for j in range(1,intersection.NbPoints()+1):
                 IntPnt = intersection.Point(j)
-                distance = IntPnt.Distance(OPnt)
+                v1 = gp_Vec2d(OPnt,IntPnt) 
+                vres = v0.Dot(v1)
+                #distance = IntPnt.Distance(OPnt)
                 u = findPnt_on_2dcurve(IntPnt,item.GetHandle())
-                IntPnts.append([i,u,distance])
+                IntPnts.append([i,u,vres])
                 
     #Determine Origin as point                 
     IntPntsarray = np.asarray(IntPnts)  #idx,W,XValue
     OriEdgePnt = IntPntsarray[np.argmax(IntPntsarray[:,2]),:]                    
-
     #Reorder Sequence of BSplines of BSplinesLst
     OBSplineLst =  []
     CorrectOrigin = False
