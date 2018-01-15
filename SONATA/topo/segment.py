@@ -288,6 +288,7 @@ class Segment(object):
         else:
             return []
 
+
     def mesh_core(self, SegmentLst, WebLst, core_cell_area, display=None)  :
         if self.ID==0 and len(SegmentLst)>1:
             pass

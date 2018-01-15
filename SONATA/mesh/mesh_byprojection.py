@@ -58,7 +58,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
     b_nodes = []
     cellLst = []
     distance = (1+tol)*layer_thickness
-    flag_integrate_leftover_interior_nodes = False           
+    flag_integrate_leftover_interior_nodes = True           
                
     #Is a_BSplineLst closed? 
     closed_a = False
@@ -377,16 +377,19 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
         for p1 in leftover_exterior_corners:
             p2 = ProjectPointOnBSplineLst(a_BSplineLst, p1[0], (1+prjTol)*layer_thickness)
             if len(p2)>0:
+                #print 'WARNING: integrating leftover interior node.'
                 new_b_node = Node(p1[0], p1[1])
+                #display.DisplayShape(new_b_node.Pnt2d, color='RED')
                 new_a_node = Node(p2[0], [LayerID, p2[1], p2[2]])
+                #display.DisplayShape(new_a_node.Pnt2d, color='GREEN')
             
+                #print 'new_a_node.parameters:',new_a_node.parameters,'a_nodes[0].parameters', a_nodes[0].parameters
                 for i,n in enumerate(a_nodes):
-                    if n.parameters[0] == new_a_node.parameters[0] and n.parameters[1] == new_a_node.parameters[1] and new_a_node.parameters[2]>n.parameters[2]: 
-                        print new_a_node.parameters[2],n.parameters[2]          
+                    if n.parameters[0] == new_a_node.parameters[0] and n.parameters[1] == new_a_node.parameters[1] and new_a_node.parameters[2]>=n.parameters[2]:        
                         insert_idx = i
                         break
                 
-                if insert_idx:
+                if insert_idx!=None:
                     b_nodes.append(new_b_node)
                     a_nodes.insert(insert_idx+1,new_a_node)
            
@@ -406,32 +409,37 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
 
     #for a,node in enumerate(a_nodes[1:-1], start=beginning):
     for a in range(start,end):
-        #print 'Closed_a: ', closed_a, ', a: ', a, ', len(a_nodes): ', len(a_nodes),', b: ', b, ', len(b_nodes):', len(b_nodes), '\n',  
-        if closed_a == False and a == 1: #Start Triangle
-            cellLst.append(Cell([a_nodes[a],a_nodes[a-1],b_nodes[b]]))
-        
-        elif closed_a == False and a == len(a_nodes)-2: #End Triangle
-            cellLst.append(Cell([a_nodes[a-1],b_nodes[b-1],b_nodes[b],a_nodes[a]]))
-            cellLst.append(Cell([a_nodes[a],b_nodes[b],a_nodes[a+1]]))
-            #print cellLst[-1]
-
-        else: #Regular Cell Creation
-            if a_nodes[a].cornerstyle == 2 or a_nodes[a].cornerstyle==3:
-                #print a, a_nodes[a], a_nodes[a].cornerstyle
-                cellLst.append(Cell([a_nodes[a-1],b_nodes[b-1],b_nodes[b],a_nodes[a]]))
-                b += 2
-                cellLst.append(Cell([a_nodes[a],b_nodes[b-2],b_nodes[b-1],b_nodes[b]]))
+        try:
+            #print 'Closed_a: ', closed_a, ', a: ', a, ', len(a_nodes): ', len(a_nodes),', b: ', b, ', len(b_nodes):', len(b_nodes), '\n',  
+            if closed_a == False and a == 1: #Start Triangle
+                cellLst.append(Cell([a_nodes[a],a_nodes[a-1],b_nodes[b]]))
             
-            elif a_nodes[a].cornerstyle == 4:
+            elif closed_a == False and a == len(a_nodes)-2: #End Triangle
                 cellLst.append(Cell([a_nodes[a-1],b_nodes[b-1],b_nodes[b],a_nodes[a]]))
-                b += 2
-                cellLst.append(Cell([a_nodes[a],b_nodes[b-2],b_nodes[b-1],b_nodes[b]]))
-                b += 2
-                cellLst.append(Cell([a_nodes[a],b_nodes[b-2],b_nodes[b-1],b_nodes[b]]))
-            
-            else:
-                cellLst.append(Cell([a_nodes[a-1],b_nodes[b-1],b_nodes[b],a_nodes[a]]))
+                cellLst.append(Cell([a_nodes[a],b_nodes[b],a_nodes[a+1]]))
+                #print cellLst[-1]
+    
+            else: #Regular Cell Creation
+                if a_nodes[a].cornerstyle == 2 or a_nodes[a].cornerstyle==3:
+                    #print a, a_nodes[a], a_nodes[a].cornerstyle
+                    cellLst.append(Cell([a_nodes[a-1],b_nodes[b-1],b_nodes[b],a_nodes[a]]))
+                    b += 2
+                    cellLst.append(Cell([a_nodes[a],b_nodes[b-2],b_nodes[b-1],b_nodes[b]]))
+                
+                elif a_nodes[a].cornerstyle == 4:
+                    cellLst.append(Cell([a_nodes[a-1],b_nodes[b-1],b_nodes[b],a_nodes[a]]))
+                    b += 2
+                    cellLst.append(Cell([a_nodes[a],b_nodes[b-2],b_nodes[b-1],b_nodes[b]]))
+                    b += 2
+                    cellLst.append(Cell([a_nodes[a],b_nodes[b-2],b_nodes[b-1],b_nodes[b]]))
+                
+                else:
+                    cellLst.append(Cell([a_nodes[a-1],b_nodes[b-1],b_nodes[b],a_nodes[a]]))
 
+        except (IndexError):
+             print 'ERROR:\t IndexError: list index out of range', a_nodes[a]
+             pass
+         
         b += 1
         
     #==============OCC3DVIEWER========================================
