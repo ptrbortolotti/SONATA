@@ -18,13 +18,18 @@ from SONATA.topo.utils import TColgp_HArray1OfPnt_from_nparray,point_list_to_TCo
 
 class Airfoil(object):
     class_counter= 0
-    def __init__(self, name, trailing_edge_style=0):
+    def __init__(self, name = None, trailing_edge_style=0):
         self.id = self.__class__.class_counter
         self.__class__.class_counter += 1
-        self.name = name  
-        self.trailing_edge_style = trailing_edge_style
-        self.array = UIUCAirfoil(self.name)
-        self.wire = self.gen_wire()
+        
+        if name:
+            self.name = name  
+            self.trailing_edge_style = trailing_edge_style
+            self.array = UIUCAirfoil(self.name)
+            self.wire = self.gen_wire()
+    
+    def restore_counter(self):
+        self.__class__.class_counter = 0
 
     def gen_wire(self):
         harray = TColgp_HArray1OfPnt_from_nparray(self.array)

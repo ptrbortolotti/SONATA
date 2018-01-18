@@ -15,7 +15,7 @@ from OCC.Display.SimpleGui import init_display
 from OCC.gp import gp_Pnt, gp_Dir, gp_Ax1
 
 import sys
-sys.path.insert(0, 'C:\TPflumm_local\work\SONATA')
+#sys.path.insert(0, 'C:\TPflumm_local\work\SONATA')
 from SONATA.bladegen.airfoil import Airfoil
 from SONATA.bladegen.bladegen_utils import make_loft
 from SONATA.topo.wire_utils import rotate_wire, translate_wire,scale_wire, mirror_wire_pnt_dir
@@ -40,6 +40,8 @@ class Blade(object):
         quarterline = np.loadtxt(self.folder + '/quarter_line.dat')
         foildata = np.loadtxt(self.folder + '/airfoil.dat',dtype='str')
         self.airfoilLst = []
+        airfoil_tmp = Airfoil()
+        airfoil_tmp.restore_counter()
         for i,af in enumerate(np.unique(foildata[:,1])):
             self.airfoilLst.append(Airfoil(af))        
        
@@ -63,7 +65,7 @@ class Blade(object):
     def design_surface(self):
     #DESIGN HOMOGENEOUS SECTION   
         wireLst = []
-        for x in self.blade_matrix:      
+        for x in self.blade_matrix:
             wire = self.airfoilLst[int(x[5])].wire
             wire = mirror_wire_pnt_dir(wire,gp_Pnt(0,0,0),gp_Dir(0,0,1))
             wire = translate_wire(wire,gp_Pnt(0,0,0),gp_Pnt(0,0.25,0))

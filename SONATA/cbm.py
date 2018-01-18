@@ -297,7 +297,7 @@ class CBM(object):
         length = get_BSplineLst_length(self.SegmentLst[0].BSplineLst)
         global_minLen = round(length/Resolution,5)
             
-        core_cell_area = 1.2*global_minLen**2
+        core_cell_area = 1.25*global_minLen**2
         web_consolidate_tol = 0.5*global_minLen
 
         #===================MESH SEGMENT

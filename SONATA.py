@@ -37,7 +37,7 @@ plt.close('all')
 #TODO: include optionflags and Vabs_setup in Configuration
 #TODO: include yaml style input files
 
-filename = 'jobs/VariSpeed/Rohl_sec_config.input'
+filename = 'jobs/VariSpeed/01_simple/sec_config.input'
 config = Configuration(filename)
 print filename
 MaterialLst = read_material_input(config.SETUP_mat_filename)
@@ -49,7 +49,7 @@ MaterialLst = read_material_input(config.SETUP_mat_filename)
 
 job = CBM(config, MaterialLst)
 job.cbm_gen_topo()
-job.cbm_display_config()
+#job.cbm_display_config()
 job.cbm_gen_mesh()
 job.cbm_review_mesh()
 job.cbm_run_vabs()

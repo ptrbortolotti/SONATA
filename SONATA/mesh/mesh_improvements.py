@@ -30,7 +30,6 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
     for i,c in enumerate(cells):
         if len(c.nodes) == 4:  
             
-            
             #cs4_counter = 0            
             if c.nodes[0].cornerstyle == 2 or c.nodes[0].cornerstyle == 3:
                 #display.DisplayShape(c.nodes[0].Pnt2d,color='RED')
