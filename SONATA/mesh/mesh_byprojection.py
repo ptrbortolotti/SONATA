@@ -173,7 +173,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
             #TODO: THIS ALGORITHM DOESNT FIND ALL 
             exterior_corners = [] 
             exterior_corners_para = []
-            
+            aglTol = 5.0
             if node.regular_corner == True:
                 for j,item in enumerate(b_BSplineLst[pIdx[0]:pIdx[1]], start=pIdx[0]):
                     spline1 = item
@@ -185,7 +185,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     spline2.D1(u2,p2,v2)
                     
                     Angle = abs(v1.Angle(v2))*180/np.pi
-                    if Angle>0.05:
+                    if Angle>aglTol:
                         exterior_corners.append(item.EndPoint())
                         exterior_corners_para.append([LayerID,j,u1])  
                         #display.DisplayShape(item.EndPoint(),color='WHITE')
@@ -200,7 +200,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     spline2.D1(u2,p2,v2)
                     
                     Angle = abs(v1.Angle(v2))*180/np.pi
-                    if Angle>0.05:
+                    if Angle>aglTol:
                         exterior_corners.append(item.EndPoint())
                         if len(b_BSplineLst) > j+pIdx[1]:
                             idx = j+pIdx[1]
@@ -456,7 +456,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
         flag_display_a_nodes = True
         flag_display_b_nodes = True
         flag_display_a_BSplineLst = True
-        flag_display_b_BSplineLst = False
+        flag_display_b_BSplineLst = True
         flag_display_cells = False
         
         if flag_display_a_nodes:
