@@ -16,6 +16,7 @@ from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
 
 from SONATA.mesh.node import Node
 from SONATA.mesh.cell import Cell
+from SONATA.mesh.mesh_utils import remove_dublicate_pnts
 from SONATA.display.display_utils import display_custome_shape
 from SONATA.topo.BSplineLst_utils import get_BSplineLst_length, find_BSplineLst_coordinate, \
                                         ProjectPointOnBSplineLst, get_BSplineLst_Pnt2d, intersect_BSplineLst_with_BSpline
@@ -94,18 +95,24 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                 else: None   
         
         
+
+            #display.DisplayShape(pPnts[0], color='GREEN')
+            
+        
+        
         #==================making sure the pPnts are unique:
-        '''It happend that somehow the same points were found multiple times
-        TODO: wrap into own function'''
+        '''It happend that somehow the same points were found multiple times'''
+        unique_tol= 5e-2
         rm_idx=[]
         for a, b in itertools.combinations(enumerate(pPnts), 2):
-            if a[1].IsEqual(b[1],1e-6):
+            if a[1].IsEqual(b[1],unique_tol):
                 rm_idx.append(a[0])
         
         pPnts = [j for k, j in enumerate(pPnts) if k not in rm_idx]
         pPara = [j for k, j in enumerate(pPara) if k not in rm_idx]
         pIdx = [j for k, j in enumerate(pIdx) if k not in rm_idx]  
     
+            
         #=========if 3 Points are found. Select the 2 points that create the larger angle.
         if len(pPnts) == 3:
             v0 = gp_Vec2d(Pnt2d,pPnts[0])
@@ -355,7 +362,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
     if flag_integrate_leftover_interior_nodes:
         new_b_node = None
         new_a_node = None
-        aglTol = 0.5
+        aglTol = 5.0
         linTol = 1e-6
         prjTol = 1e-2
         new_b_node = None
@@ -394,6 +401,8 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     a_nodes.insert(insert_idx+1,new_a_node)
            
         if new_b_node:
+            #print new_b_node
+            #display.DisplayShape(new_b_node.Pnt2d, color='RED')
             b_nodes =  sorted(b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))
 
         
