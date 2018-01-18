@@ -112,7 +112,7 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
     
             
     plt.show()
-
+    return (fig,ax)
     
 
 def plot_cells(cells,nodes,attr1,VABSProperties=None,title='None', savepath=None, plotTheta11=False, plotDisplacement=False,):
@@ -153,7 +153,7 @@ def plot_cells(cells,nodes,attr1,VABSProperties=None,title='None', savepath=None
         theta_11 = np.asarray(theta_11)
     
     
-    plot_mesh(nodes_array,element_array,theta_11,data,data_name,title,VABSProperties,False,False)    
+    fig,ax = plot_mesh(nodes_array,element_array,theta_11,data,data_name,title,VABSProperties,False,False)    
     
     if savepath!=None:
         #savepath = 'jobs/VHeuschneider/figures/R90_config.svg'
@@ -163,7 +163,7 @@ def plot_cells(cells,nodes,attr1,VABSProperties=None,title='None', savepath=None
         tmp_fig.savefig(savepath, dpi=300, orientation='landscape', papertype='a4')
    
     
-    return None
+    return (fig, ax)
 
 
     

@@ -37,13 +37,21 @@ class CBM_Component(ExplicitComponent):
     def setup(self):
         
         # Inputs
-        self.add_input('BW_XPos', val=-34.0, units='mm', desc='x coordinate of the balance weight center')   
-        #self.add_input('BW_YPos', val=0.0,   units='mm', desc='y coordinate of the balance weight center') 
-        #self.add_input('BW_Diameter', val = 5.0, units='mm', desc='blance weight diameter')
+        self.add_input('WEB_Pos1', val=0.38, desc='first Position (between 0 and 1)')
+        self.add_input('WEB_Pos2', val=0.62, desc='second Position (between 0 and 1)')
+        self.add_input('Skin_layer_thickness', val=2.5, units='mm', desc='first Position (between 0 and 1) ')
+        self.add_input('Spar_layer_thickness', val=2.2, units='mm', desc='first Position (between 0 and 1) ')  
+        self.add_input('Core1_density', val=2.5, units='g/cm^3', desc='first Position (between 0 and 1) ')
+        self.add_input('Core2_density', val=2.2, units='g/cm^3', desc='first Position (between 0 and 1) ')  
 
         # Outputs
-        #self.add_output('Xm2', units='mm', desc='x coordinate of the mass center of gravity')
-        #self.add_output('Xm3', units='mm', desc='y coordinate of the mass center of gravity')
+        self.add_output('Xm2', units='mm', desc='x coordinate of the mass center of gravity')
+        self.add_output('Xs2', units='mm', desc='x coordinate of the shear center')
+        self.add_output('EA', units='N')
+        self.add_output('GJ', units='N')
+        self.add_output('EI2', units='N')
+        self.add_output('EI3', units='N')
+        
         self.add_output('obj1', units='mm', desc='objective function1')   
         
         # Finite difference all partials.
@@ -51,27 +59,28 @@ class CBM_Component(ExplicitComponent):
         
     def compute(self, inputs, outputs):
                 
-        filename = 'jobs/VHeuschneider/sec_config.input'
+        filename = 'jobs/VariSpeed/sec_config.input'
         config = Configuration(filename)
         MaterialLst = read_material_input(config.SETUP_mat_filename)
 
         config.BW_XPos = inputs['BW_XPos'][0]
-        #config.BW_YPos = inputs['BW_YPos'][0]
-        #config.BW_Diameter = inputs['BW_Diameter']
+        config.
 
         job1 = CBM(config,MaterialLst)
         job1.cbm_gen_topo()
         job1.cbm_gen_mesh()
         job1.cbm_run_vabs(filename)
         
-        #outputs['Xm2'] = job1.BeamProperties.Xm2
-        #outputs['Xm3'] = job1.BeamProperties.Xm3 
-        outputs['obj1'] = abs(job1.BeamProperties.Xm2-2)
+        outputs['Xm2'] = job1.BeamProperties.Xm2
+        outputs['Xs2'] = job1.BeamProperties.Xs2 
+        outputs['EA'] = job1.BeamProperties.CS[0][0]
+        outputs['GJ'] = job1.BeamProperties.CS[1][1]
+        outputs['EI2'] = job1.BeamProperties.CS[2][2]
+        outputs['EI3'] = job1.BeamProperties.CS[3][3]
 
-        print abs(job1.BeamProperties.Xm2-5), job1.BeamProperties.Xm2, config.BW_XPos
 
 if __name__ == '__main__':
-    from openmdao.api import Problem, Group, ScipyOptimizer, IndepVarComp
+    from openmdao.api import Problem, ScipyOptimizer, IndepVarComp
     
     p = Problem()
     #Generate independentVariableComponent
@@ -91,10 +100,11 @@ if __name__ == '__main__':
     #Setup the Problem
 
     p.driver = ScipyOptimizer()
-    p.driver.options['optimizer'] = 'SLSQP'
+    p.driver.options['optimizer'] = 'COBYLA'
     p.driver.options['disp'] = True
-    p.driver.options['tol'] = 1e-2
-    p.driver.options['maxiter'] = 25
+    p.driver.options['tol'] = 1e-3
+    p.driver.options['maxiter'] = 30
+
 
     #p.driver.options['optimizer'] = 'COBYLA'
     p.setup()

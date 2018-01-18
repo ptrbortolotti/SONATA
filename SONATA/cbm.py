@@ -190,6 +190,7 @@ class CBM(object):
         if output_filename is None:
             output_filename = self.config.filename
             output_filename = output_filename.replace('.input', '_mesh.pkl')
+            print 'STATUS:\t Saving Mesh to: ',output_filename
             
         with open(output_filename, 'wb') as output:
             pkl.dump(self.mesh, output, protocol=pkl.HIGHEST_PROTOCOL)
@@ -403,8 +404,8 @@ class CBM(object):
     
     def cbm_post_2dmesh(self, attribute='MatID',title='NOTITLE', save=None):
         mesh,nodes = sort_and_reassignID(self.mesh)
-        plot_cells(self.mesh,nodes,attribute,self.BeamProperties,title, save)
-        
+        fig,ax = plot_cells(self.mesh,nodes,attribute,self.BeamProperties,title, save)
+        return fig,ax
         
         
     def cbm_display_config(self):

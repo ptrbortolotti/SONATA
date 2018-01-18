@@ -25,21 +25,21 @@ Date: 01/02/2017
 """
 
 import matplotlib.pyplot as plt
+import numpy as np
+import os
+import pickle as pkl
 
 from SONATA.fileIO.configuration import Configuration
 from SONATA.fileIO.readinput import read_material_input
 from SONATA.cbm import CBM
-
+plt.close('all')    
 #TODO: Comment the CBM Class and memeber functions properly!
 #TODO: include optionflags and Vabs_setup in Configuration
 #TODO: include yaml style input files
 
-plt.close('all')    
-
-
 filename = 'jobs/VariSpeed/Rohl_sec_config.input'
-
 config = Configuration(filename)
+print filename
 MaterialLst = read_material_input(config.SETUP_mat_filename)
 
 #config.SETUP_radial_station = 160
@@ -47,11 +47,13 @@ MaterialLst = read_material_input(config.SETUP_mat_filename)
 #config.VABS.recover_flag = 1
 #config.VABS.M = [0,2000e3,0]
 
-job1 = CBM(config,MaterialLst)
-job1.cbm_gen_topo()
-#job1.cbm_display_config()
-job1.cbm_gen_mesh()
-job1.cbm_review_mesh()
-job1.cbm_run_vabs()
-job1.cbm_post_2dmesh()
-#job1.cbm_post_3dtopo()
+job = CBM(config, MaterialLst)
+job.cbm_gen_topo()
+job.cbm_display_config()
+job.cbm_gen_mesh()
+job.cbm_review_mesh()
+job.cbm_run_vabs()
+#job.cbm_save()
+#job.cbm_load()
+#job.cbm_post_3dtopo()
+job.cbm_post_2dmesh()

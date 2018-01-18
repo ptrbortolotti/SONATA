@@ -16,7 +16,6 @@ from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
 
 from SONATA.mesh.node import Node
 from SONATA.mesh.cell import Cell
-from SONATA.mesh.mesh_utils import remove_dublicate_pnts
 from SONATA.display.display_utils import display_custome_shape
 from SONATA.topo.BSplineLst_utils import get_BSplineLst_length, find_BSplineLst_coordinate, \
                                         ProjectPointOnBSplineLst, get_BSplineLst_Pnt2d, intersect_BSplineLst_with_BSpline
