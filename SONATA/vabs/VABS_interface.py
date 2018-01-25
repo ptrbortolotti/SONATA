@@ -115,7 +115,7 @@ def export_cells_for_VABS(cells,nodes,filename,VABSsetup,MaterialLst):
             f.write('%i, %i\n' % (m.id,m.orth))
             if m.orth == 0:
                 f.write('%.2f %.2f\n' % (m.E,m.nu))    
-                f.write('%.3f\n' % (m.rho))
+                f.write('%.6f\n' % (m.rho))
                 if VABSsetup.thermal_flag == 1:
                     f.write('%.2f\n' % (m.alpha))
                 f.write('\n')
@@ -124,7 +124,7 @@ def export_cells_for_VABS(cells,nodes,filename,VABSsetup,MaterialLst):
                 f.write('%.2f %.2f %.2f\n' % (m.E[0],m.E[1],m.E[2]))
                 f.write('%.2f %.2f %.2f\n' % (m.G[0],m.G[1],m.G[2]))
                 f.write('%.2f %.2f %.2f\n' % (m.nu[0],m.nu[1],m.nu[2]))
-                f.write('%.3f\n' % (m.rho))
+                f.write('%.6f\n' % (m.rho))
                 if VABSsetup.thermal_flag == 1:
                     f.write('%.2f %.2f %.2f\n' % (m.alpha[0],m.alpha[1],m.alpha[2]))
                 f.write('\n')
@@ -136,7 +136,7 @@ def export_cells_for_VABS(cells,nodes,filename,VABSsetup,MaterialLst):
                 f.write('\t  \t   \t   %.2f %.2f %.2f\n' % (                              m.C[3][3],m.C[3][4],m.C[3][5]))
                 f.write('\t  \t   \t   \t   %.2f %.2f\n' % (                                        m.C[4][4],m.C[4][5]))
                 f.write('\t  \t   \t   \t   \t   %.2f\n' % (                                                  m.C[5][5]))
-                f.write('%.3f\n' % (m.rho)) 
+                f.write('%.6f\n' % (m.rho)) 
                 if VABSsetup.thermal_flag == 1:
                     f.write('%.2f %.2f %.2f %.2f %.2f %.2f\n' % (m.alpha[0],m.alpha[1],m.alpha[2],m.alpha[3],m.alpha[4],m.alpha[5]))
                 f.write('\n')

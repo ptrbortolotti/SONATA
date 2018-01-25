@@ -4,6 +4,7 @@ Created on Wed Jan 24 13:54:37 2018
 
 @author: TPflumm
 """
+import numpy as np
 from datetime import datetime
 from openmdao.api import ExplicitComponent
 
@@ -17,7 +18,7 @@ class CBM_ExplComp(ExplicitComponent):
     def __init__(self, config):
         super(CBM_ExplComp, self).__init__()
         self.config = config
-
+        self.ref_dct = {}
     
     def setup(self):
         self.counter = 0
@@ -31,12 +32,8 @@ class CBM_ExplComp(ExplicitComponent):
         self.add_input('Core2_density', val=0.05)  
 
         # Outputs
-#        self.add_output('Xm2', units='mm', desc='x coordinate of the mass center of gravity')
-#        self.add_output('Xs2', units='mm', desc='x coordinate of the shear center')
-#        self.add_output('EA', units='N')
-#        self.add_output('GJ', units='Nmm^2')
-#        self.add_output('EI2', units='Nmm^2')
-        #self.add_output('EI3')
+        self.add_output('obj', desc='objective_function')   
+        #self.add_output('obj2', desc='objective function')  
         self.add_output('MpUS', desc='Mass per unit span (kg/m)')   
         self.add_output('Xm2', desc='x location of Center of Gravity')
         self.add_output('Xm3', desc='y location of Center of Gravity')
@@ -45,23 +42,34 @@ class CBM_ExplComp(ExplicitComponent):
         self.add_output('GJ', desc='Torsional Stiffness')
         self.add_output('EI2', desc='Flapping Bending Stiffness')
         self.add_output('EI3', desc='Lagging Bending Stiffness')
-        #self.add_output('obj2', desc='objective function')  
-        
+
         # Finite difference all partials.
         #self.declare_partials('*', '*', method='fd')
-        
+    
+    def set_references(self,ref_dct):
+        self.ref_dct = ref_dct
+    
+    def objective(self):
+        obj_vec = []        
+        obj_vec.append(abs(self.job.BeamProperties.CS[1][1]*1e-6 - self.ref_dct['torsional_stiffness']) / self.ref_dct['torsional_stiffness'])
+        obj_vec.append(abs(self.job.BeamProperties.MpUS - self.ref_dct['mass_per_unit_span']) / self.ref_dct['mass_per_unit_span'])
+        return obj_vec
+    
+    
+    
     def compute(self, inputs, outputs):
         elapsed_t = datetime.now() - self.startTime
         m, s = divmod(elapsed_t.seconds, 60)
         h, m = divmod(m, 60)
-        print '----------------------------------------------------------------'
+        if self.counter == 0:
+            print '--time----wp1---wp2---spar_lt-skin_lt--obj---------------------------------'
         print  self.counter,
-        print '%02d:%02d:%02d' % (h,m,s),
-        print '%.2f  ' %inputs['WEB_Pos1'][0], 
-        print '%.2f  ' %inputs['WEB_Pos2'][0], 
-        print '%.2f  ' %inputs['Spar_layer_thickness'][0], 
-        print '%.2f  ' %inputs['Skin_layer_thickness'][0], 
-        print '%.2f  ' %inputs['Core1_density'][0]
+        print '%02d:%02d:%02d ' % (h,m,s),
+        print '%.2f, ' %inputs['WEB_Pos1'][0], 
+        print '%.2f, ' %inputs['WEB_Pos2'][0], 
+        print '%.2f, ' %inputs['Spar_layer_thickness'][0], 
+        print '%.2f, ' %inputs['Skin_layer_thickness'][0],
+        #print 'rho_1%.2f  ' %inputs['Core1_density'][0]
                 
         #SETUP A CBM JOB:
         self.job = CBM(self.config)
@@ -85,7 +93,6 @@ class CBM_ExplComp(ExplicitComponent):
             self.job.cbm_gen_mesh()
             self.job.cbm_run_vabs()
         
-        
         outputs['MpUS'] = self.job.BeamProperties.MpUS
         outputs['Xm2'] = self.job.BeamProperties.Xm2
         outputs['Xm3'] = self.job.BeamProperties.Xm3
@@ -93,8 +100,10 @@ class CBM_ExplComp(ExplicitComponent):
         outputs['GJ']   = self.job.BeamProperties.CS[1][1]
         outputs['EI2']  = self.job.BeamProperties.CS[2][2]
         outputs['EI3']  = self.job.BeamProperties.CS[3][3]
+        outputs['EI3']  = self.job.BeamProperties.MpUS
+        outputs['obj'] = self.objective()
         
-        print outputs   
+        print self.objective()  
         self.counter += 1
 
     def post_cbm(self):

@@ -213,7 +213,7 @@ class Layer(object):
                 if isClosed:
                     tmp_nodes = tmp_layer.b_nodes
                 else: 
-                    tmp_nodes = [tmp_layer.a_nodes[0]]+tmp_layer.b_nodes+[tmp_layer.a_nodes[-1]]
+                    tmp_nodes = [tmp_layer.a_nodes[0]] + tmp_layer.b_nodes + [tmp_layer.a_nodes[-1]]
                 
                 disco_nodes = grab_nodes_on_BSplineLst(tmp_nodes,iv_BSplineLst)
                 new_a_nodes.extend(disco_nodes)
@@ -264,8 +264,11 @@ class Layer(object):
         #enhanced_cells = modify_cornerstyle_one(cells,self.b_BSplineLst)
         self.cells, nb_nodes = modify_sharp_corners(self.cells, self.b_BSplineLst, global_minLen, self.thickness, self.ID, proj_tol_2, alpha_crit_2, display=display)
         self.b_nodes.extend(nb_nodes)
-        self.cells, nb_nodes = second_stage_improvements(self.cells, self.b_BSplineLst, global_minLen, self.ID, growing_factor, shrinking_factor, display=display)
-        self.b_nodes.extend(nb_nodes)
+        try:
+            self.cells, nb_nodes = second_stage_improvements(self.cells, self.b_BSplineLst, global_minLen, self.ID, growing_factor, shrinking_factor, display=display)
+            self.b_nodes.extend(nb_nodes)
+        except:
+            pass
                 
         #self.b_nodes = sorted(self.b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))  
         
