@@ -18,7 +18,8 @@ from OCC.Display.SimpleGui import init_display
 #SONATA modules:
 from SONATA.fileIO.CADoutput import export_to_step
 from SONATA.fileIO.CADinput import load_3D, import_2d_stp, import_3d_stp
-from SONATA.fileIO.hiddenprints import HiddenPrints, blockPrint, enablePrint
+from SONATA.fileIO.readinput import read_material_input
+from SONATA.fileIO.configuration import Configuration
 
 from SONATA.bladegen.blade import Blade
 
@@ -43,6 +44,7 @@ from SONATA.display.display_utils import export_to_JPEG, export_to_PNG, export_t
                                         export_to_TEX, export_to_BMP,export_to_TIFF, \
                                         show_coordinate_system, display_SONATA_SegmentLst,\
                                         display_custome_shape   
+                                        
 
 
 class CBM(object):
@@ -69,7 +71,7 @@ class CBM(object):
     '''
         
     #__slots__ = ('Configuration','MaterialLst','__tel','__email','__alter','__partner')
-    def __init__(self,Configuration,MaterialLst):
+    def __init__(self, Configuration):
         """
         Initialize attributes.
 
@@ -83,7 +85,7 @@ class CBM(object):
         """
         
         self.config = Configuration
-        self.MaterialLst = MaterialLst
+        self.MaterialLst = read_material_input(self.config.SETUP_mat_filename)
         
         self.SegmentLst = []
         self.WebLst = []    
@@ -103,8 +105,7 @@ class CBM(object):
         elif self.config.SETUP_input_type == 4:
             self.blade =  Blade(self.config.SETUP_datasource, self.config.SETUP_datasource, False, False)
             self.surface3d = self.blade.surface
-        
-
+    
 
     def cbm_save(self, output_filename=None):
         '''saves the complete <CBM> object as pickle
@@ -250,6 +251,7 @@ class CBM(object):
         '''generates the topology 
         '''               
         #Generate SegmentLst from config:
+        self.SegmentLst = []
         self.cbm_generate_SegmentLst()
         #Build Segment 0:
         self.SegmentLst[0].build_wire()
@@ -257,6 +259,7 @@ class CBM(object):
         self.SegmentLst[0].determine_final_boundary()
         
         #Build Webs:    
+        self.WebLst = []
         if self.config.SETUP_NbOfWebs > 0:
             for i in range(0,self.config.SETUP_NbOfWebs):
                 print 'STATUS:\t Building Web %s' %(i+1)
@@ -272,6 +275,8 @@ class CBM(object):
                 seg.build_layers(self.WebLst,self.SegmentLst[0])
                 seg.determine_final_boundary(self.WebLst,self.SegmentLst[0])
                 seg.build_wire()
+              
+        self.BW = None
         #Balance Weight:
         if self.config.SETUP_BalanceWeight == True:
             print 'STATUS:\t Building Balance Weight'   
@@ -292,6 +297,7 @@ class CBM(object):
         -------
         None
         """
+        self.mesh = []
         #meshing parameters:  
         Resolution = self.config.SETUP_mesh_resolution # Nb of Points on Segment0
         length = get_BSplineLst_length(self.SegmentLst[0].BSplineLst)
@@ -456,10 +462,7 @@ class CBM(object):
 #%%############################################################################
 #                           M    A    I    N                                  #
 ###############################################################################    
-if __name__ == '__main__':
-    from SONATA.fileIO.configuration import Configuration
-    from SONATA.fileIO.readinput import read_material_input
-    
+if __name__ == '__main__':   
     plt.close('all')    
     filename = 'jobs/VHeuschneider/sec_config.input'
     

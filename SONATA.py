@@ -30,24 +30,23 @@ import os
 import pickle as pkl
 
 from SONATA.fileIO.configuration import Configuration
-from SONATA.fileIO.readinput import read_material_input
+
 from SONATA.cbm import CBM
 plt.close('all')    
 #TODO: Comment the CBM Class and memeber functions properly!
 #TODO: include optionflags and Vabs_setup in Configuration
 #TODO: include yaml style input files
 
-filename = 'jobs/VariSpeed/01_simple/sec_config.input'
+filename = 'jobs/VariSpeed/02_Rohl/Rohl_sec_config.input'
 config = Configuration(filename)
 print filename
-MaterialLst = read_material_input(config.SETUP_mat_filename)
 
 #config.SETUP_radial_station = 160
 #config.flag_mesh_core = True
 #config.VABS.recover_flag = 1
 #config.VABS.M = [0,2000e3,0]
 
-job = CBM(config, MaterialLst)
+job = CBM(config)
 job.cbm_gen_topo()
 #job.cbm_display_config()
 job.cbm_gen_mesh()

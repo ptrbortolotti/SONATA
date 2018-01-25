@@ -7,6 +7,7 @@ Created on Mon Jan 22 14:36:09 2018
 import re
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import interpolate
 
 def read_dymore_beam_properties(filename, x_offset = 0.81786984):
     #READ FILE AND CLEAN UP COMMENTS, EMPTY LINES WITH SPACES AND NEWLINES
@@ -26,7 +27,6 @@ def read_dymore_beam_properties(filename, x_offset = 0.81786984):
               '@AXIAL_STIFFNESS         {',\
               '@BENDING_STIFFNESSES     {',\
               '@TORSIONAL_STIFFNESS     {',\
-              '@TORSIONAL_STIFFNESS     {',\
               '@SHEARING_STIFFNESSES    {',\
               '@MASS_PER_UNIT_SPAN      {',\
               '@MOMENTS_OF_INERTIA      {',\
@@ -44,7 +44,23 @@ def read_dymore_beam_properties(filename, x_offset = 0.81786984):
         dct[k[1:-1].strip().lower()] = arr
     
     dct['x'] = dct['curvilinear_coordinate'] + x_offset
+    dct['x'] = dct['x']*1000 #in mm
     return dct
+
+
+def interp1d_dymore_beam_properties(dct_dym, x):
+    '''Interpolate Values from dct_dym at x for optimization'''
+    dct_interp = {}
+    dct_interp['x'] = x
+    for k in dct_dym:
+        if k != 'x':
+            ynew_tmp = []
+            for i, item in enumerate(dct_dym[k].T):
+                f = interpolate.interp1d(dct_dym['x'][:,0], item) 
+                ynew_tmp.append(f(dct_interp['x']))         
+            dct_interp[k] = np.asarray(ynew_tmp)
+    return dct_interp
+
 
 
 if __name__ == '__main__':
