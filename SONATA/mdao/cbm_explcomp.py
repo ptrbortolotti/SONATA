@@ -48,15 +48,16 @@ class CBM_ExplComp(ExplicitComponent):
     
     def set_references(self,ref_dct):
         self.ref_dct = ref_dct
-    
+
     def objective(self):
-        obj_vec = []        
-        obj_vec.append(abs(self.job.BeamProperties.CS[1][1]*1e-6 - self.ref_dct['torsional_stiffness']) / self.ref_dct['torsional_stiffness'])
-        obj_vec.append(abs(self.job.BeamProperties.MpUS - self.ref_dct['mass_per_unit_span']) / self.ref_dct['mass_per_unit_span'])
-        return obj_vec
-    
-    
-    
+        o1 = abs(self.job.BeamProperties.CS[2][2]*1e-6 - self.ref_dct['bending_stiffnesses'][0]) / self.ref_dct['bending_stiffnesses'][0]
+        o2 = abs(self.job.BeamProperties.CS[3][3]*1e-6 - self.ref_dct['bending_stiffnesses'][1]) / self.ref_dct['bending_stiffnesses'][1]
+        o3 = abs(self.job.BeamProperties.CS[1][1]*1e-6 - self.ref_dct['torsional_stiffness']) / self.ref_dct['torsional_stiffness']
+        o4 = abs(self.job.BeamProperties.CS[0][0] - self.ref_dct['axial_stiffness']) / self.ref_dct['axial_stiffness']
+        o5 = abs(self.job.BeamProperties.MpUS - self.ref_dct['mass_per_unit_span']) / self.ref_dct['mass_per_unit_span']
+        obj_arr = np.hstack((o1,o2,o3,o4,o5))
+        return np.average(obj_arr)
+        
     def compute(self, inputs, outputs):
         elapsed_t = datetime.now() - self.startTime
         m, s = divmod(elapsed_t.seconds, 60)
@@ -85,8 +86,8 @@ class CBM_ExplComp(ExplicitComponent):
         self.job.config.SEG_Layup[1][2][2] = inputs['Spar_layer_thickness'][0]
         self.job.config.SEG_Layup[1][3][2] = inputs['Spar_layer_thickness'][0]
         
-        self.job.MaterialLst[11].rho = inputs['Core1_density'][0]
-        self.job.MaterialLst[12].rho = inputs['Core2_density'][0]
+        #self.job.MaterialLst[11].rho = inputs['Core1_density'][0]
+        #self.job.MaterialLst[12].rho = inputs['Core2_density'][0]
                
         with HiddenPrints():
             self.job.cbm_gen_topo()
