@@ -59,6 +59,15 @@ More to come...
 9. Now you can download or clone the repository and execute the main SONATA script. 
 	```	python SONATA.py```
 
+    
+To use the pyoptsparse optimization packages you need to install 
+conda install conda-build
+conda install mpi4py
+
+clone or download the repository from: https://bitbucket.org/mdolab/pyoptsparse
+conda build pyoptsparse
+    
+    
 ## Introduction:
 
 
