@@ -10,6 +10,7 @@
 *.log
 *.py.out
 *.stp
+*.pdf_tex
 license
 
 #ignored folders
@@ -20,4 +21,4 @@ publication/
 docs/source/
 docs/build/
 SONATA/sectionbuilder/PatranMesh_example/
-*.pdf_tex
+

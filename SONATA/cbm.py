@@ -107,6 +107,21 @@ class CBM(object):
             self.surface3d = self.blade.surface
     
 
+    def __getstate__(self):
+        """Return state values to be pickled."""
+        return (self.config, self.MaterialLst, self.SegmentLst, self.WebLst, self.BW, self.mesh, self.BeamProperties)   
+    
+    
+    def __setstate__(self, state):
+        """Restore state from the unpickled state values."""
+        (self.config, self.MaterialLst, self.SegmentLst, self.WebLst, self.BW, self.mesh, self.BeamProperties)  = state
+        if self.config.SETUP_input_type == 3:
+            self.surface3d = load_3D(self.config.SETUP_datasource)
+        elif self.config.SETUP_input_type == 4:
+            self.blade =  Blade(self.config.SETUP_datasource, self.config.SETUP_datasource, False, False)
+            self.surface3d = self.blade.surface
+    
+
     def cbm_save(self, output_filename=None):
         '''saves the complete <CBM> object as pickle
         Args:
@@ -304,6 +319,7 @@ class CBM(object):
         global_minLen = round(length/Resolution,5)
             
         core_cell_area = 1.25*global_minLen**2
+        bw_cell_area = 0.4*global_minLen**2
         web_consolidate_tol = 0.5*global_minLen
 
         #===================MESH SEGMENT
@@ -314,6 +330,8 @@ class CBM(object):
         #===================MESH CORE  
         if self.config.flag_mesh_core:
             for j,seg in enumerate(reversed(self.SegmentLst)):
+                if seg.ID == 1:
+                    core_cell_area = 0.5*global_minLen**2
                 self.mesh.extend(seg.mesh_core(self.SegmentLst, self.WebLst, core_cell_area, display=self.display))
                 
         #===================consolidate mesh on web interface         
@@ -329,8 +347,7 @@ class CBM(object):
             print 'STATUS:\t Meshing Balance Weight'   
             
             self.mesh, boundary_nodes = map_mesh_by_intersect_curve2d(self.mesh,self.BW.Curve,self.BW.wire)
-            triangle_options = 'pa.3'
-            [bw_cells,bw_nodes] = gen_core_cells(boundary_nodes,options=triangle_options)
+            [bw_cells,bw_nodes] = gen_core_cells(boundary_nodes, bw_cell_area)
             
             for c in bw_cells:
                 c.structured = False
