@@ -30,8 +30,8 @@ import os
 import pickle as pkl
 
 from SONATA.fileIO.configuration import Configuration
-
 from SONATA.cbm import CBM
+
 plt.close('all')    
 #TODO: Comment the CBM Class and memeber functions properly!
 #TODO: include optionflags and Vabs_setup in Configuration
@@ -47,12 +47,13 @@ print filename
 #config.VABS.M = [0,2000e3,0]
 
 job = CBM(config)
-job.cbm_gen_topo()
+#job.cbm_gen_topo()
 #job.cbm_display_config()
-job.cbm_gen_mesh()
-job.cbm_review_mesh()
-job.cbm_run_vabs()
-job.cbm_save()
-#job.cbm_load()
+#job.cbm_gen_mesh()
+#job.cbm_review_mesh()
+#job.cbm_run_vabs()
+#job.cbm_save()
+job.cbm_load()
 #job.cbm_post_3dtopo()
-job.cbm_post_2dmesh()
+#job.cbm_post_2dmesh()
+test = job.cbm_set_DymoreMK(x_offset = 0.81786984)
