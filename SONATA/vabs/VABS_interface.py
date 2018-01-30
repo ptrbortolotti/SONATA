@@ -6,6 +6,7 @@ Created on Mon Mar 20 14:15:44 2017
 import numpy as np
 from StringIO import StringIO 
 from SONATA.fileIO.readinput import read_rowstring, read_INTrowSTR, read_FLOATrowSTR, read_BOOLrowSTR, read_TXTrowSTR, read_LISTrowSTR
+from SONATA.vabs.vabs_utils import transfer_matrix_unitconvertion
 
 def read_VABS_Results(filename):
     a = ''
@@ -331,6 +332,36 @@ class XSectionalProperties(object):
         self.ELE = read_VABS_Results(self.filename.replace('.K','.ELE'))
         self.U = read_VABS_Results(self.filename.replace('.K','.U'))
 
+    
+    def MM_convert_units(self,in_dct = {'mass': 'g', 'length': 'mm'},out_dct = {'mass':'kg', 'length':'m'}):
+        MMunits = np.array([['mass/length','','','','mass','mass'],
+                           ['','mass/length','', 'mass','',''],
+                           ['','','mass/length', 'mass','',''],
+                           ['','mass','mass','mass*length','',''],
+                           ['mass','','','','mass*length','mass*length'],
+                           ['mass','','','','mass*length','mass*length']])
+        MM_TM = transfer_matrix_unitconvertion(MMunits,in_dct,out_dct)
+        return np.multiply(self.MM, MM_TM)
+        
+    
+    def TS_convert_units(self,in_dct = {'force': 'N', 'length': 'mm'}, out_dct = {'force': 'N', 'length': 'm'}):
+        TSunits = np.array([['force','force','force','force*length','force*length','force*length'],
+                           ['force','force','force','force*length','force*length','force*length'],
+                           ['force','force','force','force*length','force*length','force*length'],
+                           ['force*length','force*length','force*length','force*length*length','force*length*length','force*length*length'],
+                           ['force*length','force*length','force*length','force*length*length','force*length*length','force*length*length'],
+                           ['force*length','force*length','force*length','force*length*length','force*length*length','force*length*length']])
+    
+        TS_TM = transfer_matrix_unitconvertion(TSunits,in_dct,out_dct)
+        return np.multiply(self.TS, TS_TM)
+
+
+        
+        
+        
+        
+        
+        
            
 #======================================================
 #       MAIN

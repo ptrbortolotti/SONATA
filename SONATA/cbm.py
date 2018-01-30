@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import subprocess
 import sys,os,math
+import numpy as np
 
 
 #PythonOCC Modules
@@ -475,7 +476,28 @@ class CBM(object):
         self.start_display()   
         return None
     
-    
+    def cbm_set_DymoreMK(self, x_offset = 0):
+        '''
+        Returns the tablerow with the Massterms(6), Stiffness(21),damping(1) 
+        and coordinate(1) stacked horizontally for the use in DYMORE/PYMORE/MARC        
+        '''
+        MM = self.BeamProperties.MM_convert_units()
+        MASS = np.array([MM[0,0], MM[2,3], MM[0,4], MM[5,5], MM[4,5], MM[4,4]])
+        #print '@MASS_TERMS: {m00, mEta2, mEta3, m33, m23, m22}'
+        #print MASS
+        TS_u = np.triu(self.BeamProperties.TS_convert_units())
+        TS_f = TS_u.flatten('F')
+        STIFF = TS_f[TS_f != 0]
+        #print '@STIFFNESS_MATRIX {k11, k12, k22, k13, k23, k33,... k16, k26, ...k66}: '
+        #print STIFF
+        mu = 0.0
+        #print '@VISCOUS DAMPING:', mu
+        eta = self.config.SETUP_radial_station/1000 - x_offset 
+        #print'@CURVILINEAR_COORDINATE:', eta
+        return np.hstack((MASS,STIFF,mu,eta))
+        
+
+        
 #%%############################################################################
 #                           M    A    I    N                                  #
 ###############################################################################    
