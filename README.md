@@ -36,6 +36,7 @@ More to come...
 		
         ```pip install packages/Shapely-1.5.17-cp27-cp27m-win_amd64.whl```
 	* Linux: ```pip install shapely==1.5.17```
+	*           ``` conda install -c scitools shapely ``` 
 
 5. Install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
 	* __Windows__: Install the precompiled binaries from the /packages directory by running the following command: 
