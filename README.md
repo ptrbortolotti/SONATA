@@ -28,11 +28,14 @@ More to come...
 2. Install the **pythonocc** precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. Simply run the following commands in the terminal (for Windows users: execute the cmd command terminal):
     ```	conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.18	```
 
+3. Install the **pint** module. This is used to change units in the SONATA/CBM - DYMORE interface.
+    ``` conda install -c conda-forge pint ```
+
 4. Install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
 		
         ```pip install packages/Shapely-1.5.17-cp27-cp27m-win_amd64.whl```
-	* Linux: ```pip install shapely```
+	* Linux: ```pip install shapely==1.5.17```
 
 5. Install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
 	* __Windows__: Install the precompiled binaries from the /packages directory by running the following command: 
@@ -40,32 +43,35 @@ More to come...
         ```pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl```
 	* __Linux__: ```easy_install triangle```
 
-6. Install the **openmdao** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
-	* __Windows__: Install the precompiled binaries from the /package directory by running the following command:
-		
-        ```	pip install openmdao```
-	* __Linux__: ```pip install openmdao```
 
-7. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
+
+6. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
 		
         ```pip install intervaltree```
 	* __Linux__: ```pip install intervaltree```
 
+7. Install the **openmdao** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
+	* __Windows__: Install the precompiled binaries from the /package directory by running the following command:
+		
+        ```	pip install openmdao```
+	* __Linux__: ```pip install openmdao```
+    * To use the pyoptsparse optimisation package within openmdao you need to install
+    * ``` conda install conda-build```
+    * clone or download the repository from: https://bitbucket.org/mdolab/pyoptsparse
+        ``` conda build pyoptsparse ```
+    * To use parallel computing features you need to install mpi4py!!!
 
 8. Test the installation and all packages by excecuting the folloging python script:
 	```	python test_install.py```
 
+
+
 9. Now you can download or clone the repository and execute the main SONATA script. 
 	```	python SONATA.py```
 
-    
-To use the pyoptsparse optimization packages you need to install 
-conda install conda-build
-conda install mpi4py
 
-clone or download the repository from: https://bitbucket.org/mdolab/pyoptsparse
-conda build pyoptsparse
+
     
     
 ## Introduction:
