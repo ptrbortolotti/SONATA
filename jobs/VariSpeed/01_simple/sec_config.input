@@ -1,0 +1,61 @@
+#==============================SONATA-INPUT=============================
+#This file contains the input information for the structural design of the rotorblade crosssection
+#Author: Tobias Pflumm
+#Date:	01/30/2017
+
+#===============================SETUP===================================
+&DEFN Setup
+	mat_filename = jobs/VariSpeed/mat_database.input	#Path and filename of the Material Database
+	NbOfWebs = 1						#Number of Webs (0=CSpar, 1=Dspar,...)		[int]			DEFAULT=0
+	BalanceWeight = False 				#True or False for Balance Weight			[boolean]		DEFAULT=FALSE
+	input_type = 4						#0) Airfoil from UIUC Database; 1) Geometry from .dat file; 2)2d .step or .iges 3)3D .step or .iges and radial station of crosssection 	4) generate 3D-Blade from twist,taper,airfoils,1/4-line			[int] DEFAULT=0	
+	datasource = jobs/VariSpeed/uh60a_blade_zerotwist  					#0)	naca23012					1) AREA_R250.dat			2)AREA_R230.stp	 			3)AREA_Blatt_L.stp	 4)folder of data 						[string] DEFAULT=NONE
+	radial_station = 2500				#Radial station of crosssection. Only necessary for input type 3. [float]	Default=NONE
+	scale_factor = 1	 				#use as reference scale factor				[float] 		DEFAULT=1
+	Theta = 0							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
+	mesh_resolution = 300				#Scales approximately to the number of points on Segment0
+&END 
+
+
+#===============================WEB DEFINITION==========================
+
+&DEFN Web
+	WebID = 1						#Web ID 									[int]													
+	Pos1 = 0.38						#first Position (between 0 and 1) 			[float]
+	Pos2 = 0.62						#second Position (between 0 and 1) 			[float]
+&END
+
+#===============================COMPOSITE LAYUP DEFINITION==============
+
+&DEFN Seg
+	SegID = 0							#Segment ID									[int]
+	CoreMaterial = 	3					#Material ID of core filling 				[int]
+	&DEFN Layup
+	#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
+	0.0			1.0		1.2			45					1		#Skin_1	
+ 	0.0			1.0		1.2			45					1		#Skin_2
+	&END
+&END 
+
+
+&DEFN Seg
+	SegID = 1							#Segment ID									[int]
+	CoreMaterial = 	12					#Material ID of core filling 				[int]
+	&DEFN Layup
+		#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
+		0.0		1.0		2.2				0					2		#Spar1
+        0.0		1.0		2.2				0					2		#Spar1
+        0.0		1.0		2.2				0					2		#Spar1
+        0.0		1.0		2.2				0					2		#Spar1
+	&END
+&END 
+
+
+&DEFN Seg
+SegID = 2							#Segment ID									[int]
+CoreMaterial = 	13					#Material ID of core filling 				[int]
+	&DEFN Layup
+		#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
+		#0.0		1.0 	1.0				0					2		#tmp_spar
+	&END
+&END 

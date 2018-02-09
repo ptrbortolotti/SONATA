@@ -1,0 +1,94 @@
+#==============================SONATA-INPUT=============================
+#This file contains the input information for the structural design of the rotorblade crosssection
+#Author: Tobias Pflumm
+#Date:	01/30/2017
+#TODO:  SET DEFAULT VALUES
+
+#USER MANUAL:
+
+#2)AREA_R250.stp
+# - If the input_type = 2 is chosen, the user has to provide a .stp file that has the crosssection coordinate system, 
+#		x-axis is chordwise and points to the trailing edge, y-axis upwards
+# - If the input_type = 3 is chosen, the user has to provide 
+
+#===============================SETUP===================================
+&DEFN Setup
+	mat_filename = mat_database.input	#Path and filename of the Material Database
+	NbOfWebs = 0						#Number of Webs (0=CSpar, 1=Dspar,...)		[int]			DEFAULT=0
+	BalanceWeight = False 				#True or False for Balance Weight			[boolean]		DEFAULT=FALSE
+	input_type = 3						#0) Airfoil from UIUC Database; 1) Geometry from .dat file; 2)2d .step or .iges 3)3D .step or .iges and radial station of crosssection 	4) generate 3D-Blade from twist,taper,airfoils,1/4-line			[int] DEFAULT=0	
+	datasource = jobs/VHeuschneider/02_CATIA/blade_v04.stp					#0)	naca23012					1) AREA_R250.dat			2)AREA_R230.stp	 			3)AREA_Blatt_L.stp	 4)folder of data 						[string] DEFAULT=NONE
+	radial_station = 160				#Radial station of crosssection. Only necessary for input type 3. [float]	Default=NONE
+	scale_factor = 1	 				#use as reference scale factor				[float] 		DEFAULT=1
+	Theta = 0							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
+	mesh_resolution = 240				#Scales approximately to the number of points on Segment0
+&END 
+
+
+#===============================WEB DEFINITION==========================
+#&DEFN Web
+#	WebID = 1						#Web ID 									[int]													
+#	Pos1 = 0.35						#first Position (between 0 and 1) 			[float]
+#	Pos2 = 0.68						#second Position (between 0 and 1) 			[float]
+#&END
+
+#&DEFN Web
+#	WebID = 2						#Web ID 									[int]													
+#	Pos1 = 0.28						#first Position (between 0 and 1) 			[float]
+#	Pos2 = 0.80						#second Position (between 0 and 1) 			[float]
+#&END
+
+
+#===============================COMPOSITE LAYUP DEFINITION==============
+
+&DEFN Seg
+	SegID = 0							#Segment ID									[int]
+	CoreMaterial = 	2					#Material ID of core filling 				[int]
+	&DEFN Layup
+	#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
+	0.0			1.0		0.24			45					1		#Skin_1	
+ 	0.0			1.0		0.24			45					1		#Skin_2
+	0.0			1.0		0.24			45					1		#Skin_3	
+	0.0			1.0	    0.6				0					2		#Spar_1
+	0.0   		1.0		0.24			45					1		#BL_1
+	0.0   		1.0		0.24			90					1		#BL_1
+	0.0   		1.0		0.24			45					1		#BL_1
+    0.0			1.0	    0.6				0					2		#Spar_2
+    0.0   		1.0		0.24			45					1		#BL_1
+	0.0   		1.0		0.24			45					1		#BL_1
+    0.0			1.0	    0.6				0					2		#Spar_3
+    0.0   		1.0		0.24			45					1		#BL_1
+	0.0   		1.0		0.24			45					1		#BL_1
+    0.0			1.0	    0.6				0					2		#Spar_4
+    0.0   		1.0		0.24			45					1		#BL_1
+	0.0   		1.0		0.24			45					1		#BL_1
+    0.0			1.0	    0.6				0					2		#Spar_5
+    0.0   		1.0		0.24			45					1		#BL_1
+	0.0   		1.0		0.24			45					1		#BL_1
+    0.0			1.0	    0.6				0					2		#Spar_6
+    0.0   		1.0		0.24			45					1		#BL_1
+	0.0   		1.0		0.24			45					1		#BL_1
+    0.0			1.0	    0.6				0					2		#Spar_7
+    0.0   		1.0		0.24			45					1		#BL_1
+	0.0   		1.0		0.24			45					1		#BL_1
+    0.0			1.0	    0.6				0					2		#Spar_8
+    0.0   		1.0		0.24			45					1		#BL_1
+	0.0   		1.0		0.24			45					1		#BL_1
+    0.0			1.0	    0.6				0					2		#Spar_Filler
+    0.0   		1.0		0.24			45					1		#BL_1
+	0.0   		1.0		0.24			45					1		#BL_1
+    0.0			1.0	    0.6				0					2		#Spar_Filler
+    0.0   		1.0		0.24			45					1		#BL_1
+	0.0   		1.0		0.24			45					1		#BL_1
+	&END
+&END 
+
+
+#=================================Balance Weight Definition=============
+
+&DEFN BalanceWeight
+	XPos = 3.5						#	X Position	[-]						[float]				NO DEFAULT VALUE						
+	YPos = 0.0							#	Y Position	[-]						[float]				NO DEFAULT VALUE
+	Diameter = 5.0						#	Diameter of Balance Weight [mm]		[float]				NO DEFAULT VALUE
+	MatID = 6   						#   Material ID							[int]				NO DEFAULT VALUE
+&END

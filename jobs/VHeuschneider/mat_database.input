@@ -1,0 +1,115 @@
+#==============================SONATA-MATERIAL DATABASE============================
+#This file contains the Material properties as input information for SONATA 
+#Author: Tobias Pflumm
+#Date:	03/17/2017
+
+
+#======USER MANUAL -- EXAMPLES:============================
+#ISOTROPIC MATERIAL:
+#&DEFN Material
+# 		MatID = 1							#Material ID 	[int]	
+#		name = Alu 7075-T6				#Name [string]
+#		orth = 0							#isotropic(0), orthotropic(1), general anisotropic(2)
+#		rho = 4.43 							#Density [kg/m3]bzw.[g/cm3] [float]
+#		E = 71700							#Youngs's Modulus [MPa] [float]
+#		nu = 0.33							#Poisson's ratio  [-] [float]
+#		alpha = 23.1						#Thermal expansion coefficient [10-6K^-1] [float]
+#&END
+
+#Orthotropic MATERIAL:
+#&DEFN Material
+# 		MatID = 4							#Material ID 	[int]	
+#		name = CFK UD (HT-Fiber) FVF(0.571)	#Name [string]
+#		orth = 1							#isotropic(0), orthotropic(1), general anisotropic(2)
+#		rho = 1.561 						#Density [kg/m3]bzw.[g/cm3] [float]
+#		E = [E1,E2,E3]						#Youngs's Modulus [E1,E2,E3]	[MPa] [float]
+#		G = [G12,G13,G23]					#Shear Modulus [G12,G13,G23]	[MPa] [float]
+#		nu = [nu12,nu13,nu23]				#Poisson's ratio  [nu12,nu13,nu23] [-] [float]
+#		alpha = [a11,a22,a33]					#Thermal expansion coefficient at 20°C [a11,a22,a33] [10-6/K] [float]
+#&END
+
+#General anisotropic MATERIAL:
+#&DEFN Material
+# 		MatID = 3							#Material ID 	[int]	
+#		name = Anisotropic Dummy			#Name [string]
+#		orth = 2							#isotropic(0), orthotropic(1), general anisotropic(2)
+#		C = [[c11, c12, c13, c14, c15, c16]	#Matrix representation (stiffness tensor)	[MPa] [float]
+#			 [   , c22, c23, c24, c25, c26] #with [sigma] = C*[epsilon]
+#			 [   ,    , c33, c34, c35, c36]
+#			 [   ,    ,    , c44, c45, c46]
+#			 [   ,    ,    ,    , c55, c56]
+#			 [   ,    ,    ,    ,    , c66]]							
+#							
+#		rho = 1.561 						#Density [kg/m3]bzw.[g/cm3] [float]
+#		alpha = [a11,2a12,2a13,a22,2a23,a33]#Thermal expansion coefficient at 20°C [a11,a22,a33] [10-6/K] [float]
+#&END
+
+#===============================MATEIAL DEFINITION==========================
+&DEFN Material
+ 		MatID = 1							#Material ID 	[int]	
+		name = SGL/FT109/Sigratex/200g/2x2	#Name [string]
+		orth = 1							#isotropic(0), orthotropic(1), general anisotropic(2)
+		rho = 1.561 						#Density [g/cm3] [float]
+		E = [72000,72000,66000]				#Youngs's Modulus [E1,E2,E3]	[MPa] [float]
+		G = [5000,5000,5000]					#Shear Modulus [G12,G13,G23]	[MPa] [float]
+		nu = [0.1,0.1,0.1]					#Poisson's ratio  [nu12,nu13,nu23] [-] [float]
+		alpha = [0.2,30,30]					#Thermal expansion coefficient at 20°C [a11,a22,a33] [10-6/K] [float]
+&END
+
+&DEFN Material
+ 		MatID = 2							#Material ID 	[int]	
+		name = SGL/FT109/Sigrafil-C30-T050/600g/UD	#Name [string]
+		orth = 1							#isotropic(0), orthotropic(1), general anisotropic(2)
+		rho = 1.561 						#Density [g/cm3] [float]
+		E = [132830,11616,11616]				#Youngs's Modulus [E1,E2,E3]	[MPa] [float]
+		G = [5336,5336,4264]					#Shear Modulus [G12,G13,G23]	[MPa] [float]
+		nu = [0.28,0.28,0.36]			#Poisson's ratio  [nu12,nu13,nu23] [-] [float]
+		alpha = [0.2,30,30]					#Thermal expansion coefficient at 20°C [a11,a22,a33] [10-6/K] [float]
+&END
+
+&DEFN Material
+ 		MatID = 3							#Material ID 	[int]	
+		name = ROHACELL51 IG/IG-F							#Name [string]
+		orth = 0							#isotropic(0), orthotropic(1), general anisotropic(2)
+		rho = 0.052 						#Density [g/cm3] [float]
+		E = 70								#Youngs's Modulus [MPa] [float]
+		nu = 0.4							#Poisson's ratio  [-] [float]
+		alpha = 3.33						#Thermal expansion coefficient at 20°C [10-6/K] [float]
+&END
+
+&DEFN Material
+ 		MatID = 4							#Material ID 	[int]	
+		name = Alu 7075-T6				#Name [string]
+		orth = 0							#isotropic(0), orthotropic(1), general anisotropic(2)
+		rho = 2.71 							#Density [g/cm3] [float]
+		E = 71700							#Youngs's Modulus [MPa] [float]
+		nu = 0.33							#Poisson's ratio  [-] [float]
+		alpha = 23.1						#Thermal expansion coefficient [10-6K^-1] [float]
+&END
+
+&DEFN Material
+ 		MatID = 5							#Material ID 	[int]	
+		name = Titanium Ti-6Al-4V (Grade 5)	#Name [string]
+		orth = 0							#isotropic(0), orthotropic(1), general anisotropic(2)
+		rho = 4.43 							#Density [g/cm3] [float]
+		E = 113800							#Youngs's Modulus [MPa] [float]
+		nu = 0.342							#Poisson's ratio  [-] [float]
+		alpha = 8.2							#Thermal expansion coefficient at 20°C [10-6/K] [float]
+&END
+
+
+&DEFN Material
+ 		MatID = 6							#Material ID 	[int]	
+		name = Lead							#Name [string]
+		orth = 0							#isotropic(0), orthotropic(1), general anisotropic(2)
+		rho = 11.43 						#Density [g/cm3] [float]
+		E = 14000							#Youngs's Modulus [MPa] [float]
+		nu = 0.42							#Poisson's ratio  [-] [float]
+		alpha = 29.1						#Thermal expansion coefficient at 20°C [10-6/K] [float]
+&END
+
+ 
+
+
+
+

@@ -37,7 +37,7 @@ plt.close('all')
 #TODO: include optionflags and Vabs_setup in Configuration
 #TODO: include yaml style input files
 
-filename = 'jobs/VariSpeed/02_Rohl/Rohl_sec_config.input'
+filename = 'jobs/EPiet/sonata/AREA_R150/sec_config.input'
 config = Configuration(filename)
 print filename
 
@@ -47,13 +47,13 @@ print filename
 #config.VABS.M = [0,2000e3,0]
 
 job = CBM(config)
-#job.cbm_gen_topo()
-#job.cbm_display_config()
-#job.cbm_gen_mesh()
-#job.cbm_review_mesh()
+job.cbm_gen_topo()
+job.cbm_display_config()
+job.cbm_gen_mesh()
+job.cbm_review_mesh()
 #job.cbm_run_vabs()
 #job.cbm_save()
-job.cbm_load()
+#job.cbm_load()
 #job.cbm_post_3dtopo()
-#job.cbm_post_2dmesh()
-test = job.cbm_set_DymoreMK(x_offset = 0.81786984)
+job.cbm_post_2dmesh()
+#test = job.cbm_set_DymoreMK(x_offset = 0.81786984)
