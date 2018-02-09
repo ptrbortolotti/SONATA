@@ -1,4 +1,3 @@
-
 from OCC.gp import gp_Pnt2d
 from OCC.GCPnts import GCPnts_AbscissaPoint
 from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
@@ -7,8 +6,8 @@ from OCC.Geom2d import Geom2d_BSplineCurve, Handle_Geom2d_BSplineCurve_DownCast
 
 import os
 os.chdir('C:\\TPflumm_local\\work\\SONATA\\')
-from SONATA.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
-from SONATA.fileIO.readinput import UIUCAirfoil2d, AirfoilDat2d
+from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
+from SONATA.cbm.fileIO.readinput import UIUCAirfoil2d, AirfoilDat2d
 
 
 class BSpline2d(Geom2d_BSplineCurve):

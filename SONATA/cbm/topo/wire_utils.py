@@ -15,8 +15,8 @@ from OCC.TopTools import TopTools_ListIteratorOfListOfShape, TopTools_ListOfShap
 from OCC.TopoDS import topods
 
 #Own Libraries:
-from SONATA.topo.explorer import WireExplorer
-from SONATA.topo.utils import Pnt2dLst_to_npArray, PolygonArea, unique_rows, P2Pdistance
+from SONATA.cbm.topo.explorer import WireExplorer
+from SONATA.cbm.topo.utils import Pnt2dLst_to_npArray, PolygonArea, unique_rows, P2Pdistance
 
 ###############################################################################
 # Wire Utilities

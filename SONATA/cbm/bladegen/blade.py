@@ -16,11 +16,11 @@ from OCC.gp import gp_Pnt, gp_Dir, gp_Ax1
 
 import sys
 #sys.path.insert(0, 'C:\TPflumm_local\work\SONATA')
-from SONATA.bladegen.airfoil import Airfoil
-from SONATA.bladegen.bladegen_utils import make_loft
-from SONATA.topo.wire_utils import rotate_wire, translate_wire,scale_wire, mirror_wire_pnt_dir
-from SONATA.display.display_utils import show_coordinate_system 
-from SONATA.fileIO.CADinput import BSplineLst_from_intersect_shape
+from SONATA.cbm.bladegen.airfoil import Airfoil
+from SONATA.cbm.bladegen.bladegen_utils import make_loft
+from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire,scale_wire, mirror_wire_pnt_dir
+from SONATA.cbm.display.display_utils import show_coordinate_system 
+from SONATA.cbm.fileIO.CADinput import BSplineLst_from_intersect_shape
 
 class Blade(object):
     def __init__(self, folder, name='None', FLAG_SHOW_3D_TOPO=False, FLAG_SHOW_2D_DATA=False):

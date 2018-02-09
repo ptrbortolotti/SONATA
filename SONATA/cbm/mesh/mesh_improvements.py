@@ -11,10 +11,10 @@ from OCC.gp import gp_Vec2d, gp_Pnt2d
 from OCC.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
 from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
 
-from SONATA.mesh.node import Node
-from SONATA.mesh.cell import Cell
-from SONATA.mesh.mesh_utils import move_node_on_BSplineLst, theta_1_from_2nodes
-from SONATA.topo.BSplineLst_utils import ProjectPointOnBSplineLst
+from SONATA.cbm.mesh.node import Node
+from SONATA.cbm.mesh.cell import Cell
+from SONATA.cbm.mesh.mesh_utils import move_node_on_BSplineLst, theta_1_from_2nodes
+from SONATA.cbm.topo.BSplineLst_utils import ProjectPointOnBSplineLst
 
 def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, LayerID = 0, tol=1e-2,alpha_crit = 50,**kwargs):
     '''

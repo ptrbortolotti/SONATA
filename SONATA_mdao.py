@@ -26,9 +26,9 @@ from datetime import datetime
 from multiprocessing import Pool
 from shutil import copyfile
 
-from SONATA.fileIO.configuration import Configuration
-from SONATA.fileIO.readinput import read_material_input
-from SONATA.fileIO.hiddenprints import HiddenPrints
+from SONATA.cbm.fileIO.configuration import Configuration
+from SONATA.cbm.fileIO.readinput import read_material_input
+from SONATA.cbm.fileIO.hiddenprints import HiddenPrints
 
 from SONATA.mdao.cbm_explcomp import CBM_ExplComp
 

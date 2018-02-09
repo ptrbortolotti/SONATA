@@ -19,7 +19,6 @@ class SETUP(object):
 
 
 
-
 if __name__ == '__main__':
 
     filename = 'yaml.input'

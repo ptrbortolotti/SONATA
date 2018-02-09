@@ -19,7 +19,7 @@ from OCC.gp import gp_Pnt2d,gp_Lin2d, gp_Dir2d,gp_Dir,gp_Pnt,gp_Pln,gp_Vec
 from OCC.Geom2d import Geom2d_Line
 from OCC.Geom2dAPI import Geom2dAPI_InterCurveCurve
 
-from SONATA.topo.BSplineLst_utils import findPnt_on_2dcurve
+from SONATA.cbm.topo.BSplineLst_utils import findPnt_on_2dcurve
 
 
 def map_node_on_curve(node,Curve2d,theta_11,distance=1e5,**kwargs):

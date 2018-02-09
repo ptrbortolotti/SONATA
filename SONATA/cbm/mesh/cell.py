@@ -13,7 +13,7 @@ from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline,Geom2dAPI_ProjectPointOnCurv
 
 from SONATA.vabs.strain import Strain
 from SONATA.vabs.stress import Stress
-from SONATA.topo.utils import PolygonArea, calc_angle_between, point2d_list_to_TColgp_Array1OfPnt2d
+from SONATA.cbm.topo.utils import PolygonArea, calc_angle_between, point2d_list_to_TColgp_Array1OfPnt2d
 
 
 def calc_cell_angles(cell):

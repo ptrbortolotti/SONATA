@@ -13,8 +13,8 @@ from OCC.GeomAPI import GeomAPI_Interpolate
 from OCC.Geom import Geom_BezierCurve
 
 #SONATA modules:
-from SONATA.fileIO.readinput  import UIUCAirfoil
-from SONATA.topo.utils import TColgp_HArray1OfPnt_from_nparray,point_list_to_TColgp_Array1OfPnt
+from SONATA.cbm.fileIO.readinput  import UIUCAirfoil
+from SONATA.cbm.topo.utils import TColgp_HArray1OfPnt_from_nparray,point_list_to_TColgp_Array1OfPnt
 
 class Airfoil(object):
     class_counter= 0

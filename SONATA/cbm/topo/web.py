@@ -7,9 +7,9 @@ Created on Mon Jan 16 14:28:42 2017
 from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
 from OCC.gp import gp_Pnt, gp_Pnt2d
 
-from SONATA.topo.BSplineLst_utils import get_BSplineLst_Pnt2d, intersect_BSplineLst_with_BSpline
-from SONATA.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
-from SONATA.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
+from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_Pnt2d, intersect_BSplineLst_with_BSpline
+from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
+from SONATA.cbm.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
 
 
 class Web(object):

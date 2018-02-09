@@ -29,15 +29,15 @@ import numpy as np
 import os
 import pickle as pkl
 
-from SONATA.fileIO.configuration import Configuration
-from SONATA.cbm import CBM
+from SONATA.cbm.fileIO.configuration import Configuration
+from SONATA.cbm.sonata_cbm import CBM
 
 plt.close('all')    
 #TODO: Comment the CBM Class and memeber functions properly!
 #TODO: include optionflags and Vabs_setup in Configuration
 #TODO: include yaml style input files
 
-filename = 'jobs/EPiet/sonata/AREA_R150/sec_config.input'
+filename = 'sec_config.input'
 config = Configuration(filename)
 print filename
 
@@ -48,12 +48,12 @@ print filename
 
 job = CBM(config)
 job.cbm_gen_topo()
-job.cbm_display_config()
+#job.cbm_display_config()
 job.cbm_gen_mesh()
 job.cbm_review_mesh()
-#job.cbm_run_vabs()
-#job.cbm_save()
+job.cbm_run_vabs()
+job.cbm_save()
 #job.cbm_load()
-#job.cbm_post_3dtopo()
+job.cbm_post_3dtopo()
 job.cbm_post_2dmesh()
 #test = job.cbm_set_DymoreMK(x_offset = 0.81786984)

@@ -11,7 +11,7 @@ from OCC.gp import gp_Circ2d, gp_Pnt2d, gp_Ax2d, gp_Dir2d, gp_Vec2d, gp_Ax2, gp_
 from OCC.Geom2d import Geom2d_Circle, Geom2d_BezierCurve
 from OCC.Display.SimpleGui import init_display
 
-from SONATA.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
+from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
 
 
 def WeightStyle1_BezierPoint(P1,P2,R,W):

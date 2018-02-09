@@ -15,7 +15,6 @@ import matplotlib.pyplot as plt
 
 
 
-
 def centroid(points):
     x = [p[0] for p in points]
     y = [p[1] for p in points]

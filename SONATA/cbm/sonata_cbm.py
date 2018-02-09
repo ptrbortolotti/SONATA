@@ -17,30 +17,30 @@ import numpy as np
 from OCC.Display.SimpleGui import init_display
 
 #SONATA modules:
-from SONATA.fileIO.CADoutput import export_to_step
-from SONATA.fileIO.CADinput import load_3D, import_2d_stp, import_3d_stp
-from SONATA.fileIO.readinput import read_material_input
-from SONATA.fileIO.configuration import Configuration
+from SONATA.cbm.fileIO.CADoutput import export_to_step
+from SONATA.cbm.fileIO.CADinput import load_3D, import_2d_stp, import_3d_stp
+from SONATA.cbm.fileIO.readinput import read_material_input
+from SONATA.cbm.fileIO.configuration import Configuration
 
-from SONATA.bladegen.blade import Blade
+from SONATA.cbm.bladegen.blade import Blade
 
-from SONATA.topo.segment import Segment
-from SONATA.topo.web import Web
-from SONATA.topo.utils import  getID
-from SONATA.topo.weight import Weight
-from SONATA.topo.BSplineLst_utils import get_BSplineLst_length
+from SONATA.cbm.topo.segment import Segment
+from SONATA.cbm.topo.web import Web
+from SONATA.cbm.topo.utils import  getID
+from SONATA.cbm.topo.weight import Weight
+from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length
 
-from SONATA.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, sort_and_reassignID
-from SONATA.mesh.consolidate_mesh import consolidate_mesh_on_web
-from SONATA.mesh.mesh_intersect import map_mesh_by_intersect_curve2d
-from SONATA.mesh.mesh_core import gen_core_cells
+from SONATA.cbm.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, sort_and_reassignID
+from SONATA.cbm.mesh.consolidate_mesh import consolidate_mesh_on_web
+from SONATA.cbm.mesh.mesh_intersect import map_mesh_by_intersect_curve2d
+from SONATA.cbm.mesh.mesh_core import gen_core_cells
 
 from SONATA.vabs.VABS_interface import VABS_config, export_cells_for_VABS, XSectionalProperties
 from SONATA.vabs.strain import Strain
 from SONATA.vabs.stress import Stress
 
-from SONATA.display.display_mesh import plot_cells
-from SONATA.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
+from SONATA.cbm.display.display_mesh import plot_cells
+from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
                                         export_to_SVG, export_to_PS, export_to_EnhPS, \
                                         export_to_TEX, export_to_BMP,export_to_TIFF, \
                                         show_coordinate_system, display_SONATA_SegmentLst,\

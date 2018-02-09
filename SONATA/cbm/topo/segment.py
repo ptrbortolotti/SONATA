@@ -6,27 +6,23 @@ from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
 from OCC.gp import gp_Pnt, gp_Pnt2d, gp_Pln, gp_Dir, gp_Vec
 
 
-from SONATA.fileIO.readinput import UIUCAirfoil2d, AirfoilDat2d
-from SONATA.bladegen.blade import Blade
-from SONATA.fileIO.CADinput import import_2d_stp, import_3d_stp
+from SONATA.cbm.fileIO.readinput import UIUCAirfoil2d, AirfoilDat2d
 
-from SONATA.topo.utils import  getID  
-from SONATA.topo.utils import  calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, point2d_list_to_TColgp_Array1OfPnt2d
-from SONATA.topo.BSplineLst_utils import get_BSpline_length, get_BSplineLst_length, \
+from SONATA.cbm.topo.BSplineLst_utils import get_BSpline_length, get_BSplineLst_length, \
                             find_BSplineLst_coordinate, get_BSplineLst_Pnt2d, \
                             trim_BSplineLst, seg_boundary_from_dct, set_BSplineLst_to_Origin, \
                             copy_BSplineLst, trim_BSplineLst_by_Pnt2d, reverse_BSplineLst
-from SONATA.topo.wire_utils import trim_wire, build_wire_from_BSplineLst
-from SONATA.topo.projection import cummulated_layup_boundaries, relevant_cummulated_layup_boundaries,\
+from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst
+from SONATA.cbm.topo.projection import cummulated_layup_boundaries, relevant_cummulated_layup_boundaries,\
                                     plot_layup_projection, inverse_relevant_cummulated_layup_boundaries, \
                                     chop_interval_from_layup, insert_interval_in_layup, sort_layup_projection
 
-from SONATA.topo.layer import Layer
-from SONATA.topo.layer_utils import get_layer, get_web, get_segment
-from SONATA.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
+from SONATA.cbm.topo.layer import Layer
+from SONATA.cbm.topo.layer_utils import get_layer, get_web, get_segment
+from SONATA.cbm.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
 
-from SONATA.mesh.mesh_core import gen_core_cells
-from SONATA.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
+from SONATA.cbm.mesh.mesh_core import gen_core_cells
+from SONATA.cbm.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
                                  grab_nodes_on_BSplineLst, remove_duplicates_from_list_preserving_order, remove_dublicate_nodes
 
 

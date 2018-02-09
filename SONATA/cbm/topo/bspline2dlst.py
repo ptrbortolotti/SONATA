@@ -7,16 +7,16 @@ from OCC.Geom2d import Geom2d_BSplineCurve, Handle_Geom2d_BSplineCurve_DownCast
 import os
 import numpy as np
 os.chdir('C:\\TPflumm_local\\work\\SONATA\\')
-from SONATA.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
-from SONATA.fileIO.readinput import UIUCAirfoil2d, AirfoilDat2d
+from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
+from SONATA.cbm.fileIO.readinput import UIUCAirfoil2d, AirfoilDat2d
 
-from SONATA.topo.BSplineLst_utils import get_BSpline_length, get_BSplineLst_length, \
+from SONATA.cbm.topo.BSplineLst_utils import get_BSpline_length, get_BSplineLst_length, \
                             find_BSplineLst_coordinate, get_BSplineLst_Pnt2d, \
                             trim_BSplineLst, seg_boundary_from_dct, set_BSplineLst_to_Origin, \
                             copy_BSplineLst, trim_BSplineLst_by_Pnt2d, findPnt_on_2dcurve, \
                             isPnt_on_2dcurve
 
-from SONATA.topo.utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_to_npArray, \
+from SONATA.cbm.topo.utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_to_npArray, \
                     discrete_stepsize, curvature_of_curve, isclose, unique_rows, \
                     P2Pdistance, PolygonArea, TColgp_Array1OfPnt2d_from_nparray
 

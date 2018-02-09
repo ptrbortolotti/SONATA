@@ -2,24 +2,24 @@ import matplotlib.pyplot as plt
 
 from OCC.gp import gp_Pnt2d
 
-from SONATA.fileIO.CADinput import order_BSplineLst_Head2Tail
+from SONATA.cbm.fileIO.CADinput import order_BSplineLst_Head2Tail
 
-from SONATA.topo.BSplineLst_utils import get_BSplineLst_length, get_BSplineLst_Pnt2d, \
+from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length, get_BSplineLst_Pnt2d, \
                                          trim_BSplineLst, copy_BSplineLst, \
                                          BSplineLst_from_dct, discretize_BSplineLst, \
                                          find_BSplineLst_pos, get_BSpline_length
-from SONATA.topo.wire_utils import build_wire_from_BSplineLst
-from SONATA.topo.cutoff import cutoff_layer
-from SONATA.topo.offset import shp_parallel_offset
-from SONATA.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
-from SONATA.topo.layer_utils import get_layer, get_web, get_segment       
+from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst
+from SONATA.cbm.topo.cutoff import cutoff_layer
+from SONATA.cbm.topo.offset import shp_parallel_offset
+from SONATA.cbm.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
+from SONATA.cbm.topo.layer_utils import get_layer, get_web, get_segment       
 
-from SONATA.mesh.mesh_byprojection import mesh_by_projecting_nodes_on_BSplineLst
-from SONATA.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, equidistant_nodes_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
+from SONATA.cbm.mesh.mesh_byprojection import mesh_by_projecting_nodes_on_BSplineLst
+from SONATA.cbm.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, equidistant_nodes_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
                                  grab_nodes_on_BSplineLst, remove_duplicates_from_list_preserving_order, merge_nodes_if_too_close, \
                                  find_node_by_ID
                                  
-from SONATA.mesh.mesh_improvements import modify_sharp_corners, modify_cornerstyle_one, second_stage_improvements, integrate_leftover_interior_nodes
+from SONATA.cbm.mesh.mesh_improvements import modify_sharp_corners, modify_cornerstyle_one, second_stage_improvements, integrate_leftover_interior_nodes
 class Layer(object):
     ''' 
     The layer object is constructed from multiple BSplineCurveSegments. It is the basis for all future operations. 

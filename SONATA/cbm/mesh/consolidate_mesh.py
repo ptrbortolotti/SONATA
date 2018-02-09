@@ -14,9 +14,9 @@ import numpy as np
 
 from OCC.gp import gp_Vec2d
 
-from SONATA.mesh.mesh_utils import find_cells_that_contain_node
-from SONATA.mesh.cell import Cell
-from SONATA.display.display_utils import display_custome_shape    
+from SONATA.cbm.mesh.mesh_utils import find_cells_that_contain_node
+from SONATA.cbm.mesh.cell import Cell
+from SONATA.cbm.display.display_utils import display_custome_shape    
 
 def consolidate_mesh_on_web(mesh,w_BSplineLst,w1_nodes,w2_nodes,w_tol,display):
     ''' Consolidates mesh on the web interface.

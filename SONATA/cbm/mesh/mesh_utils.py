@@ -19,15 +19,15 @@ from OCC.BRepLib import breplib_BuildCurves3d
 from OCC.TopoDS import TopoDS_Compound, topods_Face, topods_Edge
 
 
-from SONATA.topo.BSplineLst_utils import get_BSplineLst_length, get_BSpline_length, trim_BSplineLst, set_BSplineLst_to_Origin, \
+from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length, get_BSpline_length, trim_BSplineLst, set_BSplineLst_to_Origin, \
                             BSplineLst_Orientation, reverse_BSplineLst, findPnt_on_BSplineLst, copy_BSplineLst, \
                             isPnt_on_BSplineLst, distance_on_BSplineLst, trim_BSplineLst_by_Pnt2d, trim_BSplineLst_by_coordinates, \
                             ProjectPointOnBSplineLst
-from SONATA.fileIO.CADinput import order_BSplineLst_Head2Tail, Check_BSplineLst_Head2Tail
-from SONATA.topo.wire_utils import build_wire_from_BSplineLst,get_wire_length
-from SONATA.topo.utils import Pnt2dLst_to_npArray, unique_rows, PolygonArea, calc_DCT_angles,calc_angle_between
-from SONATA.mesh.node import Node
-from SONATA.mesh.cell import Cell
+from SONATA.cbm.fileIO.CADinput import order_BSplineLst_Head2Tail, Check_BSplineLst_Head2Tail
+from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst,get_wire_length
+from SONATA.cbm.topo.utils import Pnt2dLst_to_npArray, unique_rows, PolygonArea, calc_DCT_angles,calc_angle_between
+from SONATA.cbm.mesh.node import Node
+from SONATA.cbm.mesh.cell import Cell
 
 
 def find_cells_that_contain_node(cells,n2find):

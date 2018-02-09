@@ -14,12 +14,12 @@ from OCC.Display.SimpleGui import init_display
 from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
 
 
-from SONATA.mesh.node import Node
-from SONATA.mesh.cell import Cell
-from SONATA.display.display_utils import display_custome_shape
-from SONATA.topo.BSplineLst_utils import get_BSplineLst_length, find_BSplineLst_coordinate, \
+from SONATA.cbm.mesh.node import Node
+from SONATA.cbm.mesh.cell import Cell
+from SONATA.cbm.display.display_utils import display_custome_shape
+from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length, find_BSplineLst_coordinate, \
                                         ProjectPointOnBSplineLst, get_BSplineLst_Pnt2d, intersect_BSplineLst_with_BSpline
-from SONATA.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
+from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
 
 
 def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, layer_thickness, tol=1e-2, crit_angle = 95, LayerID = 0, **kw):
@@ -345,8 +345,8 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                 node.cornerstyle = 5
                 print 'cornerstyles > 4 have not been implemented yet.'
                 
-                display.DisplayShape(pPnts[0], color='BLUE')
-                display.DisplayShape(pPnts[1], color='RED')
+#                display.DisplayShape(pPnts[0], color='BLUE')
+#                display.DisplayShape(pPnts[1], color='RED')
                 #TODO: 
                   #for p in exterior_corners:
                         #display.DisplayShape(p,color='RED')

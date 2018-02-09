@@ -8,8 +8,8 @@ import numpy as np
 from datetime import datetime
 from openmdao.api import ExplicitComponent
 
-from SONATA.fileIO.hiddenprints import HiddenPrints
-from SONATA.cbm import CBM
+from SONATA.cbm.fileIO.hiddenprints import HiddenPrints
+from SONATA.cbm.sonata_cbm import CBM
 
 class CBM_ExplComp(ExplicitComponent):
     """

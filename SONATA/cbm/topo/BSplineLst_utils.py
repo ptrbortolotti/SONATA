@@ -13,11 +13,11 @@ from OCC.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve, Geom
 from OCC.Geom2d import Handle_Geom2d_BSplineCurve_DownCast, Geom2d_Line
 
 #Own Libraries:
-from SONATA.topo.utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_to_npArray, \
+from SONATA.cbm.topo.utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_to_npArray, \
                     discrete_stepsize, curvature_of_curve, isclose, unique_rows, \
                     P2Pdistance, PolygonArea, TColgp_Array1OfPnt2d_from_nparray
 
-from SONATA.topo.para_Geom2d_BsplineCurve import Para_Geom2d_BSplineCurve
+from SONATA.cbm.topo.para_Geom2d_BsplineCurve import Para_Geom2d_BSplineCurve
 
 ###############################################################################
 # BSpline and BSplineLst Utilities

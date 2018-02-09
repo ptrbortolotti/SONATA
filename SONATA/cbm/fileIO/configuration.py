@@ -5,8 +5,8 @@ Created on Wed Jan 03 13:24:23 2018
 @author: TPflumm
 """
 
-from SONATA.topo.utils import allunique
-from SONATA.fileIO.readinput import read_segment, read_TXTrowSTR, read_INTrowSTR,\
+from SONATA.cbm.topo.utils import allunique
+from SONATA.cbm.fileIO.readinput import read_segment, read_TXTrowSTR, read_INTrowSTR,\
                                     read_BOOLrowSTR, read_FLOATrowSTR, read_layup
 
 from SONATA.vabs.VABS_interface import VABS_config, export_cells_for_VABS, XSectionalProperties

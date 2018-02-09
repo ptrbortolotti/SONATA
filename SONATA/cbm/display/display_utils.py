@@ -19,7 +19,7 @@ from OCC.Graphic3d import (Graphic3d_EF_PDF,
 from OCC.Quantity import Quantity_Color
 from OCC.AIS import AIS_Shape
 
-from SONATA.topo.wire_utils import rotate_wire, translate_wire
+from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire
 
 #===========================================================================
 # MENU FUNCTIONALITIES

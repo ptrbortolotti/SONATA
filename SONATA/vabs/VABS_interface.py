@@ -5,7 +5,7 @@ Created on Mon Mar 20 14:15:44 2017
 """
 import numpy as np
 from StringIO import StringIO 
-from SONATA.fileIO.readinput import read_rowstring, read_INTrowSTR, read_FLOATrowSTR, read_BOOLrowSTR, read_TXTrowSTR, read_LISTrowSTR
+from SONATA.cbm.fileIO.readinput import read_rowstring, read_INTrowSTR, read_FLOATrowSTR, read_BOOLrowSTR, read_TXTrowSTR, read_LISTrowSTR
 from SONATA.vabs.vabs_utils import transfer_matrix_unitconvertion
 
 def read_VABS_Results(filename):

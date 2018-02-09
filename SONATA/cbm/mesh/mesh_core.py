@@ -14,10 +14,10 @@ import matplotlib.pyplot as plt
 from OCC.gp import gp_Pnt2d
 from triangle import triangulate
 
-from SONATA.topo.BSplineLst_utils import get_BSplineLst_length
-from SONATA.mesh.mesh_utils import equidistant_nodes_on_BSplineLst                   
-from SONATA.mesh.node import Node
-from SONATA.mesh.cell import Cell
+from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length
+from SONATA.cbm.mesh.mesh_utils import equidistant_nodes_on_BSplineLst                   
+from SONATA.cbm.mesh.node import Node
+from SONATA.cbm.mesh.cell import Cell
 
 #===================FUNCTIONALITIES==========================================
 

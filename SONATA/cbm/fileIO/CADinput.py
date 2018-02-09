@@ -36,11 +36,11 @@ from OCC.TopoDS import topods
 from OCC.ShapeAnalysis import ShapeAnalysis_Wire, ShapeAnalysis_WireOrder
 from OCC.ShapeFix import ShapeFix_Wire
 
-from SONATA.topo.wire_utils import build_wire_from_BSplineLst,rotate_wire, translate_wire, NbEdges_in_wire, Unique_EdgeLst, Wire_Orientation,discretize_wire_TangentialDeflection
-from SONATA.topo.explorer import WireExplorer
-from SONATA.topo.utils import point2d_list_to_TColgp_HArray1OfPnt2d, Pnt2dLst_to_npArray, PolygonArea, unique_rows,Polygon_orientation
-from SONATA.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
-from SONATA.topo.BSplineLst_utils import get_BSpline_length, get_BSplineLst_length, \
+from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst,rotate_wire, translate_wire, NbEdges_in_wire, Unique_EdgeLst, Wire_Orientation,discretize_wire_TangentialDeflection
+from SONATA.cbm.topo.explorer import WireExplorer
+from SONATA.cbm.topo.utils import point2d_list_to_TColgp_HArray1OfPnt2d, Pnt2dLst_to_npArray, PolygonArea, unique_rows,Polygon_orientation
+from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
+from SONATA.cbm.topo.BSplineLst_utils import get_BSpline_length, get_BSplineLst_length, \
                             find_BSplineLst_coordinate, get_BSplineLst_Pnt2d, \
                             trim_BSplineLst, seg_boundary_from_dct, set_BSplineLst_to_Origin, \
                             copy_BSplineLst, trim_BSplineLst_by_Pnt2d, copy_BSpline, \

@@ -7,7 +7,7 @@ from OCC.TColStd import TColStd_Array1OfReal, TColStd_Array1OfInteger
 from OCC.Display.SimpleGui import init_display
 
 #Own Libraries:
-from SONATA.topo.utils import TColgp_Array1OfPnt2d_from_nparray, _Tcol_dim_1, TColgp_Array1OfPnt2d_to_array, TColStd_to_array
+from SONATA.cbm.topo.utils import TColgp_Array1OfPnt2d_from_nparray, _Tcol_dim_1, TColgp_Array1OfPnt2d_to_array, TColStd_to_array
 
 
 #==============================================================================
