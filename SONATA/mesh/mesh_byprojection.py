@@ -343,12 +343,31 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
             #===CORNERSTYLE 5====== 
             elif len(exterior_corners) > 2 and node.corner==True:
                 node.cornerstyle = 5
+                print 'cornerstyles > 4 have not been implemented yet.'
+                
+                display.DisplayShape(pPnts[0], color='BLUE')
+                display.DisplayShape(pPnts[1], color='RED')
                 #TODO: 
                   #for p in exterior_corners:
                         #display.DisplayShape(p,color='RED')
                 #b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))  
                 #b_nodes.append(Node(b_BSplineLst[pIdx[0]].EndPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].LastParameter()]))
                 #b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))    
+                
+            #===CORNERSTYLE 6====== 
+            elif len(exterior_corners) == 4 and node.corner==True:
+                node.cornerstyle = 6
+                #TODO: 
+                  #for p in exterior_corners:
+                        #display.DisplayShape(p,color='RED')
+                #b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))  
+                #b_nodes.append(Node(b_BSplineLst[pIdx[0]].EndPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].LastParameter()]))
+                #b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))    
+            
+            
+            
+            
+            
             
         else:
             print 'Projection Error, number of projection points: ', len(pPnts)
