@@ -1,4 +1,4 @@
-# SONATA: Multidiciplinary Rotor Blade Design Environment for **S**tructural **O**ptimization a**n**d **A**eroelas**t**ic **A**nalysis
+# SONATA: Multidiciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis
 
 <img src="docs/logo_wframe.png" align="left"  width="80"> The large number of constrains and design drivers from various disciplines makes the helicopter rotor blade development
 process difficult, time consuming and costly.
@@ -17,7 +17,7 @@ Classical 1D-beam elements are usually used to describe the rotor blade at an ea
 
 In the last 25 years, researches have stated the need for a design methodology and optimization framework that combines computational efficiency of a beam description in aeromechanic analysis with a rotor blade structural model that is able to describe realistic composite rotor blade cross-sections with respect to the structural properties, applied load, stress and strain distributions as well as design constraints [5–7]. SONATA provides such an optimization ennvironment.
 
-###Framework:
+### Framework:
 The framework to bundle the necessary tools for designing and analysing a helicopter rotorblade is written in [Python](https://www.python.org "Python"). 
 
 -  Python can be easy to pick up whether you're a first time programmer or you're experienced with other languages. 
@@ -26,7 +26,7 @@ The framework to bundle the necessary tools for designing and analysing a helico
 - [openMDAO](http://openmdao.org/) is an open-source high-performance computing platform for systems analysis and multidisciplinary optimization, written in Python.
 - [pythonocc](http://www.pythonocc.org/ "pythonocc") is a python library whose purpose is to provide 3D modeling features. It is intended to developers who aim at developing CAD/PDM/PLM applications.
 
-###Flowchart:
+### Flowchart:
 
 <img src="docs/flowchart.png" hspace="20" vspace="6" width="600">
 
