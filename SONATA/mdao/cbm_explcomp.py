@@ -110,16 +110,16 @@ class CBM_ExplComp(ExplicitComponent):
         print('%.2f, ' %inputs['Spar_layer_thickness'][0], end=' ') 
         print('%.2f, ' %inputs['Skin_layer_thickness'][0], end=' ')
         #print 'rho_1%.2f  ' %inputs['Core1_density'][0]
-                
         #SETUP A CBM JOB:
+        self.job = None
         self.job = CBM(self.config)
         self.connect_input_to_config(inputs)
-        
         with HiddenPrints():
             self.job.cbm_gen_topo()
             self.job.cbm_gen_mesh()
             self.job.cbm_run_vabs()
-        
+
+        self.connect_output_from_job(outputs)
         print(outputs['obj'])
         self.counter += 1
 

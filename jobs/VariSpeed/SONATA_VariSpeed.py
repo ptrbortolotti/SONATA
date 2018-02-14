@@ -46,7 +46,7 @@ dct_davis['cg'] = np.loadtxt(folder + 'cg.dat')
 #=============================================================================
 #%%      SONATA - CBM
 #==============================================================================
-filename = 'jobs/VariSpeed/02_advanced/sec_config.input'
+filename = 'jobs/VariSpeed/01_simple/sec_config.input'
 config = Configuration(filename)
 config.SETUP_radial_station = x
 flag_opt = True
@@ -97,7 +97,7 @@ if flag_opt:
     p.driver.options['bits'] = {'ivc.spar_lt' : 4}
     p.driver.options['bits'] = {'ivc.wp1' : 4}
     p.driver.options['bits'] = {'ivc.wp2' : 4}
-    p.driver.options['pop_size'] = 5
+    p.driver.options['pop_size'] = 2
     p.driver.options['max_gen'] = 5
 
 
