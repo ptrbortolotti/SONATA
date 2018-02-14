@@ -37,9 +37,8 @@ plt.close('all')
 #TODO: include optionflags and Vabs_setup in Configuration
 #TODO: include yaml style input files
 
-filename = 'sec_config.input'
+filename = 'jobs/VHeuschneider/R350/sec_config.input'
 config = Configuration(filename)
-print filename
 
 #config.SETUP_radial_station = 160
 #config.flag_mesh_core = True

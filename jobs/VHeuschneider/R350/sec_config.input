@@ -17,10 +17,10 @@
 &DEFN Setup
 	mat_filename = mat_database.input	#Path and filename of the Material Database
 	NbOfWebs = 0						#Number of Webs (0=CSpar, 1=Dspar,...)		[int]			DEFAULT=0
-	BalanceWeight = False 				#True or False for Balance Weight			[boolean]		DEFAULT=FALSE
+	BalanceWeight = True 				#True or False for Balance Weight			[boolean]		DEFAULT=FALSE
 	input_type = 3						#0) Airfoil from UIUC Database; 1) Geometry from .dat file; 2)2d .step or .iges 3)3D .step or .iges and radial station of crosssection 	4) generate 3D-Blade from twist,taper,airfoils,1/4-line			[int] DEFAULT=0	
-	datasource = jobs/VHeuschneider/blade_v01.stp					#0)	naca23012					1) AREA_R250.dat			2)AREA_R230.stp	 			3)AREA_Blatt_L.stp	 4)folder of data 						[string] DEFAULT=NONE
-	radial_station = 225				#Radial station of crosssection. Only necessary for input type 3. [float]	Default=NONE
+	datasource = jobs/VHeuschneider/02_CATIA/blade_v04.stp					#0)	naca23012					1) AREA_R250.dat			2)AREA_R230.stp	 			3)AREA_Blatt_L.stp	 4)folder of data 						[string] DEFAULT=NONE
+	radial_station = 350				#Radial station of crosssection. Only necessary for input type 3. [float]	Default=NONE
 	scale_factor = 1	 				#use as reference scale factor				[float] 		DEFAULT=1
 	Theta = 0							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
 	mesh_resolution = 240				#Scales approximately to the number of points on Segment0
@@ -48,10 +48,9 @@
 	CoreMaterial = 	3					#Material ID of core filling 				[int]
 	&DEFN Layup
 	#Start[-]	End[-]	thickness [mm]	Orientation [deg]	MatID	name	
-	0.0			1.0		0.24			45					1		#Skin_1	
- 	0.0			1.0		0.24			45					1		#Skin_2
-	0.0			1.0		0.24			45					1		#Skin_3	
- #	0.0			1.0		0.24			45					1		#Skin_4
+	0.0			1.0		0.25			45					1		#Skin_1	
+ 	0.0			1.0		0.25			45					1		#Skin_2
+	0.0			1.0		0.25			45					1		#Skin_3	
 	0.36		0.63	0.6				0					2		#Spar_1
 	0.43		0.55	0.6				0					2		#Spar_2
 	0.44		0.56	0.6				0					2		#Spar_3
@@ -101,7 +100,7 @@
 #=================================Balance Weight Definition=============
 
 &DEFN BalanceWeight
-	XPos = 3.5						#	X Position	[-]						[float]				NO DEFAULT VALUE						
+	XPos = -34.0						#	X Position	[-]						[float]				NO DEFAULT VALUE						
 	YPos = 0.0							#	Y Position	[-]						[float]				NO DEFAULT VALUE
 	Diameter = 5.0						#	Diameter of Balance Weight [mm]		[float]				NO DEFAULT VALUE
 	MatID = 6   						#   Material ID							[int]				NO DEFAULT VALUE
