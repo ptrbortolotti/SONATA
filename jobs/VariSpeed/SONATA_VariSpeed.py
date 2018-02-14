@@ -14,10 +14,10 @@ from openmdao.api import ScipyOptimizer, SimpleGADriver
 print(os.getcwd())
 os.chdir('C://TPflumm_local/work/SONATA')
 
-from SONATA.fileIO.configuration import Configuration
-from SONATA.fileIO.dymore_utils import read_dymore_beam_properties, interp1d_dymore_beam_properties
-from SONATA.fileIO.readinput import read_material_input
-from SONATA.cbm import CBM
+from SONATA.cbm.fileIO.configuration import Configuration
+from SONATA.cbm.fileIO.dymore_utils import read_dymore_beam_properties, interp1d_dymore_beam_properties
+from SONATA.cbm.fileIO.readinput import read_material_input
+from SONATA.cbm.sonata_cbm import CBM
 from SONATA.vabs.VABS_interface import VABS_config, export_cells_for_VABS, XSectionalProperties
 from SONATA.mdao.cbm_explcomp import CBM_ExplComp
 
@@ -26,7 +26,7 @@ from SONATA.mdao.cbm_explcomp import CBM_ExplComp
 #==============================================================================
 
 #READ DYMORE BEAM PROPERTIES:
-folder = 'C://TPflumm_local/work/SONATA/jobs/VariSpeed/uh60a_blade/'
+folder = 'jobs/VariSpeed/uh60a_blade/'
 filename = folder + 'dymore_uh60a_rotor_blade.dat'
 dct_dym = read_dymore_beam_properties(filename, x_offset = 0.81786984)
 x = 2500 
@@ -49,7 +49,7 @@ dct_davis['cg'] = np.loadtxt(folder + 'cg.dat')
 filename = 'jobs/VariSpeed/02_advanced/sec_config.input'
 config = Configuration(filename)
 config.SETUP_radial_station = x
-flag_opt = False
+flag_opt = True
 
 if flag_opt:   
     
@@ -93,12 +93,12 @@ if flag_opt:
 #    p.driver.opt_settings['rhobeg'] = 0.05 
     
     p.driver= SimpleGADriver()
-    p.driver.options['bits'] = {'ivc.skin_lt' : 8}
-    p.driver.options['bits'] = {'ivc.spar_lt' : 8}
-    p.driver.options['bits'] = {'ivc.wp1' : 8}
-    p.driver.options['bits'] = {'ivc.wp2' : 8}
-    p.driver.options['pop_size'] = 12
-    p.driver.options['max_gen'] = 10
+    p.driver.options['bits'] = {'ivc.skin_lt' : 4}
+    p.driver.options['bits'] = {'ivc.spar_lt' : 4}
+    p.driver.options['bits'] = {'ivc.wp1' : 4}
+    p.driver.options['bits'] = {'ivc.wp2' : 4}
+    p.driver.options['pop_size'] = 5
+    p.driver.options['max_gen'] = 5
 
 
     p.setup()

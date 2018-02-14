@@ -16,7 +16,7 @@ class CBM_ExplComp(ExplicitComponent):
     A simple CBM Component that computes the the composite beam properties.
     """
     def __init__(self, config):
-        super(CBM_ExplComp, self).__init__()
+        super().__init__()
         self.config = config
         self.ref_dct = {}
 
