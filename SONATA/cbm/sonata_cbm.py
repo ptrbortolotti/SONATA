@@ -196,7 +196,7 @@ class CBM(object):
             for layer in seg.LayerLst:
                 self.exportLst.append(layer.wire)            
             
-        print 'STATUS:\t Exporting Topology to: ', export_filename   
+        print('STATUS:\t Exporting Topology to: ', export_filename)   
         export_to_step(self.exportLst, export_filename)
         return None
     
@@ -207,7 +207,7 @@ class CBM(object):
         if output_filename is None:
             output_filename = self.config.filename
             output_filename = output_filename.replace('.input', '_mesh.pkl')
-            print 'STATUS:\t Saving Mesh to: ',output_filename
+            print('STATUS:\t Saving Mesh to: ',output_filename)
             
         with open(output_filename, 'wb') as output:
             pkl.dump(self.mesh, output, protocol=pkl.HIGHEST_PROTOCOL)
@@ -250,7 +250,7 @@ class CBM(object):
                     self.SegmentLst.append(Segment(item, Layup = self.config.SEG_Layup[i], CoreMaterial = self.config.SEG_CoreMaterial[i], Theta = self.blade.get_Theta(self.config.SETUP_radial_station), OCC=True, Boundary = BSplineLst))  
                     
                 else:
-                    print 'ERROR:\t WRONG input_type'
+                    print('ERROR:\t WRONG input_type')
          
             else:
                 if self.config.SETUP_input_type == 4:
@@ -278,7 +278,7 @@ class CBM(object):
         self.WebLst = []
         if self.config.SETUP_NbOfWebs > 0:
             for i in range(0,self.config.SETUP_NbOfWebs):
-                print 'STATUS:\t Building Web %s' %(i+1)
+                print('STATUS:\t Building Web %s' %(i+1))
                 self.WebLst.append(Web(self.config.WEB_ID[i],self.config.WEB_Pos1[i],self.config.WEB_Pos2[i],self.SegmentLst))
             sorted(self.SegmentLst, key=getID)  
             
@@ -295,7 +295,7 @@ class CBM(object):
         self.BW = None
         #Balance Weight:
         if self.config.SETUP_BalanceWeight == True:
-            print 'STATUS:\t Building Balance Weight'   
+            print('STATUS:\t Building Balance Weight')   
             self.BW = Weight(0,self.config.BW_XPos,self.config.BW_YPos,self.config.BW_Diameter,self.config.BW_MatID)
             
             
@@ -338,14 +338,14 @@ class CBM(object):
         #===================consolidate mesh on web interface         
         for web in self.WebLst:
             #print web.ID,  'Left:', SegmentLst[web.ID].ID, 'Right:', SegmentLst[web.ID+1].ID,
-            print 'STATUS:\t Consolidate Mesh on Web Interface ', web.ID  
+            print('STATUS:\t Consolidate Mesh on Web Interface ', web.ID)  
             web.wl_nodes = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID].cells, web.BSplineLst)
             web.wr_nodes = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID+1].cells, web.BSplineLst)
             self.mesh = consolidate_mesh_on_web(self.mesh,web.BSplineLst, web.wl_nodes, web.wr_nodes, web_consolidate_tol,self.display)
             
         #============= BALANCE WEIGHT - CUTTING HOLE ALGORITHM
         if self.config.SETUP_BalanceWeight == True:
-            print 'STATUS:\t Meshing Balance Weight'   
+            print('STATUS:\t Meshing Balance Weight')   
             
             self.mesh, boundary_nodes = map_mesh_by_intersect_curve2d(self.mesh,self.BW.Curve,self.BW.wire)
             [bw_cells,bw_nodes] = gen_core_cells(boundary_nodes, bw_cell_area)
@@ -364,14 +364,14 @@ class CBM(object):
 
     def cbm_review_mesh(self):
         '''prints a summary of the mesh properties to the screen '''
-        print 'STATUS:\t Review Mesh:'
-        print '\t   - Total Number of Cells: %s' %(len(self.mesh))
-        print '\t   - Duration: %s' % (datetime.now() - self.startTime)
+        print('STATUS:\t Review Mesh:')
+        print('\t   - Total Number of Cells: %s' %(len(self.mesh)))
+        print('\t   - Duration: %s' % (datetime.now() - self.startTime))
         #print '\t   - Saved as: %s' % filename 
         minarea = min([c.area for c in self.mesh])
-        print '\t   - smallest cell area: %s' % minarea 
+        print('\t   - smallest cell area: %s' % minarea) 
         minimum_angle = min([c.minimum_angle for c in self.mesh])
-        print '\t   - smallest angle [deg]: %s' % minimum_angle 
+        print('\t   - smallest angle [deg]: %s' % minimum_angle) 
         #orientation = all([c.orientation for c in mesh])
         #print '\t   - Orientation [CC]: %s' % orientation 
         return None
@@ -386,7 +386,7 @@ class CBM(object):
         self.mesh,nodes = sort_and_reassignID(self.mesh)
         #TODO: BE CAREFUL TO USE THE RIGHT COORDINATE SYSTEM FOR THE CALCULATIONS!!!!  
         vabs_filename = self.config.filename.replace('.input', '.vab')
-        print 'STATUS:\t RUNNING VABS for Constitutive modeling:'
+        print('STATUS:\t RUNNING VABS for Constitutive modeling:')
         #EXECUTE VABS:
         if self.config.VABS.recover_flag == 1:
             self.config.VABS.recover_flag=0
@@ -395,7 +395,7 @@ class CBM(object):
             stdout = subprocess.check_output(command, shell=True)
             self.config.VABS.recover_flag=1
             export_cells_for_VABS(self.mesh,nodes,vabs_filename,self.config.VABS,self.MaterialLst)
-            print 'STATUS:\t RUNNING VABS for 3D Recovery:'
+            print('STATUS:\t RUNNING VABS for 3D Recovery:')
             command = 'VABSIII.exe '+ vabs_filename
             stdout = stdout + subprocess.check_output(command, shell=True)
             
@@ -403,12 +403,13 @@ class CBM(object):
             export_cells_for_VABS(self.mesh,nodes,vabs_filename,self.config.VABS,self.MaterialLst)
             command = 'VABSIII.exe '+ vabs_filename
             stdout = subprocess.check_output(command, shell=True)
-        
+            
+        stdout = stdout.decode('utf-8')
         stdout = stdout.replace('\r\n\r\n','\n\t   -')
         stdout = stdout.replace('\r\n','\n\t   -')
         stdout = 'STATUS:\t VABS CALCULATIONS COMPLETED: \n\t   -' + stdout
-        print stdout 
-        print 'STATUS:\t Total Elapsed Time: %s' % (datetime.now() - self.startTime)
+        print(stdout) 
+        print('STATUS:\t Total Elapsed Time: %s' % (datetime.now() - self.startTime))
         
         #VABS Postprocessing:
         self.BeamProperties = XSectionalProperties(vabs_filename+'.K')

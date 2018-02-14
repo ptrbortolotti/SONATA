@@ -85,7 +85,7 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
                                 vnP = gp_Vec2d(n.Pnt2d,P)
 
                                 if  len(pPnts)>2:
-                                    print 'vnP.Dot(v01): ', vnP.Dot(v01)
+                                    print('vnP.Dot(v01): ', vnP.Dot(v01))
                                     
                                     
                                 if vnP.Dot(v01)>0 and trigger_f :
@@ -97,8 +97,8 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
                                     BackNodes.append(Node(P,[LayerID, pIdx[i],pPara[i]]))
                                 
                                 else:
-                                    print 'ERROR: cannot determine FRONT and BACK nodes @ ',c.nodes[0], 'because vnp and v01 are orthogonal'
-                                    print pPara
+                                    print('ERROR: cannot determine FRONT and BACK nodes @ ',c.nodes[0], 'because vnp and v01 are orthogonal')
+                                    print(pPara)
 #                            if c.nodes[1].Pnt2d.Distance(P)<c.nodes[3].Pnt2d.Distance(P):
 #                                FrontNodes.append(Node(P,['',pIdx[i],pPara[i]]))
 #                            else: 
@@ -332,7 +332,7 @@ def integrate_leftover_interior_nodes(a_nodes, a_BSplineLst, b_nodes, b_BSplineL
         if len(p2) > 0:
             for c in cells:
                 if c.cell_node_distance(new_b_node) < (1+celTol)*thickness:
-                    print len(leftover_exterior_corners)
+                    print(len(leftover_exterior_corners))
                     display.DisplayShape(p2[0], color='YELLOW')
                     display.DisplayShape(c.wire, color='ORANGE')
                     

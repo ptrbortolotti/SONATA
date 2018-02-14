@@ -50,7 +50,7 @@ def export_to_PDF(display,event=None):
     while os.path.exists('img/capture_pdf%s.pdf' % i):
         i += 1
     f.Export('img/capture_pdf%s.pdf' % i, Graphic3d_EF_PDF)
-    print "EXPORT: \t Screencapture exported to img/capture_pdf%s.pdf" % i
+    print("EXPORT: \t Screencapture exported to img/capture_pdf%s.pdf" % i)
     display.set_bg_gradient_color(20,6,111,200,200,200)
     
 def export_to_SVG(display,event=None):
@@ -60,7 +60,7 @@ def export_to_SVG(display,event=None):
     while os.path.exists('img/capture_svg%s.svg' % i):
         i += 1
     f.Export('img/capture_svg_%s.svg' % i, Graphic3d_EF_SVG)
-    print "EXPORT: \t Screencapture exported to img/capture_svg%s.svg" % i
+    print("EXPORT: \t Screencapture exported to img/capture_svg%s.svg" % i)
     display.set_bg_gradient_color(20,6,111,200,200,200)
     
 def export_to_PS(display,event=None):
@@ -70,7 +70,7 @@ def export_to_PS(display,event=None):
     while os.path.exists('img/capture_ps%s.ps' % i):
         i += 1
     f.Export('img/capture_ps%s.ps' % i, Graphic3d_EF_PostScript)
-    print "EXPORT: \t Screencapture exported to img/capture_ps%s.ps" % i
+    print("EXPORT: \t Screencapture exported to img/capture_ps%s.ps" % i)
     display.set_bg_gradient_color(20,6,111,200,200,200)
 
 def export_to_EnhPS(display,event=None):
@@ -80,7 +80,7 @@ def export_to_EnhPS(display,event=None):
     while os.path.exists('img/capture_Enh_ps%s.ps' % i):
         i += 1
     f.Export('img/capture_Enh_ps%s.ps' % i, Graphic3d_EF_EnhPostScript)
-    print "EXPORT: \t Screencapture exported to img/capture_Enh_ps%s.ps" % i
+    print("EXPORT: \t Screencapture exported to img/capture_Enh_ps%s.ps" % i)
     display.set_bg_gradient_color(20,6,111,200,200,200)
     
 def export_to_TEX(display,event=None):
@@ -90,7 +90,7 @@ def export_to_TEX(display,event=None):
     while os.path.exists('img/capture_tex%s.tex' % i):
         i += 1
     f.Export('img/capture_tex%s.tex' % i, Graphic3d_EF_TEX)
-    print "EXPORT: \t Screencapture exported to img/capture_tex%s.tex" % i
+    print("EXPORT: \t Screencapture exported to img/capture_tex%s.tex" % i)
     display.set_bg_gradient_color(20,6,111,200,200,200)
     
 def export_to_BMP(display,event=None):
@@ -99,7 +99,7 @@ def export_to_BMP(display,event=None):
     while os.path.exists('img/capture_bmp%s.bmp' % i):
         i += 1
     display.View.Dump('img/capture_bmp%s.bmp' % i)
-    print "EXPORT: \t Screencapture exported to img/capture_bmp%s.bmp" % i
+    print("EXPORT: \t Screencapture exported to img/capture_bmp%s.bmp" % i)
     display.set_bg_gradient_color(20,6,111,200,200,200)
 
 def export_to_PNG(display,event=None):
@@ -108,7 +108,7 @@ def export_to_PNG(display,event=None):
     while os.path.exists('img/capture_png%s.png' % i):
         i += 1
     display.View.Dump('img/capture_png%s.png' % i)
-    print "EXPORT: \t Screencapture exported to img/capture_png%s.bmp" % i
+    print("EXPORT: \t Screencapture exported to img/capture_png%s.bmp" % i)
     display.set_bg_gradient_color(20,6,111,200,200,200)
 
 def export_to_JPEG(display,event=None):
@@ -117,7 +117,7 @@ def export_to_JPEG(display,event=None):
     while os.path.exists('img/capture_jpeg%s.jpeg' % i):
         i += 1
     display.View.Dump('img/capture_jpeg%s.jpeg' % i)
-    print "EXPORT: \t Screencapture exported to img/capture_jpeg%s.jpeg" % i
+    print("EXPORT: \t Screencapture exported to img/capture_jpeg%s.jpeg" % i)
     display.set_bg_gradient_color(20,6,111,200,200,200)
 
 def export_to_TIFF(display,event=None):
@@ -126,13 +126,13 @@ def export_to_TIFF(display,event=None):
     while os.path.exists('img/capture_tiff%s.tiff' % i):
         i += 1
     display.View.Dump('img/capture_tiff%s.tiff' % i)
-    print "EXPORT: \t Screencapture exported to img/capture_tiff%s.tiff" % i
+    print("EXPORT: \t Screencapture exported to img/capture_tiff%s.tiff" % i)
     display.set_bg_gradient_color(20,6,111,200,200,200)
 
 
 def print_xy_click(SHP, *kwargs):
     for shape in SHP:
-        print("Shape selected: ", shape)
+        print(("Shape selected: ", shape))
     print(kwargs)
 
 def exit():

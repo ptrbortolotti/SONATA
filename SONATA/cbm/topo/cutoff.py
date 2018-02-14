@@ -117,4 +117,4 @@ def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
     return OffsetBSplineLst
 
 if __name__ == '__main__':
-    execfile("SONATA.py")
+    exec(compile(open("SONATA.py").read(), "SONATA.py", 'exec'))

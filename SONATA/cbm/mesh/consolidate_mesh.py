@@ -59,8 +59,8 @@ def consolidate_mesh_on_web(mesh,w_BSplineLst,w1_nodes,w2_nodes,w_tol,display):
     #MERGE Nodes according to NodeMatching(NM) Matrix:
     for match in NM:
         #print int(match[1]),int(match[2])
-        n1 = filter(lambda x: x.id == match[1], w1_nodes)[0]
-        n2 = filter(lambda x: x.id == match[2], w2_nodes)[0]
+        n1 = [x for x in w1_nodes if x.id == match[1]][0]
+        n2 = [x for x in w2_nodes if x.id == match[2]][0]
         #move the first node to the middle!
         n1.Pnt2d
         v = gp_Vec2d(n1.Pnt2d, n2.Pnt2d)

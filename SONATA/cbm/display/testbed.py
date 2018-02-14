@@ -61,9 +61,9 @@ display.DisplayShape(BSpline,color='BLACK')
 display.DisplayShape(BSpline.StartPoint(),color='ORANGE')
 BSpline2 = Geom2dAPI_Interpolate(point2d_list_to_TColgp_Array1OfPnt2d(Pnt2d_Lst)).Curve().GetObject()   
 
-print BSpline.StartPoint().X(), BSpline.StartPoint().Y()
-print BSpline.EndPoint().X(), BSpline.EndPoint().Y()
-print BSpline.IsClosed()
+print(BSpline.StartPoint().X(), BSpline.StartPoint().Y())
+print(BSpline.EndPoint().X(), BSpline.EndPoint().Y())
+print(BSpline.IsClosed())
 
 
 
@@ -78,10 +78,10 @@ projection = GeomAPI_ProjectPointOnCurve(point_to_project,circle.GetHandle())
 projected_point = projection.NearestPoint()
 # the number of possible results
 nb_results = projection.NbPoints()
-print("NbResults : %i" % nb_results)
+print(("NbResults : %i" % nb_results))
 
 pstring = "N : at Distance : %f" % projection.LowerDistance()
-print pstring
+print(pstring)
 #display.DisplayMessage(projected_point, pstring)
 
 # thre maybe many different possible solutions
@@ -90,7 +90,7 @@ if nb_results > 0:
         Q = projection.Point(i)
         distance = projection.Distance(i)
         pstring = "Q%i: at Distance :%f" % (i, distance)
-        print pstring
+        print(pstring)
         display.DisplayShape(Q,color='Blue')
         #display.DisplayMessage(Q, pstring)
 

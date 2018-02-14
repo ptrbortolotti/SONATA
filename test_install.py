@@ -27,9 +27,9 @@ def plot_line(ax, ob):
 
 def set_limits(ax, x_range, y_range):
     ax.set_xlim(*x_range)
-    ax.set_xticks(range(*x_range) + [x_range[-1]])
+    ax.set_xticks(list(range(*x_range)) + [x_range[-1]])
     ax.set_ylim(*y_range)
-    ax.set_yticks(range(*y_range) + [y_range[-1]])
+    ax.set_yticks(list(range(*y_range)) + [y_range[-1]])
     ax.set_aspect(1)
 
 line = LineString([(0, 0), (1, 1), (0, 2), (2, 2), (3, 1), (1, 0)])

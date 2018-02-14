@@ -99,7 +99,7 @@ class Configuration(object):
         #======================================================================
         #CHECK and READ WEB DEFINITION!
         if self.SETUP_NbOfWebs != STR.count('&DEFN Web'):
-            print 'WARNING: \t Setup variable "NbOfWebs" is not equal to the number of web definitions'
+            print('WARNING: \t Setup variable "NbOfWebs" is not equal to the number of web definitions')
             
         if self.SETUP_NbOfWebs > 0:
             #READ Balance Weight Definition
@@ -118,7 +118,7 @@ class Configuration(object):
                 #WEB_str,WEB_start,WEB_end = read_segment(STR,'Web')      
                 
         if not allunique(self.WEB_ID):
-            print 'WARNING: \t WEB IDs are not unique!'
+            print('WARNING: \t WEB IDs are not unique!')
   
   
         #======================================================================
@@ -141,10 +141,10 @@ class Configuration(object):
         
         #CHECK FOR SOME INPUT MISTAKES:
         if not allunique(self.SEG_ID):
-            print 'WARNING: \t SEG IDs are not unique'        
+            print('WARNING: \t SEG IDs are not unique')        
         
         if not(self.SETUP_NbOfWebs == 0 and len(self.SEG_ID) == 1) and (not(self.SETUP_NbOfWebs+2 == len(self.SEG_ID))):   
-            print 'WARNING: \t The number of segments does not corresponds to the number of Webs'
+            print('WARNING: \t The number of segments does not corresponds to the number of Webs')
 
 
 

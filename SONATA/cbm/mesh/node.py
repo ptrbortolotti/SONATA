@@ -35,7 +35,7 @@ class Node(object):
             return find_BSplineLst_pos(b_BSplineLst,para)
         
         except:
-            print 'Node',self.id,'not on b_BSplineLst'
+            print('Node',self.id,'not on b_BSplineLst')
             return None
     
     def __repr__(self): 
@@ -44,6 +44,12 @@ class Node(object):
     def __eq__(self,other):
         #return self.Pnt2d.IsEqual(other.Pnt2d,1e-6)    #slow but robust
         return self.id == other.id    #faster, but be careful not to assign the id's otherwise in the code
+    
+    def __hash__(self):
+        '''if you define __eq__, the default __hash__ (namely, hashing the address 
+        of the object in memory) goes away. This is important because hashing 
+        needs to be consistent with equality: equal objects need to hash the same.'''
+        return id(self)    #faster, but be careful not to assign the id's otherwise in the code
     
     def __getstate__(self):
         """Return state values to be pickled."""

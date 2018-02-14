@@ -38,6 +38,6 @@ if __name__ == '__main__':
     
     #for section in cfg:
         #print(section)
-    print(cfg['Setup'])
+    print((cfg['Setup']))
     #print(cfg['Web'])
     #print(cfg['Seg_1'])

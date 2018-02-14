@@ -128,7 +128,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
             
         #==================DETECT CORNERS====================================== 
         if len(pPnts) == 0: 
-            print 'ERROR:\t No Projection found for node,', node.id
+            print('ERROR:\t No Projection found for node,', node.id)
         elif len(pPnts) == 1: 
             b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))      
 
@@ -164,7 +164,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                 node.regular_corner = True
             
             else:
-                print 'ERROR: cannot determine regular_corner because vres and v0 are orthogonal'
+                print('ERROR: cannot determine regular_corner because vres and v0 are orthogonal')
             
             #=======================determine the exterior corners on z_BsplineLst
             #TODO: DETECT ALL EXTERIOR CORNERS WITHIN THAT INTERVAL pIdx[0],pPara[0],'|',pIdx[1], pPara[1]
@@ -229,14 +229,14 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     b_nodes.append(Node(newPnt,[LayerID,pIdx[0],newPara]))
                     
                 elif node.regular_corner == False:
-                    print 'WARNING: cornerstyle 0: this possibility has not been implemented yet.'
+                    print('WARNING: cornerstyle 0: this possibility has not been implemented yet.')
                     b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
                 
                 else:
                     if pPnts[0].IsEqual(pPnts[1],1e-4):
                         b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
                     else:
-                        print 'ERROR: cornerstyle 0: this possibility has not been implemented yet. pIdx[0] != pIdx[0]. Create Bisector and intersect with bsplinelist!'                     
+                        print('ERROR: cornerstyle 0: this possibility has not been implemented yet. pIdx[0] != pIdx[0]. Create Bisector and intersect with bsplinelist!')                     
                     
             #===CORNERSTYLE 1======     
             elif len(exterior_corners) == 1 and node.corner==False:
@@ -343,7 +343,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
             #===CORNERSTYLE 5====== 
             elif len(exterior_corners) > 2 and node.corner==True:
                 node.cornerstyle = 5
-                print 'cornerstyles > 4 have not been implemented yet.'
+                print('cornerstyles > 4 have not been implemented yet.')
                 
 #                display.DisplayShape(pPnts[0], color='BLUE')
 #                display.DisplayShape(pPnts[1], color='RED')
@@ -370,7 +370,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
             
             
         else:
-            print 'Projection Error, number of projection points: ', len(pPnts)
+            print('Projection Error, number of projection points: ', len(pPnts))
     
 
 
@@ -464,7 +464,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     cellLst.append(Cell([a_nodes[a-1],b_nodes[b-1],b_nodes[b],a_nodes[a]]))
 
         except (IndexError):
-             print 'ERROR:\t IndexError: list index out of range', a_nodes[a]
+             print('ERROR:\t IndexError: list index out of range', a_nodes[a])
              pass
          
         b += 1

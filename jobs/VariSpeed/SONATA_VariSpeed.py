@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.transforms import BlendedGenericTransform
 from openmdao.api import Problem, ScipyOptimizer, IndepVarComp 
 from openmdao.api import ScipyOptimizer, SimpleGADriver
-print os.getcwd()
+print(os.getcwd())
 os.chdir('C://TPflumm_local/work/SONATA')
 
 from SONATA.fileIO.configuration import Configuration

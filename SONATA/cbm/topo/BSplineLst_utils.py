@@ -566,7 +566,7 @@ def trim_BSplineLst_by_Pnt2d(BSplineLst,Pos1_Pnt2d,Pos2_Pnt2d):
 def seg_boundary_from_dct(DCT_data,angular_deflection = 30):
     #Check if DCT_Definition is closed, if not: close it
     if not np.array_equal(DCT_data[0],DCT_data[-1]):
-        print 'INFO:\t Closing open discrete boundary definition'
+        print('INFO:\t Closing open discrete boundary definition')
         DCT_data = np.concatenate((DCT_data,DCT_data[0:1,:]),axis=0)
         
     #Find corners and edges of data

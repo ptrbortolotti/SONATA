@@ -198,7 +198,7 @@ class Segment(object):
         
         if self.Layup.size != 0:
             for i in range(1,len(self.Layup)+1):
-                print "STATUS:\t Building Segment %d, Layer: %d" % (self.ID,i)
+                print("STATUS:\t Building Segment %d, Layer: %d" % (self.ID,i))
     
                 begin = float(self.Layup[i-1][0])
                 end = float(self.Layup[i-1][1])
@@ -271,7 +271,7 @@ class Segment(object):
                 self.inv_cumivLst = ivCollector                
     
             for i,layer in enumerate(reversed(self.LayerLst)):
-                print 'STATUS:\t Meshing Segment %s, Layer %s' %(self.ID,len(self.LayerLst)-i)  
+                print('STATUS:\t Meshing Segment %s, Layer %s' %(self.ID,len(self.LayerLst)-i))  
     
                 layer.inverse_ivLst = chop_interval_from_layup(self.inv_cumivLst,layer.S1,layer.S2)
                 layer.inverse_ivLst =  sort_layup_projection([layer.inverse_ivLst])[0]
@@ -293,7 +293,7 @@ class Segment(object):
             pass
         
         else:
-            print 'STATUS:\t Meshing Segment %s, Core' %(self.ID)
+            print('STATUS:\t Meshing Segment %s, Core' %(self.ID))
             #print self.final_Boundary_ivLst
             core_a_nodes = []
             for iv in self.final_Boundary_ivLst:
@@ -313,7 +313,7 @@ class Segment(object):
                     
                     
                     if disco_nodes == []:
-                        print 'ERROR:\t No nodes are found on the web interface',web.ID
+                        print('ERROR:\t No nodes are found on the web interface',web.ID)
                     else: 
                         core_a_nodes.extend(disco_nodes[1:-1])
 
@@ -333,7 +333,7 @@ class Segment(object):
                 c.MatID = int(self.CoreMaterial)
                 c.calc_theta_1()
                 if c.area<1e-7:
-                    print c.nodes
+                    print(c.nodes)
                     display.DisplayShape(c.nodes[0].Pnt2d)
                     display.DisplayShape(c.nodes[1].Pnt2d, color='RED')
                     display.DisplayShape(c.nodes[2].Pnt2d, color='GREEN')
@@ -399,7 +399,7 @@ class Segment(object):
             
 
     def build_segment_boundary_from_WebLst(self,WebLst,Segment0):
-        print 'STATUS:\t Building Segment Boundaries %s' %(self.ID)
+        print('STATUS:\t Building Segment Boundaries %s' %(self.ID))
         i = self.ID - 1    
                     
         if self.ID == 0:

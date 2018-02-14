@@ -7,7 +7,7 @@ Created on Tue Jan 02 10:52:53 2018
 
 def get_layer(lid,SegmentLst):
     if lid<0:
-        print 'ERROR:\t lid<0 -> refering to a web and not a layer or a segment' 
+        print('ERROR:\t lid<0 -> refering to a web and not a layer or a segment') 
         return None
     
     else:
@@ -21,13 +21,13 @@ def get_layer(lid,SegmentLst):
                 x = None
         
         if x == None:
-            print 'ERROR:\t the lid:',lid,' was not found'
+            print('ERROR:\t the lid:',lid,' was not found')
         
         return x
     
 def get_web(lid,WebLst):
     if lid>0:
-        print 'ERROR:\t lid>0 -> refering to a layer and not a web' 
+        print('ERROR:\t lid>0 -> refering to a layer and not a web') 
         return None
     
     else:
@@ -38,7 +38,7 @@ def get_web(lid,WebLst):
 def get_segment(lid,SegmentLst):
 
     if lid<0:
-        print 'ERROR:\t lid<0 -> refering to a web and not a layer or a segment' 
+        print('ERROR:\t lid<0 -> refering to a web and not a layer or a segment') 
         return None
     
     else:

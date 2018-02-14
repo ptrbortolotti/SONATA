@@ -10,7 +10,7 @@
 #==============================================================================
 import numpy as np 
 import ast
-import urllib2  
+from urllib.request import urlopen
 
 
 def read_segment(STR,seg2find):
@@ -129,29 +129,31 @@ def read_layup(STR):
 
 def UIUCAirfoil(name):
     foil_dat_url = 'http://m-selig.ae.illinois.edu/ads/coord_seligFmt/%s.dat' % name
-    f = urllib2.urlopen(foil_dat_url)
-    temp_x = []
-    temp_y = []
-    temp_z = []
-    for line in f.readlines()[1:]:                                                                  # The first line contains info only
-        line = line.lstrip().rstrip().replace('    ', ' ').replace('   ', ' ').replace('  ', ' ')   # do some cleanup on the data (mostly dealing with spaces)
-        data = line.split(' ')   
-        temp_y.append(float(data[0]))                                                               # data[0] = x coord.
-        temp_z.append(float(data[1]))                                                               # data[1] = y coord.
-        temp_x.append(float(0))                                                                     # data[2] = z coord 
+    with urlopen(foil_dat_url) as f:
+        temp_x = []
+        temp_y = []
+        temp_z = []
+        for line in f.readlines()[1:]:      
+            line = line.decode('utf-8')                                                            # The first line contains info only
+            line = line.lstrip().rstrip().replace('    ', ' ').replace('   ', ' ').replace('  ', ' ')   # do some cleanup on the data (mostly dealing with spaces)
+            data = line.split(' ')   
+            temp_y.append(float(data[0]))                                                               # data[0] = x coord.
+            temp_z.append(float(data[1]))                                                               # data[1] = y coord.
+            temp_x.append(float(0))                                                                     # data[2] = z coord 
     return np.array([temp_x,temp_y,temp_z])                                                         # return AirfoilCoordinate as np.arrray
 
 
 def UIUCAirfoil2d(name):
     foil_dat_url = 'http://m-selig.ae.illinois.edu/ads/coord_seligFmt/%s.dat' % name
-    f = urllib2.urlopen(foil_dat_url)
-    temp_x = []
-    temp_y = []
-    for line in f.readlines()[1:]:                                                                  # The first line contains info only
-        line = line.lstrip().rstrip().replace('    ', ' ').replace('   ', ' ').replace('  ', ' ')   # do some cleanup on the data (mostly dealing with spaces)
-        data = line.split(' ')   
-        temp_x.append(float(data[0]))                                                               # data[0] = x coord.
-        temp_y.append(float(data[1]))                                                               # data[1] = y coord.
+    with urlopen(foil_dat_url) as f:
+        temp_x = []
+        temp_y = []
+        for line in f.readlines()[1:]:                                                                  # The first line contains info only
+            line = line.decode('utf-8')            
+            line = line.lstrip().rstrip().replace('    ', ' ').replace('   ', ' ').replace('  ', ' ')   # do some cleanup on the data (mostly dealing with spaces)
+            data = line.split(' ')   
+            temp_x.append(float(data[0]))                                                               # data[0] = x coord.
+            temp_y.append(float(data[1]))                                                               # data[1] = y coord.
     return np.array([temp_x,temp_y])    
 
 
@@ -161,7 +163,8 @@ def AirfoilDat(name):
     temp_x = []
     temp_y = []
     temp_z = []
-    for line in f.readlines()[1:]:                                                                  # The first line contains info only
+    for line in f.readlines()[1:]:    
+        line = line.decode('utf-8')                                                                # The first line contains info only
         line = line.lstrip().rstrip().replace('    ', ' ').replace('   ', ' ').replace('  ', ' ')   # do some cleanup on the data (mostly dealing with spaces)
         data = line.split(' ')   
         temp_y.append(float(data[0]))                                                               # data[0] = x coord.

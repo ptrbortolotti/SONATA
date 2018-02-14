@@ -102,13 +102,13 @@ class CBM_ExplComp(ExplicitComponent):
         m, s = divmod(elapsed_t.seconds, 60)
         h, m = divmod(m, 60)
         if self.counter == 0:
-            print '--time----wp1---wp2---spar_lt-skin_lt--obj---------------------------------'
-        print  self.counter,
-        print '%02d:%02d:%02d ' % (h,m,s),
-        print '%.2f, ' %inputs['WEB_Pos1'][0], 
-        print '%.2f, ' %inputs['WEB_Pos2'][0], 
-        print '%.2f, ' %inputs['Spar_layer_thickness'][0], 
-        print '%.2f, ' %inputs['Skin_layer_thickness'][0],
+            print('--time----wp1---wp2---spar_lt-skin_lt--obj---------------------------------')
+        print(self.counter, end=' ')
+        print('%02d:%02d:%02d ' % (h,m,s), end=' ')
+        print('%.2f, ' %inputs['WEB_Pos1'][0], end=' ') 
+        print('%.2f, ' %inputs['WEB_Pos2'][0], end=' ') 
+        print('%.2f, ' %inputs['Spar_layer_thickness'][0], end=' ') 
+        print('%.2f, ' %inputs['Skin_layer_thickness'][0], end=' ')
         #print 'rho_1%.2f  ' %inputs['Core1_density'][0]
                 
         #SETUP A CBM JOB:
@@ -120,7 +120,7 @@ class CBM_ExplComp(ExplicitComponent):
             self.job.cbm_gen_mesh()
             self.job.cbm_run_vabs()
         
-        print outputs['obj']
+        print(outputs['obj'])
         self.counter += 1
 
     def post_cbm(self):

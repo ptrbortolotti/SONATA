@@ -7,7 +7,7 @@ Created on Mon Nov 21 15:37:44 2016
 import numpy as np       
 import shapely.geometry as shp
 import matplotlib.pyplot as plt
-from utils import calc_DCT_angles, P2Pdistance, isclose,unique_rows,Polygon_orientation
+from .utils import calc_DCT_angles, P2Pdistance, isclose,unique_rows,Polygon_orientation
 
 
 def shp_parallel_offset(arrPts,dist,join_style=1):
@@ -39,7 +39,7 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
                     data = np.vstack((x,y))
                     data = data.T
                 else:
-                    print "ERROR: \t A multilinestring has been created by shp_parallel_offset that is not closed!"
+                    print("ERROR: \t A multilinestring has been created by shp_parallel_offset that is not closed!")
                     
         elif isinstance(offset,shp.LineString):                 
             data = np.array(offset.coords)
@@ -140,7 +140,7 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
 
 #==============================================================================       
 if __name__ == '__main__': 
-    execfile("SONATA.py")
+    exec(compile(open("SONATA.py").read(), "SONATA.py", 'exec'))
 #    for i,item in enumerate(projection):
 #        timelines(0,item[0],item[1],color[int(item[2])])
                

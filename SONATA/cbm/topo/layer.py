@@ -128,7 +128,7 @@ class Layer(object):
                 #print 'Coordinate',S,'is on layer',int(iv[2])
                 break
         
-        print iv[2]
+        print(iv[2])
         tmp_layer = next((x for x in LayerLst if x.ID == int(iv[2])), None)
         if not tmp_layer == None: 
             Pnt2d = get_BSplineLst_Pnt2d(tmp_layer.a_BSplineLst,S,tmp_layer.S1,tmp_layer.S2)

@@ -37,7 +37,7 @@ from openmdao.api import Problem, ScipyOptimizer, IndepVarComp, ExplicitComponen
 
 
 def f(tpl):
-    print tpl
+    print(tpl)
     (radial_station, src, cnt) = tpl
     dst = src[:-6]+str(cnt)+src[-6:]
     copyfile(src, dst)
@@ -94,7 +94,7 @@ def f(tpl):
     #p.driver.options['optimizer'] = 'COBYLA'
     p.setup()
     p.run_driver()
-    print p['cbm_comp.obj1'], (p['ivc.wp1'], p['ivc.wp2'], p['ivc.spar_lt'], p['ivc.skin_lt'])
+    print(p['cbm_comp.obj1'], (p['ivc.wp1'], p['ivc.wp2'], p['ivc.spar_lt'], p['ivc.skin_lt']))
     return p.model.cbm_comp.job
     
 if __name__ == '__main__':

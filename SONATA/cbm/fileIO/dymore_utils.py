@@ -39,7 +39,7 @@ def read_dymore_beam_properties(filename, x_offset = 0.81786984):
         regex = k+'(.+?)\}+?'
         tmp_lst = re.findall(regex, STR)
         tmp_lst = [s.split(',') for s in tmp_lst]
-        tmp_lst = [map(float,s) for s in tmp_lst]
+        tmp_lst = [list(map(float,s)) for s in tmp_lst]
         arr = np.asarray(tmp_lst)
         dct[k[1:-1].strip().lower()] = arr
     
