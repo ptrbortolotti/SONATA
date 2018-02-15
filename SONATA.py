@@ -37,10 +37,9 @@ plt.close('all')
 #TODO: include optionflags and Vabs_setup in Configuration
 #TODO: include yaml style input files
 
-filename = 'sec_config.input'
+filename = 'jobs/EPiet/sonata/AREA_R1600/sec_config.input'
 config = Configuration(filename)
 
-#config.SETUP_radial_station = 160
 #config.flag_mesh_core = True
 #config.VABS.recover_flag = 1
 #config.VABS.M = [0,2000e3,0]
@@ -51,9 +50,10 @@ job.cbm_gen_topo()
 job.cbm_gen_mesh()
 job.cbm_review_mesh()
 job.cbm_run_vabs()
-job.cbm_save()
+#job.cbm_save()
 #job.cbm_load()
 job.cbm_post_2dmesh()
-job.cbm_post_3dtopo()
+#job.cbm_post_3dtopo()
 
-#test = job.cbm_set_DymoreMK(x_offset = 0.81786984)
+test1 = job.cbm_set_DymoreMK(x_offset = 0.81786984)
+test1 = job.cbm_set_DymoreMK(x_offset = 0.81786984)

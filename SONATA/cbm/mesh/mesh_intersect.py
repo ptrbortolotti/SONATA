@@ -15,12 +15,12 @@ from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge,BRepBuilderAPI_MakeWire
 from OCC.GCPnts import GCPnts_QuasiUniformAbscissa
 from OCC.Geom import Geom_Plane
 from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
-from OCC.gp import gp_Pnt2d,gp_Lin2d, gp_Dir2d,gp_Dir,gp_Pnt,gp_Pln,gp_Vec
+from OCC.gp import gp_Pnt2d,gp_Lin2d, gp_Dir2d,gp_Dir,gp_Pnt,gp_Pln,gp_Vec, gp_Vec2d
 from OCC.Geom2d import Geom2d_Line
 from OCC.Geom2dAPI import Geom2dAPI_InterCurveCurve
 
 from SONATA.cbm.topo.BSplineLst_utils import findPnt_on_2dcurve
-
+from SONATA.cbm.mesh.mesh_utils import remove_duplicates_from_list_preserving_order
 
 def map_node_on_curve(node,Curve2d,theta_11,distance=1e5,**kwargs):
     
@@ -62,7 +62,7 @@ def map_node_on_curve(node,Curve2d,theta_11,distance=1e5,**kwargs):
     return None
 
 
-def map_mesh_by_intersect_curve2d(mesh,curve2d,wire,**kwargs):
+def map_mesh_by_intersect_curve2d(mesh,curve2d,wire,global_minLen,**kwargs):
     
     #KWARGS:
     if kwargs.get('display') !=  None:
@@ -195,4 +195,18 @@ def map_mesh_by_intersect_curve2d(mesh,curve2d,wire,**kwargs):
         uLst.append(findPnt_on_2dcurve(n.Pnt2d,curve2d.GetHandle()))        
     mapped_nodes = [x for y, x in sorted(zip(uLst, mapped_nodes))]
     
+    
+    #====merge_mapped_nodes if to close:
+    tmp = []
+    for i,n1 in enumerate(mapped_nodes[0:], start=0):
+        n2 = mapped_nodes[i-1]
+        v = gp_Vec2d(n1.Pnt2d,n2.Pnt2d)
+        magnitude = v.Magnitude()
+
+        if magnitude<=0.001*global_minLen:
+            n1 = n2
+        tmp.append(n1)
+        
+    mapped_nodes = remove_duplicates_from_list_preserving_order(tmp)
+
     return mesh,mapped_nodes
