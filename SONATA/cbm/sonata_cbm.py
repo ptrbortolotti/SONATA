@@ -30,7 +30,7 @@ from SONATA.cbm.topo.utils import  getID
 from SONATA.cbm.topo.weight import Weight
 from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length
 
-from SONATA.cbm.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, sort_and_reassignID
+from SONATA.cbm.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, sort_and_reassignID, merge_nodes_if_too_close
 from SONATA.cbm.mesh.consolidate_mesh import consolidate_mesh_on_web
 from SONATA.cbm.mesh.mesh_intersect import map_mesh_by_intersect_curve2d
 from SONATA.cbm.mesh.mesh_core import gen_core_cells
@@ -320,7 +320,7 @@ class CBM(object):
         global_minLen = round(length/Resolution,5)
             
         core_cell_area = 1.25*global_minLen**2
-        bw_cell_area = 0.4*global_minLen**2
+        bw_cell_area = 0.6*global_minLen**2
         web_consolidate_tol = 0.5*global_minLen
 
         #===================MESH SEGMENT
@@ -347,7 +347,10 @@ class CBM(object):
         if self.config.SETUP_BalanceWeight == True:
             print('STATUS:\t Meshing Balance Weight')   
             
-            self.mesh, boundary_nodes = map_mesh_by_intersect_curve2d(self.mesh,self.BW.Curve,self.BW.wire)
+            self.mesh, boundary_nodes = map_mesh_by_intersect_curve2d(self.mesh,self.BW.Curve,self.BW.wire,global_minLen)
+            #boundary_nodes = merge_nodes_if_too_close(boundary_nodes,self.BW.Curve,global_minLen,tol=0.05)
+            
+            
             [bw_cells,bw_nodes] = gen_core_cells(boundary_nodes, bw_cell_area)
             
             for c in bw_cells:
