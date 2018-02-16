@@ -97,8 +97,9 @@ if flag_opt:
     p.driver.options['bits'] = {'ivc.spar_lt' : 4}
     p.driver.options['bits'] = {'ivc.wp1' : 4}
     p.driver.options['bits'] = {'ivc.wp2' : 4}
-    p.driver.options['pop_size'] = 2
+    p.driver.options['pop_size'] = 8
     p.driver.options['max_gen'] = 5
+    p.driver.options['run_parallel'] = True
 
 
     p.setup()

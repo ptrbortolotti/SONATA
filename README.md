@@ -15,7 +15,7 @@ Blade and Rotor Design Department often bundles the different aspects while cons
 In contrast to that, a multidisciplinary approach offers a more systematic development process that is capable to develop a better helicopter [2]. Because of the impact the rotor behavior has on the overall performance of the helicopter and customer noticeable vibratory characteristics, rotor aeroelastic effects should be considered in the earliest stages of the design process [3].
 Classical 1D-beam elements are usually used to describe the rotor blade at an early design stage due to the much simpler mathematical formulation compared to a complete 3D finite element model of the composite rotor blade. Typically, this approach decouples the realistic composite blade definition and the manufacturability constraints from the aeromechanic analysis and the predesign of structural blade properties. That way, problems in the blade design cannot be discovered until later in the process where changes are costly and time consuming [4].
 
-In the last 25 years, researches have stated the need for a design methodology and optimization framework that combines computational efficiency of a beam description in aeromechanic analysis with a rotor blade structural model that is able to describe realistic composite rotor blade cross-sections with respect to the structural properties, applied load, stress and strain distributions as well as design constraints [5–7]. SONATA provides such an optimization ennvironment.
+In the last 25 years, researches have stated the need for a design methodology and optimization framework that combines computational efficiency of a beam description in aeromechanic analysis with a rotor blade structural model that is able to describe realistic composite rotor blade cross-sections with respect to the structural properties, applied load, stress and strain distributions as well as design constraints [5–7]. __SONATA provides such an optimization ennvironment__.
 
 ### Framework:
 The framework to bundle the necessary tools for designing and analysing a helicopter rotorblade is written in [Python](https://www.python.org "Python"). 
@@ -28,7 +28,7 @@ The framework to bundle the necessary tools for designing and analysing a helico
 
 ### Flowchart:
 
-<img src="docs/flowchart.png" hspace="20" vspace="6" width="600">
+<img src="docs/flowchart.png" hspace="20" vspace="6" width="800">
 
 ##### 1. SONATA-CBM:
 is a preprocessor for parametric analysis and design of composite beam cross-sections in a multidisciplinary rotor design environment. A helicopter rotor blade represents a classical aeroelastic problem, where the aerodynamic behavior, the structural elasticity and vibrational dynamics have to be studied simultaneously.  While a geometric definition of a rotorblade with CAD tools is simple, the transfer to a meshed cross-sectional representation may prohibit automated design optimization. Consequently, most researches have developed individual parametric mesh generators for the cross-sectional analysis, that reduces their structural model to few design variables in the process. SONATA represents such a preprocessor.
@@ -47,8 +47,8 @@ this module comes [https://gitlab.lrz.de/wgarre/Pymore](https://gitlab.lrz.de/wg
 
 
 ## Installation
-To use the full functionality of SONATA a bunch of installations have to be made and packages to gathered. In this section a brief insallation guide is presented that will help the user to install it properly. 
-SONATA is developed to work currently in a python 2.7 distribution but will later be updated to a python > 3.6.
+To use the full functionality of SONATA a bunch of installations have to be made and packages to be gathered. In this section a brief insallation guide is presented that will help the user to install it properly. 
+SONATA is developed to work with a python version >3.6. An old python 2.7 release can be found under the tag v0.1
 
 1. A python 2.7 distribution is needed. It is recommended to use use Anaconda for easier package management https://www.anaconda.com/download/
 2. Install the **pythonocc** precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. Simply run the following commands in the terminal (for Windows users: execute the cmd command terminal):
@@ -57,52 +57,50 @@ SONATA is developed to work currently in a python 2.7 distribution but will late
 3. Install the **pint** module. This is used to change units in the SONATA/CBM - DYMORE interface.
     ``` conda install -c conda-forge pint ```
 
-4. Install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
+4. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
+	* ` conda install -c bioconda intervaltree `
+
+5. Install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
 		
-        ```pip install packages/Shapely-1.5.17-cp27-cp27m-win_amd64.whl```
-	* Linux: ```pip install shapely==1.5.17```
-	*           ``` conda install -c scitools shapely ``` 
-
-5. Install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
+        ```pip install Shapely-1.6.4.post1-cp36-cp36m-win_amd64```
+	* Linux: ```pip install shapely==1.6.4```
+	
+6. Install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
 	* __Windows__: Install the precompiled binaries from the /packages directory by running the following command: 
 		
         ```pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl```
-	* __Linux__: ```easy_install triangle```
+	* __Linux__: ```pip install triangle```
 
+7. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
+	* ` conda install -c bioconda intervaltree `
 
-6. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
-	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
-		
-        ```pip install intervaltree```
-	* __Linux__: ```pip install intervaltree```
-
-7. Install the **openmdao** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
-	* __Windows__: Install the precompiled binaries from the /package directory by running the following command:
-		
-        ```	pip install openmdao```
-	* __Linux__: ```pip install openmdao```
-    * To use the pyoptsparse optimisation package within openmdao you need to install
-    * ``` conda install conda-build```
-    * clone or download the repository from: https://bitbucket.org/mdolab/pyoptsparse
-        ``` conda build pyoptsparse ```
-    * To use parallel computing features you need to install mpi4py!!!
-
-8. Test the installation and all packages by excecuting the folloging python script:
+8. Install the **openmdao** package. This is the python package that provides the necessary framework for SONATA. you can either use the pip to install the openmdao or clone it directly from https://github.com/OpenMDAO/OpenMDAO
+	
+	* ```pip install openmdao```
+    
+    To use the pyoptsparse optimisation package within openmdao you need to install conda-	build ` conda install conda-build`. Then clone or download the repository from https://bitbucket.org/mdolab/pyoptsparse and build it like so ` conda build pyoptsparse `.   To use parallel computing features you need to follow the following instructions https://openmdao.readthedocs.io/en/1.7.3/getting-started/mpi_windows.html
+	
+9. Test the installation and all packages by excecuting the folloging python script:
 	```	python test_install.py```
 
-
-9. Now you can download or clone the repository and execute the main SONATA script. 
+10. Now you can download or clone the repository and execute the main SONATA script. 
 	```	python SONATA.py```
 
 
 ## Resources
 * [PythonOCC](http://www.pythonocc.org/)
+* [openMDAO](http://openmdao.org/)
+
 
 #### Documentation for Developers:
 
-- [OpenCascadeTechnology Documentation](https://www.opencascade.com/doc/occt-6.9.1/refman/html/index.html)
-- [PythonOCC API Documentation](http://api.pythonocc.org/)
+* [OpenCascadeTechnology Documentation](https://www.opencascade.com/doc/occt-6.9.1/refman/html/index.html)
+* [PythonOCC API Documentation](http://api.pythonocc.org/)
+* [OpenMDAO Documentation](http://openmdao.org/twodocs/versions/latest/)
+
+## Publications:
+to follow...
 
 
 ## Referencencs:
