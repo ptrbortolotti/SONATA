@@ -32,7 +32,7 @@ def plot_nodes(nodes):
     plt.show()
 
 
-def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=None,show_element_number=False,show_node_number=False,):
+def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=None,show_element_number=False,show_node_number=False,**kw):
     fig, ax = plt.subplots()
     patches = []
     centroids = []
@@ -81,9 +81,9 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
         pass
         CG, = plt.plot(VABSProperties.Xm2,VABSProperties.Xm3,'ro', label='CG: Mass Center')
         ax.annotate('CG', (VABSProperties.Xm2,VABSProperties.Xm3),fontsize=20)
-        GC, = plt.plot(VABSProperties.Xg2,VABSProperties.Xg3,'bo', label='GC: Geometric Center')
+        GC, = plt.plot(VABSProperties.Xg2,VABSProperties.Xg3,'b^', label='GC: Geometric Center')
         ax.annotate('GC', (VABSProperties.Xg2,VABSProperties.Xg3),fontsize=20)
-        NA, = plt.plot(VABSProperties.Xt2,VABSProperties.Xt3,'go',  label='NA: Neutral Axes')
+        NA, = plt.plot(VABSProperties.Xt2,VABSProperties.Xt3,'gs',  label='NA: Neutral Axes')
         ax.annotate('NA', (VABSProperties.Xt2,VABSProperties.Xt3),fontsize=20)
         plt.legend(handles=[CG,GC,NA])
         
@@ -104,7 +104,7 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
         
 
         if VABSProperties.Xs2 != None:
-            SC, = plt.plot(VABSProperties.Xs2,VABSProperties.Xs3,'ko',label='SC: Generalized Shear Center')
+            SC, = plt.plot(VABSProperties.Xs2,VABSProperties.Xs3,'kD',label='SC: Generalized Shear Center')
             ax.annotate('SC', (VABSProperties.Xs2,VABSProperties.Xs3),fontsize=20)
             plt.legend(handles=[CG,GC,NA,SC])
 
@@ -114,7 +114,8 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
     return (fig,ax)
     
 
-def plot_cells(cells,nodes,attr1,VABSProperties=None,title='None', savepath=None, plotTheta11=False, plotDisplacement=False,):
+def plot_cells(cells,nodes,attr1, VABSProperties=None, title='None', plotTheta11=False, plotDisplacement=False, **kw):
+    print(kw)
     nodes_array = []
     for n in nodes:
         if plotDisplacement:
@@ -153,13 +154,16 @@ def plot_cells(cells,nodes,attr1,VABSProperties=None,title='None', savepath=None
     
     
     fig,ax = plot_mesh(nodes_array,element_array,theta_11,data,data_name,title,VABSProperties,False,False)    
-    
-    if savepath!=None:
+   
+    if 'savepath' in kw:
         #savepath = 'jobs/VHeuschneider/figures/R90_config.svg'
-        #datestr = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+        datestr = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+        fname = kw['savepath'].split('.')[0]+'_'+datestr+'.'+kw['savepath'].split('.')[1]
+        print(fname)
         tmp_fig = plt.gcf()
-        tmp_fig.set_size_inches(11.69, 8.27)    #a4 landscape
-        tmp_fig.savefig(savepath, dpi=300, orientation='landscape', papertype='a4')
+        #tmp_fig.set_size_inches(11.69, 8.27)    #a4 landscape
+        tmp_fig.set_size_inches(40, 20)    #a4 landscape
+        tmp_fig.savefig(fname, dpi=300, orientation='landscape', papertype='a4')
    
     
     return (fig, ax)
