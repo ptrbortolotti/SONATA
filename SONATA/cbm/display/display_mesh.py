@@ -115,7 +115,6 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
     
 
 def plot_cells(cells,nodes,attr1, VABSProperties=None, title='None', plotTheta11=False, plotDisplacement=False, **kw):
-    print(kw)
     nodes_array = []
     for n in nodes:
         if plotDisplacement:
@@ -159,13 +158,12 @@ def plot_cells(cells,nodes,attr1, VABSProperties=None, title='None', plotTheta11
         #savepath = 'jobs/VHeuschneider/figures/R90_config.svg'
         datestr = datetime.datetime.now().strftime("%Y%m%d_%H%M")
         fname = kw['savepath'].split('.')[0]+'_'+datestr+'.'+kw['savepath'].split('.')[1]
-        print(fname)
+        #print(fname)
         tmp_fig = plt.gcf()
         #tmp_fig.set_size_inches(11.69, 8.27)    #a4 landscape
         tmp_fig.set_size_inches(40, 20)    #a4 landscape
         tmp_fig.savefig(fname, dpi=300, orientation='landscape', papertype='a4')
    
-    
     return (fig, ax)
 
 
