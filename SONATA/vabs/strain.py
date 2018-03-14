@@ -8,7 +8,7 @@ Created on Wed Mar 22 13:25:49 2017
 class Strain(object):
     #Object to represent the STRAIN Tensor within an Element    
 
-    def __init__(self,Vec):
+    def __init__(self, Vec=None):
         if Vec is None:
             pass
         elif Vec is not None:

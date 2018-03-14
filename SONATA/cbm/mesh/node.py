@@ -12,7 +12,10 @@ from SONATA.cbm.topo.BSplineLst_utils import find_BSplineLst_pos, findPnt_on_BSp
 @total_ordering
 class Node(object):
     
-    class_counter= 1
+    class_counter= 1    #class attribute
+    __slots__ = ( 'id', 'Pnt2d', 'parameters', 'corner', 'cornerstyle', 'regular_corner', 'displacement') 
+    #tell Python, to manage class attributes memorypreserving.
+    
     def __init__(self, Pnt2d, parameters=['0',0,0]):
         self.id = self.__class__.class_counter
         self.__class__.class_counter += 1

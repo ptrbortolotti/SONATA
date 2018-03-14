@@ -14,26 +14,11 @@ from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline,Geom2dAPI_ProjectPointOnCurv
 from SONATA.vabs.strain import Strain
 from SONATA.vabs.stress import Stress
 from SONATA.cbm.topo.utils import PolygonArea, calc_angle_between, point2d_list_to_TColgp_Array1OfPnt2d
-
-
-def calc_cell_angles(cell):
-    corners = []
-    for node in cell.nodes:
-        corners.append(node.coordinates)         
-    corners = np.asarray(corners)   
-    temp = []
-    for i in range(0,corners.shape[0]):
-            if i == corners.shape[0]-1: #last point
-                v1 = corners[i-1]-corners[i] 
-                v2 = corners[0]-corners[i]
-            else:
-                v1 = corners[i-1]-corners[i]
-                v2 = corners[i+1]-corners[i]
-            temp.append(calc_angle_between(v1,v2))
-    return np.array(temp)
+from SONATA.cbm.mesh.cell_utils import calc_cell_angles
 
 
 class Cell(object):
+    __slots__ = ( 'id', 'nodes', 'theta_1', 'theta_3', 'MatID', 'structured', 'interior_nodes', 'strain', 'strainM', 'stress', 'stressM') 
     class_counter= 1
     def __init__(self,nodeLst):                  #int
         self.id = self.__class__.class_counter
@@ -88,7 +73,6 @@ class Cell(object):
     @property
     def maximum_angle(self):
         return self.calc_maximum_angle()  
-    
     
     def __repr__(self): 
         #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 
@@ -192,4 +176,3 @@ class Cell(object):
         
         min_index, min_value = min(enumerate(P_distances), key=operator.itemgetter(1))       
         return min_value[1]
-    

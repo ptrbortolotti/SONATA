@@ -30,6 +30,8 @@ from SONATA.cbm.topo.utils import  getID
 from SONATA.cbm.topo.weight import Weight
 from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length
 
+from SONATA.cbm.mesh.node import Node
+from SONATA.cbm.mesh.cell import Cell
 from SONATA.cbm.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, sort_and_reassignID, merge_nodes_if_too_close
 from SONATA.cbm.mesh.consolidate_mesh import consolidate_mesh_on_web
 from SONATA.cbm.mesh.mesh_intersect import map_mesh_by_intersect_curve2d
@@ -147,7 +149,7 @@ class CBM(object):
             input_filename = input_filename.replace('.input', '.pkl') 
         
         with open(input_filename, 'rb') as handle:
-            tmp_dict = pkl.load(handle).__dict__
+            tmp_dict = pkl.load(handle, encoding='latin1').__dict__
             self.__dict__.update(tmp_dict)    
         return None
 
@@ -298,7 +300,6 @@ class CBM(object):
             print('STATUS:\t Building Balance Weight')   
             self.BW = Weight(0,self.config.BW_XPos,self.config.BW_YPos,self.config.BW_Diameter,self.config.BW_MatID)
             
-            
         return None
 
 
@@ -314,6 +315,8 @@ class CBM(object):
         None
         """
         self.mesh = []
+        Node.class_counter = 1
+        Cell.class_counter = 1
         #meshing parameters:  
         Resolution = self.config.SETUP_mesh_resolution # Nb of Points on Segment0
         length = get_BSplineLst_length(self.SegmentLst[0].BSplineLst)
@@ -430,9 +433,9 @@ class CBM(object):
                 n.displacement = self.BeamProperties.U[i][3:6]
     
     
-    def cbm_post_2dmesh(self, attribute='MatID',title='NOTITLE', save=None):
+    def cbm_post_2dmesh(self, attribute='MatID',title='NOTITLE', **kw):
         mesh,nodes = sort_and_reassignID(self.mesh)
-        fig,ax = plot_cells(self.mesh,nodes,attribute,self.BeamProperties,title, save)
+        fig,ax = plot_cells(self.mesh, nodes, attribute, self.BeamProperties, title, **kw)
         return fig,ax
         
         
