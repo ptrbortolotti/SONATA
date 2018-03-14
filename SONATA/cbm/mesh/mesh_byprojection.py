@@ -93,11 +93,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     pIdx.append(idx)
                 else: None   
         
-        
-
-            #display.DisplayShape(pPnts[0], color='GREEN')
-            
-        
+        #display.DisplayShape(pPnts[0], color='GREEN')
         
         #==================making sure the pPnts are unique:
         '''It happend that somehow the same points were found multiple times'''
@@ -226,7 +222,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     p2 = ProjectPointOnBSplineLst(b_BSplineLst,cP,1)
                     newPnt = p2[0]
                     newPara = [LayerID,p2[1],p2[2]]
-                    b_nodes.append(Node(newPnt,[LayerID,pIdx[0],newPara]))
+                    b_nodes.append(Node(newPnt,newPara))
                     
                 elif node.regular_corner == False:
                     print('WARNING: cornerstyle 0: this possibility has not been implemented yet.')
@@ -241,7 +237,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
             #===CORNERSTYLE 1======     
             elif len(exterior_corners) == 1 and node.corner==False:
                 node.cornerstyle = 1
-                #print 'Node ID: ',node.id,', Len(exterior_corners):', len(exterior_corners)
+                #print('Node ID: ',node.id,', Len(exterior_corners):', len(exterior_corners))
                 b_nodes.append(Node(exterior_corners[0],exterior_corners_para[0]))
             
 
@@ -334,7 +330,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     newPnt = p2[0]
                     newPara = [LayerID,p2[1],p2[2]]
                     
-                    b_nodes.append(Node(newPnt,[LayerID,pIdx[0],newPara]))
+                    b_nodes.append(Node(newPnt,newPara))
                     b_nodes.append(Node(exterior_corners[1],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]))
                     b_nodes[-1].corner = True
                     b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
@@ -364,17 +360,11 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                 #b_nodes.append(Node(b_BSplineLst[pIdx[0]].EndPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].LastParameter()]))
                 #b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))    
             
-            
-            
-            
-            
-            
         else:
             print('Projection Error, number of projection points: ', len(pPnts))
+            
+            
     
-
-
-
     #==============integrate_leftover_interior_nodes=========================================
     #determin_leftover_pnts
     if flag_integrate_leftover_interior_nodes:
@@ -416,14 +406,16 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                 
                 if insert_idx!=None:
                     b_nodes.append(new_b_node)
+                    print('hello',new_b_node)
                     a_nodes.insert(insert_idx+1,new_a_node)
            
         if new_b_node:
             #print new_b_node
             #display.DisplayShape(new_b_node.Pnt2d, color='RED')
-            b_nodes =  sorted(b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))
+            #print(b_nodes[0].parameters[1], b_nodes[0].parameters[2])
+            #b_nodes =  sorted(b_nodes, key=lambda n: (n.parameters[1], n.parameters[2]) )
+            b_nodes = sorted(b_nodes)
 
-        
     #==============CREATE CELLS PROJECTION=========================================
     
     b = 0   #b_nodes idx
