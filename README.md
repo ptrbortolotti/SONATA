@@ -58,7 +58,7 @@ SONATA is developed to work with a python version >3.6. An old python 2.7 releas
     ``` conda install -c conda-forge pint ```
 
 4. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
-	* ` conda install -c bioconda intervaltree `
+	* ` conda install -c conda-forge intervaltree `
 
 5. Install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
