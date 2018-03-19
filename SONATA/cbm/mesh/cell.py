@@ -68,11 +68,11 @@ class Cell(object):
         
     @property
     def minimum_angle(self):
-        return self.calc_minimum_angle()
+        return np.amin(calc_cell_angles(self))
 
     @property
     def maximum_angle(self):
-        return self.calc_maximum_angle()  
+        return np.amax(calc_cell_angles(self))  
     
     def __repr__(self): 
         #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 
@@ -113,11 +113,13 @@ class Cell(object):
         self.theta_1 = theta_1
         return None
 
+
     def calc_area(self):  
         corners = []
         for node in self.nodes:
             corners.append(node.coordinates)      
         return PolygonArea(corners)
+
 
     def calc_orientation(self):  
         corners = []
@@ -127,21 +129,15 @@ class Cell(object):
             return True
         else: return False
     
-    def calc_minimum_angle(self):  
-        #print np.amin(calc_cell_angles(self))
-        return np.amin(calc_cell_angles(self))
     
-    def calc_maximum_angle(self):  
-        #print np.amax(calc_cell_angles(self))
-        return np.amax(calc_cell_angles(self))
-
     def min_facelenght(self):  
         fl = []
         for i,n in enumerate(self.nodes[:-1]):
             fl.append(n.Distance(self.nodes[i+1]))
         fl.append(self.nodes[-1].Distance(self.nodes[0]))            
         return min(fl)     
-       
+    
+    
     def build_wire(self):
         WireBuilder = BRepBuilderAPI_MakeWire()
         for i in range(0,len(self.nodes)-1):
@@ -155,6 +151,7 @@ class Cell(object):
         
         return WireBuilder.Wire()
     
+    
     def cell_node_distance(self,node):
         P_distances = []
 
@@ -165,6 +162,7 @@ class Cell(object):
                 P_distances.append(projection.Distance(j))
 
         return min(P_distances or [10e6])
+    
     
     def closest_cell_edge(self,node):
         P_distances = []
