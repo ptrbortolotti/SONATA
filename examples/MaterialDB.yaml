@@ -1,0 +1,148 @@
+#==============================SONATA-MATERIAL-Input YAML=============================
+#This file contains a yaml style Material Database for the structural design of the rotorblade crosssection
+#Author: Tobias Pflumm
+#Date:	03/19/2018	
+# ===================== 
+#Materials
+    # Material 1:     #Isotropic Material, 
+        # name: Alu 7075-T6           #Name [string]
+        # orth: 0                     #isotropic(0), orthotropic(1), general anisotropic(2)
+        # rho: 4.43                   #Density [kg/m3]bzw.[g/cm3] [float]
+        # E: 71700                    #Youngs's Modulus [MPa] [float]
+        # nu: 0.33                    #Poisson's ratio  [-] [float]
+        # alpha: 23.1                 #Thermal expansion coefficient [10-6K^-1] [float]
+        
+    # Material 2:     #Orthotropic Material:
+        # name: CFK UD (HT-Fiber) FVF(0.571)	#Name [string]
+        # orth: 1							    #isotropic(0), orthotropic(1), general anisotropic(2)
+        # rho:  1.561 						#Density [kg/m3]bzw.[g/cm3] [float]
+        # E: [E1,E2,E3]						#Youngs's Modulus [E1,E2,E3]	[MPa] [float]
+        # G: [G12,G13,G23]					#Shear Modulus [G12,G13,G23]	[MPa] [float]
+        # nu: [nu12,nu13,nu23]				    #Poisson's ratio  [nu12,nu13,nu23] [-] [float]
+        # alpha: [a11,a22,a33]					#Thermal expansion coefficient at 20°C [a11,a22,a33] [10-6/K] [float]
+
+    # Material 3: #General anisotropic Material:
+        # name: Anisotropic Dummy             #Name [string]
+        # orth: 2							    #isotropic(0), orthotropic(1), general anisotropic(2)
+        # rho: 1.561 						#Density [kg/m3]bzw.[g/cm3] [float]
+        # alpha: [a11,2a12,2a13,a22,2a23,a33]     #Thermal expansion coefficient at 20°C [a11,a22,a33] [10-6/K] [float]
+        # C:                                      #with [sigma]:C*[epsilon]
+            # - [c11, c12, c13, c14, c15, c16]	#Matrix representation (stiffness tensor)	[MPa] [float]
+            # - [0 , c22, c23, c24, c25, c26]    
+            # - [0 ,  0 , c33, c34, c35, c36]
+            # - [0 , 0  ,  0 , c44, c45, c46]
+            # - [0 , 0   , 0  , 0  , c55, c56]
+            # - [ 0  , 0   ,  0  ,  0  ,  0 , c66]
+ 
+# ===================== 
+ Materials:
+    Material 1:
+        name:   SGL/FT109/Sigratex/200g/2x2	#Name [string]
+        orth:   1							
+        rho:    1.561 						
+        E:      [72000, 72000, 66000]				
+        G:      [5000, 5000, 5000]					
+        nu:     [0.1, 0.1, 0.1]					
+        alpha:  [0.2, 30, 30]					
+
+    Material 2:
+        name:   SGL/FT109/Sigrafil-C30-T050/600g/UD
+        orth:   1		
+        rho:    1.561
+        E:      [132830, 11616, 11616]		
+        G:      [5336, 5336, 4264]				
+        nu:     [0.28, 0.28, 0.36]
+        alpha:  [0.2, 30, 30]
+
+    Material 3:
+        name: ROHACELL51 IG/IG-F						
+        orth: 0					
+        rho: 0.052				
+        E: 70					
+        nu: 0.4					
+        alpha: 3.33
+
+    Material 4:
+        name: Alu 7075-T6				
+        orth: 0					
+        rho: 2.71						
+        E: 71700						
+        nu: 0.33				
+        alpha: 23.1	
+
+    Material 5:
+        MatID: 5						
+        name: Titanium Ti-6Al-4V (Grade 5)	
+        orth: 0				
+        rho: 4.43
+        E: 113800
+        nu: 0.342
+        alpha: 8.2
+
+    Material 6:
+        name: Lead							
+        orth: 0						
+        rho: 11.43 					
+        E: 14000							
+        nu: 0.42						
+        alpha: 29.1
+
+    Material 7:
+        name: Steel ((Rohl, P.J)
+        orth: 0
+        rho: 7.7977
+        E: 205023
+        nu: 0.3
+        alpha: 11.75
+
+    Material 8:
+        name:   E-Glass (Rohl, P.J)          
+        orth:   1							
+        rho:    1.7214 						
+        E:      [20698,20698,20698]
+        G:      [4095,4095,4095]			
+        nu:     [0.15,0.15,0.3]
+        alpha:  [0.2,30,30]
+
+    Material 9:
+        name: IM7 (Rohl, P.J)           
+        orth: 1							
+        rho: 1.5513					
+        E:      [165012, 8798, 8798]
+        G:      [4895, 4895, 4895]
+        nu:     [0.34, 0.34, 0.3]
+        alpha:  [0.2, 30, 30]
+
+    Material 10:
+        name: S-Glass (Rohl, P.J)        
+        orth: 1							
+        rho: 1.8605					
+        E: [43403,11997,11997]	           
+        G: [3599,3599,3599]				
+        nu: [0.28,0.28,0.28]			   
+        alpha: [0.2,30,30]
+
+    Material 11:
+        name: Plascore (Rohl, P.J)       
+        orth: 1	
+        rho: 0.0464						
+        E: [6.89,138.03,6.89]
+        G: [23.99,6.89,39.99]
+        nu: [0.01,0.3,0.01]
+        alpha: [0.2,30,30]
+
+    Material 12:
+        name: Core Dummy 1		
+        orth: 0					
+        rho: 0.052 			
+        E: 70						
+        nu: 0.4
+        alpha: 3.33
+
+    Material 13:
+        name: Core Dummy 2						
+        orth: 0							
+        rho: 0.052 					
+        E: 70								
+        nu: 0.4
+        alpha: 3.33	
