@@ -37,18 +37,6 @@ class Material(object):
             self.alpha = kwargs.get('alpha')  
 
 
-        #########Strength#####################
-        if orth == 0:
-            self.YS = None # Yield Strenth (Streckgrenze)
-            self.UTS = None #Tensile Strenght (Zugfestigkeit)
-        
-        if orth == 1:
-            self.Xt = None #Axial Tensile Strength of unidirectional composite MPa
-            self.Xc = None #Axial Compression Strength of unidirectional composite MPa
-            self.Yt = None #Transverse strenght of unidirectional composite
-            self.Yc = None #Transverse strenght of unidirectional composite
-            self.S21 = None # 
-            self.S23 = None #
 
     def __repr__(self): 
         return  str('Material %s: %s' % (self.id, self.name))
