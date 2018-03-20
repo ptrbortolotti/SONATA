@@ -1,0 +1,62 @@
+#==============================SONATA-Configuration-Input YAML=============================
+#This file contains the input information for the structural design of the rotorblade crosssection
+#Author: Tobias Pflumm
+#Date:	03/19/2018
+#===============================SETUP===================================				 
+Setup:
+    input_type: 3						   #0) Airfoil from UIUC Database; 1) Geometry from .dat file; 2)2d .step 3)3D .step + radial station of crosssection 	4) gen, 3D-Blade f. twist,taper,airfoils,1/4-line	[int] DEFAULT=0	
+    datasource: examples/AREA_Blatt_L.stp  #0)	naca23012					1) AREA_R250.dat			2)AREA_R230.stp	 			3)AREA_Blatt_L.stp	 4)folder of data 						                    [str] DEFAULT=NONE
+    material_db: examples/mat_db.yml	   #Path and filename of the Material Database						#True or False for Balance Weight			                                                            [bool] DEFAULT=FALSE
+    radial_station: 260					#Radial station of crosssection. Only necessary for input type 3. [float]	Default=NONE
+    Theta: 6.7							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
+    scale_factor: 1						#use as reference scale factor				[float] 		DEFAULT=1
+    BalanceWeight: False		
+    mesh_resolution: 200				#Scales approximately to the number of points on Segment0
+
+#=======WEBS=======			
+Webs:
+    Web 1:								#WebName									[int]	
+        Pos1: 0.4						
+        Pos2: 0.62
+	
+    Web 2:
+        Pos1: 0.2
+        Pos2: 0.82
+
+#=======SEGMENTS==	
+Segments:
+    Segment 0:							#Web ID 									[int]	
+        CoreMaterial: 3
+        Layup: 
+            #Start[-],End[-],thickness[mm],Orientation [deg],MatID[int],name[str]	
+            - [0.0, 1.0, 0.24, 45, 1, 'Skin1']
+            - [0.0, 1.0, 0.24, 45, 1, 'Skin2']
+            
+    Segment 1:
+        CoreMaterial: 3
+        Layup: 
+            #Start[-],End[-],thickness[mm],Orientation [deg],MatID[int],name[str]	
+            - [0.0, 1.0, 0.24, 45, 1, 'Skin1']
+            - [0.0, 1.0, 0.24, 45, 1, 'Skin2']
+            
+    Segment 2:
+        CoreMaterial: 11
+        Layup: 
+            #Start[-],End[-],thickness[mm],Orientation [deg],MatID[int],name[str]	
+            - [0.0, 1.0, 0.6, 0, 2, 'Skin1']
+            - [0.0, 1.0, 0.6, 0, 2, 'Skin2']
+            
+    Segment 3:
+        CoreMaterial: 3
+        Layup: 
+            #Start[-],End[-],thickness[mm],Orientation [deg],MatID[int],name[str]	
+            - [0.0, 1.0, 0.24, 45, 1, 'Skin1']
+            - [0.0, 1.0, 0.24, 45, 1, 'Skin2']
+
+            
+#=======BalanceWeight==	
+BalanceWeight: 
+    XPos1: -21.0            	#	X Position	[-]						[float]				NO DEFAULT VALUE
+    YPos2: 1.5              	#	Y Position	[-]						[float]				NO DEFAULT VALUE
+    Diameter: 3.00          	#	Diameter of Balance Weight [mm]		[float]				NO DEFAULT VALUE
+    MatID: 4                	#   Material ID							[int]				NO DEFAULT VALUE
