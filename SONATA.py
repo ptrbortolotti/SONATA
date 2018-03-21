@@ -35,25 +35,22 @@ from SONATA.cbm.sonata_cbm import CBM
 plt.close('all')    
 #TODO: Comment the CBM Class and memeber functions properly!
 #TODO: include optionflags and Vabs_setup in Configuration
-#TODO: include yaml style input files
 
 filename = 'examples/sec_config.yml'
 config = Configuration(filename)
 
 #config.flag_mesh_core = True
 config.vabs_cfg.recover_flag = 1
-config.vabs_cfg.M = [3000e1,2000e3,0]
+config.vabs_cfg.M = [3000e1, 0, 0]
 
 job = CBM(config)
-#job.cbm_gen_topo()
-#job.cbm_display_config()
-#job.cbm_gen_mesh()
-#job.cbm_review_mesh()
-#job.cbm_run_vabs()
 #job.cbm_save()
-job.cbm_load()
+job.cbm_gen_topo()
+#job.cbm_display_config()
+job.cbm_gen_mesh()
+#job.cbm_save()
+job.cbm_review_mesh()
+#job.cbm_run_vabs()
+
 job.cbm_post_2dmesh()
 job.cbm_post_3dtopo()
-
-job.cbm_post_2dmesh(attribute='stressM.sigma11')
-test1 = job.cbm_set_DymoreMK(x_offset = 0.81786984)

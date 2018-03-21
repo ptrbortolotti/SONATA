@@ -123,5 +123,6 @@ class CBM_ExplComp(ExplicitComponent):
         print(outputs['obj'])
         self.counter += 1
 
+
     def post_cbm(self):
         return self.job.cbm_post_2dmesh()
