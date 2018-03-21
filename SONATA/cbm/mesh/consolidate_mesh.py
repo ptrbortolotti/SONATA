@@ -38,6 +38,12 @@ def consolidate_mesh_on_web(mesh,w_BSplineLst,w1_nodes,w2_nodes,w_tol,display):
         mesh: the updated mesh formulation (list of cells)
                 
     '''
+    if display !=  None:
+        for n in w1_nodes:
+            display.DisplayShape(n.Pnt2d)
+        
+        for n in w2_nodes:
+            display.DisplayShape(n.Pnt2d, color='RED')
     
     #Generate NodeMatching Matrix [NM]
     tmp = []

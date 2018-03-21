@@ -10,8 +10,8 @@ Setup:
     radial_station: 260					#Radial station of crosssection. Only necessary for input type 3. [float]	Default=NONE
     Theta: 6.7							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
     scale_factor: 1						#use as reference scale factor				[float] 		DEFAULT=1
-    BalanceWeight: False		
-    mesh_resolution: 200				#Scales approximately to the number of points on Segment0
+    BalanceWeight: True		
+    mesh_resolution: 260				#Scales approximately to the number of points on Segment0
 
 #=======WEBS=======			
 Webs:
@@ -45,7 +45,7 @@ Segments:
         CoreMaterial: 11
         Layup: 
             #Start[-],End[-],thickness[mm],Orientation [deg],MatID[int],name[str]	
-            - [0.0, 1.0, 0.6, 0, 2, 'Skin1']
+            - [0.0, 1.0, 0.2, 0, 2, 'Skin1']
             - [0.0, 1.0, 0.6, 0, 2, 'Skin2']
             
     Segment 3:
@@ -58,7 +58,7 @@ Segments:
             
 #=======BalanceWeight==	
 BalanceWeight: 
-    XPos1: -21.0            	#	X Position	[-]						[float]				NO DEFAULT VALUE
-    YPos2: 1.5              	#	Y Position	[-]						[float]				NO DEFAULT VALUE
-    Diameter: 3.00          	#	Diameter of Balance Weight [mm]		[float]				NO DEFAULT VALUE
-    MatID: 4                	#   Material ID							[int]				NO DEFAULT VALUE
+    XPos: -21.0            	#	X Position	[-]						[float]				NO DEFAULT VALUE
+    YPos: 2.5              	#	Y Position	[-]						[float]				NO DEFAULT VALUE
+    Diameter: 4.0          	#	Diameter of Balance Weight [mm]		[float]				NO DEFAULT VALUE
+    Material: 4             #   Material ID							[int]				NO DEFAULT VALUE

@@ -47,7 +47,7 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
                                         export_to_SVG, export_to_PS, export_to_EnhPS, \
                                         export_to_TEX, export_to_BMP,export_to_TIFF, \
                                         show_coordinate_system, display_SONATA_SegmentLst,\
-                                        display_custome_shape   
+                                        display_custome_shape, transform_wire_2to3d  
                                         
 
 
@@ -299,7 +299,7 @@ class CBM(object):
         #Balance Weight:
         if self.config.setup['BalanceWeight'] == True:
             print('STATUS:\t Building Balance Weight')   
-            self.BW = Weight(0,self.config.bw['XPos'], self.config.bw['XPos'], self.config.bw['Diameter'], self.config.bw['Material'])
+            self.BW = Weight(0, self.config.bw['XPos'], self.config.bw['YPos'], self.config.bw['Diameter'], self.config.bw['Material'])
             
         return None
 
@@ -343,7 +343,7 @@ class CBM(object):
         for web in self.WebLst:
             #print web.ID,  'Left:', SegmentLst[web.ID].ID, 'Right:', SegmentLst[web.ID+1].ID,
             print('STATUS:\t Consolidate Mesh on Web Interface ', web.ID)  
-            web.wl_nodes = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID].cells, web.BSplineLst)
+            web.wl_nodes = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID].cells, web.BSplineLst)            
             web.wr_nodes = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID+1].cells, web.BSplineLst)
             self.mesh = consolidate_mesh_on_web(self.mesh,web.BSplineLst, web.wl_nodes, web.wr_nodes, web_consolidate_tol,self.display)
             
@@ -351,15 +351,14 @@ class CBM(object):
         if self.config.setup['BalanceWeight'] == True:
             print('STATUS:\t Meshing Balance Weight')   
             
-            self.mesh, boundary_nodes = map_mesh_by_intersect_curve2d(self.mesh,self.BW.Curve,self.BW.wire,global_minLen)
-            #boundary_nodes = merge_nodes_if_too_close(boundary_nodes,self.BW.Curve,global_minLen,tol=0.05)
-            
+            self.mesh, boundary_nodes = map_mesh_by_intersect_curve2d(self.mesh, self.BW.Curve, self.BW.wire, global_minLen)
+            #boundary_nodes = merge_nodes_if_too_close(boundary_nodes,self.BW.Curve,global_minLen,tol=0.05))
             [bw_cells,bw_nodes] = gen_core_cells(boundary_nodes, bw_cell_area)
             
             for c in bw_cells:
                 c.structured = False
                 c.theta_3 = 0
-                c.MatID = self.config.BW_MatID
+                c.MatID = self.config.bw['Material']
                 c.calc_theta_1()
             
             self.mesh.extend(bw_cells)
@@ -452,8 +451,6 @@ class CBM(object):
     def cbm_post_3dtopo(self):
         self.cbm_display_config()
         
-        if self.config.setup['BalanceWeight']:
-            self.display.DisplayShape(self.BW.Curve, color="BLACK")
         #display.DisplayShape(SegmentLst[0].BSplineLst[0].StartPoint())
         #display_custome_shape(display,SegmentLst[0].wire,2,0,[0,0,0])
 
@@ -463,10 +460,14 @@ class CBM(object):
             
             display_SONATA_SegmentLst(self.display,self.SegmentLst,self.config.setup['radial_station'],-math.pi/2,-math.pi/2)
             self.display.DisplayShape(self.surface3d, color=None, transparency=0.7, update=True)
-               
+            
+            if self.config.setup['BalanceWeight']:
+                transform_wire_2to3d(self.display,self.BW.wire,self.config.setup['radial_station'],-math.pi/2,-math.pi/2)
+
         else:
             display_SONATA_SegmentLst(self.display,self.SegmentLst)
-        
+            if self.config.setup['BalanceWeight']:
+                self.display.DisplayShape(self.BW.Curve, color="BLACK")
         #self.display.View_ISO()
         self.display.FitAll()
         self.start_display()   
