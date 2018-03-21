@@ -184,8 +184,11 @@ class Segment(object):
         '''returns a Pnt2d for the coresponding layer number and the coordinate S'''
         a = self.final_Boundary_ivLst
         #select interval were S can be found
-        b = a[np.where(a[:,0] <= S < a[:,1])]
-        lid = int(b[0][2])
+        for it, e in enumerate(a):
+            if e[0]<S<e[1]:
+                lid = e[2]
+                break
+
         (BSplineLst, start, end) = self.get_BsplineLst_plus(lid, SegmentLst, WebLst)
         return get_BSplineLst_Pnt2d(BSplineLst, S, start, end)
         
