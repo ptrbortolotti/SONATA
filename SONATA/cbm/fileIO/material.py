@@ -9,7 +9,7 @@ import numpy as np
 
     
 class Material(object):
-    __slots__ = ( 'id', 'name', 'orth', 'rho', 'E', 'nu', 'G', 'alpha', 'C') 
+    __slots__ = ( 'id', 'name', 'orth', 'rho') 
     
     def __init__(self, ID='NOID', name = 'NONAME', orth=None, rho=0, **kwargs):
         self.id = ID
@@ -17,27 +17,6 @@ class Material(object):
         self.orth = orth
         self.rho = rho/1000 #from g/cm3 to g/mm3
         
-        #########ELASTIC PROPERTIES#####################
-        #ISOTROPIC
-        if orth == 0: 
-            self.E = kwargs.get('E')
-            self.nu = kwargs.get('nu')  
-            self.alpha = kwargs.get('alpha')  
-
-        #orthotropic material
-        elif orth == 1:
-            self.E = kwargs.get('E') 
-            self.G = kwargs.get('G') 
-            self.nu = kwargs.get('nu')  
-            self.alpha = kwargs.get('alpha')  
-             
-        #general anisotropic material
-        elif orth == 2:
-            self.C = np.asarray(kwargs.get('C'))  
-            self.alpha = kwargs.get('alpha')  
-
-
-
     def __repr__(self): 
         return  str('Material %s: %s' % (self.id, self.name))
      
@@ -74,7 +53,7 @@ class OrthotropicMaterial(Material):
         self.Yt = kw.get('Xc') #Transverse strenght of unidirectional composite
         self.Yc = kw.get('Yc')  #Transverse strenght of unidirectional composite
         self.S21 = kw.get('S21') # 
-        self.S23 = kw.get('S23') # 
+        self.S23 = kw.get('S23') #
 
 
 class AnisotropicMaterial(Material):

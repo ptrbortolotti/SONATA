@@ -33,8 +33,8 @@ def read_yaml_materialdb(fname):
         
     return sorted(MaterialLst, key=lambda x: x.id)
         
-        
+
 if __name__ == '__main__':
     os.chdir('C://TPflumm_local/work/SONATA')
-    fname = 'examples/MaterialDB.yaml'      
+    fname = 'examples/mat_db.yml'      
     mdb = read_yaml_materialdb(fname)
