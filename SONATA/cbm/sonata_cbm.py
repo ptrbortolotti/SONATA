@@ -11,6 +11,7 @@ from datetime import datetime
 import subprocess
 import sys,os,math
 import numpy as np
+import uuid
 
 
 #PythonOCC Modules
@@ -231,36 +232,38 @@ class CBM(object):
     def cbm_generate_SegmentLst(self):
         ''' generate Segment Lst'''
         self.SegmentLst = []   #List of Segment Objects
-        #for i,item in enumerate(self.config.SEG_ID):
+        
+        #TODO cleanup this mess!
+
         for k, seg in self.config.segments.items():
             if k == 0:        
                 if self.config.setup['input_type'] == 0:   #0) Airfoil from UIUC Database  --- naca23012
-                    self.SegmentLst.append(Segment(k, Layup = seg['Layup'], CoreMaterial = seg['CoreMaterial'], scale_factor = self.config.setup['scale_factor'], Theta = self.config.setup['Theta'], OCC=False, airfoil = self.config.setup['datasource']))
-                
+                    self.SegmentLst.append(Segment(k, **seg, **self.config.setup, OCC=False, airfoil = self.config.setup['datasource']))
+                    
                 elif self.config.setup['input_type'] == 1: #1) Geometry from .dat file --- AREA_R250.dat
-                    self.SegmentLst.append(Segment(k, Layup = seg['Layup'], CoreMaterial = seg['CoreMaterial'], scale_factor = self.config.setup['scale_factor'],  Theta = self.config.setup['Theta'], OCC=False, filename = self.config.setup['datasource']))
+                    self.SegmentLst.append(Segment(k, **seg, **self.config.setup, OCC=False, filename = self.config.setup['datasource']))
                 
                 elif self.config.setup['input_type'] == 2: #2)2d .step or .iges  --- AREA_R230.stp
                     BSplineLst = import_2d_stp(self.config.setup['datasource'], self.config.setup['scale_factor'], self.config.setup['Theta'])
-                    self.SegmentLst.append(Segment(k, Layup = seg['Layup'], CoreMaterial = seg['CoreMaterial'], Theta = self.config.setup['Theta'], OCC=True, Boundary = BSplineLst))
+                    self.SegmentLst.append(Segment(k, **seg, **self.config.setup, OCC=True, Boundary = BSplineLst))
                 
                 elif self.config.setup['input_type'] == 3: #3)3D .step or .iges and radial station of crosssection --- AREA_Blade.stp, R=250
                     BSplineLst = import_3d_stp(self.config.setup['datasource'],self.config.setup['radial_station'], self.config.setup['scale_factor'], self.config.setup['Theta'])
-                    self.SegmentLst.append(Segment(k, Layup = seg['Layup'], CoreMaterial = seg['CoreMaterial'], Theta = self.config.setup['Theta'], OCC=True, Boundary = BSplineLst))  
+                    self.SegmentLst.append(Segment(k, **seg, **self.config.setup, OCC=True, Boundary = BSplineLst))  
         
                 elif self.config.setup['input_type'] == 4: #4)generate 3D-Shape from twist,taper,1/4-line and airfoils, --- examples/UH-60A, R=4089, theta is given from twist distribution
                     BSplineLst = self.blade.get_crosssection(self.config.setup['radial_station'], self.config.setup['scale_factor'])
-                    self.SegmentLst.append(Segment(k, Layup = seg['Layup'], CoreMaterial = seg['CoreMaterial'], Theta = self.blade.get_Theta(self.config.setup['radial_station']), OCC=True, Boundary = BSplineLst))  
+                    self.SegmentLst.append(Segment(k, **seg, Theta = self.blade.get_Theta(self.config.setup['radial_station']), OCC=True, Boundary = BSplineLst))  
                     
                 else:
                     print('ERROR:\t WRONG input_type')
          
             else:
                 if self.config.setup['input_type'] == 4:
-                    self.SegmentLst.append(Segment(k, Layup = seg['Layup'], CoreMaterial = seg['CoreMaterial'], Theta = self.blade.get_Theta(self.config.setup['radial_station'])))
+                    self.SegmentLst.append(Segment(k, **seg, Theta = self.blade.get_Theta(self.config.setup['radial_station'])))
                 
                 else:
-                    self.SegmentLst.append(Segment(k,  Layup = seg['Layup'], CoreMaterial = seg['CoreMaterial'], Theta = self.config.setup['Theta']))
+                    self.SegmentLst.append(Segment(k, **seg, **self.config.setup))
         
         sorted(self.SegmentLst, key=getID)  
         return None
@@ -382,15 +385,16 @@ class CBM(object):
         return None
 
     
-    def cbm_run_vabs(self):
+    def cbm_run_vabs(self, jobid=str(uuid.uuid4())[:6], rm_vabfiles=True):
         '''runs the solver
         
         Args:
             filename: <string> of the configuration file with path.        
         '''
         self.mesh,nodes = sort_and_reassignID(self.mesh)
+        fstring = '_'+jobid+'.vab'
         #TODO: BE CAREFUL TO USE THE RIGHT COORDINATE SYSTEM FOR THE CALCULATIONS!!!!  
-        vabs_filename = self.config.filename.replace('.yml', '.vab')
+        vabs_filename = self.config.filename.replace('.yml', fstring)
         print('STATUS:\t RUNNING VABS for Constitutive modeling:')
         #EXECUTE VABS:
         if self.config.vabs_cfg.recover_flag == 1:
@@ -431,6 +435,17 @@ class CBM(object):
             for i,n in enumerate(nodes):
                 n.displacement = self.BeamProperties.U[i][3:6]
     
+        if rm_vabfiles:
+            folder = '/'.join(vabs_filename.split('/')[:-1])
+            fstring = vabs_filename.split('/')[-1]
+            print(vabs_filename)
+            for file in os.listdir(folder):
+                if fstring in file:
+                    print('removing: '+folder+'/'+file)
+                    os.remove(folder+'/'+file)
+
+           
+            
     
     def cbm_post_2dmesh(self, attribute='MatID',title='NOTITLE', **kw):
         mesh,nodes = sort_and_reassignID(self.mesh)
