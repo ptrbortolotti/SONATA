@@ -43,14 +43,14 @@ class Configuration(object):
         
         #read segments:
         D = {int(k.split()[-1]):v for (k, v) in yDict['Segments'].items()}
+
         for k in D:
             D[k]['Layup_names'] = np.asarray(D[k]['Layup'])[:,5].tolist()
             D[k]['Layup'] = np.asarray(D[k]['Layup'])[:,:5].astype(np.float)
-            
         self.segments =  OrderedDict(sorted(D.items()))
         
         
 if __name__ == '__main__':
     os.chdir('C://TPflumm_local/work/SONATA')
-    fname = 'examples/sec_config.yaml'  
+    fname = 'jobs/VariSpeed/02_advanced/sec_config.yml'
     cfg = Configuration(fname)

@@ -38,3 +38,4 @@ if __name__ == '__main__':
     os.chdir('C://TPflumm_local/work/SONATA')
     fname = 'examples/mat_db.yml'      
     mdb = read_yaml_materialdb(fname)
+    x = clean_filestring(fname) 

@@ -18,8 +18,15 @@ class Material(object):
         self.rho = rho/1000 #from g/cm3 to g/mm3
         
     def __repr__(self): 
-        return  str('Material %s: %s' % (self.id, self.name))
-     
+        if self.orth==0:
+            return  str('%s: IsotropicMaterial: %s' % (self.id, self.name))    
+        elif self.orth == 1:
+            return  str('%s: OrthotropicMaterial: %s' % (self.id, self.name))
+        elif self.orth == 2:
+            return  str('%s: OrthotropicMaterial: %s' % (self.id, self.name))
+        else:
+            return  str('%s: UndefinedMaterial: %s' % (self.id, self.name))
+            
 
 class IsotropicMaterial(Material):
     __slots__ = ( 'E', 'nu', 'alpha', 'YS', 'UTS') 
@@ -73,9 +80,7 @@ class AnisotropicMaterial(Material):
         self.Yc = kw.get('Yc')  #Transverse strenght of unidirectional composite
         self.S21 = kw.get('S21') # 
         self.S23 = kw.get('S23') # 
-        
-        def __repr__(self): 
-            return  str('AnisotropicMaterial %s: %s' % (self.id, self.name))
+
 
 
 if __name__ == '__main__':

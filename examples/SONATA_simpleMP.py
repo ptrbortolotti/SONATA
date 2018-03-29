@@ -33,8 +33,7 @@ if __name__ == "__main__":
     config = Configuration(filename)
     
     configs = []
-    for i in range(1,10):
-        print(i)
+    for i in range(1,8):
         tmp = copy.deepcopy(config)
         tmp.bw['Material'] = i
         configs.append(tmp)
@@ -42,7 +41,8 @@ if __name__ == "__main__":
     jobs = []
     with futures.ProcessPoolExecutor(max_workers=8) as e:
         fs = {e.submit(compute_cbm, c): it for it,c in enumerate(configs)}
-        print("Alle Aufgaben gestartet.")
+        print("all jobs started.")
         for f in futures.as_completed(fs):
             print("n=%i, MpuS=%f" % (fs[f], f.result().BeamProperties.MpUS))
             jobs.append(f.result())
+    

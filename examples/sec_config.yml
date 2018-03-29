@@ -42,14 +42,14 @@ Segments:
             - [0.0, 1.0, 0.24, 45, 1, 'Skin2']
             
     Segment 2:
-        CoreMaterial: 11
+        CoreMaterial: 0
         Layup: 
             #Start[-],End[-],thickness[mm],Orientation [deg],MatID[int],name[str]	
             - [0.0, 1.0, 0.2, 0, 2, 'Skin1']
             - [0.0, 1.0, 0.6, 0, 2, 'Skin2']
             
     Segment 3:
-        CoreMaterial: 3
+        CoreMaterial: 11
         Layup: 
             #Start[-],End[-],thickness[mm],Orientation [deg],MatID[int],name[str]	
             - [0.0, 1.0, 0.24, 45, 1, 'Skin1']
