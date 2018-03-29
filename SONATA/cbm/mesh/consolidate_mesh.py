@@ -18,7 +18,7 @@ from SONATA.cbm.mesh.mesh_utils import find_cells_that_contain_node
 from SONATA.cbm.mesh.cell import Cell
 from SONATA.cbm.display.display_utils import display_custome_shape    
 
-def consolidate_mesh_on_web(mesh,w_BSplineLst,w1_nodes,w2_nodes,w_tol,display):
+def consolidate_mesh_on_web(web, w_tol, display = None):
     ''' Consolidates mesh on the web interface.
     
     After the mesh has been generated for every segment. This function makes
@@ -38,19 +38,14 @@ def consolidate_mesh_on_web(mesh,w_BSplineLst,w1_nodes,w2_nodes,w_tol,display):
         mesh: the updated mesh formulation (list of cells)
                 
     '''
-    if display !=  None:
-        for n in w1_nodes:
-            display.DisplayShape(n.Pnt2d)
-        
-        for n in w2_nodes:
-            display.DisplayShape(n.Pnt2d, color='RED')
+    w1_nodes = web.wl_nodes
+    w2_nodes = web.wr_nodes
+    mesh = web.wl_cells + web.wr_cells
     
     #Generate NodeMatching Matrix [NM]
-    tmp = []
-    for w1 in w1_nodes:
-        for w2 in w2_nodes:
-            tmp.append([w1.Pnt2d.Distance(w2.Pnt2d),w1.id,w2.id])   
-    tmp=np.asarray(tmp)
+    tmp = [[w1.Pnt2d.Distance(w2.Pnt2d),w1.id,w2.id] for w1 in w1_nodes for w2 in w2_nodes]
+    tmp = np.asarray(tmp)
+    
     NM = tmp[tmp[:,0]<w_tol]
     NM = NM[NM[:,0].argsort()]
     
@@ -78,26 +73,25 @@ def consolidate_mesh_on_web(mesh,w_BSplineLst,w1_nodes,w2_nodes,w_tol,display):
         for c in disco_cells:
             c.nodes = [n1 if x==n2 else x for x in c.nodes]
     
-    #determine ramaining w1_nodes. If w1_node.id is not in NM[:,1]
-    rem_w1_nodes = []
-    for w1 in w1_nodes:
-        if w1.id not in NM[:,1]:
-            rem_w1_nodes.append(w1)
-            #display.DisplayShape(w1.Pnt2d, color="RED")   
-            
-    rem_w2_nodes = []
-    for w2 in w2_nodes:
-        if w2.id not in NM[:,2]:
-            rem_w2_nodes.append(w2)
-            #display.DisplayShape(w2.Pnt2d, color="GREEN")   
-    
-    mesh = split_cells_to_consolidate(mesh,rem_w1_nodes,display)
-    mesh = split_cells_to_consolidate(mesh,rem_w2_nodes,display)
-    return mesh                    
+    #determine ramaining w1 and w2_nodes. If w1_node.id is not in NM[:,1]            
+    rem_w1_nodes = [w1 for w1 in w1_nodes if w1.id not in NM[:,1]]
+    rem_w2_nodes = [w2 for w2 in w2_nodes if w2.id not in NM[:,2]]        
+           
+#    if display !=  None:
+#        for n in rem_w1_nodes:
+#            display.DisplayShape(n.Pnt2d)
+#            
+#        for n in rem_w2_nodes:
+#            display.DisplayShape(n.Pnt2d, color = 'RED')
+
+    newcells = []
+    newcells.extend(split_cells_to_consolidate(web.wl_cells,rem_w2_nodes,display))
+    newcells.extend(split_cells_to_consolidate(web.wr_cells,rem_w1_nodes,display))
+    return newcells                    
    
 
                  
-def split_cells_to_consolidate(mesh,rem_nodes,display):
+def split_cells_to_consolidate(cells, rem_nodes, display):
     '''Subfunction to split cells with hanging nodes.
     
     Subfunction of consolidate_mesh_on_web to split cells with hanging nodes.
@@ -114,44 +108,59 @@ def split_cells_to_consolidate(mesh,rem_nodes,display):
         mesh: the updated mesh formulation (list of cells)
                         
     '''
-    for rn in rem_nodes:
-        #mark all cells that are very close to the node but do not contain it! 
-        for c in mesh:
-            #identify cells that are beeing intersected by the hanging node!  
-            if c.cell_node_distance(rn) < 1e-4 and (rn not in c.nodes):
-                #calculate the minimun distance between the wire and the node.Pnt2d
-                #display_custome_shape(display,c.wire,2.0, 0.0, [1,1,0]) #Yellow
-                #display.DisplayShape(rn.Pnt2d, color="YELLOW")   
-                edg_idx = c.closest_cell_edge(rn)     
-                #print rn, c, edg_idx 
-                
-                #if the cell is a quad split cell into 1 triangles and one quad 
-                if len(c.nodes) == 4:
-                    
-                    #display.DisplayColoredShape(p2[0], 'ORANGE')
-                    nodeLst = c.nodes
-                    #MODIFY EXISTING CELL
-                    c.nodes = [nodeLst[edg_idx-1],nodeLst[edg_idx],rn]
-                    #ADD NEW CELL
-                    newcell_1 = Cell([nodeLst[edg_idx-1],rn,nodeLst[edg_idx-2]])
-                    newcell_1.theta_1 = c.theta_1
-                    newcell_1.theta_3 = c.theta_3
-                    newcell_1.MatID = c.MatID
-                    mesh.append(newcell_1)
-                    #ADD NEW CELL
-                    newcell_2 = Cell([nodeLst[edg_idx-2],rn,nodeLst[edg_idx-3]])
-                    newcell_2.theta_1 = c.theta_1
-                    newcell_2.theta_3 = c.theta_3
-                    newcell_2.MatID = c.MatID
-                    mesh.append(newcell_2)         
-                    
-                #if cell is triangle split into 2 further triangles
-                elif len(c.nodes) == 3: 
-                    c.nodes = [nodeLst[edg_idx-1],nodeLst[edg_idx],rn]
-                    newcell = Cell([nodeLst[edg_idx-1],rn,nodeLst[edg_idx]])
-                    newcell.theta_1 = c.theta_1
-                    newcell.theta_3 = c.theta_3
-                    newcell.MatID = c.MatID
-                    mesh.append(newcell)                 
+    newcells = []
+    for c in cells:
+        tmp_nodes = []
+        tmp_newcells = []
+        for rn in rem_nodes:
+             if c.cell_node_distance(rn) < 1e-4 and (rn not in c.nodes):
+                 tmp_nodes.append(rn)
+                 edg_idx = c.closest_cell_edge(rn)  
+        
+        if len(c.nodes) == 4 and len(tmp_nodes)>0:
+            edg_idx = c.closest_cell_edge(tmp_nodes[0])  
+            nodeLst = c.nodes
             
-    return mesh
+            if display:
+                display.DisplayShape(c.wire, color='RED')
+            
+                for it,n in enumerate(nodeLst):
+                    display.DisplayShape(n.Pnt2d)
+                    display.DisplayMessage(n.Pnt,str(it),message_color=(1.0,0.0,0.0))
+                for n in tmp_nodes:
+                    display.DisplayShape(n.Pnt2d, color='RED')
+
+            #TODO: sort tmp nodes based on web.BSplineLst postion
+            if len(tmp_nodes) == 1:
+                tmp_newcells.append(Cell([nodeLst[edg_idx-1],tmp_nodes[0],nodeLst[edg_idx-2]]))
+                c.nodes = [nodeLst[edg_idx-1],nodeLst[edg_idx],tmp_nodes[0]]
+                tmp_newcells.append(Cell([nodeLst[edg_idx-2],tmp_nodes[0],nodeLst[edg_idx-3]]))
+                
+            elif len(tmp_nodes) == 2:
+                tmp_newcells.append(Cell([nodeLst[edg_idx-1], nodeLst[edg_idx], tmp_nodes[1]]))       #ADD NEW CELL
+                c.nodes = [nodeLst[edg_idx-1],tmp_nodes[1],tmp_nodes[0],nodeLst[edg_idx-2]]
+                tmp_newcells.append(Cell([nodeLst[edg_idx-2],tmp_nodes[0],nodeLst[edg_idx-3]]))
+
+            elif len(tmp_nodes) == 3:
+                tmp_newcells.append(Cell([nodeLst[edg_idx-1], nodeLst[edg_idx], tmp_nodes[2]]))       #ADD NEW CELL
+                tmp_newcells.append(Cell([nodeLst[edg_idx-1], tmp_nodes[2], tmp_nodes[1]]))              #ADD NEW CELL
+                c.nodes = [nodeLst[edg_idx-1],  tmp_nodes[1], nodeLst[edg_idx-2]]           #MODIFY EXISTING CELL#ADD NEW CELL
+                tmp_newcells.append(Cell([nodeLst[edg_idx-2], tmp_nodes[1], tmp_nodes[0]]))
+                tmp_newcells.append(Cell([nodeLst[edg_idx-2], tmp_nodes[0], nodeLst[edg_idx-3]]))             #ADD NEW CELL
+                #tmp_newcells.append(Cell([nodeLst[edg_idx-2],tmp_nodes[2],nodeLst[edg_idx-3]]))       #ADD NEW CELL
+                
+            elif len(tmp_nodes) == 4:
+                tmp_newcells.append(Cell([nodeLst[edg_idx-1], nodeLst[edg_idx], tmp_nodes[3]]))       #ADD NEW CELL
+                tmp_newcells.append(Cell([nodeLst[edg_idx-1], tmp_nodes[3], tmp_nodes[2]]))              #ADD NEW CELL
+                c.nodes = [nodeLst[edg_idx-1],  tmp_nodes[2], tmp_nodes[1], nodeLst[edg_idx-2]]           #MODIFY EXISTING CELL#ADD NEW CELL
+                tmp_newcells.append(Cell([nodeLst[edg_idx-2], tmp_nodes[1], tmp_nodes[0]]))
+                tmp_newcells.append(Cell([nodeLst[edg_idx-2], tmp_nodes[0], nodeLst[edg_idx-3]]))             #ADD NEW CELL
+                #tmp_newcells.append(Cell([nodeLst[edg_idx-2],tmp_nodes[2],nodeLst[edg_idx-3]]))       #ADD NEW CELL
+                
+        for tc in tmp_newcells:
+            tc.theta_1 = c.theta_1
+            tc.theta_3 = c.theta_3
+            tc.MatID = c.MatID     
+        newcells.extend(tmp_newcells)     
+    
+    return newcells                  

@@ -27,6 +27,8 @@ class Web(object):
 
         self.wr_nodes =[] 
         self.wl_nodes = []
+        self.wr_cells =[] 
+        self.wl_cells = []
         
         #self.BackBSplineLst = trim_BSplineLst(BSplineLst, S1, S2, start, end):
         #Intersect Segment0_Boundary_BSplineLst with self.BSpline

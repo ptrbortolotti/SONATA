@@ -182,7 +182,7 @@ def move_node_on_BSplineLst(BSplineLst,node,dist,tol=1e-6):
     return None
 
 
-def grab_nodes_of_cells_on_BSplineLst(cells,BSplineLst):
+def grab_nodes_of_cells_on_BSplineLst(cells, BSplineLst):
     '''the grab_nodes_of_cells_on_BSplineLst fuction determines the nodes of 
     the cells that are located on the BSplineLst (list of geom2d_BSpline 
     objects) with a given tolerance and uses the subfunction 
@@ -198,18 +198,23 @@ def grab_nodes_of_cells_on_BSplineLst(cells,BSplineLst):
     '''
         
     disco_nodes = []
-    tmp_nodes = []
+    disco_cells = []
+#    tmp_nodes = [y for c in cells for y in c.nodes]   
+#    tmp_nodes = list(set(tmp_nodes))  
+#    
     for c in cells:
-        tmp_nodes.extend(c.nodes)
-    
-    tmp_nodes = list(set(tmp_nodes))    
-    disco_nodes.extend(grab_nodes_on_BSplineLst(tmp_nodes,BSplineLst))
+        tmp_nodes = grab_nodes_on_BSplineLst(c.nodes, BSplineLst)
+        if tmp_nodes != []:
+            disco_cells.append(c)
+            disco_nodes.extend(tmp_nodes)
+            
+    #disco_nodes.extend(grab_nodes_on_BSplineLst(tmp_nodes,BSplineLst))
     disco_nodes = list(set(disco_nodes))               
     disco_nodes = sorted(disco_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))
-    return disco_nodes
+    return (disco_nodes, disco_cells)
 
 
-def grab_nodes_on_BSplineLst(nodes,BSplineLst, tolerance=1e-5):
+def grab_nodes_on_BSplineLst(nodes, BSplineLst, tolerance=1e-5):
     '''the grab_nodes_on_BSplineLst fuction determines the nodes of the input 
     argument list 'nodes' that are located on the BSplineLst. It loops though 
     all nodes and for each nodes it generates a projection on all bsplins in 
