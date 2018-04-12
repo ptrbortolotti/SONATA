@@ -73,14 +73,21 @@ def f(tpl):
     p.model.add_constraint('cbm_comp.EI2', lower=1.3e11, upper=1.4e11)
     p.model.add_constraint('cbm_comp.EI3', lower=3.2e12, upper=3.6e12)
 
-    #Setup the Problem
-    p.driver = ScipyOptimizer()
-    p.driver.options['optimizer'] = 'COBYLA'
-    p.driver.options['disp'] = True
-    p.driver.options['tol'] = 1e-4
-    p.driver.options['maxiter'] = 2
-    p.driver.opt_settings['rhobeg'] = 0.1 
+#    #Setup the Problem
+#    p.driver = ScipyOptimizer()
+#    p.driver.options['optimizer'] = 'COBYLA'
+#    p.driver.options['disp'] = True
+#    p.driver.options['tol'] = 1e-2
+#    p.driver.options['maxiter'] = 20
+#    p.driver.opt_settings['rhobeg'] = 0.1 
  
+        #Setup the Problem
+    p.driver = ScipyOptimizer()
+    p.driver.options['optimizer'] = 'SLSQP'
+    p.driver.options['disp'] = True
+    p.driver.options['tol'] = 1e-2
+    p.driver.options['maxiter'] = 20
+    p.driver.opt_settings['eps'] = 0.1 
     
 #    p.driver = SimpleGADriver()
 #    p.driver.options['bits'] = {'ivc.wp1' : 8}
@@ -98,12 +105,7 @@ def f(tpl):
     return p.model.cbm_comp.job
     
 if __name__ == '__main__':
-    
-    
-    pool = Pool(processes=2)
+
     filename = 'jobs/VariSpeed/01_simple/sec_config.input'
-    
     test = [[2500,filename,1],[3000,filename,2]]
-    
-    job = pool.map(f,test)
-    
+

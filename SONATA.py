@@ -46,7 +46,7 @@ job.cbm_gen_topo()
 job.cbm_gen_mesh()
 #job.cbm_save()
 job.cbm_review_mesh()
-#job.cbm_post_2dmesh()
+job.cbm_post_2dmesh()
 job.cbm_run_vabs()
 
 

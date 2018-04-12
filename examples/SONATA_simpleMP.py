@@ -46,3 +46,5 @@ if __name__ == "__main__":
             print("n=%i, MpuS=%f" % (fs[f], f.result().BeamProperties.MpUS))
             jobs.append(f.result())
     
+    
+    

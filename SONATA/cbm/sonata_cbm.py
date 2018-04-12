@@ -307,7 +307,6 @@ class CBM(object):
         return None
 
 
-
     def cbm_gen_mesh(self):
         """
         generates the dicretization of topology and stores the cells and nodes
@@ -387,7 +386,7 @@ class CBM(object):
         return None
 
     
-    def cbm_run_vabs(self, jobid=str(uuid.uuid4())[:6], rm_vabfiles=True):
+    def cbm_run_vabs(self, jobid=str(uuid.uuid4())[:8], rm_vabfiles=True):
         '''runs the solver
         
         Args:
@@ -448,7 +447,6 @@ class CBM(object):
 
            
             
-    
     def cbm_post_2dmesh(self, attribute='MatID',title='NOTITLE', **kw):
         mesh,nodes = sort_and_reassignID(self.mesh)
         fig,ax = plot_cells(self.mesh, nodes, attribute, self.BeamProperties, title, **kw)

@@ -5,8 +5,13 @@ Created on Wed Jan 24 13:54:37 2018
 @author: TPflumm
 """
 import numpy as np
+import sys
+import copy 
+import math
+
 from datetime import datetime
 from openmdao.api import ExplicitComponent
+
 
 from SONATA.cbm.fileIO.hiddenprints import HiddenPrints
 from SONATA.cbm.sonata_cbm import CBM
@@ -19,6 +24,7 @@ class CBM_ExplComp_VSadvanced(ExplicitComponent):
     def __init__(self, config):
         super().__init__()
         self.config = config
+        self.ref_config = copy.deepcopy(config) 
         self.ref_dct = {}
 
     
@@ -33,8 +39,8 @@ class CBM_ExplComp_VSadvanced(ExplicitComponent):
         #self.declare_partials('*', '*', method='fd')
     
     def set_input(self):
-        self.add_input('s_w1', val=0.00)
-        self.add_input('s_w2', val=0.00)
+        self.add_input('s_w1', val=0.44)
+        self.add_input('s_w2', val=0.56)
         self.add_input('t_erosion', val=0.82)
         self.add_input('t_overwrap', val=0.25)  
         self.add_input('t_spar1', val=3.00)
@@ -47,12 +53,12 @@ class CBM_ExplComp_VSadvanced(ExplicitComponent):
 
     def connect_input_to_config(self,inputs):
         #Architecture:
-        self.job.config.webs[1]['Pos1'] = self.job.config.webs[1]['Pos1']+inputs['s_w1'][0]
-        self.job.config.webs[1]['Pos2'] = self.job.config.webs[1]['Pos2']-inputs['s_w1'][0]
-      
-        self.job.config.webs[2]['Pos1'] = self.job.config.webs[2]['Pos1']+inputs['s_w2'][0]
-        self.job.config.webs[2]['Pos2'] = self.job.config.webs[2]['Pos2']-inputs['s_w2'][0]
-
+        self.job.config.webs[1]['Pos1'] = inputs['s_w1'][0]
+        self.job.config.webs[1]['Pos2'] = 1-self.job.config.webs[1]['Pos1']
+        
+        self.job.config.webs[2]['Pos1'] = inputs['s_w2'][0]
+        self.job.config.webs[2]['Pos2'] = 1-self.job.config.webs[2]['Pos1']
+        
         #Segment 0 :
         self.job.config.segments[0]['Layup'][0][2] = inputs['t_erosion'][0]
         self.job.config.segments[0]['Layup'][1][2] = inputs['t_overwrap'][0]
@@ -96,9 +102,11 @@ class CBM_ExplComp_VSadvanced(ExplicitComponent):
         o3 = abs(self.job.BeamProperties.CS[1][1]*1e-6 - self.ref_dct['torsional_stiffness']) / self.ref_dct['torsional_stiffness']
         o4 = abs(self.job.BeamProperties.CS[0][0] - self.ref_dct['axial_stiffness']) / self.ref_dct['axial_stiffness']
         o5 = abs(self.job.BeamProperties.MpUS - self.ref_dct['mass_per_unit_span']) / self.ref_dct['mass_per_unit_span']
-              
-        #obj_arr = np.hstack((o1**2,o2**2,o3**2,o4**2,o5**2))
-        return o1+o2+o3+o4+o5
+        #o6 = abs(self.job.BeamProperties.Xm2)
+        
+        self.residuum = np.mean([o1,o2,o3,o4,o5])
+        self.rmse = math.sqrt(np.mean([o1**2,o2**2,o3**2,o4**2,o5**2]))
+        return self.rmse
 
     def connect_output_from_job(self, outputs):
         outputs['MpUS'] = self.job.BeamProperties.MpUS
@@ -115,8 +123,6 @@ class CBM_ExplComp_VSadvanced(ExplicitComponent):
     def set_references(self,ref_dct):
         self.ref_dct = ref_dct
 
-
-
     def compute(self, inputs, outputs):
         elapsed_t = datetime.now() - self.startTime
         m, s = divmod(elapsed_t.seconds, 60)
@@ -126,9 +132,15 @@ class CBM_ExplComp_VSadvanced(ExplicitComponent):
             for k in inputs:
                 print('--%s, ' %k, end=' ')  
             print('')
-        print(self.counter, end=' ')
-        print('%02d:%02d:%02d ' % (h,m,s), end=' ')
-        print(inputs, end=' ')
+        print(('%2i' % self.counter), end=' ')
+        print('%02d:%02d:%02d [' % (h,m,s), end=' ')
+        print(('%2.3f' % inputs['s_w1'][0]), end=' ')
+        print(('%2.3f' % inputs['s_w2'][0]), end=' ')
+        print(('%2.3f' % inputs['t_sparcap1'][0]), end=' ')
+        print(('%2.3f' % inputs['t_sparcap2'][0]), end=' ')
+        print(('%2.3f' % inputs['t_sparcap3'][0]), end=' ')
+        print(('%2.3f' % inputs['t_sparcap4'][0]), end=' ')
+        print(('%2.3f' % inputs['rho_mat11'][0]), end=' ')
 #        for k,v in inputs.items():
 #             print('%.2f, ' %v, end=' ') 
 
@@ -136,13 +148,23 @@ class CBM_ExplComp_VSadvanced(ExplicitComponent):
         self.job = None
         self.job = CBM(self.config)
         self.connect_input_to_config(inputs)
-        with HiddenPrints():
-            self.job.cbm_gen_topo()
-            self.job.cbm_gen_mesh()
-            self.job.cbm_run_vabs(rm_vabfiles=False)
 
-        self.connect_output_from_job(outputs)
-        print(outputs['obj'])
+        try:
+            with HiddenPrints():
+                self.job.cbm_gen_topo()
+                self.job.cbm_gen_mesh()
+                self.job.cbm_run_vabs(rm_vabfiles=True)
+            self.connect_output_from_job(outputs)
+            print('] ' + str(outputs['obj']))
+            
+        except KeyboardInterrupt:
+            raise Exception
+            
+        except:
+           outputs['obj'] = 1e3    
+           self.job.cbm_post_2dmesh()
+           print('] [Unexpected error:', sys.exc_info()[0], ']')
+           
         self.counter += 1
 
 
