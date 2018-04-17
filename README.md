@@ -58,11 +58,10 @@ SONATA is developed to work currently in a python 3.6 distribution.
 	
 	Create the sonata anaconda environment by using the terminal or the anaconda prompt ([creating-an-environment-from-an-environment-yml-file](https://conda.io/docs/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file))
 	
-	- Create the environement for the environemnt.yml file 
+	* Create the environement for the environemnt.yml file 
 	``` conda env create -f environment.yml ```
-	- Activate the new environment: ```source activate sonata```
-	- Verify that the new environemnt was installed correctly: ``` conda list ```
-
+	* Activate the new environment: ```source activate sonata```
+	* Verify that the new environemnt was installed correctly: ``` conda list ```
 
 
 If your are using windows or if you want to install your packages manually follow the following steps. If a package is not available from conda or Anaconda.org, you may be able to find and install the package with another package manager like pip. Make sure to activate your conda environment.
