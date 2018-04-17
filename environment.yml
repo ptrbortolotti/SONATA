@@ -55,9 +55,6 @@ dependencies:
   - cloudpickle=0.5.2=py36_1
   - clyent=1.2.2=py36h7e57e65_1
   - colorama=0.3.9=py36h489cec4_0
-  - conda=4.5.0=py36_0
-  - conda-build=3.4.1=py36_0
-  - conda-env=2.6.0=h36134e3_1
   - conda-verify=2.0.0=py36h98955d8_0
   - contextlib2=0.5.5=py36h6c84a62_0
   - cryptography=2.1.4=py36hd09be54_0

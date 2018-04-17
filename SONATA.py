@@ -34,8 +34,8 @@ plt.close('all')
 #TODO: Comment the CBM Class and memeber functions properly!
 #TODO: include optionflags and Vabs_setup in Configuration
 
-filename = 'examples/sec_config.yml'
-#filename = 'jobs/VariSpeed/advanced/sec_config.yml'
+#filename = 'examples/sec_config.yml'
+filename = 'jobs/VariSpeed/advanced/sec_config.yml'
 config = Configuration(filename)
 
 job = CBM(config)

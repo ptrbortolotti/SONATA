@@ -57,7 +57,6 @@ SONATA is developed to work currently in a python 3.6 distribution.
 1. A **python 3.6** distribution is needed. It is recommended to use use Anaconda for easier package management [https://www.anaconda.com/download/]().
 	
 	Create the sonata anaconda environment by using the terminal or the anaconda prompt ([creating-an-environment-from-an-environment-yml-file](https://conda.io/docs/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file))
-	
 	* Create the environement for the environemnt.yml file 
 	``` conda env create -f environment.yml ```
 	* Activate the new environment: ```source activate sonata```
