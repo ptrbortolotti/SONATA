@@ -12,6 +12,7 @@ import subprocess
 import sys,os,math
 import numpy as np
 import uuid
+import platform
 
 
 #PythonOCC Modules
@@ -397,24 +398,26 @@ class CBM(object):
         #TODO: BE CAREFUL TO USE THE RIGHT COORDINATE SYSTEM FOR THE CALCULATIONS!!!!  
         vabs_filename = self.config.filename.replace('.yml', fstring)
         print('STATUS:\t RUNNING VABS for Constitutive modeling:')
+        if platform.system() == 'Linux':
+            executable = 'VABSIII'
+        elif platform.system == 'Windows':
+            executable = 'VABSIII.exe'
+            
         #EXECUTE VABS:
         if self.config.vabs_cfg.recover_flag == 1:
             self.config.vabs_cfg.recover_flag=0
             export_cells_for_VABS(self.mesh,nodes, vabs_filename, self.config.vabs_cfg, self.MaterialLst)
-            command = 'VABSIII.exe '+ vabs_filename
-            stdout = subprocess.check_output(command, shell=True)
+            
+            stdout = subprocess.run([executable,vabs_filename], stdout=subprocess.PIPE).stdout.decode('utf-8')
             self.config.vabs_cfg.recover_flag=1
             export_cells_for_VABS(self.mesh,nodes,vabs_filename, self.config.vabs_cfg, self.MaterialLst)
             print('STATUS:\t RUNNING VABS for 3D Recovery:')
-            command = 'VABSIII.exe '+ vabs_filename
-            stdout = stdout + subprocess.check_output(command, shell=True)
+            stdout = subprocess.run([executable,vabs_filename], stdout=subprocess.PIPE).stdout.decode('utf-8')
             
         else:
             export_cells_for_VABS(self.mesh, nodes ,vabs_filename, self.config.vabs_cfg, self.MaterialLst)
-            command = 'VABSIII.exe '+ vabs_filename
-            stdout = subprocess.check_output(command, shell=True)
+            stdout = subprocess.run([executable,vabs_filename], stdout=subprocess.PIPE).stdout.decode('utf-8')
             
-        stdout = stdout.decode('utf-8')
         stdout = stdout.replace('\r\n\r\n','\n\t   -')
         stdout = stdout.replace('\r\n','\n\t   -')
         stdout = 'STATUS:\t VABS CALCULATIONS COMPLETED: \n\t   -' + stdout

@@ -259,10 +259,13 @@ class Layer(object):
         '''
         
         self.determine_a_nodes(SegmentLst,global_minLen,display)
+        print(self.ID)
         self.a_nodes, self.b_nodes, self.cells = mesh_by_projecting_nodes_on_BSplineLst(self.a_BSplineLst,self.a_nodes,self.b_BSplineLst,self.thickness, proj_tol_1,crit_angle_1, LayerID = self.ID, display=display) 
         #enhanced_cells = modify_cornerstyle_one(cells,self.b_BSplineLst)
+        print(self.ID)
         self.cells, nb_nodes = modify_sharp_corners(self.cells, self.b_BSplineLst, global_minLen, self.thickness, self.ID, proj_tol_2, alpha_crit_2, display=display)
         self.b_nodes.extend(nb_nodes)
+        print(self.ID)
         try:
             self.cells, nb_nodes = second_stage_improvements(self.cells, self.b_BSplineLst, global_minLen, self.ID, growing_factor, shrinking_factor, display=display)
             self.b_nodes.extend(nb_nodes)

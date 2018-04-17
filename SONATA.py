@@ -35,18 +35,19 @@ plt.close('all')
 #TODO: include optionflags and Vabs_setup in Configuration
 
 filename = 'examples/sec_config.yml'
-filename = 'jobs/VariSpeed/advanced/sec_config.yml'
+#filename = 'jobs/VariSpeed/advanced/sec_config.yml'
 config = Configuration(filename)
 
 job = CBM(config)
 #job.cbm_save()
 job.cbm_gen_topo()
+#job.cbm_post_3dtopo()
 #job.cbm_load_topo()
 #job.cbm_display_config()
 job.cbm_gen_mesh()
 #job.cbm_save()
-job.cbm_review_mesh()
 job.cbm_post_2dmesh()
+job.cbm_review_mesh()
 job.cbm_run_vabs()
 
 

@@ -43,41 +43,59 @@ The second part generates a mesh upon the topology, the mesh can be exported int
 <img src="docs/mesh.png" hspace="20" vspace="6" width="600">
 
 ##### 2. SONATA-MARC (python module for the DYMORE Multibody Aeromechanics tool):
-this module comes [https://gitlab.lrz.de/wgarre/Pymore](https://gitlab.lrz.de/wgarre/Pymore)
+this module comes [https://gitlab.lrz.de/wgarre/Pymore]()
 
 
 ## Installation
+Download or Clone the repository: [https://gitlab.lrz.de/gu32kij/SONATA.git]().
+
 To use the full functionality of SONATA a bunch of installations have to be made and packages to gathered. In this section a brief insallation guide is presented that will help the user to install it properly. 
-SONATA is developed to work currently in a python 2.7 distribution but will later be updated to a python > 3.6.
+SONATA is developed to work currently in a python 3.6 distribution.
 
-1. A python 2.7 distribution is needed. It is recommended to use use Anaconda for easier package management https://www.anaconda.com/download/
-2. Install the **pythonocc** precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. Simply run the following commands in the terminal (for Windows users: execute the cmd command terminal):
-    ```	conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.18	```
 
-3. Install the **pint** module. This is used to change units in the SONATA/CBM - DYMORE interface.
+
+1. A **python 3.6** distribution is needed. It is recommended to use use Anaconda for easier package management [https://www.anaconda.com/download/]().
+	
+	Create the sonata anaconda environment by using the terminal or the anaconda prompt ([creating-an-environment-from-an-environment-yml-file](https://conda.io/docs/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file))
+	
+	- Create the environement for the environemnt.yml file 
+	``` conda env create -f environment.yml ```
+	- Activate the new environment: ```source activate sonata```
+	- Verify that the new environemnt was installed correctly: ``` conda list ```
+
+
+
+If your are using windows or if you want to install your packages manually follow the following steps. If a package is not available from conda or Anaconda.org, you may be able to find and install the package with another package manager like pip. Make sure to activate your conda environment.
+[installing-non-conda-packages](https://conda.io/docs/user-guide/tasks/manage-pkgs.html#installing-non-conda-packages)
+
+
+1. **pythonocc** module: pythonocc is a wrapper for the opensource CAD kernel opencascade and is used extensively in SONATA. Install the pythonocc precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. 
+	Simply run the following commands in the terminal (for Windows users: execute the cmd command terminal or in the conda prompt):
+    
+    ```	conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.18.1 ```
+
+2.  **pint** module: This is used to change units in the SONATA/CBM - DYMORE interface.
+    
     ``` conda install -c conda-forge pint ```
 
-4. Install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
+3.  **intervaltree** module: This is used for an intervaltree structure of the topology and the calculation of layup coordinates. 
+	
+	```  conda install -c conda-forge intervaltree ``` 
+
+4. **shapely** module. This is used for the discretization and approximation of offset curves during the topology generation process:
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
 		
         ```pip install packages/Shapely-1.5.17-cp27-cp27m-win_amd64.whl```
-	* Linux: ```pip install shapely==1.5.17```
-	*           ``` conda install -c scitools shapely ``` 
+	* Linux: ```pip install shapely==1.6.4```
+	*  ``` conda install -c scitools shapely ``` 
 
 5. Install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
 	* __Windows__: Install the precompiled binaries from the /packages directory by running the following command: 
 		
         ```pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl```
-	* __Linux__: ```easy_install triangle```
+	* __Linux__: ```pip install triangle```
 
-
-6. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
-	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
-		
-        ```pip install intervaltree```
-	* __Linux__: ```pip install intervaltree```
-
-7. Install the **openmdao** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
+6. Install the **openmdao** package.
 	* __Windows__: Install the precompiled binaries from the /package directory by running the following command:
 		
         ```	pip install openmdao```
@@ -88,13 +106,8 @@ SONATA is developed to work currently in a python 2.7 distribution but will late
         ``` conda build pyoptsparse ```
     * To use parallel computing features you need to install mpi4py!!!
 
-8. Test the installation and all packages by excecuting the folloging python script:
+7. Test the installation and all packages by excecuting the folloging python script:
 	```	python test_install.py```
-
-
-9. Now you can download or clone the repository and execute the main SONATA script. 
-	```	python SONATA.py```
-
 
 ## Resources
 * [PythonOCC](http://www.pythonocc.org/)
