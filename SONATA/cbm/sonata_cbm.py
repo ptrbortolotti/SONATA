@@ -468,7 +468,6 @@ class CBM(object):
     
     def cbm_post_3dtopo(self):
         self.cbm_display_config()
-        
         #display.DisplayShape(SegmentLst[0].BSplineLst[0].StartPoint())
         #display_custome_shape(display,SegmentLst[0].wire,2,0,[0,0,0])
 
@@ -521,8 +520,6 @@ class CBM(object):
         eta = self.config.setup['radial_station']/1000 - x_offset 
         #print'@CURVILINEAR_COORDINATE:', eta
         return np.hstack((MASS,STIFF,mu,eta))
-        
-
         
 #%%############################################################################
 #                           M    A    I    N                                  #

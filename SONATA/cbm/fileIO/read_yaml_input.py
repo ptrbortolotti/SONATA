@@ -8,7 +8,7 @@ import yaml
 import os
 
 if __name__ == '__main__':
-    os.chdir('C://TPflumm_local/work/SONATA')
+    os.chdir('/media/gu32kij/work/TPflumm/SONATA')
 from SONATA.cbm.fileIO.material import IsotropicMaterial, OrthotropicMaterial, AnisotropicMaterial
 
 
@@ -35,7 +35,8 @@ def read_yaml_materialdb(fname):
         
 
 if __name__ == '__main__':
-    os.chdir('C://TPflumm_local/work/SONATA')
-    fname = 'examples/mat_db.yml'      
-    mdb = read_yaml_materialdb(fname)
-    x = clean_filestring(fname) 
+
+    os.chdir('/media/gu32kij/work/TPflumm/SONATA')
+
+    mdb = read_yaml_materialdb('examples/mat_db.yml')
+    x = clean_filestring('examples/sec_config.yml') 

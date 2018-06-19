@@ -500,7 +500,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                 v = gp_Vec2d()
                 u = (a_spline.LastParameter()-a_spline.FirstParameter())/2+a_spline.FirstParameter()
                 a_spline.D1(u,p,v)
-                display.DisplayMessage(p,str(i),height=30,message_color=(0,1,1))
+                #display.DisplayMessage(p,str(i),height=30,message_color=(0,1,1))
                 #display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
             
         if flag_display_b_BSplineLst: 

@@ -10,7 +10,7 @@ import numpy as np
 import yaml
 
 if __name__ == '__main__':
-    os.chdir('C://TPflumm_local/work/SONATA')
+    os.chdir('/media/gu32kij/work/TPflumm/SONATA')
 from SONATA.cbm.fileIO.read_yaml_input import clean_filestring
 from SONATA.vabs.VABS_interface import VABS_config
 
@@ -22,6 +22,7 @@ class Configuration(object):
     __slots__ = ( 'filename', 'setup', 'webs', 'segments', 'bw', 'flags', 'vabs_cfg') 
     def __init__(self, filename=None):
         if filename:
+            self.setup, self.webs, self.segments, self.bw = {},{},{},{}
             self.read_yaml_config(filename)
             self.filename = filename
         else:
@@ -35,10 +36,12 @@ class Configuration(object):
     def read_yaml_config(self, fname):
         b_string = clean_filestring(fname,comments='#')
         yDict =  yaml.load(b_string)
-
         self.setup = yDict['Setup']
-        D = {int(k.split()[-1]):v for (k, v) in yDict['Webs'].items()}    
-        self.webs =  OrderedDict(sorted(D.items()))
+        
+        if 'Webs' in yDict.keys():
+            D = {int(k.split()[-1]):v for (k, v) in yDict['Webs'].items()}    
+            self.webs =  OrderedDict(sorted(D.items()))
+         
         self.bw = yDict['BalanceWeight']
         
         #read segments:
@@ -51,6 +54,7 @@ class Configuration(object):
         
         
 if __name__ == '__main__':
-    os.chdir('C://TPflumm_local/work/SONATA')
-    fname = 'jobs/VariSpeed/02_advanced/sec_config.yml'
+    os.chdir('/media/gu32kij/work/TPflumm/SONATA')
+    #fname = 'jobs/VariSpeed/advanced/sec_config.yml'
+    fname = 'examples/sec_config.yml'
     cfg = Configuration(fname)

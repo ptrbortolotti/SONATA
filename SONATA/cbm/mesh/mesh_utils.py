@@ -1,7 +1,6 @@
 import numpy as np
 import math
 import itertools
-import toolz
 
 from OCC.AIS import AIS_Shape
 from OCC.BRep import BRep_Builder, BRep_Tool

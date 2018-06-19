@@ -153,6 +153,10 @@ def show_coordinate_system(display,length,event=None):
     display.DisplayShape(h1,color='RED')
     display.DisplayShape(h2,color='GREEN')
     display.DisplayShape(h3,color='BLUE')
+    display.DisplayMessage(p1,'x',message_color=(0,0,0))
+    display.DisplayMessage(p2,'y',message_color=(0,0,0))
+    display.DisplayMessage(p3,'z',message_color=(0,0,0))
+
 
 def display_points_of_array(array,display):
     for j in range(array.Lower(),array.Upper()+1):
