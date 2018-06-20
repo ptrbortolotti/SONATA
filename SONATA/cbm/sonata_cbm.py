@@ -13,7 +13,7 @@ import sys,os,math
 import numpy as np
 import uuid
 import platform
-
+import shutil
 
 #PythonOCC Modules
 from OCC.Display.SimpleGui import init_display
@@ -398,10 +398,19 @@ class CBM(object):
         #TODO: BE CAREFUL TO USE THE RIGHT COORDINATE SYSTEM FOR THE CALCULATIONS!!!!  
         vabs_filename = self.config.filename.replace('.yml', fstring)
         print('STATUS:\t RUNNING VABS for Constitutive modeling:')
+        
+        #Copy licensefile to 
+        src = os.getcwd()+'/SONATA/vabs/licenses/license.'+platform.node().lower()
+        dst = os.getcwd()+'/license'
+        if os.path.isfile(src):
+            shutil.copyfile(src, dst)
+        else:
+            print('no license file found at',src)
+        
         if platform.system() == 'Linux':
-            executable = 'VABSIII'
+            executable = 'SONATA/vabs/bin/VABSIII'
         elif platform.system == 'Windows':
-            executable = 'VABSIII.exe'
+            executable = 'SONATA/vabs/bin/VABSIII.exe'
             
         #EXECUTE VABS:
         if self.config.vabs_cfg.recover_flag == 1:

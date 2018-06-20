@@ -58,7 +58,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
     b_nodes = []
     cellLst = []
     distance = (1+tol)*layer_thickness
-    flag_integrate_leftover_interior_nodes = True           
+    flag_integrate_leftover_interior_nodes = False           
                
     #Is a_BSplineLst closed? 
     closed_a = False
@@ -410,7 +410,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     a_nodes.insert(insert_idx+1,new_a_node)
            
         if new_b_node:
-            #print new_b_node
+            print(new_b_node)
             #display.DisplayShape(new_b_node.Pnt2d, color='RED')
             #print(b_nodes[0].parameters[1], b_nodes[0].parameters[2])
             #b_nodes =  sorted(b_nodes, key=lambda n: (n.parameters[1], n.parameters[2]) )
@@ -464,10 +464,10 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
     #==============OCC3DVIEWER========================================
     if kw.get('display') !=  None:
         
-        flag_display_a_nodes = False
-        flag_display_b_nodes = False
+        flag_display_a_nodes = True
+        flag_display_b_nodes = True
         flag_display_a_BSplineLst = True
-        flag_display_b_BSplineLst = False
+        flag_display_b_BSplineLst = True
         flag_display_cells = False
         
         if flag_display_a_nodes:
@@ -475,22 +475,22 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     if a.corner == True:
                         display.DisplayShape(a.Pnt,color='WHITE')  
                         string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
-                        display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
+                        #display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
                         
                     elif a.cornerstyle == 1 or a.cornerstyle == 0 :
                         display.DisplayShape(a.Pnt,color='WHITE')  
                         string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
-                        display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
+                        #display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
                         
                     else: 
                         display.DisplayShape(a.Pnt,color='WHITE')  
-                        display.DisplayMessage(a.Pnt,str(a.id))
+                        #display.DisplayMessage(a.Pnt,str(a.id))
                     
                     
         if flag_display_b_nodes:           
             for i,b in enumerate(b_nodes):
                     display.DisplayShape(b.Pnt,color='GREEN')  
-                    display.DisplayMessage(b.Pnt,str(b.id),message_color=(1.0,0.5,0.0))
+                    #display.DisplayMessage(b.Pnt,str(b.id),message_color=(1.0,0.5,0.0))
     
         if flag_display_a_BSplineLst: 
             for i,a_spline in enumerate(a_BSplineLst):
@@ -511,7 +511,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                 v = gp_Vec2d()
                 u = (b_spline.LastParameter()-b_spline.FirstParameter())/2+b_spline.FirstParameter()
                 b_spline.D1(u,p,v)
-                display.DisplayMessage(p,str(i),height=30,message_color=(0,0,1))    
+                #display.DisplayMessage(p,str(i),height=30,message_color=(0,0,1))    
                 #display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
      
         if flag_display_cells:
