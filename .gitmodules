@@ -1,0 +1,3 @@
+[submodule "SONATA/Pymore"]
+	path = SONATA/Pymore
+	url = https://gitlab.lrz.de/wgarre/Pymore.git

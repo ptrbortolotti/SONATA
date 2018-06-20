@@ -23,9 +23,12 @@ from SONATA.cbm.display.display_utils import show_coordinate_system
 from SONATA.cbm.fileIO.CADinput import BSplineLst_from_intersect_shape
 
 class Blade(object):
-    def __init__(self, folder, name='None', FLAG_SHOW_3D_TOPO=False, FLAG_SHOW_2D_DATA=False):
+    def __init__(self, folder, name=None, FLAG_SHOW_3D_TOPO=False, FLAG_SHOW_2D_DATA=False):
         self.folder = folder
-        self.name = name
+        if name:
+            self.name = name
+        else:
+            self.name = folder
         self.FLAG_SHOW_3D_TOPO = FLAG_SHOW_3D_TOPO
         self.FLAG_SHOW_2D_DATA = FLAG_SHOW_2D_DATA
         self.airfoilLst = []

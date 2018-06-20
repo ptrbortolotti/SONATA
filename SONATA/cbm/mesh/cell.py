@@ -14,26 +14,11 @@ from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline,Geom2dAPI_ProjectPointOnCurv
 from SONATA.vabs.strain import Strain
 from SONATA.vabs.stress import Stress
 from SONATA.cbm.topo.utils import PolygonArea, calc_angle_between, point2d_list_to_TColgp_Array1OfPnt2d
-
-
-def calc_cell_angles(cell):
-    corners = []
-    for node in cell.nodes:
-        corners.append(node.coordinates)         
-    corners = np.asarray(corners)   
-    temp = []
-    for i in range(0,corners.shape[0]):
-            if i == corners.shape[0]-1: #last point
-                v1 = corners[i-1]-corners[i] 
-                v2 = corners[0]-corners[i]
-            else:
-                v1 = corners[i-1]-corners[i]
-                v2 = corners[i+1]-corners[i]
-            temp.append(calc_angle_between(v1,v2))
-    return np.array(temp)
+from SONATA.cbm.mesh.cell_utils import calc_cell_angles
 
 
 class Cell(object):
+    __slots__ = ( 'id', 'nodes', 'theta_1', 'theta_3', 'MatID', 'structured', 'interior_nodes', 'strain', 'strainM', 'stress', 'stressM') 
     class_counter= 1
     def __init__(self,nodeLst):                  #int
         self.id = self.__class__.class_counter
@@ -83,12 +68,11 @@ class Cell(object):
         
     @property
     def minimum_angle(self):
-        return self.calc_minimum_angle()
+        return np.amin(calc_cell_angles(self))
 
     @property
     def maximum_angle(self):
-        return self.calc_maximum_angle()  
-    
+        return np.amax(calc_cell_angles(self))  
     
     def __repr__(self): 
         #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 
@@ -129,11 +113,13 @@ class Cell(object):
         self.theta_1 = theta_1
         return None
 
+
     def calc_area(self):  
         corners = []
         for node in self.nodes:
             corners.append(node.coordinates)      
         return PolygonArea(corners)
+
 
     def calc_orientation(self):  
         corners = []
@@ -143,21 +129,15 @@ class Cell(object):
             return True
         else: return False
     
-    def calc_minimum_angle(self):  
-        #print np.amin(calc_cell_angles(self))
-        return np.amin(calc_cell_angles(self))
     
-    def calc_maximum_angle(self):  
-        #print np.amax(calc_cell_angles(self))
-        return np.amax(calc_cell_angles(self))
-
     def min_facelenght(self):  
         fl = []
         for i,n in enumerate(self.nodes[:-1]):
             fl.append(n.Distance(self.nodes[i+1]))
         fl.append(self.nodes[-1].Distance(self.nodes[0]))            
         return min(fl)     
-       
+    
+    
     def build_wire(self):
         WireBuilder = BRepBuilderAPI_MakeWire()
         for i in range(0,len(self.nodes)-1):
@@ -171,16 +151,19 @@ class Cell(object):
         
         return WireBuilder.Wire()
     
+    
     def cell_node_distance(self,node):
         P_distances = []
 
         for i in range(0,len(self.nodes)-1):
             spline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([self.nodes[i].Pnt2d, self.nodes[i+1].Pnt2d])).Curve().GetObject()
             projection = Geom2dAPI_ProjectPointOnCurve(node.Pnt2d,spline.GetHandle())
+            
             for j in range(1,projection.NbPoints()+1):
                 P_distances.append(projection.Distance(j))
 
         return min(P_distances or [10e6])
+    
     
     def closest_cell_edge(self,node):
         P_distances = []
@@ -192,4 +175,3 @@ class Cell(object):
         
         min_index, min_value = min(enumerate(P_distances), key=operator.itemgetter(1))       
         return min_value[1]
-    

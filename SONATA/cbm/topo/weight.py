@@ -41,7 +41,6 @@ class Weight(object):
     def wire(self):
         return self.build_wire()
     
-    
     def __getstate__(self):
         """Return state values to be pickled."""
         return (self.ID, self.X, self.Y, self.D, self.MatID, self.style)   
@@ -55,7 +54,6 @@ class Weight(object):
         self.Curve = Geom2d_Circle(Ax2d,self.D/2)
     
     
-    
     def build_wire(self):
         Center = gp_Pnt(self.X,self.Y,0)
         Ax2 = gp_Ax2(Center,gp_Dir(0,0,1))
@@ -63,6 +61,7 @@ class Weight(object):
         aedge = BRepBuilderAPI_MakeEdge(Circ).Edge()
         wire = BRepBuilderAPI_MakeWire(aedge)
         return wire.Wire()
+    
 #        elif style == 1:
 #        W = 0.4
 #        P1 = Center.Translated(gp_Vec2d(-R,0)) 

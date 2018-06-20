@@ -12,7 +12,7 @@ import pickle
 import matplotlib.pyplot as plt
 
 from OCC.gp import gp_Pnt2d
-from triangle import triangulate
+from triangle import triangulate, plot
 
 from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length
 from SONATA.cbm.mesh.mesh_utils import equidistant_nodes_on_BSplineLst                   
@@ -55,10 +55,12 @@ def triangle_mesh(nodes,options):
         else: tmp.append([i,i+1])
     segments_core = np.asarray(tmp)
         
-    poly = {'vertices': None, 'holes': None, 'segments': None}
+    poly = {'vertices': None, 'segments': None}
     poly['vertices'] = old_vertices
     poly['segments'] = segments_core
+    #plt.plot(old_vertices[:,0],old_vertices[:,1],'.-')
     mesh =  triangulate(poly, options)
+    #plot.compare(plt, poly, mesh)
     return mesh
 
 
@@ -108,7 +110,11 @@ def gen_core_cells(a_nodes,area=1.0,**kwargs):
     if kwargs.get('options') !=  None:
         options = kwargs.get('options')
     else:
-        options = 'pa%s' % (area)
+        if area<1.0:
+            area = 1.0              #Somehow the triangle module crashes now for the area constraint a0.5
+        options = 'pa%s' % (area)   #Somehow crashing!?
+        
+        #options = 'pq'
     
     mesh = triangle_mesh(a_nodes,options)  
   

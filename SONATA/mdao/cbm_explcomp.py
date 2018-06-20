@@ -42,18 +42,33 @@ class CBM_ExplComp(ExplicitComponent):
 
 
     def connect_input_to_config(self,inputs):
-        self.job.config.WEB_Pos1[0] = inputs['WEB_Pos1'][0]
-        self.job.config.WEB_Pos2[0] = inputs['WEB_Pos2'][0]
-        self.job.config.SEG_Layup[0][0][2] = inputs['Skin_layer_thickness'][0]
-        self.job.config.SEG_Layup[0][1][2] = inputs['Skin_layer_thickness'][0]
+        #Architecture:
+#        self.job.config.webs[1]['Pos1'] = 
+#        self.job.config.webs[1]['Pos2'] = 
+
+        #Segment 0 :
+        self.job.config.segments[0]['Layup'][0][2] = inputs['t_erosion'][0]
+        self.job.config.segments[0]['Layup'][1][2] = inputs['t_overwrap'][0]
+        self.job.config.segments[0]['Layup'][2][2] = inputs['t_overwrap'][0]
+        self.job.config.segments[0]['Layup'][3][2] = inputs['t_overwrap'][0]
+        self.job.config.segments[0]['Layup'][4][2] = inputs['t_overwrap'][0]
         
-        self.job.config.SEG_Layup[1][0][2] = inputs['Spar_layer_thickness'][0]
-        self.job.config.SEG_Layup[1][1][2] = inputs['Spar_layer_thickness'][0]
-        self.job.config.SEG_Layup[1][2][2] = inputs['Spar_layer_thickness'][0]
-        self.job.config.SEG_Layup[1][3][2] = inputs['Spar_layer_thickness'][0]
+        #Segment 1:
+        self.job.config.segments[1]['Layup'][0][2] = inputs['t_spar1'][0]
+        self.job.MaterialLst[3].rho = inputs['rho_mat3'][0]
         
-        #self.job.MaterialLst[11].rho = inputs['Core1_density'][0]
-        #self.job.MaterialLst[12].rho = inputs['Core2_density'][0]
+        #Segment 2:
+        self.job.config.segments[2]['Layup'][0][2] = inputs['t_spar_cap'][0]
+        self.job.config.segments[2]['Layup'][1][2] = inputs['t_spar_cap'][0]
+        self.job.config.segments[2]['Layup'][2][2] = inputs['t_spar_cap'][0]
+        self.job.config.segments[2]['Layup'][3][2] = inputs['t_spar_cap'][0]
+        
+        self.job.config.segments[2]['Layup'][0][2] = inputs['t_spar_cap'][0]
+        self.job.config.segments[2]['Layup'][0][2] = inputs['t_spar_cap'][0]
+        self.job.config.segments[2]['Layup'][0][2] = inputs['t_spar_cap'][0]
+        
+        #Segment 3:
+        self.job.MaterialLst[11].rho = inputs['rho_mat11'][0]
 
 
     def set_output(self):
@@ -122,6 +137,7 @@ class CBM_ExplComp(ExplicitComponent):
         self.connect_output_from_job(outputs)
         print(outputs['obj'])
         self.counter += 1
+
 
     def post_cbm(self):
         return self.job.cbm_post_2dmesh()

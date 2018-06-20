@@ -5,12 +5,15 @@
 #TODO: Include more checks for input format
 #TODO: Include Definition of an erosion protection   
 #
+
 #Author: Tobias Pflumm
 #Date:	09/21/2016
 #==============================================================================
 import numpy as np 
 import ast
 from urllib.request import urlopen
+
+from SONATA.cbm.fileIO.material import Material
 
 
 def read_segment(STR,seg2find):
@@ -185,35 +188,6 @@ def AirfoilDat2d(name):
         temp_x.append(float(data[0]))                                                             
         temp_y.append(float(data[1]))                                                                                                       
     return np.array([temp_x,temp_y])                                                                # return AirfoilCoordinate as np.arrray    
-
-
-class Material(object):
-    def __init__(self,MatID,name,orth,rho,**kwargs):
-        self.id = MatID
-        self.name = name
-        self.orth = orth
-        self.rho = rho/1000 #from g/cm3 to g/mm3
-        
-        #ISOTROPIC
-        if orth == 0: 
-            self.E = kwargs.get('E')
-            self.nu = kwargs.get('nu')  
-            self.alpha = kwargs.get('alpha')  
-
-        #orthotropic material
-        elif orth == 1:
-            self.E = kwargs.get('E') 
-            self.G = kwargs.get('G') 
-            self.nu = kwargs.get('nu')  
-            self.alpha = kwargs.get('alpha')  
-             
-        #general anisotropic material
-        elif orth == 2:
-            self.C = kwargs.get('C')  
-            self.alpha = kwargs.get('alpha')  
-
-    def __repr__(self): 
-        return  str('Material %s: %s' % (self.id, self.name))
 
 
 def read_material_input(filename):

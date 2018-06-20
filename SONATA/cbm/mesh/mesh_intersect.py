@@ -68,14 +68,13 @@ def map_mesh_by_intersect_curve2d(mesh,curve2d,wire,global_minLen,**kwargs):
     if kwargs.get('display') !=  None:
         display = kwargs.get('display')
     else: display=None
-   
+       
     #=========================INTERSECTING CELLS===============================
     icells = []
     for c in mesh:
         Distance = BRepExtrema_DistShapeShape(wire,c.wire)
         if Distance.Value()<1e-5:
             icells.append(c)
-            #display.DisplayShape(c.wire,color='YELLOW')
     
     #Determine the interior nodes of Intersecting Cells
     #===================INTERIOR NODES of Intersecting Cells===================
@@ -117,7 +116,6 @@ def map_mesh_by_intersect_curve2d(mesh,curve2d,wire,global_minLen,**kwargs):
     #for c in niicells:
         #display.DisplayShape(c.wire,color='RED')
     
-
     #=========================MAPPING==========================================
     mapped_nodes = []
     for c in icells:
@@ -186,8 +184,6 @@ def map_mesh_by_intersect_curve2d(mesh,curve2d,wire,global_minLen,**kwargs):
     mesh = list(set(mesh) - set(rm2cells))
     
     #TODO: If two nodes are mapped to the same point, then 
-
-    
     #=========================SORTING MAPPED NODES=============================
     uLst = []
     mapped_nodes = list(set(mapped_nodes))

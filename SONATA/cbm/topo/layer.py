@@ -218,13 +218,12 @@ class Layer(object):
                 disco_nodes = grab_nodes_on_BSplineLst(tmp_nodes,iv_BSplineLst)
                 new_a_nodes.extend(disco_nodes)
         
-        
         self.a_nodes = remove_duplicates_from_list_preserving_order(new_a_nodes)
         self.a_nodes = merge_nodes_if_too_close(self.a_nodes,self.a_BSplineLst,global_minLen,0.01)
         
         
-    def mesh_layer(self, SegmentLst, global_minLen, proj_tol_1= 5e-2, 
-                   proj_tol_2= 3e-1, crit_angle_1 = 115, alpha_crit_2 = 60, 
+    def mesh_layer(self, SegmentLst, global_minLen, proj_tol_1=8e-2, 
+                   proj_tol_2= 3e-1, crit_angle_1 = 110, alpha_crit_2 = 60, 
                    growing_factor=1.8, shrinking_factor=0.01, display=None):
         '''
         The mesh layer function discretizes the layer, which is composed of a 

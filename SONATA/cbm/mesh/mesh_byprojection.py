@@ -58,7 +58,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
     b_nodes = []
     cellLst = []
     distance = (1+tol)*layer_thickness
-    flag_integrate_leftover_interior_nodes = True           
+    flag_integrate_leftover_interior_nodes = False           
                
     #Is a_BSplineLst closed? 
     closed_a = False
@@ -93,11 +93,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     pIdx.append(idx)
                 else: None   
         
-        
-
-            #display.DisplayShape(pPnts[0], color='GREEN')
-            
-        
+        #display.DisplayShape(pPnts[0], color='GREEN')
         
         #==================making sure the pPnts are unique:
         '''It happend that somehow the same points were found multiple times'''
@@ -226,7 +222,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     p2 = ProjectPointOnBSplineLst(b_BSplineLst,cP,1)
                     newPnt = p2[0]
                     newPara = [LayerID,p2[1],p2[2]]
-                    b_nodes.append(Node(newPnt,[LayerID,pIdx[0],newPara]))
+                    b_nodes.append(Node(newPnt,newPara))
                     
                 elif node.regular_corner == False:
                     print('WARNING: cornerstyle 0: this possibility has not been implemented yet.')
@@ -241,7 +237,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
             #===CORNERSTYLE 1======     
             elif len(exterior_corners) == 1 and node.corner==False:
                 node.cornerstyle = 1
-                #print 'Node ID: ',node.id,', Len(exterior_corners):', len(exterior_corners)
+                #print('Node ID: ',node.id,', Len(exterior_corners):', len(exterior_corners))
                 b_nodes.append(Node(exterior_corners[0],exterior_corners_para[0]))
             
 
@@ -334,7 +330,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     newPnt = p2[0]
                     newPara = [LayerID,p2[1],p2[2]]
                     
-                    b_nodes.append(Node(newPnt,[LayerID,pIdx[0],newPara]))
+                    b_nodes.append(Node(newPnt,newPara))
                     b_nodes.append(Node(exterior_corners[1],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]))
                     b_nodes[-1].corner = True
                     b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
@@ -364,17 +360,11 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                 #b_nodes.append(Node(b_BSplineLst[pIdx[0]].EndPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].LastParameter()]))
                 #b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))    
             
-            
-            
-            
-            
-            
         else:
             print('Projection Error, number of projection points: ', len(pPnts))
+            
+            
     
-
-
-
     #==============integrate_leftover_interior_nodes=========================================
     #determin_leftover_pnts
     if flag_integrate_leftover_interior_nodes:
@@ -416,14 +406,16 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                 
                 if insert_idx!=None:
                     b_nodes.append(new_b_node)
+                    print('hello',new_b_node)
                     a_nodes.insert(insert_idx+1,new_a_node)
            
         if new_b_node:
-            #print new_b_node
+            print(new_b_node)
             #display.DisplayShape(new_b_node.Pnt2d, color='RED')
-            b_nodes =  sorted(b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))
+            #print(b_nodes[0].parameters[1], b_nodes[0].parameters[2])
+            #b_nodes =  sorted(b_nodes, key=lambda n: (n.parameters[1], n.parameters[2]) )
+            b_nodes = sorted(b_nodes)
 
-        
     #==============CREATE CELLS PROJECTION=========================================
     
     b = 0   #b_nodes idx
@@ -483,22 +475,22 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     if a.corner == True:
                         display.DisplayShape(a.Pnt,color='WHITE')  
                         string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
-                        display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
+                        #display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
                         
                     elif a.cornerstyle == 1 or a.cornerstyle == 0 :
                         display.DisplayShape(a.Pnt,color='WHITE')  
                         string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
-                        display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
+                        #display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
                         
                     else: 
                         display.DisplayShape(a.Pnt,color='WHITE')  
-                        display.DisplayMessage(a.Pnt,str(a.id))
+                        #display.DisplayMessage(a.Pnt,str(a.id))
                     
                     
         if flag_display_b_nodes:           
             for i,b in enumerate(b_nodes):
                     display.DisplayShape(b.Pnt,color='GREEN')  
-                    display.DisplayMessage(b.Pnt,str(b.id),message_color=(1.0,0.5,0.0))
+                    #display.DisplayMessage(b.Pnt,str(b.id),message_color=(1.0,0.5,0.0))
     
         if flag_display_a_BSplineLst: 
             for i,a_spline in enumerate(a_BSplineLst):
@@ -508,7 +500,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                 v = gp_Vec2d()
                 u = (a_spline.LastParameter()-a_spline.FirstParameter())/2+a_spline.FirstParameter()
                 a_spline.D1(u,p,v)
-                display.DisplayMessage(p,str(i),height=30,message_color=(0,1,1))
+                #display.DisplayMessage(p,str(i),height=30,message_color=(0,1,1))
                 #display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
             
         if flag_display_b_BSplineLst: 
@@ -519,7 +511,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                 v = gp_Vec2d()
                 u = (b_spline.LastParameter()-b_spline.FirstParameter())/2+b_spline.FirstParameter()
                 b_spline.D1(u,p,v)
-                display.DisplayMessage(p,str(i),height=30,message_color=(0,0,1))    
+                #display.DisplayMessage(p,str(i),height=30,message_color=(0,0,1))    
                 #display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
      
         if flag_display_cells:

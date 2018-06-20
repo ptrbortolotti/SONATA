@@ -4,11 +4,18 @@ Created on Fri Mar 03 13:37:55 2017
 
 @author: TPflumm
 """
+from functools import total_ordering
+
 from OCC.gp import gp_Pnt, gp_Pnt2d
 from SONATA.cbm.topo.BSplineLst_utils import find_BSplineLst_pos, findPnt_on_BSplineLst
 
+@total_ordering
 class Node(object):
-    class_counter= 1
+    
+    class_counter= 1    #class attribute
+    __slots__ = ( 'id', 'Pnt2d', 'parameters', 'corner', 'cornerstyle', 'regular_corner', 'displacement') 
+    #tell Python, to manage class attributes memorypreserving.
+    
     def __init__(self, Pnt2d, parameters=['0',0,0]):
         self.id = self.__class__.class_counter
         self.__class__.class_counter += 1
@@ -50,6 +57,22 @@ class Node(object):
         of the object in memory) goes away. This is important because hashing 
         needs to be consistent with equality: equal objects need to hash the same.'''
         return id(self)    #faster, but be careful not to assign the id's otherwise in the code
+    
+    def __lt__(self,other):
+        '''with the definition of__lt__ magic methon an the decorator 
+        @total_ordering it is possible to define a sorting methodology for the 
+        instaces within a list eg.: sorted(b_nodes) rather than 
+        b_nodes =  sorted(b_nodes, key=lambda n: (n.parameters[1], n.parameters[2]) )'''
+        if self.parameters[1]>other.parameters[1]:
+            return True
+        elif self.parameters[1]<other.parameters[1]:
+            return False
+        elif self.parameters[1]==other.parameters[1]:
+            #print (self.parameters[2],other.parameters[2])
+            #print (self.id, self.parameters)
+            if self.parameters[2]>other.parameters[2]:
+                return True
+            else: return False
     
     def __getstate__(self):
         """Return state values to be pickled."""
