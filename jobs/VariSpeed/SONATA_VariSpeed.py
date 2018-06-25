@@ -236,7 +236,9 @@ from matplotlib.transforms import BlendedGenericTransform
 from openmdao.api import Problem, ScipyOptimizer, IndepVarComp 
 from openmdao.drivers.genetic_algorithm_driver import SimpleGADriver
 print(os.getcwd())
-os.chdir('C://TPflumm_local/work/SONATA')
+os.chdir('..') 
+os.chdir('..')
+
 
 from SONATA.cbm.fileIO.configuration import Configuration
 from SONATA.cbm.fileIO.dymore_utils import read_dymore_beam_properties, interp1d_dymore_beam_properties
@@ -254,8 +256,7 @@ from jobs.VariSpeed.advanced.cbm_explcomp import CBM_ExplComp_VSadvanced
 folder = 'jobs/VariSpeed/uh60a_blade/'
 filename = folder + 'dymore_uh60a_rotor_blade.dat'
 dct_dym = read_dymore_beam_properties(filename, x_offset = 0.81786984)
-x = 2500 
-dct_interp = interp1d_dymore_beam_properties(dct_dym,x)
+
 __spec__ = None
 
 #READ DAVIS UH-60A BLADE PROPERTIES:
@@ -272,10 +273,20 @@ dct_davis['cg'] = np.loadtxt(folder + 'cg.dat')
 #%%      SONATA - CBM
 #==============================================================================
 filename = 'jobs/VariSpeed/advanced/sec_config.yml'
-config = Configuration(filename)
-config.setup['radial_station'] = x
-flag_opt = True
 
+config = Configuration(filename)
+config.setup['radial_station'] = 2500
+config.setup['BalanceWeight'] = False
+dct_interp = interp1d_dymore_beam_properties(dct_dym,config.setup['radial_station'])
+
+
+job = CBM(config)
+job.cbm_gen_topo()
+job.cbm_gen_mesh()
+job.cbm_run_vabs()
+job.cbm_post_2dmesh(title = 'Reference')
+
+flag_opt = True
 if flag_opt:   
     p = Problem()
     #Generate independentVariableComponent
@@ -346,7 +357,7 @@ if flag_opt:
 
     p.driver= SimpleGADriver()
     p.set_solver_print(level=0)
-    p.driver.options['debug_print'] = ['desvars','ln_cons','nl_cons','objs']
+    #p.driver.options['debug_print'] = ['desvars','ln_cons','nl_cons','objs']
     p.driver.options['bits'] = {'ivc.s_w1' : 8}
     p.driver.options['bits'] = {'ivc.s_w2' : 8}
     p.driver.options['bits'] = {'ivc.t_sparcap1' : 8}
@@ -354,8 +365,8 @@ if flag_opt:
     p.driver.options['bits'] = {'ivc.t_sparcap3' : 8}
     p.driver.options['bits'] = {'ivc.t_sparcap4' : 8}
     p.driver.options['bits'] = {'ivc.rho_mat11' : 8}
-    p.driver.options['pop_size'] = 60
-    p.driver.options['max_gen'] = 15
+    p.driver.options['pop_size'] = 5
+    p.driver.options['max_gen'] = 5
     p.driver.options['run_parallel'] = False
 
 
@@ -366,14 +377,6 @@ if flag_opt:
     job_opt = p.model.cbm_comp.job
     job_opt.cbm_post_2dmesh(title = 'Optimization')
     
-
-ref_config = Configuration(filename)
-ref_config.setup['radial_station'] = x
-job = CBM(ref_config)
-job.cbm_gen_topo()
-job.cbm_gen_mesh()
-job.cbm_run_vabs()
-job.cbm_post_2dmesh(title = 'Reference')
 
 #==============================================================================
 #%%      P L O T
