@@ -47,5 +47,10 @@ job.cbm_gen_mesh()
 job.cbm_review_mesh()
 #job.cbm_post_3dtopo()
 #job.cbm_save()
-#job.cbm_post_2dmesh(title='UH-60A Reference')
+job.cbm_post_2dmesh()
 job.cbm_run_vabs()
+
+
+
+
+

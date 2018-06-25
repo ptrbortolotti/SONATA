@@ -10,7 +10,7 @@ Setup:
     radial_station: 2500					#Radial station of crosssection. Only necessary for input type 3. [float]	Default=NONE
     Theta: 0							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
     scale_factor: 1						#use as reference scale factor				[float] 		DEFAULT=1
-    BalanceWeight: False		
+    BalanceWeight: True		
     mesh_resolution: 260				#Scales approximately to the number of points on Segment0
 
 #=======WEBS=======			
