@@ -512,12 +512,12 @@ class CBM(object):
     
     def cbm_set_DymoreMK(self, x_offset = 0):
         '''
-        Returns the tablerow with the Massterms(6), Stiffness(21),damping(1) 
+        Returns the tablerow with the Massterms(6), Stiffness(21), damping(1) 
         and coordinate(1) stacked horizontally for the use in DYMORE/PYMORE/MARC        
         '''
         MM = self.BeamProperties.MM_convert_units()
         MASS = np.array([MM[0,0], MM[2,3], MM[0,4], MM[5,5], MM[4,5], MM[4,4]])
-        #print '@MASS_TERMS: {m00, mEta2, mEta3, m33, m23, m22}'
+        #rint '@MASS_TERMS: {m00, mEta2, mEta3, m33, m23, m22}'
         #print MASS
         TS_u = np.triu(self.BeamProperties.TS_convert_units())
         TS_f = TS_u.flatten('F')
