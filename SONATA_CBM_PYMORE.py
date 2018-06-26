@@ -29,6 +29,11 @@ import matplotlib.pyplot as plt
 from SONATA.cbm.fileIO.configuration import Configuration
 from SONATA.cbm.sonata_cbm import CBM
 
+from SONATA.Pymore.marc.marc import MARC
+
+import numpy as np
+import SONATA.Pymore.utl.coef as coef
+
 
 plt.close('all')    
 #TODO: Comment the CBM Class and memeber functions properly!
@@ -38,19 +43,35 @@ plt.close('all')
 filename = 'jobs/VariSpeed/advanced/sec_config.yml'
 config = Configuration(filename)
 
-job = CBM(config)
+cs = CBM(config)
 #job.cbm_save()
-job.cbm_gen_topo()
+cs.cbm_gen_topo()
 #job.cbm_load_topo()
 #job.cbm_display_config()
-job.cbm_gen_mesh()
+cs.cbm_gen_mesh()
 #job.cbm_review_mesh()
 #job.cbm_post_3dtopo()
 #job.cbm_save()
-job.cbm_post_2dmesh()
-job.cbm_run_vabs()
-#print(job.cbm_set_DymoreMK())
+cs.cbm_post_2dmesh()
+#cs.cbm_run_vabs()
+#print(cs.cbm_set_DymoreMK())
 
+
+mdl_root = 'SONATA/Pymore/dym/mdl/03_rotormodel/05_UH60_rotor_optimization/01_UH60_rotor_snglblade_static/'
+mdl = MARC(mdl_root, 'rotor_assembly.dym')
+    
+nbOfEig = mdl.analysis.sta_get_eigNb()
+nbOfNod = mdl.analysis.sta_get_nodNb()
+nbOfLoc = 5
+RPM_vec = np.linspace(4.3*2*np.pi*0.7, 4.3*2*np.pi*1.1, nbOfLoc)
+
+#beamProp = coef.refBeamProp()
+#mdl.marc_set_beamProp('BLADE_BP_CG01', beamProp)
+result_dir ='SONATA/Pymore/rlt/'
+    
+#marc.marc_set_beamProp(cs.cbm_set_DymoreMK(x_offset = 0.81786984))
+mdl.fanplot(RPM_vec, result_dir)
+mdl.fanplot_show(RPM_vec, result_dir)
 
 
 
