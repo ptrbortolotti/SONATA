@@ -42,6 +42,7 @@ plt.close('all')
 #filename = 'examples/sec_config.yml'
 filename = 'jobs/VariSpeed/advanced/sec_config.yml'
 config = Configuration(filename)
+config.setup['BalanceWeight'] = False
 
 cs = CBM(config)
 #job.cbm_save()
@@ -53,20 +54,24 @@ cs.cbm_gen_mesh()
 #job.cbm_post_3dtopo()
 #job.cbm_save()
 cs.cbm_post_2dmesh()
-#cs.cbm_run_vabs()
-#print(cs.cbm_set_DymoreMK())
-
+cs.cbm_run_vabs()
+beamProp = np.repeat([cs.cbm_set_DymoreMK()], 2, axis=0)
+beamProp[0,-1] = +0.000e+00
+beamProp[1,-1] = +7.361e+00
+print(beamProp)
+#print(beamProp.shape)
 
 mdl_root = 'SONATA/Pymore/dym/mdl/03_rotormodel/05_UH60_rotor_optimization/01_UH60_rotor_snglblade_static/'
 mdl = MARC(mdl_root, 'rotor_assembly.dym')
     
 nbOfEig = mdl.analysis.sta_get_eigNb()
 nbOfNod = mdl.analysis.sta_get_nodNb()
-nbOfLoc = 5
+nbOfLoc = 15
 RPM_vec = np.linspace(4.3*2*np.pi*0.7, 4.3*2*np.pi*1.1, nbOfLoc)
 
 #beamProp = coef.refBeamProp()
-#mdl.marc_set_beamProp('BLADE_BP_CG01', beamProp)
+#print(beamProp.shape)
+mdl.marc_set_beamProp('BLADE_BP_CG01', beamProp)
 result_dir ='SONATA/Pymore/rlt/'
     
 #marc.marc_set_beamProp(cs.cbm_set_DymoreMK(x_offset = 0.81786984))
