@@ -11,6 +11,7 @@ from datetime import datetime
 import subprocess
 import sys,os,math
 import numpy as np
+import re
 import uuid
 import platform
 import shutil
@@ -397,7 +398,7 @@ class CBM(object):
         fstring = '_'+jobid+'.vab'
         #TODO: BE CAREFUL TO USE THE RIGHT COORDINATE SYSTEM FOR THE CALCULATIONS!!!!  
         vabs_filename = self.config.filename.replace('.yml', fstring)
-        print('STATUS:\t RUNNING VABS for Constitutive modeling:')
+        print('STATUS:\t Running VABS for Constitutive modeling:')
         
         #Copy licensefile to 
         src = os.getcwd()+'/SONATA/vabs/licenses/license.'+platform.node().lower()
@@ -420,16 +421,23 @@ class CBM(object):
             stdout = subprocess.run([executable,vabs_filename], stdout=subprocess.PIPE).stdout.decode('utf-8')
             self.config.vabs_cfg.recover_flag=1
             export_cells_for_VABS(self.mesh,nodes,vabs_filename, self.config.vabs_cfg, self.MaterialLst)
-            print('STATUS:\t RUNNING VABS for 3D Recovery:')
+            print('STATUS:\t Running VABS for 3D Recovery:')
             stdout = subprocess.run([executable,vabs_filename], stdout=subprocess.PIPE).stdout.decode('utf-8')
             
         else:
             export_cells_for_VABS(self.mesh, nodes ,vabs_filename, self.config.vabs_cfg, self.MaterialLst)
             stdout = subprocess.run([executable,vabs_filename], stdout=subprocess.PIPE).stdout.decode('utf-8')
-            
+        
         stdout = stdout.replace('\r\n\r\n','\n\t   -')
         stdout = stdout.replace('\r\n','\n\t   -')
-        stdout = 'STATUS:\t VABS CALCULATIONS COMPLETED: \n\t   -' + stdout
+        stdout = stdout.replace('\n\n','\n\t   -')
+        stdout = stdout[:-2]
+                
+        if ' VABS finished successfully' in stdout:
+            stdout = 'STATUS:\t VABS Calculations Completed: \n\t   -' + stdout
+        else:
+            stdout = 'ERROR:\t VABS Calculations Incomplete!: \n\t   -' + stdout
+       
         print(stdout) 
         print('STATUS:\t Total Elapsed Time: %s' % (datetime.now() - self.startTime))
         
@@ -451,12 +459,12 @@ class CBM(object):
         if rm_vabfiles:
             folder = '/'.join(vabs_filename.split('/')[:-1])
             fstring = vabs_filename.split('/')[-1]
-            print(vabs_filename)
+            #print(vabs_filename)
             for file in os.listdir(folder):
                 if fstring in file:
                     #print('removing: '+folder+'/'+file)
                     os.remove(folder+'/'+file)
-
+        return stdout
            
             
     def cbm_post_2dmesh(self, attribute='MatID',title='NOTITLE', **kw):
