@@ -29,7 +29,6 @@ from jobs.VariSpeed.advanced.cbm_explcomp import CBM_ExplComp_VSadvanced
 #==============================================================================
 
 #READ DYMORE BEAM PROPERTIES:
-folder = 'jobs/VariSpeed/uh60a_blade/'
 folder = 'SONATA/Pymore/dym/mdl/03_rotormodel/05_UH60_rotor_optimization/01_UH60_rotor_snglblade_static/'
 filename = folder + 'dymore_uh60a_rotor_blade.dat'
 #filename = folder + 'rotor_blade.dat'
@@ -38,6 +37,7 @@ dct_dym = read_dymore_beam_properties(filename, x_offset = 0.81786984)
 __spec__ = None
 
 #READ DAVIS UH-60A BLADE PROPERTIES:
+folder = 'jobs/VariSpeed/uh60a_blade/'
 dct_davis = {}
 dct_davis['torsional_stiffness'] = np.loadtxt(folder + 'torsional_stiffness.dat')
 dct_davis['torsional_inertia'] = np.loadtxt(folder + 'torsional_inertia.dat')

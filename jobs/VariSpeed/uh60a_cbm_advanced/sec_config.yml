@@ -5,7 +5,7 @@
 #===============================SETUP===================================				 
 Setup:
     input_type: 4						   #0) Airfoil from UIUC Database; 1) Geometry from .dat file; 2)2d .step 3)3D .step + radial station of crosssection 	4) gen, 3D-Blade f. twist,taper,airfoils,1/4-line	[int] DEFAULT=0	
-    datasource: jobs/VariSpeed/uh60a_blade_zerotwist  #0)	naca23012					1) AREA_R250.dat			2)AREA_R230.stp	 			3)AREA_Blatt_L.stp	 4)folder of data 						                    [str] DEFAULT=NONE
+    datasource: jobs/VariSpeed/uh60a_data_blade/uh60a_blade_zerotwist  #0)	naca23012					1) AREA_R250.dat			2)AREA_R230.stp	 			3)AREA_Blatt_L.stp	 4)folder of data 						                    [str] DEFAULT=NONE
     material_db: examples/mat_db.yml	   #Path and filename of the Material Database						#True or False for Balance Weight			                                                            [bool] DEFAULT=FALSE
     radial_station: 2500					#Radial station of crosssection. Only necessary for input type 3. [float]	Default=NONE
     Theta: 0							#To place the Origin of the SONATA Coordinates at the intersection of the by Theta rotated xaxis. [float] DEFAULT = 0
