@@ -24,20 +24,22 @@ from SONATA.vabs.VABS_interface import VABS_config, export_cells_for_VABS, XSect
 #from SONATA.mdao.cbm_explcomp import CBM_ExplComp
 
 from jobs.VariSpeed.advanced.cbm_explcomp import CBM_ExplComp_VSadvanced
+from SONATA.Pymore.marc_explcomp import MARC_ExplComp
 #==============================================================================
 #%%      Interpolate Values from dct_dym for optimization
 #==============================================================================
 
 #READ DYMORE BEAM PROPERTIES:
-folder = 'jobs/VariSpeed/uh60a_blade/'
+#folder = 'jobs/VariSpeed/uh60a_blade/'
 folder = 'SONATA/Pymore/dym/mdl/03_rotormodel/05_UH60_rotor_optimization/01_UH60_rotor_snglblade_static/'
-filename = folder + 'dymore_uh60a_rotor_blade.dat'
-#filename = folder + 'rotor_blade.dat'
+#filename = folder + 'dymore_uh60a_rotor_blade.dat'
+filename = folder + 'rotor_blade.dat'
 dct_dym = read_dymore_beam_properties(filename, x_offset = 0.81786984)
 
 __spec__ = None
 
 #READ DAVIS UH-60A BLADE PROPERTIES:
+folder = 'jobs/VariSpeed/uh60a_blade/'
 dct_davis = {}
 dct_davis['torsional_stiffness'] = np.loadtxt(folder + 'torsional_stiffness.dat')
 dct_davis['torsional_inertia'] = np.loadtxt(folder + 'torsional_inertia.dat')
@@ -64,8 +66,13 @@ job.cbm_run_vabs()
 job.cbm_post_2dmesh(title = 'Reference')
 job.cbm_set_DymoreMK(x_offset = 0.81786984)
 
+#=============================================================================
+#%%      SONATA - Pymore
+#==============================================================================
 
-flag_opt = False
+
+
+flag_opt = True
 if flag_opt:   
     p = Problem()
     #Generate independentVariableComponent
@@ -89,6 +96,12 @@ if flag_opt:
     p.model.add_subsystem('cbm_comp', CBM_ExplComp_VSadvanced(config))
     p.model.cbm_comp.set_references(dct_interp)
     
+    #Generate MARC Subsystem
+    p.model.add_subsystem('marc_comp', MARC_ExplComp())
+    
+    #Connect MARC-Variables to CBM-Variables
+    p.model.connect('cbm_comp.BeamPropSec', 'marc_comp.BeamPropSec')
+    
     p.model.connect('ivc.s_w1', 'cbm_comp.s_w1')
     p.model.connect('ivc.s_w2', 'cbm_comp.s_w2')
     p.model.connect('ivc.t_erosion', 'cbm_comp.t_erosion')
@@ -111,7 +124,8 @@ if flag_opt:
     p.model.add_design_var('ivc.t_sparcap4', lower=0.4, upper=2.7, ref=2.7, ref0 = 0.4)
     p.model.add_design_var('ivc.rho_mat11', lower=0.05, upper=19.25,   ref=19.25, ref0 = 0)
     
-    p.model.add_objective('cbm_comp.obj')
+#    p.model.add_objective('cbm_comp.obj')
+    p.model.add_objective('marc_comp.obj')
     #p.model.add_constraint('cbm_comp.Xm2', lower=dct_interp['centre_of_mass_location'][0]*lo, upper=dct_interp['centre_of_mass_location'][0]*lo)
     #p.model.add_constraint('cbm_comp.EI2', lower=dct_interp['bending_stiffnesses'][0]*lo, upper=dct_interp['bending_stiffnesses'][0]*lo)
     #p.model.add_constraint('cbm_comp.EI3', lower=dct_interp['bending_stiffnesses'][1]*lo, upper=dct_interp['bending_stiffnesses'][1]*lo)
@@ -135,7 +149,7 @@ if flag_opt:
 
     p.driver= SimpleGADriver()
     p.set_solver_print(level=0)
-    #p.driver.options['debug_print'] = ['desvars','ln_cons','nl_cons','objs']
+    p.driver.options['debug_print'] = ['desvars','objs']
     p.driver.options['bits'] = {'ivc.s_w1' : 8}
     p.driver.options['bits'] = {'ivc.s_w2' : 8}
     p.driver.options['bits'] = {'ivc.t_sparcap1' : 8}
@@ -143,8 +157,8 @@ if flag_opt:
     p.driver.options['bits'] = {'ivc.t_sparcap3' : 8}
     p.driver.options['bits'] = {'ivc.t_sparcap4' : 8}
     p.driver.options['bits'] = {'ivc.rho_mat11' : 8}
-    p.driver.options['pop_size'] = 5
-    p.driver.options['max_gen'] = 5
+    p.driver.options['pop_size'] = 10
+    p.driver.options['max_gen'] = 10
     p.driver.options['run_parallel'] = False
 
 
@@ -154,6 +168,7 @@ if flag_opt:
     #print p['cbm_comp.MpUS'], (p['ivc.wp1'], p['ivc.wp2'], p['ivc.spar_lt'], p['ivc.skin_lt'])
     job_opt = p.model.cbm_comp.job
     job_opt.cbm_post_2dmesh(title = 'Optimization')
+    p.model.marc_comp.job.fanplot_show(p.model.marc_comp.RPM_vec, p.model.marc_comp.result_dir)
     
 
 #==============================================================================
@@ -239,7 +254,7 @@ axarr[1,1].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 x_offset = 0.81786984
 
 axarr[2,1].plot(dct_davis['flapping_stiffness'][:,0],dct_davis['flapping_stiffness'][:,1],'r:')
-axarr[2,1].plot(dct_dym['x'],dct_dym['bending_stiffnesses'][:x_offset = 0.81786984,0],'--') 
+axarr[2,1].plot(dct_dym['x'],dct_dym['bending_stiffnesses'],'--') 
 #axarr[2,1].plot(dct_interp['x'],dct_interp['bending_stiffnesses'][0],'gx') 
 axarr[2,1].plot(job.config.setup['radial_station'], job.BeamProperties.CS[2,2]*1e-6,'ko') 
 if flag_opt:

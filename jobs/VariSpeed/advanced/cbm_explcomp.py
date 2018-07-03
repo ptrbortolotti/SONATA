@@ -94,7 +94,9 @@ class CBM_ExplComp_VSadvanced(ExplicitComponent):
         self.add_output('GJ', desc='Torsional Stiffness')
         self.add_output('EI2', desc='Flapping Bending Stiffness')
         self.add_output('EI3', desc='Lagging Bending Stiffness')
-
+        
+        # beam properties stored in the vector
+        self.add_output('BeamPropSec', val=np.zeros((2,29)), desc='Massterms(6), Stiffness(21), damping(1) and coordinate(1)') 
 
     def compute_objective(self):
         o1 = abs(self.job.BeamProperties.CS[2][2]*1e-6 - self.ref_dct['bending_stiffnesses'][0]) / self.ref_dct['bending_stiffnesses'][0]
@@ -117,7 +119,11 @@ class CBM_ExplComp_VSadvanced(ExplicitComponent):
         outputs['EI2']  = self.job.BeamProperties.CS[2][2]
         outputs['EI3']  = self.job.BeamProperties.CS[3][3]
         outputs['EI3']  = self.job.BeamProperties.MpUS
-        outputs['obj'] = self.compute_objective()
+        beamProp = np.repeat([self.job.cbm_set_DymoreMK()], 2, axis=0)
+        beamProp[0,-1] = +0.000e+00
+        beamProp[1,-1] = +7.361e+00
+        outputs['BeamPropSec'] = beamProp
+        #outputs['obj'] = self.compute_objective()
         
     
     def set_references(self,ref_dct):
