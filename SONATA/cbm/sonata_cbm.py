@@ -464,7 +464,7 @@ class CBM(object):
                 if fstring in file:
                     #print('removing: '+folder+'/'+file)
                     os.remove(folder+'/'+file)
-        return stdout
+        
            
             
     def cbm_post_2dmesh(self, attribute='MatID',title='NOTITLE', **kw):
