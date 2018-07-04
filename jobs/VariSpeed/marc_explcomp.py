@@ -99,7 +99,7 @@ class MARC_ExplComp(ExplicitComponent):
         # Assemble Beam Properties
         beamProp = inputs['BeamPropSec']
 #        beamProp = coef.refBeamProp()
-        self.job.marc_set_beamProp('BLADE_BP_CG01', beamProp)
+        self.job.marc_set_beamProp('BLADE_BP_CD01', beamProp)
 
         #-------------------------------------#
         #   Change Mass Properties            #
