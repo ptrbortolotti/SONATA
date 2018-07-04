@@ -33,14 +33,14 @@ from SONATA.Pymore.marc.marc import MARC
 
 import numpy as np
 import SONATA.Pymore.utl.coef as coef
-
+import SONATA.Pymore.utl.optimization as obj
 
 plt.close('all')    
 #TODO: Comment the CBM Class and memeber functions properly!
 #TODO: include optionflags and Vabs_setup in Configuration
 
 #filename = 'examples/sec_config.yml'
-filename = 'jobs/VariSpeed/advanced/sec_config.yml'
+filename = 'jobs/VariSpeed/uh60a_cbm_advanced/sec_config.yml'
 config = Configuration(filename)
 config.setup['BalanceWeight'] = False
 
@@ -58,7 +58,6 @@ cs.cbm_run_vabs()
 beamProp = np.repeat([cs.cbm_set_DymoreMK()], 2, axis=0)
 beamProp[0,-1] = +0.000e+00
 beamProp[1,-1] = +7.361e+00
-print(beamProp)
 #print(beamProp.shape)
 
 mdl_root = 'SONATA/Pymore/dym/mdl/03_rotormodel/05_UH60_rotor_optimization/01_UH60_rotor_snglblade_static/'
@@ -71,11 +70,14 @@ RPM_vec = np.linspace(4.3*2*np.pi*0.7, 4.3*2*np.pi*1.1, nbOfLoc)
 
 #beamProp = coef.refBeamProp()
 #print(beamProp.shape)
-mdl.marc_set_beamProp('BLADE_BP_CG01', beamProp)
+mdl.marc_set_beamProp('BLADE_BP_CD01', beamProp)
 result_dir ='SONATA/Pymore/rlt/'
-    
+
 #marc.marc_set_beamProp(cs.cbm_set_DymoreMK(x_offset = 0.81786984))
 mdl.fanplot(RPM_vec, result_dir)
+
+objFun = obj.gradPlacement(np.real(mdl.analysis.freq), RPM_vec)
+
 mdl.fanplot_show(RPM_vec, result_dir)
 
 
