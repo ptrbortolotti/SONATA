@@ -55,15 +55,15 @@ class MARC_ExplComp(ExplicitComponent):
         #   Setup                             #
         #=====================================#        
 #        self.add_input('beamProp', val=np.ones([46,29]))
-        self.add_input('massProp0', val=0.0)
+#        self.add_input('massProp0', val=0.0)
 #        self.add_input('massProp1', val=0.0)
 #        self.add_input('massProp2', val=0.0)
 #        self.add_input('massProp3', val=0.0)
         
-        self.add_input('beamProp0', val=1.0)
-        self.add_input('beamProp1', val=1.0)
-        self.add_input('beamProp2', val=1.0)
-        self.add_input('beamProp3', val=1.0)
+#        self.add_input('beamProp0', val=1.0)
+#        self.add_input('beamProp1', val=1.0)
+#        self.add_input('beamProp2', val=1.0)
+#        self.add_input('beamProp3', val=1.0)
         self.add_input('BeamPropSec', val=np.zeros((2,29)), desc='Massterms(6), Stiffness(21), damping(1) and coordinate(1)') 
 
         self.add_output('obj', val=1.0e05)
@@ -99,7 +99,7 @@ class MARC_ExplComp(ExplicitComponent):
         # Assemble Beam Properties
         beamProp = inputs['BeamPropSec']
 #        beamProp = coef.refBeamProp()
-        self.job.marc_set_beamProp('BLADE_BP_CG01', beamProp)
+        self.job.marc_set_beamProp('BLADE_BP_CD01', beamProp)
 
         #-------------------------------------#
         #   Change Mass Properties            #
@@ -120,6 +120,7 @@ class MARC_ExplComp(ExplicitComponent):
         #   Process Results                   #
         #=====================================#
         objFun = obj.gradPlacement(np.real(self.job.analysis.freq), self.RPM_vec)
+        print(objFun)
 #        print (' ** MARC **: Time Analysis: ' + str(datetime.now() - starttime)     )  
 #        print (' ** MARC **: objective = ' +str(objFun) +', input = ' + str(massP0) +', ' + str(massP1) +', ' + str(massP2) +', ' + str(massP3) +
 #                                                                 ', ' + str(beamP0) +', ' + str(beamP1) +', ' + str(beamP2) +', ' + str(beamP3) )

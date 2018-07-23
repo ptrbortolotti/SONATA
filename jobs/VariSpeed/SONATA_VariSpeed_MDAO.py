@@ -92,7 +92,11 @@ if flag_opt:
     p.driver.options['bits'] = {'t_sparcap3' : 8}
     p.driver.options['bits'] = {'t_sparcap4' : 8}
     p.driver.options['bits'] = {'rho_mat11' : 8}
+<<<<<<< HEAD
     p.driver.options['pop_size'] = 56
+=======
+    p.driver.options['pop_size'] = 15
+>>>>>>> 8111258df9f407d2047506188314be39f49e1472
     p.driver.options['max_gen'] = 5
     p.driver.options['run_parallel'] = False
 
