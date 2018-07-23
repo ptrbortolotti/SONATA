@@ -54,7 +54,7 @@ config.setup['radial_station'] = 2500
 config.setup['BalanceWeight'] = False
 dct_interp = interp1d_dymore_beam_properties(dct_dym,config.setup['radial_station'])
 
-flag_ref = False
+flag_ref = True
 if flag_ref:
     job = CBM(config)
     job.cbm_gen_topo()
@@ -66,10 +66,10 @@ if flag_ref:
 #=============================================================================
 #%%      SONATA - Pymore
 #==============================================================================
-flag_opt = True
+flag_opt = False
 if flag_opt:   
     p = Problem()
-    p.model = MDAO_Group(config)
+    p.model = MDAO_Group(config, ref_dct = dct_interp)
 
     p.model.add_design_var('s_w1', lower=0.35, upper=0.44, ref=0.45, ref0 = 0.44)
     p.model.add_design_var('s_w2', lower=0.2,  upper=0.31, ref=0.31, ref0 = 0.30)
@@ -79,8 +79,8 @@ if flag_opt:
     p.model.add_design_var('t_sparcap4', lower=0.4, upper=2.7, ref=2.7, ref0 = 0.4)
     p.model.add_design_var('rho_mat11', lower=0.05, upper=19.25,   ref=19.25, ref0 = 0)
     
-#    p.model.add_objective('cbm_comp.obj')
-    p.model.add_objective('marc_comp.obj')
+    p.model.add_objective('cbm_comp.obj')
+    #p.model.add_objective('marc_comp.obj')
     
     p.driver= SimpleGADriver()
     p.set_solver_print(level=0)
@@ -92,8 +92,8 @@ if flag_opt:
     p.driver.options['bits'] = {'t_sparcap3' : 8}
     p.driver.options['bits'] = {'t_sparcap4' : 8}
     p.driver.options['bits'] = {'rho_mat11' : 8}
-    p.driver.options['pop_size'] = 25
-    p.driver.options['max_gen'] = 3
+    p.driver.options['pop_size'] = 56
+    p.driver.options['max_gen'] = 5
     p.driver.options['run_parallel'] = False
 
     p.setup()
@@ -104,7 +104,6 @@ if flag_opt:
     job_opt.cbm_post_2dmesh(title = 'Optimization')
     val_fname = 'jobs/VariSpeed/uh60a_data_blade/Fanplot_Bowen_Davies_Diss.csv'
     p.model.marc_comp.job.fanplot_show(p.model.marc_comp.RPM_vec, p.model.marc_comp.result_dir,val_fname=val_fname)
-    
 
 #==============================================================================
 #%%      P L O T
