@@ -40,7 +40,7 @@ plt.close('all')
 #TODO: include optionflags and Vabs_setup in Configuration
 
 #filename = 'examples/sec_config.yml'
-filename = 'jobs/VariSpeed/advanced/sec_config.yml'
+filename = 'jobs/VariSpeed/uh60a_cbm_advanced/sec_config.yml'
 config = Configuration(filename)
 config.setup['BalanceWeight'] = False
 
