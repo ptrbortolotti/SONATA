@@ -128,7 +128,6 @@ class MARC_ExplComp(ExplicitComponent):
 #        outputs['measureFreq'] = freq[1:,:]/(2*np.pi)
         outputs['obj'] = objFun
         
-        
     def compute_partials(self, inputs, partials):
         #%%===================================#
         #   Compute Partials                  #
