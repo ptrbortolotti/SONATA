@@ -76,6 +76,7 @@ class CBM(object):
      topology and/or mesh
 
     '''
+
         
     #__slots__ = ('Configuration','MaterialLst','__tel','__email','__alter','__partner')
     def __init__(self, Configuration):
@@ -471,15 +472,31 @@ class CBM(object):
         mesh,nodes = sort_and_reassignID(self.mesh)
         fig,ax = plot_cells(self.mesh, nodes, attribute, self.BeamProperties, title, **kw)
         return fig,ax
-        
-        
+                
+       
+    
     def cbm_display_config(self):
+        
+        def export_png(): return export_to_PNG(self.display)
+        def export_jpg():return export_to_JPEG(self.display)
+        def export_pdf(): return export_to_PDF(self.display)
+        def export_svg(): return export_to_SVG(self.display)
+        def export_ps(): return export_to_PS(self.display)
+
+        
         #===========DISPLAY CONFIG:===============
         self.display, self.start_display, self.add_menu, self.add_function_to_menu = init_display()
         self.display.Context.SetDeviationAngle(1e-6)       # 0.001 default. Be careful to scale it to the problem.
         self.display.Context.SetDeviationCoefficient(1e-6) # 0.001 default. Be careful to scale it to the problem. 
         self.display.set_bg_gradient_color(20,6,111,200,200,200)
         show_coordinate_system(self.display,5)
+        self.add_menu('screencapture')
+        self.add_function_to_menu('screencapture', export_png)
+        self.add_function_to_menu('screencapture', export_jpg)
+        self.add_function_to_menu('screencapture', export_pdf)
+        self.add_function_to_menu('screencapture', export_svg)
+        self.add_function_to_menu('screencapture', export_ps)
+            
         return (self.display, self.start_display, self.add_menu, self.add_function_to_menu)
         
     
