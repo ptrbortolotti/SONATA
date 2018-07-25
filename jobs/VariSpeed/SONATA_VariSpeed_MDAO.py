@@ -54,7 +54,7 @@ config.setup['radial_station'] = 2500
 config.setup['BalanceWeight'] = False
 dct_interp = interp1d_dymore_beam_properties(dct_dym,config.setup['radial_station'])
 
-flag_ref = True
+flag_ref = False
 if flag_ref:
     job = CBM(config)
     job.cbm_gen_topo()
@@ -66,7 +66,7 @@ if flag_ref:
 #=============================================================================
 #%%      SONATA - Pymore
 #==============================================================================
-flag_opt = False
+flag_opt = True
 if flag_opt:   
     p = Problem()
     p.model = MDAO_Group(config, ref_dct = dct_interp)
@@ -92,12 +92,9 @@ if flag_opt:
     p.driver.options['bits'] = {'t_sparcap3' : 8}
     p.driver.options['bits'] = {'t_sparcap4' : 8}
     p.driver.options['bits'] = {'rho_mat11' : 8}
-<<<<<<< HEAD
-    p.driver.options['pop_size'] = 56
-=======
-    p.driver.options['pop_size'] = 15
->>>>>>> 8111258df9f407d2047506188314be39f49e1472
-    p.driver.options['max_gen'] = 5
+
+    p.driver.options['pop_size'] = 80
+    p.driver.options['max_gen'] = 10
     p.driver.options['run_parallel'] = False
 
     p.setup()
