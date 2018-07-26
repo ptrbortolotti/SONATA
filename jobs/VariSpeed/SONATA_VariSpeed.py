@@ -15,7 +15,6 @@ print(os.getcwd())
 os.chdir('..') 
 os.chdir('..')
 
-
 from SONATA.cbm.fileIO.configuration import Configuration
 from SONATA.cbm.fileIO.dymore_utils import read_dymore_beam_properties, interp1d_dymore_beam_properties
 from SONATA.cbm.fileIO.readinput import read_material_input
@@ -50,7 +49,7 @@ dct_davis['cg'] = np.loadtxt(folder + 'cg.dat')
 #=============================================================================
 #%%      SONATA - CBM
 #==============================================================================
-filename = 'jobs/VariSpeed/advanced/sec_config.yml'
+filename = 'jobs/VariSpeed/uh60a_cbm_advanced/sec_config.yml'
 
 config = Configuration(filename)
 config.setup['radial_station'] = 2500
@@ -64,97 +63,7 @@ job.cbm_run_vabs()
 job.cbm_post_2dmesh(title = 'Reference')
 job.cbm_set_DymoreMK(x_offset = 0.81786984)
 
-
 flag_opt = False
-if flag_opt:   
-    p = Problem()
-    #Generate independentVariableComponent
-    ivc = p.model.add_subsystem('ivc', IndepVarComp())
-    
-    ivc.add_output('s_w1', 0.44)
-    ivc.add_output('s_w2', 0.3)
-    ivc.add_output('t_erosion', 0.91)
-    ivc.add_output('t_overwrap',0.25)  
-    ivc.add_output('t_spar1', 3.00)
-    ivc.add_output('rho_mat3', 0.05)  
-    ivc.add_output('t_sparcap1',2.5)
-    ivc.add_output('t_sparcap2', 1.833)
-    ivc.add_output('t_sparcap3', 1.833)
-    ivc.add_output('t_sparcap4', 1.842) 
-    ivc.add_output('rho_mat11', 0.05)  
-
-    #ivc.add_output('rho_1', 0.05)
-    
-    #Generate Group of two Components
-    p.model.add_subsystem('cbm_comp', CBM_ExplComp_VSadvanced(config))
-    p.model.cbm_comp.set_references(dct_interp)
-    
-    p.model.connect('ivc.s_w1', 'cbm_comp.s_w1')
-    p.model.connect('ivc.s_w2', 'cbm_comp.s_w2')
-    p.model.connect('ivc.t_erosion', 'cbm_comp.t_erosion')
-    p.model.connect('ivc.t_overwrap', 'cbm_comp.t_overwrap')
-    p.model.connect('ivc.t_spar1', 'cbm_comp.t_spar1')
-    p.model.connect('ivc.rho_mat3', 'cbm_comp.rho_mat3')
-    p.model.connect('ivc.t_sparcap1', 'cbm_comp.t_sparcap1')
-    p.model.connect('ivc.t_sparcap2', 'cbm_comp.t_sparcap2')
-    p.model.connect('ivc.t_sparcap3', 'cbm_comp.t_sparcap3')
-    p.model.connect('ivc.t_sparcap4', 'cbm_comp.t_sparcap4')
-    p.model.connect('ivc.rho_mat11', 'cbm_comp.rho_mat11')
-
-    #p.model.connect('ivc.rho_1', 'cbm_comp.Core1_density')
-    
-    p.model.add_design_var('ivc.s_w1', lower=0.35, upper=0.44, ref=0.45, ref0 = 0.44)
-    p.model.add_design_var('ivc.s_w2', lower=0.2,  upper=0.31, ref=0.31, ref0 = 0.30)
-    p.model.add_design_var('ivc.t_sparcap1', lower=0.4, upper=2.7, ref=2.7, ref0 = 0.4)
-    p.model.add_design_var('ivc.t_sparcap2', lower=0.4, upper=2.7, ref=2.7, ref0 = 0.4)
-    p.model.add_design_var('ivc.t_sparcap3', lower=0.4, upper=2.7, ref=2.7, ref0 = 0.4)
-    p.model.add_design_var('ivc.t_sparcap4', lower=0.4, upper=2.7, ref=2.7, ref0 = 0.4)
-    p.model.add_design_var('ivc.rho_mat11', lower=0.05, upper=19.25,   ref=19.25, ref0 = 0)
-    
-    p.model.add_objective('cbm_comp.obj')
-    #p.model.add_constraint('cbm_comp.Xm2', lower=dct_interp['centre_of_mass_location'][0]*lo, upper=dct_interp['centre_of_mass_location'][0]*lo)
-    #p.model.add_constraint('cbm_comp.EI2', lower=dct_interp['bending_stiffnesses'][0]*lo, upper=dct_interp['bending_stiffnesses'][0]*lo)
-    #p.model.add_constraint('cbm_comp.EI3', lower=dct_interp['bending_stiffnesses'][1]*lo, upper=dct_interp['bending_stiffnesses'][1]*lo)
-    
-    #Setup the Problem
-#    p.driver = ScipyOptimizeDriver()
-#    p.driver.options['optimizer'] = 'COBYLA'
-#    p.driver.options['disp'] = False
-#    p.driver.options['tol'] = 1e-2
-#    p.driver.options['maxiter'] = 200
-#    p.driver.opt_settings['rhobeg'] = 1.0 
-#    
-#    p.driver = ScipyOptimizeDriver()
-#    p.driver.options['optimizer'] = 'SLSQP'
-#    p.driver.options['disp'] = True
-#    p.driver.options['tol'] = 1e-3
-#    p.driver.options['maxiter'] = 200
-#    p.driver.options['disp'] = True
-#    p.driver.opt_settings['eps'] = 0.1 
-
-
-    p.driver= SimpleGADriver()
-    p.set_solver_print(level=0)
-    #p.driver.options['debug_print'] = ['desvars','ln_cons','nl_cons','objs']
-    p.driver.options['bits'] = {'ivc.s_w1' : 8}
-    p.driver.options['bits'] = {'ivc.s_w2' : 8}
-    p.driver.options['bits'] = {'ivc.t_sparcap1' : 8}
-    p.driver.options['bits'] = {'ivc.t_sparcap2' : 8}
-    p.driver.options['bits'] = {'ivc.t_sparcap3' : 8}
-    p.driver.options['bits'] = {'ivc.t_sparcap4' : 8}
-    p.driver.options['bits'] = {'ivc.rho_mat11' : 8}
-    p.driver.options['pop_size'] = 5
-    p.driver.options['max_gen'] = 5
-    p.driver.options['run_parallel'] = False
-
-
-    p.setup()
-    p.run_driver()
-    #p.run_model()
-    #print p['cbm_comp.MpUS'], (p['ivc.wp1'], p['ivc.wp2'], p['ivc.spar_lt'], p['ivc.skin_lt'])
-    job_opt = p.model.cbm_comp.job
-    job_opt.cbm_post_2dmesh(title = 'Optimization')
-    
 
 #==============================================================================
 #%%      P L O T
@@ -239,7 +148,7 @@ axarr[1,1].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 x_offset = 0.81786984
 
 axarr[2,1].plot(dct_davis['flapping_stiffness'][:,0],dct_davis['flapping_stiffness'][:,1],'r:')
-axarr[2,1].plot(dct_dym['x'],dct_dym['bending_stiffnesses'][:x_offset = 0.81786984,0],'--') 
+axarr[2,1].plot(dct_dym['x'],dct_dym['bending_stiffnesses'][:,0],'--') 
 #axarr[2,1].plot(dct_interp['x'],dct_interp['bending_stiffnesses'][0],'gx') 
 axarr[2,1].plot(job.config.setup['radial_station'], job.BeamProperties.CS[2,2]*1e-6,'ko') 
 if flag_opt:

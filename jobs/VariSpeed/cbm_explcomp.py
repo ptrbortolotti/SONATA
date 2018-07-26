@@ -11,6 +11,7 @@ import math
 
 from datetime import datetime
 from openmdao.api import ExplicitComponent
+from sklearn.metrics import mean_squared_error
 
 from SONATA.cbm.fileIO.hiddenprints import HiddenPrints
 from SONATA.cbm.sonata_cbm import CBM
@@ -157,9 +158,11 @@ class CBM_ExplComp(ExplicitComponent):
         o3 = abs(self.job.BeamProperties.CS[1][1]*1e-6 - self.ref_dct['torsional_stiffness']) / self.ref_dct['torsional_stiffness']
         o4 = abs(self.job.BeamProperties.CS[0][0] - self.ref_dct['axial_stiffness']) / self.ref_dct['axial_stiffness']
         o5 = abs(self.job.BeamProperties.MpUS - self.ref_dct['mass_per_unit_span']) / self.ref_dct['mass_per_unit_span']
-        #o6 = abs(self.job.BeamProperties.Xm2)
+        o6 = abs(self.job.BeamProperties.Xm2 - 1000*self.ref_dct['centre_of_mass_location'][0]) / 530;  
+        
         self.residuum = np.mean([o1,o2,o3,o4,o5])
-        self.rmse = math.sqrt(np.mean([o1**2,o2**2,o3**2,o4**2,o5**2]))
+        self.rmse = math.sqrt(np.mean([o1**2,o2**2,o3**2,o4**2,o5**2,o6**2]))
+        
         return self.rmse
     
     def set_references(self,ref_dct):

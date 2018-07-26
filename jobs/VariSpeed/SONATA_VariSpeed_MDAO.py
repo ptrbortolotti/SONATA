@@ -8,7 +8,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.transforms import BlendedGenericTransform
-from openmdao.api import Problem, ScipyOptimizer, IndepVarComp 
+from openmdao.api import Problem, ScipyOptimizer, IndepVarComp, ScipyOptimizeDriver 
 from openmdao.drivers.genetic_algorithm_driver import SimpleGADriver
 
 #Sonata Modules: Make Sure to be in the SONATA working directory!
@@ -21,7 +21,7 @@ from SONATA.cbm.sonata_cbm import CBM
 from SONATA.vabs.VABS_interface import VABS_config, export_cells_for_VABS, XSectionalProperties
 
 #job specific modules!
-from jobs.VariSpeed.mdao_group import MDAO_Group
+from jobs.VariSpeed.sonata_group import Sonata_Group
 
 __spec__ = None
 
@@ -50,26 +50,26 @@ dct_davis['cg'] = np.loadtxt(folder + 'cg.dat')
 filename = 'jobs/VariSpeed/uh60a_cbm_advanced/sec_config.yml'
 
 config = Configuration(filename)
-config.setup['radial_station'] = 2500
+config.setup['radial_station'] = 2000
 config.setup['BalanceWeight'] = False
 dct_interp = interp1d_dymore_beam_properties(dct_dym,config.setup['radial_station'])
-
-flag_ref = False
-if flag_ref:
-    job = CBM(config)
-    job.cbm_gen_topo()
-    job.cbm_gen_mesh()
-    job.cbm_run_vabs()
-    job.cbm_post_2dmesh(title = 'Reference')
-    job.cbm_set_DymoreMK(x_offset = 0.81786984)
 
 #=============================================================================
 #%%      SONATA - Pymore
 #==============================================================================
+flag_ref = True
+if flag_ref:
+    job = CBM(config)
+    job.cbm_gen_topo()
+    job.cbm_gen_mesh()
+    job.cbm_post_2dmesh(title = 'Reference')
+    job.cbm_run_vabs()
+
+
 flag_opt = True
 if flag_opt:   
     p = Problem()
-    p.model = MDAO_Group(config, ref_dct = dct_interp)
+    p.model = Sonata_Group(config, ref_dct = dct_interp)
 
     p.model.add_design_var('s_w1', lower=0.35, upper=0.44, ref=0.45, ref0 = 0.44)
     p.model.add_design_var('s_w2', lower=0.2,  upper=0.31, ref=0.31, ref0 = 0.30)
@@ -83,7 +83,7 @@ if flag_opt:
     #p.model.add_objective('marc_comp.obj')
     
     p.driver= SimpleGADriver()
-    p.set_solver_print(level=0)
+    p.set_solver_print(level=2)
     p.driver.options['debug_print'] = ['desvars','objs','totals']
     p.driver.options['bits'] = {'s_w1' : 8}
     p.driver.options['bits'] = {'s_w2' : 8}
@@ -93,10 +93,10 @@ if flag_opt:
     p.driver.options['bits'] = {'t_sparcap4' : 8}
     p.driver.options['bits'] = {'rho_mat11' : 8}
 
-    p.driver.options['pop_size'] = 80
-    p.driver.options['max_gen'] = 10
+    p.driver.options['pop_size'] = 60
+    p.driver.options['max_gen'] = 4
     p.driver.options['run_parallel'] = False
-
+    
     p.setup()
     p.run_driver()
     #p.run_model()
@@ -104,7 +104,9 @@ if flag_opt:
     job_opt = p.model.cbm_comp.job
     job_opt.cbm_post_2dmesh(title = 'Optimization')
     val_fname = 'jobs/VariSpeed/uh60a_data_blade/Fanplot_Bowen_Davies_Diss.csv'
-    p.model.marc_comp.job.fanplot_show(p.model.marc_comp.RPM_vec, p.model.marc_comp.result_dir,val_fname=val_fname)
+    #p.model.marc_comp.job.fanplot_show(p.model.marc_comp.RPM_vec, p.model.marc_comp.result_dir,val_fname=val_fname)
+
+
 
 #==============================================================================
 #%%      P L O T
@@ -189,7 +191,7 @@ axarr[1,1].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 x_offset = 0.81786984
 
 axarr[2,1].plot(dct_davis['flapping_stiffness'][:,0],dct_davis['flapping_stiffness'][:,1],'r:')
-axarr[2,1].plot(dct_dym['x'],dct_dym['bending_stiffnesses'],'--') 
+axarr[2,1].plot(dct_dym['x'],dct_dym['bending_stiffnesses'][:,0],'--') 
 #axarr[2,1].plot(dct_interp['x'],dct_interp['bending_stiffnesses'][0],'gx') 
 axarr[2,1].plot(job.config.setup['radial_station'], job.BeamProperties.CS[2,2]*1e-6,'ko') 
 if flag_opt:

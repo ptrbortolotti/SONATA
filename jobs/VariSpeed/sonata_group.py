@@ -13,7 +13,7 @@ from openmdao.api import Group, IndepVarComp
 from jobs.VariSpeed.cbm_explcomp import CBM_ExplComp
 from jobs.VariSpeed.marc_explcomp import MARC_ExplComp
 
-class MDAO_Group(Group):
+class Sonata_Group(Group):
     '''Generate Group of two Components'''
     def __init__(self, config, **kw):
         super().__init__()

@@ -59,7 +59,7 @@ Segments:
             
 #=======BalanceWeight==	
 BalanceWeight: 
-    XPos: -117.0           	#	X Position	[-]						[float]				NO DEFAULT VALUE
+    XPos: -116.5           	#	X Position	[-]						[float]				NO DEFAULT VALUE
     YPos: 1.0              	#	Y Position	[-]						[float]				NO DEFAULT VALUE
     Diameter: 14.0          	#	Diameter of Balance Weight [mm]		[float]				NO DEFAULT VALUE
     Material: 6             #   Material ID							[int]				NO DEFAULT VALUE

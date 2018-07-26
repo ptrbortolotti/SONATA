@@ -341,7 +341,8 @@ class CBM(object):
         if self.config.flags['mesh_core']:
             for j,seg in enumerate(reversed(self.SegmentLst)):
                 if seg.ID == 1:
-                    core_cell_area = 0.5*global_minLen**2
+                    core_cell_area = 0.25*global_minLen**2
+                    print(core_cell_area)
                 self.mesh.extend(seg.mesh_core(self.SegmentLst, self.WebLst, core_cell_area, display=self.display))
                 
         #===================consolidate mesh on web interface         
