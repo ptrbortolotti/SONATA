@@ -39,21 +39,30 @@ class CBM_ExplComp(ExplicitComponent):
         self.set_output()
 
         # Finite difference all partials.
-        #self.declare_partials('*', '*', method='fd')
+        #self.declare_partials('*', '*', method='fd', step=0.05)
+        self.declare_partials('obj', 'rho_mat3', method='fd', step = 2e-2)
+        self.declare_partials('obj', 't_sparcap1', method='fd', step = 1e-2)
+        self.declare_partials('obj', 't_sparcap2', method='fd', step = 1e-2)
+        self.declare_partials('obj', 't_sparcap3', method='fd', step = 1e-2)
+        self.declare_partials('obj', 't_sparcap4', method='fd', step = 1e-2)
+        self.declare_partials('obj', 's_w1', method='fd', step = 1e-2)
+        self.declare_partials('obj', 's_w2', method='fd', step = 1e-2)
+        self.declare_partials('obj', 's_spar2', method='fd', step = 1e-2)
     
     def set_input(self):
-        self.add_input('s_w1', val=0.44)
-        self.add_input('s_w2', val=0.56)
-        self.add_input('t_erosion', val=0.82)
+        self.add_input('s_w1', val=0.43)
+        self.add_input('s_w2', val=0.57)
+        self.add_input('s_spar2', val=0.46)
+        #self.add_input('t_erosion', val=0.82)
         self.add_input('t_overwrap', val=0.25)  
-        self.add_input('t_spar1', val=3.00)
-        self.add_input('rho_mat3', val=0.05)  
-        self.add_input('t_sparcap1', val=2.05)
-        self.add_input('t_sparcap2', val=1.85)
-        self.add_input('t_sparcap3', val=1.85)
+        #self.add_input('t_spar1', val=3.00)
+
+        self.add_input('t_sparcap1', val=1.35)
+        self.add_input('t_sparcap2', val=1.35)
+        self.add_input('t_sparcap3', val=1.45)
         self.add_input('t_sparcap4', val=0.50) 
         self.add_input('rho_mat11', val=0.05)  
-        
+        self.add_input('rho_mat3', val=2.05)  
       
     def set_output(self):
         self.add_output('obj', desc='objective_function for erf2018, paper')   
@@ -84,10 +93,13 @@ class CBM_ExplComp(ExplicitComponent):
 #        print(('%2i' % self.counter), end=' ')
 #        print('%02d:%02d:%02d [' % (h,m,s), end=' ')
 
+
         #SETUP A CBM JOB:
         self.job = None
         self.job = CBM(self.config)
         self.connect_input_to_config(inputs)
+    
+        
         try:
             with HiddenPrints():
                 self.job.cbm_gen_topo()
@@ -101,7 +113,7 @@ class CBM_ExplComp(ExplicitComponent):
         
         except:
            outputs['obj'] = 1e3    
-           self.job.cbm_post_2dmesh(title='ERROR')
+           #self.job.cbm_post_2dmesh(title='ERROR')
            print('] [Unexpected error:', sys.exc_info()[0], ']')
         self.counter += 1   
         
@@ -111,19 +123,22 @@ class CBM_ExplComp(ExplicitComponent):
         self.job.config.webs[1]['Pos1'] = inputs['s_w1'][0]
         self.job.config.webs[1]['Pos2'] = 1-self.job.config.webs[1]['Pos1']
         
+        
         self.job.config.webs[2]['Pos1'] = inputs['s_w2'][0]
         self.job.config.webs[2]['Pos2'] = 1-self.job.config.webs[2]['Pos1']
         
+        self.job.config.segments[0]['Layup'][6][0] = inputs['s_spar2'][0]
+        self.job.config.segments[0]['Layup'][6][1] = 1-inputs['s_spar2'][0]
+        
         #Segment 0 :
-        self.job.config.segments[0]['Layup'][0][2] = inputs['t_erosion'][0]
+        #self.job.config.segments[0]['Layup'][0][2] = inputs['t_erosion'][0]
         self.job.config.segments[0]['Layup'][1][2] = inputs['t_overwrap'][0]
         self.job.config.segments[0]['Layup'][2][2] = inputs['t_overwrap'][0]
         self.job.config.segments[0]['Layup'][3][2] = inputs['t_overwrap'][0]
         self.job.config.segments[0]['Layup'][4][2] = inputs['t_overwrap'][0]
         
         #Segment 1:
-        self.job.config.segments[1]['Layup'][0][2] = inputs['t_spar1'][0]
-        self.job.MaterialLst[3].rho = inputs['rho_mat3'][0]
+        #self.job.config.segments[1]['Layup'][0][2] = inputs['t_spar1'][0]
         
         #Segment 2:
         self.job.config.segments[2]['Layup'][0][2] = inputs['t_sparcap1'][0]
@@ -134,8 +149,8 @@ class CBM_ExplComp(ExplicitComponent):
         #self.job.config.segments[2]['Layup'][3][4] = inputs['o_spar_cap1']
         
         #Segment 3:
-        self.job.MaterialLst[11].rho = inputs['rho_mat11'][0]
-
+        self.job.MaterialLst[10].rho = inputs['rho_mat11'][0]/1000
+        self.job.MaterialLst[2].rho = inputs['rho_mat3'][0]/1000
 
     def connect_output_from_job(self, outputs):
         outputs['MpUS'] = self.job.BeamProperties.MpUS
@@ -160,9 +175,9 @@ class CBM_ExplComp(ExplicitComponent):
         o5 = abs(self.job.BeamProperties.MpUS - self.ref_dct['mass_per_unit_span']) / self.ref_dct['mass_per_unit_span']
         o6 = abs(self.job.BeamProperties.Xm2 - 1000*self.ref_dct['centre_of_mass_location'][0]) / 530;  
         
-        self.residuum = np.mean([o1,o2,o3,o4,o5])
+        #self.residuum = np.mean([o1,o2,o3,o4,o5])
         self.rmse = math.sqrt(np.mean([o1**2,o2**2,o3**2,o4**2,o5**2,o6**2]))
-        
+        #self.rmse = math.sqrt(np.mean([o1**2,o2**2,o5**2,o6**2]))
         return self.rmse
     
     def set_references(self,ref_dct):

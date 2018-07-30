@@ -25,21 +25,24 @@ class Sonata_Group(Group):
     def setup(self):
         
         ivc = self.add_subsystem('ivc', IndepVarComp(), promotes=['*'])
-        ivc.add_output('s_w1', 0.44)
-        ivc.add_output('s_w2', 0.3)
-        ivc.add_output('t_erosion', 0.91)
+
+        #ivc.add_output('t_erosion', 0.91)
         ivc.add_output('t_overwrap',0.25)  
-        ivc.add_output('t_spar1', 3.00)
-        ivc.add_output('rho_mat3', 0.05)  
-        ivc.add_output('t_sparcap1',2.5)
-        ivc.add_output('t_sparcap2', 1.833)
-        ivc.add_output('t_sparcap3', 1.833)
-        ivc.add_output('t_sparcap4', 1.842) 
-        ivc.add_output('rho_mat11', 0.05)  
+
+        ivc.add_output('rho_mat3', 2.05)
+        ivc.add_output('rho_mat11', 0.05)
+        ivc.add_output('t_sparcap1',1.35)
+        ivc.add_output('t_sparcap2', 1.35)
+        ivc.add_output('t_sparcap3', 1.45)
+        ivc.add_output('t_sparcap4', 0.5)
+        
+        ivc.add_output('s_w1', 0.43)
+        ivc.add_output('s_w2', 0.3)
+        ivc.add_output('s_spar2', 0.46)
         #ivc.add_output('rho_1', 0.05)
 
-        promo_inputlst = ['s_w1','s_w2','t_erosion','t_overwrap','t_spar1', 'rho_mat3', 't_sparcap1', 't_sparcap2', 't_sparcap3', 't_sparcap4', 'rho_mat11']
+        promo_inputlst = ['s_w1','s_w2','s_spar2','t_overwrap', 't_sparcap1', 't_sparcap2', 't_sparcap3', 't_sparcap4', 'rho_mat3', 'rho_mat11']
         self.add_subsystem('cbm_comp', CBM_ExplComp(self.config, self.kw), promotes_inputs=promo_inputlst, promotes_outputs=['BeamPropSec'])
         
         #Generate MARC Subsystem
-        self.add_subsystem('marc_comp', MARC_ExplComp(), promotes_inputs=['BeamPropSec'])
+        #self.add_subsystem('marc_comp', MARC_ExplComp(), promotes_inputs=['BeamPropSec'])

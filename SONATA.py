@@ -52,6 +52,6 @@ tmp = job.cbm_set_DymoreMK(x_offset=0.1)
 
 
 job.cbm_post_2dmesh()
-#job.cbm_post_3dtopo()
+job.cbm_post_3dtopo()
 
 

@@ -329,7 +329,7 @@ class CBM(object):
         global_minLen = round(length/Resolution,5)
             
         core_cell_area = 1.25*global_minLen**2
-        bw_cell_area = 0.6*global_minLen**2
+        bw_cell_area = 0.25*global_minLen**2
         web_consolidate_tol = 0.5*global_minLen
 
         #===================MESH SEGMENT
@@ -342,7 +342,7 @@ class CBM(object):
             for j,seg in enumerate(reversed(self.SegmentLst)):
                 if seg.ID == 1:
                     core_cell_area = 0.25*global_minLen**2
-                    print(core_cell_area)
+                    #print(core_cell_area)
                 self.mesh.extend(seg.mesh_core(self.SegmentLst, self.WebLst, core_cell_area, display=self.display))
                 
         #===================consolidate mesh on web interface         
