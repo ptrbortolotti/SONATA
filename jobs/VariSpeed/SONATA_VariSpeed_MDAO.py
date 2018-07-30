@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.transforms import BlendedGenericTransform
 from openmdao.api import Problem, ScipyOptimizer, IndepVarComp, ScipyOptimizeDriver 
 from openmdao.drivers.genetic_algorithm_driver import SimpleGADriver
+from concurrent import futures
 
 #Sonata Modules: Make Sure to be in the SONATA working directory!
 os.chdir('../..')  #print(os.getcwd())
@@ -31,7 +32,8 @@ __spec__ = None
 #READ DYMORE BEAM PROPERTIES:
 folder = 'SONATA/Pymore/dym/mdl/03_rotormodel/05_UH60_rotor_optimization/01_UH60_rotor_snglblade_static/'
 filename = folder + 'rotor_blade.dat'
-dct_dym = read_dymore_beam_properties(filename, x_offset = 0.81786984)
+x_offset = 0.81786984
+dct_dym = read_dymore_beam_properties(filename, x_offset = x_offset)
 
 #READ DAVIS UH-60A BLADE PROPERTIES:
 folder = 'jobs/VariSpeed/uh60a_data_blade/uh60a_blade/'
@@ -47,132 +49,199 @@ dct_davis['cg'] = np.loadtxt(folder + 'cg.dat')
 #=============================================================================
 #%%      SONATA - CBM
 #==============================================================================
-radial_station = 7500
-filename = 'jobs/VariSpeed/uh60a_cbm_advanced/sec_config_R%s.yml' % (radial_station)
-config = Configuration(filename)
-stconfig.setup['radial_station'] = radial_station
-config.setup['BalanceWeight'] = True
-dct_interp = interp1d_dymore_beam_properties(dct_dym,config.setup['radial_station'])
 
-#=============================================================================
-#%%      SONATA - Pymore
-#==============================================================================
-flag_ref = True
-if flag_ref:
-    job = CBM(config)
-    job.cbm_gen_topo()
-    job.cbm_gen_mesh()
-    job.cbm_run_vabs(rm_vabfiles=True)
-
-
-flag_opt = True
-solver = 'slsqp'
-if flag_opt:   
-    p = Problem()
-    p.model = Sonata_Group(config, ref_dct = dct_interp)
-
-    p.model.add_design_var('rho_mat3', lower=0.05, upper=19.25, ref0 = 0, ref=19.25)
-    #p.model.add_design_var('rho_mat11', lower=0.05, upper=19.25, ref0 = 0, ref=19.25)
-    p.model.add_design_var('t_sparcap1', lower=0.35, upper=2.7, ref0 = 0.4, ref=2.7)
-    p.model.add_design_var('t_sparcap2', lower=0.35, upper=2.7, ref0 = 0.4, ref=2.7)
-    p.model.add_design_var('t_sparcap3', lower=0.35, upper=2.7, ref0 = 0.4, ref=2.7)
-    p.model.add_design_var('t_sparcap4', lower=0.35, upper=2.7, ref0 = 0.4, ref=2.7)
-    p.model.add_design_var('s_w1', lower=0.35, upper=0.425, ref0 = 0.35, ref=0.42)
-    p.model.add_design_var('s_w2', lower=0.2,  upper=0.32, ref0 = 0.2, ref=0.31)
-    p.model.add_design_var('s_spar2', lower=0.445,  upper=0.476, ref0 = 0.445, ref=0.476)
+def run_cbm_optimization(radial_station, dct_dym, flag_ref=True, flag_opt=False, solver='slsqp'):
+    filename = 'jobs/VariSpeed/uh60a_cbm_advanced/sec_config_R%s.yml' % (radial_station)
+    config = Configuration(filename)
+    config.setup['radial_station'] = radial_station
+    config.setup['BalanceWeight'] = True
+    dct_interp = interp1d_dymore_beam_properties(dct_dym,config.setup['radial_station'])
     
-    p.model.add_objective('cbm_comp.obj')
-
-    #p.model.add_objective('marc_comp.obj')
+    #=============================================================================
+    #%%      SONATA - Pymore
+    #==============================================================================
+    job=None
+    #flag_ref = True
+    if flag_ref:
+        job = CBM(config)
+        job.cbm_gen_topo()
+        job.cbm_gen_mesh()
+        job.cbm_run_vabs(rm_vabfiles=True)
     
+    job_opt=None
+    #flag_opt = False
+    #solver = 'slsqp'
+    if flag_opt:   
+        p = Problem()
+        p.model = Sonata_Group(config, ref_dct = dct_interp)
     
-    if solver == 'simpleGA':
-        p.driver= SimpleGADriver()
-        p.set_solver_print(level=2)
-        p.driver.options['debug_print'] = ['desvars','objs','totals']
-        p.driver.options['bits'] = {'s_w1' : 8}
-        p.driver.options['bits'] = {'s_w2' : 8}
-        p.driver.options['bits'] = {'t_sparcap1' : 8}
-#        p.driver.options['bits'] = {'t_sparcap2' : 8}
-#        p.driver.options['bits'] = {'t_sparcap3' : 8}
-#        p.driver.options['bits'] = {'t_sparcap4' : 8}
-        p.driver.options['bits'] = {'rho_mat3' : 8}
-    
-        p.driver.options['pop_size'] = 10
-        p.driver.options['max_gen'] = 10
-        p.driver.options['run_parallel'] = False
+        p.model.add_design_var('rho_mat3', lower=0.05, upper=19.25, ref0 = 0, ref=19.25)
+        #p.model.add_design_var('rho_mat11', lower=0.05, upper=19.25, ref0 = 0, ref=19.25)
+        p.model.add_design_var('t_sparcap1', lower=0.35, upper=2.7, ref0 = 0.4, ref=2.7)
+        p.model.add_design_var('t_sparcap2', lower=0.35, upper=2.7, ref0 = 0.4, ref=2.7)
+        p.model.add_design_var('t_sparcap3', lower=0.35, upper=2.7, ref0 = 0.4, ref=2.7)
+        p.model.add_design_var('t_sparcap4', lower=0.35, upper=2.7, ref0 = 0.4, ref=2.7)
+        p.model.add_design_var('s_w1', lower=0.35, upper=0.425, ref0 = 0.35, ref=0.42)
+        p.model.add_design_var('s_w2', lower=0.2,  upper=0.32, ref0 = 0.2, ref=0.31)
+        p.model.add_design_var('s_spar2', lower=0.445,  upper=0.476, ref0 = 0.445, ref=0.476)
         
-    elif solver == 'slsqp':
-        p.driver = ScipyOptimizeDriver()
-        p.driver.options['optimizer'] = 'SLSQP'
-        p.driver.options['debug_print'] = ['desvars','objs']
-        p.driver.options['maxiter'] = 100
-        p.driver.options['tol'] = 2e-5
-        p.driver.opt_settings['eps'] = 1.0
-        
-    elif solver == 'newton-cg':
-        p.driver = ScipyOptimizeDriver()
-        p.driver.options['optimizer'] = 'Newton-CG'
-        p.driver.options['debug_print'] = ['desvars','objs']
-        p.driver.options['maxiter'] = 100
-        p.driver.options['tol'] = 1e-5
-        p.driver.opt_settings['eps'] = 0.1
-        
-    elif solver == 'cobyla':
-        p.driver = ScipyOptimizeDriver()
-        p.driver.options['optimizer'] = 'COBYLA'
-        p.driver.options['debug_print'] = ['desvars','objs']
-        p.driver.options['maxiter'] = 300
-        p.driver.options['tol'] = 1e-5
-        p.driver.opt_settings['rhobeg'] = 0.8
+        p.model.add_objective('cbm_comp.obj')
     
-    p.setup()
-    #p.run_model()
-    p.run_driver()
+        #p.model.add_objective('marc_comp.obj')
+        
+        
+        if solver == 'simpleGA':
+            p.driver= SimpleGADriver()
+            p.set_solver_print(level=2)
+            p.driver.options['debug_print'] = ['desvars','objs','totals']
+            p.driver.options['bits'] = {'s_w1' : 8}
+            p.driver.options['bits'] = {'s_w2' : 8}
+            p.driver.options['bits'] = {'t_sparcap1' : 8}
+    #        p.driver.options['bits'] = {'t_sparcap2' : 8}
+    #        p.driver.options['bits'] = {'t_sparcap3' : 8}
+    #        p.driver.options['bits'] = {'t_sparcap4' : 8}
+            p.driver.options['bits'] = {'rho_mat3' : 8}
+        
+            p.driver.options['pop_size'] = 10
+            p.driver.options['max_gen'] = 10
+            p.driver.options['run_parallel'] = False
+            
+        elif solver == 'slsqp':
+            p.driver = ScipyOptimizeDriver()
+            p.driver.options['optimizer'] = 'SLSQP'
+            p.driver.options['debug_print'] = ['desvars','objs']
+            p.driver.options['maxiter'] = 100
+            p.driver.options['tol'] = 2e-5
+            p.driver.opt_settings['eps'] = 1.0
+            
+        elif solver == 'newton-cg':
+            p.driver = ScipyOptimizeDriver()
+            p.driver.options['optimizer'] = 'Newton-CG'
+            p.driver.options['debug_print'] = ['desvars','objs']
+            p.driver.options['maxiter'] = 100
+            p.driver.options['tol'] = 1e-5
+            p.driver.opt_settings['eps'] = 0.1
+            
+        elif solver == 'cobyla':
+            p.driver = ScipyOptimizeDriver()
+            p.driver.options['optimizer'] = 'COBYLA'
+            p.driver.options['debug_print'] = ['desvars','objs']
+            p.driver.options['maxiter'] = 300
+            p.driver.options['tol'] = 1e-5
+            p.driver.opt_settings['rhobeg'] = 0.8
+        
+        p.setup()
+        #p.run_model()
+        p.run_driver()
+    
+    if flag_opt:    
+        job_opt = p.model.cbm_comp.job
+    return (job, job_opt)
 
-
+radial_station = [2000,7500]
+with futures.ProcessPoolExecutor(max_workers=6) as e:
+    fs = {n:e.submit(run_cbm_optimization, n, dct_dym) for n in radial_station}
+    print('Alle Aufgaben gestartet')
+print('Alle Aufgaben erledigt.')
 
 #==================================================================================
 #%%      P Y M O R E
-#from SONATA.Pymore.marc.marc import MARC
-#from SONATA.Pymore.utl.plot import fan_plot
+#==================================================================================
+from SONATA.Pymore.marc.marc import MARC
+a = fs[2000].result()[0].cbm_set_DymoreMK(x_offset)
+a[-1] = +0.000e+00
+b = fs[2000].result()[0].cbm_set_DymoreMK(x_offset)
+c = fs[7500].result()[0].cbm_set_DymoreMK(x_offset)
+d = fs[7500].result()[0].cbm_set_DymoreMK(x_offset)
+d[-1] = +7.361e+00
+beamProp = np.vstack((a,b,c,d))
 
-#beamProp = ...
+nbOfLoc = 11
+Omega = 4.3*2*np.pi #in rad/sec
+RPM_vec = np.linspace(0.2*Omega, 1.15*Omega, nbOfLoc)
 
-#nbOfLoc = 10
-#RPM_vec = np.linspace(4.3*2*np.pi*0.7, 4.3*2*np.pi*1.1, nbOfLoc)
-#result_dir = 'SONATA/Pymore/rlt/'
-    
-#job_pym = MARC(dir_root, 'rotor_assembly.dym')
-#job.fanplot(RPM_vec, result_dir)
-#.job.marc_set_beamProp('BLADE_BP_CD01', beamProp)
+dir_root = 'SONATA/Pymore/dym/mdl/03_rotormodel/05_UH60_rotor_optimization/01_UH60_rotor_snglblade_static/'
+result_dir = 'SONATA/Pymore/rlt/'
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+job_pym = MARC(dir_root, 'rotor_assembly.dym')
+job_pym.marc_set_beamProp('BLADE_BP_CD01', beamProp)
+job_pym.fanplot(RPM_vec, result_dir)
 
 #==================================================================================
 #%%      P L O T
+
+
+#==========================FAN-PLOT==========================================
+res = np.real(job_pym.analysis.freq)
+
+plt.figure()
+plt.subplot(121)
+plt.grid(True)
+
+#plot rotor-harmonics 
+x =  np.linspace(0, 1.2, 20)
+y =  x*Omega/(2*np.pi)
+for i in range(1,9):
+    color = '#333333'
+    plt.plot(x,i*y,'--',color='grey')
+    string = r'$%i\Omega$' % (i)
+    plt.text(x[-1]+.01, i*y[-1], string)
+
+#read and plot reference data:
+fname = 'jobs/VariSpeed/uh60a_data_blade/fanplot_uh60a_bowen-davies-PhD.txt'
+ref_data = np.loadtxt(fname,skiprows=1,delimiter=',')
+ref_str = open(fname).readline().replace('\n','').split(',')
+x = ref_data[:,0]
+for i,d in enumerate(ref_data.T):
+    s=ref_str[i]
+    if 'f' in s:
+        colorhex = 'blue'
+        plt.plot(x, d, '--',color=colorhex)
+    elif 'l' in s:
+        colorhex = 'red'
+        plt.plot(x, d,'--', color=colorhex)
+    elif 't' in s:
+        colorhex = 'green'
+        plt.plot(x,d,'--',color=colorhex)
+        
+#plot dymore frequencies:
+x = RPM_vec/Omega
+ref_str = ['l1','f1','f2','f3','f4','t1','f5']
+for i,d in enumerate(res[:,:len(ref_str)].T):
+    s=ref_str[i]
+    plt.plot(x,d,'b')
+    if 'f' in s:
+        colorhex = 'blue'
+        plt.plot(x, d, 'o-', color=colorhex)
+        string = r'%s flap' % (s[-1])
+        plt.text(x[-1]+.01, d[-1], string, color=colorhex)
+    elif 'l' in s:
+        colorhex = 'red'
+        plt.plot(x, d, 'o-', color=colorhex)
+        string = r'%s lead-lag' % (s[-1])
+        plt.text(x[-1]+.01, d[-1], string, color=colorhex)
+    elif 't' in s:
+        colorhex = 'green'
+        plt.plot(x, d, 'o-', color=colorhex)
+        string = r'%s torsion' % (s[-1])
+        plt.text(x[-1]+.01, d[-1], string, color=colorhex)
+        
+plt.ylim((0,40))
+plt.xlim((0,1.2))
+plt.title('Fan-Plot')
+plt.xlabel(r'Main Rotor Speed $\Omega$ [1/Rev]')
+plt.ylabel(r'Eigenfrequencies $\omega$ [Hz]')
+
+
 #==========================CROSS-SECTIONS==========================================
+
 if flag_ref:
     job.cbm_post_2dmesh(title = 'Reference')
     
 if flag_opt:
         val_fname = 'jobs/VariSpeed/uh60a_data_blade/Fanplot_Bowen_Davies_Diss.csv'
         #p.model.marc_comp.job.fanplot_show(p.model.marc_comp.RPM_vec, p.model.marc_comp.result_dir,val_fname=val_fname)
-        job_opt = p.model.cbm_comp.job
+
         job_opt.cbm_post_2dmesh(title = 'Optimization')
     
     

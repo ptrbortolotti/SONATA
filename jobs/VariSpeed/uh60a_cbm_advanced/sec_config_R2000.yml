@@ -63,7 +63,7 @@ Segments:
         CoreMaterial: 11
         Layup: 
             #Start[-],End[-],thickness[mm],Orientation [deg],MatID[int],name[str]	
-            - [0.961, 0.039, 3.1, 45, 8, 'TE_Filler'] 
+            - [0.96, 0.04, 3.1, 45, 8, 'TE_Filler'] 
 
             
 #=======BalanceWeight==	
