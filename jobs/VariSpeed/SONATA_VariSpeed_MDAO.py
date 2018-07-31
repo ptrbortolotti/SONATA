@@ -26,26 +26,6 @@ from jobs.VariSpeed.sonata_group import Sonata_Group
 plt.close('all')
 __spec__ = None
 
-#==============================================================================
-#%%      Interpolate Values from dct_dym for optimization
-#==============================================================================
-#READ DYMORE BEAM PROPERTIES:
-folder = 'SONATA/Pymore/dym/mdl/03_rotormodel/05_UH60_rotor_optimization/01_UH60_rotor_snglblade_static/'
-filename = folder + 'rotor_blade.dat'
-x_offset = 0.81786984
-dct_dym = read_dymore_beam_properties(filename, x_offset = x_offset)
-
-#READ DAVIS UH-60A BLADE PROPERTIES:
-folder = 'jobs/VariSpeed/uh60a_data_blade/uh60a_blade/'
-dct_davis = {}
-dct_davis['torsional_stiffness'] = np.loadtxt(folder + 'torsional_stiffness.dat')
-dct_davis['torsional_inertia'] = np.loadtxt(folder + 'torsional_inertia.dat')
-dct_davis['flapping_stiffness'] = np.loadtxt(folder + 'flapping_stiffness.dat')
-dct_davis['edgewise_stiffness'] = np.loadtxt(folder + 'edgewise_stiffness.dat')
-dct_davis['edgewise_inertia'] = np.loadtxt(folder + 'edgewise_inertia.dat')
-dct_davis['mass'] = np.loadtxt(folder + 'mass.dat')
-dct_davis['cg'] = np.loadtxt(folder + 'cg.dat')
-
 #=============================================================================
 #%%      SONATA - CBM
 #==============================================================================
@@ -61,6 +41,8 @@ def run_cbm_optimization(radial_station, dct_dym, flag_ref=True, flag_opt=False,
     #%%      SONATA - Pymore
     #==============================================================================
     job=None
+    job_opt=None
+    
     #flag_ref = True
     if flag_ref:
         job = CBM(config)
@@ -68,7 +50,6 @@ def run_cbm_optimization(radial_station, dct_dym, flag_ref=True, flag_opt=False,
         job.cbm_gen_mesh()
         job.cbm_run_vabs(rm_vabfiles=True)
     
-    job_opt=None
     #flag_opt = False
     #solver = 'slsqp'
     if flag_opt:   
@@ -86,10 +67,8 @@ def run_cbm_optimization(radial_station, dct_dym, flag_ref=True, flag_opt=False,
         p.model.add_design_var('s_spar2', lower=0.445,  upper=0.476, ref0 = 0.445, ref=0.476)
         
         p.model.add_objective('cbm_comp.obj')
-    
         #p.model.add_objective('marc_comp.obj')
-        
-        
+                
         if solver == 'simpleGA':
             p.driver= SimpleGADriver()
             p.set_solver_print(level=2)
@@ -138,9 +117,34 @@ def run_cbm_optimization(radial_station, dct_dym, flag_ref=True, flag_opt=False,
         job_opt = p.model.cbm_comp.job
     return (job, job_opt)
 
+#%%#######RUN CBM OPTIMIZATION#############################################################
+#==============================================================================
+#      Interpolate Values from dct_dym for optimization
+#==============================================================================
+#READ DYMORE BEAM PROPERTIES:
+folder = 'SONATA/Pymore/dym/mdl/03_rotormodel/05_UH60_rotor_optimization/01_UH60_rotor_snglblade_static/'
+filename = folder + 'rotor_blade.dat'
+x_offset = 0.81786984
+dct_dym = read_dymore_beam_properties(filename, x_offset = x_offset)
+
+#READ DAVIS UH-60A BLADE PROPERTIES:
+folder = 'jobs/VariSpeed/uh60a_data_blade/uh60a_blade/'
+dct_davis = {}
+dct_davis['torsional_stiffness'] = np.loadtxt(folder + 'torsional_stiffness.dat')
+dct_davis['torsional_inertia'] = np.loadtxt(folder + 'torsional_inertia.dat')
+dct_davis['flapping_stiffness'] = np.loadtxt(folder + 'flapping_stiffness.dat')
+dct_davis['edgewise_stiffness'] = np.loadtxt(folder + 'edgewise_stiffness.dat')
+dct_davis['edgewise_inertia'] = np.loadtxt(folder + 'edgewise_inertia.dat')
+dct_davis['mass'] = np.loadtxt(folder + 'mass.dat')
+dct_davis['cg'] = np.loadtxt(folder + 'cg.dat')
+
+
+flag_ref=True 
+flag_opt=True 
+solver='slsqp'
 radial_station = [2000,7500]
 with futures.ProcessPoolExecutor(max_workers=6) as e:
-    fs = {n:e.submit(run_cbm_optimization, n, dct_dym) for n in radial_station}
+    fs = {n:e.submit(run_cbm_optimization, n, dct_dym, flag_ref, flag_opt, solver) for n in radial_station}
     print('Alle Aufgaben gestartet')
 print('Alle Aufgaben erledigt.')
 
@@ -148,13 +152,29 @@ print('Alle Aufgaben erledigt.')
 #%%      P Y M O R E
 #==================================================================================
 from SONATA.Pymore.marc.marc import MARC
-a = fs[2000].result()[0].cbm_set_DymoreMK(x_offset)
-a[-1] = +0.000e+00
-b = fs[2000].result()[0].cbm_set_DymoreMK(x_offset)
-c = fs[7500].result()[0].cbm_set_DymoreMK(x_offset)
-d = fs[7500].result()[0].cbm_set_DymoreMK(x_offset)
-d[-1] = +7.361e+00
-beamProp = np.vstack((a,b,c,d))
+from collections import OrderedDict
+dct_cbm_job_ref = OrderedDict()
+dct_cbm_job_opt = OrderedDict()
+
+for k in fs:
+    res = fs[k].result()
+    if res[0] != None: dct_cbm_job_ref[k] = res[0]
+    if res[1] != None: dct_cbm_job_opt[k] = res[1]
+
+#TODO: Use a proper interpolation scheme and include start and end properties 
+tmp = []
+if flag_opt==False:
+    for k in dct_cbm_job_ref:
+        tmp.append(dct_cbm_job_ref[k].cbm_set_DymoreMK(x_offset))
+else:
+    for k in dct_cbm_job_opt:
+        tmp.append(dct_cbm_job_opt[k].cbm_set_DymoreMK(x_offset))
+        
+tmp.insert(0,tmp[0].copy())
+tmp[0][-1] = +0.000e+00
+tmp.append(tmp[-1].copy())
+tmp[-1][-1] = +7.361e+00
+beamProp = np.asarray(tmp)
 
 nbOfLoc = 11
 Omega = 4.3*2*np.pi #in rad/sec
@@ -169,13 +189,10 @@ job_pym.fanplot(RPM_vec, result_dir)
 
 #==================================================================================
 #%%      P L O T
-
-
 #==========================FAN-PLOT==========================================
 res = np.real(job_pym.analysis.freq)
-
 plt.figure()
-plt.subplot(121)
+#plt.subplot(121)
 plt.grid(True)
 
 #plot rotor-harmonics 
@@ -234,16 +251,13 @@ plt.ylabel(r'Eigenfrequencies $\omega$ [Hz]')
 
 
 #==========================CROSS-SECTIONS==========================================
-
-if flag_ref:
-    job.cbm_post_2dmesh(title = 'Reference')
+for k in dct_cbm_job_ref:
+    title = 'Reference at R=%i' % (k)
+    dct_cbm_job_ref[k].cbm_post_2dmesh(title = title)
     
-if flag_opt:
-        val_fname = 'jobs/VariSpeed/uh60a_data_blade/Fanplot_Bowen_Davies_Diss.csv'
-        #p.model.marc_comp.job.fanplot_show(p.model.marc_comp.RPM_vec, p.model.marc_comp.result_dir,val_fname=val_fname)
-
-        job_opt.cbm_post_2dmesh(title = 'Optimization')
-    
+for k in dct_cbm_job_opt:
+    title = 'Optimization Result at R=%i' % (k)
+    dct_cbm_job_opt[k].cbm_post_2dmesh(title = title)
     
 #==========================BEAM-PROPERTIES=======================================    
 plt.rc('text', usetex=False)
@@ -253,9 +267,14 @@ f, axarr = plt.subplots(3,2, sharex=True)
 axarr[0,0].plot(dct_davis['mass'][:,0],dct_davis['mass'][:,1],'r:', label='from S.J. Davis (1981, Sikorsky Aircraft Division)')
 axarr[0,0].plot(dct_dym['x'],dct_dym['mass_per_unit_span'],'--', label='from DYMORE UH-60A (Yeo)')
 #axarr[0,0].plot(dct_interp['x'],dct_interp['mass_per_unit_span'],'gx', label='lin. interp. from DYMORE')
-axarr[0,0].plot(job.config.setup['radial_station'],job.BeamProperties.MpUS,'o', color='grey', label='SONATA CBM (VABS)')
-if flag_opt:
+
+for k in dct_cbm_job_ref:
+    job = dct_cbm_job_ref[k]
+    axarr[0,0].plot(job.config.setup['radial_station'],job.BeamProperties.MpUS,'o', color='grey', label='SONATA CBM (VABS)')
+for k in dct_cbm_job_opt:
+    job_opt = dct_cbm_job_opt[k]
     axarr[0,0].plot(job_opt.config.setup['radial_station'],job_opt.BeamProperties.MpUS,'k^', label='SONATA CBM OPT w. VABS')
+    
 axarr[0,0].set_ylim([5,40])
 axarr[0,0].set_ylabel(r'$m_{00}$ [kg/m]')
 axarr[0,0].legend(loc='upper center', bbox_to_anchor=(0.5, 1.5), ncol=2)
@@ -264,8 +283,11 @@ axarr[0,0].legend(loc='upper center', bbox_to_anchor=(0.5, 1.5), ncol=2)
 axarr[0,1].plot(dct_davis['cg'][:,0],dct_davis['cg'][:,1],'r:')
 axarr[0,1].plot(dct_dym['x'],dct_dym['centre_of_mass_location'][:,0]*1000,'--')
 #axarr[1,0].plot(dct_interp['x'],dct_interp['centre_of_mass_location'][0]*1000,'gx')
-axarr[0,1].plot(job.config.setup['radial_station'],job.BeamProperties.Xm2,'o',color='grey')
-if flag_opt:
+for k in dct_cbm_job_ref:
+    job = dct_cbm_job_ref[k]
+    axarr[0,1].plot(job.config.setup['radial_station'],job.BeamProperties.Xm2,'o',color='grey')
+for k in dct_cbm_job_opt:
+    job_opt = dct_cbm_job_opt[k]
     axarr[0,1].plot(job_opt.config.setup['radial_station'],job_opt.BeamProperties.Xm2,'k^')
 axarr[0,1].set_ylim([-100,100])
 axarr[0,1].set_ylabel(r' $X_{m2}$ [mm]')
@@ -273,8 +295,11 @@ axarr[0,1].set_ylabel(r' $X_{m2}$ [mm]')
 #---------------EA-------------------------------------------------------------
 axarr[1,0].plot(dct_dym['x'],dct_dym['axial_stiffness'],'--')
 #axarr[0,1].plot(dct_interp['x'],dct_interp['axial_stiffness'],'gx')
-axarr[1,0].plot(job.config.setup['radial_station'],job.BeamProperties.CS[0,0],'o', color='grey')
-if flag_opt:
+for k in dct_cbm_job_ref:
+    job = dct_cbm_job_ref[k]
+    axarr[1,0].plot(job.config.setup['radial_station'],job.BeamProperties.CS[0,0],'o', color='grey')
+for k in dct_cbm_job_opt:
+    job_opt = dct_cbm_job_opt[k]
     axarr[1,0].plot(job_opt.config.setup['radial_station'],job_opt.BeamProperties.CS[0,0],'k^')
 axarr[1,0].set_ylabel(r'$EA \; [N]$')
 axarr[1,0].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
@@ -283,8 +308,12 @@ axarr[1,0].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 axarr[1,1].plot(dct_davis['torsional_stiffness'][:,0],dct_davis['torsional_stiffness'][:,1],'r:')
 axarr[1,1].plot(dct_dym['x'],dct_dym['torsional_stiffness'],'--')
 #axarr[1,1].plot(dct_interp['x'],dct_interp['torsional_stiffness'],'gx')
-axarr[1,1].plot(job.config.setup['radial_station'], job.BeamProperties.CS[1,1]*1e-6,'o', color='grey')
-if flag_opt:
+
+for k in dct_cbm_job_ref:
+    job = dct_cbm_job_ref[k]
+    axarr[1,1].plot(job.config.setup['radial_station'], job.BeamProperties.CS[1,1]*1e-6,'o', color='grey')
+for k in dct_cbm_job_opt:
+    job_opt = dct_cbm_job_opt[k]
     axarr[1,1].plot(job_opt.config.setup['radial_station'], job_opt.BeamProperties.CS[1,1]*1e-6,'k^')
 axarr[1,1].set_ylabel(r'$GJ \; [Nm^2]$')
 axarr[1,1].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
@@ -294,8 +323,11 @@ x_offset = 0.81786984
 axarr[2,0].plot(dct_davis['flapping_stiffness'][:,0],dct_davis['flapping_stiffness'][:,1],'r:')
 axarr[2,0].plot(dct_dym['x'],dct_dym['bending_stiffnesses'][:,0],'--') 
 #axarr[2,1].plot(dct_interp['x'],dct_interp['bending_stiffnesses'][0],'gx') 
-axarr[2,0].plot(job.config.setup['radial_station'], job.BeamProperties.CS[2,2]*1e-6,'o', color='grey') 
-if flag_opt:
+for k in dct_cbm_job_ref:
+    job = dct_cbm_job_ref[k]
+    axarr[2,0].plot(job.config.setup['radial_station'], job.BeamProperties.CS[2,2]*1e-6,'o', color='grey') 
+for k in dct_cbm_job_opt:
+    job_opt = dct_cbm_job_opt[k]
     axarr[2,0].plot(job_opt.config.setup['radial_station'],job_opt.BeamProperties.CS[2,2]*1e-6,'k^') 
 axarr[2,0].set_ylabel(r'$EI_{2} \; [Nm^2]$')
 axarr[2,0].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
@@ -304,8 +336,11 @@ axarr[2,0].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 axarr[2,1].plot(dct_davis['edgewise_stiffness'][:,0],dct_davis['edgewise_stiffness'][:,1],'r:')
 axarr[2,1].plot(dct_dym['x'],dct_dym['bending_stiffnesses'][:,1],'--')
 #axarr[3,1].plot(dct_interp['x'],dct_interp['bending_stiffnesses'][1],'gx')
-axarr[2,1].plot(job.config.setup['radial_station'],job.BeamProperties.CS[3,3]*1e-6,'o', color='grey') 
-if flag_opt:
+for k in dct_cbm_job_ref:
+    job = dct_cbm_job_ref[k]
+    axarr[2,1].plot(job.config.setup['radial_station'],job.BeamProperties.CS[3,3]*1e-6,'o', color='grey') 
+for k in dct_cbm_job_opt:
+    job_opt = dct_cbm_job_opt[k]
     axarr[2,1].plot(job_opt.config.setup['radial_station'],job_opt.BeamProperties.CS[3,3]*1e-6,'k^') 
 axarr[2,1].set_ylabel(r'$EI_3 \; [Nm^2]$')
 axarr[2,1].set_xlabel('Radius [mm]')
