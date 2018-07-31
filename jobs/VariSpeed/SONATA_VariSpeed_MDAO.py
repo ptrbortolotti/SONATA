@@ -7,10 +7,12 @@ Created on Tue Jan 23 11:18:28 2018
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
 from matplotlib.transforms import BlendedGenericTransform
 from openmdao.api import Problem, ScipyOptimizer, IndepVarComp, ScipyOptimizeDriver 
 from openmdao.drivers.genetic_algorithm_driver import SimpleGADriver
 from concurrent import futures
+from matplotlib2tikz import save as tikz_save
 
 #Sonata Modules: Make Sure to be in the SONATA working directory!
 os.chdir('../..')  #print(os.getcwd())
@@ -20,9 +22,11 @@ from SONATA.cbm.fileIO.dymore_utils import read_dymore_beam_properties, interp1d
 from SONATA.cbm.fileIO.readinput import read_material_input
 from SONATA.cbm.sonata_cbm import CBM
 from SONATA.vabs.VABS_interface import VABS_config, export_cells_for_VABS, XSectionalProperties
+import SONATA.Pymore.utl.coef as coef
 
 #job specific modules!
 from jobs.VariSpeed.sonata_group import Sonata_Group
+
 plt.close('all')
 __spec__ = None
 
@@ -127,18 +131,6 @@ filename = folder + 'rotor_blade.dat'
 x_offset = 0.81786984
 dct_dym = read_dymore_beam_properties(filename, x_offset = x_offset)
 
-#READ DAVIS UH-60A BLADE PROPERTIES:
-folder = 'jobs/VariSpeed/uh60a_data_blade/uh60a_blade/'
-dct_davis = {}
-dct_davis['torsional_stiffness'] = np.loadtxt(folder + 'torsional_stiffness.dat')
-dct_davis['torsional_inertia'] = np.loadtxt(folder + 'torsional_inertia.dat')
-dct_davis['flapping_stiffness'] = np.loadtxt(folder + 'flapping_stiffness.dat')
-dct_davis['edgewise_stiffness'] = np.loadtxt(folder + 'edgewise_stiffness.dat')
-dct_davis['edgewise_inertia'] = np.loadtxt(folder + 'edgewise_inertia.dat')
-dct_davis['mass'] = np.loadtxt(folder + 'mass.dat')
-dct_davis['cg'] = np.loadtxt(folder + 'cg.dat')
-
-
 flag_ref=True 
 flag_opt=True 
 solver='slsqp'
@@ -169,16 +161,16 @@ if flag_opt==False:
 else:
     for k in dct_cbm_job_opt:
         tmp.append(dct_cbm_job_opt[k].cbm_set_DymoreMK(x_offset))
-        
-tmp.insert(0,tmp[0].copy())
-tmp[0][-1] = +0.000e+00
-tmp.append(tmp[-1].copy())
-tmp[-1][-1] = +7.361e+00
+
+tmp.insert(0,coef.refBeamProp()[0])
+tmp.append(coef.refBeamProp()[-1])
+
 beamProp = np.asarray(tmp)
+#dct_dym['mass_per_unit_span'][0]
 
 nbOfLoc = 11
 Omega = 4.3*2*np.pi #in rad/sec
-RPM_vec = np.linspace(0.2*Omega, 1.15*Omega, nbOfLoc)
+RPM_vec = np.linspace(0.2*Omega, 1.2*Omega, nbOfLoc)
 
 dir_root = 'SONATA/Pymore/dym/mdl/03_rotormodel/05_UH60_rotor_optimization/01_UH60_rotor_snglblade_static/'
 result_dir = 'SONATA/Pymore/rlt/'
@@ -190,9 +182,11 @@ job_pym.fanplot(RPM_vec, result_dir)
 #==================================================================================
 #%%      P L O T
 #==========================FAN-PLOT==========================================
+plt.close('all')
 res = np.real(job_pym.analysis.freq)
 plt.figure()
 #plt.subplot(121)
+
 plt.grid(True)
 
 #plot rotor-harmonics 
@@ -213,44 +207,172 @@ for i,d in enumerate(ref_data.T):
     s=ref_str[i]
     if 'f' in s:
         colorhex = 'blue'
-        plt.plot(x, d, '--',color=colorhex)
+        plt.plot(x, d, ':',color=colorhex)
     elif 'l' in s:
         colorhex = 'red'
-        plt.plot(x, d,'--', color=colorhex)
+        plt.plot(x, d,':', color=colorhex)
     elif 't' in s:
         colorhex = 'green'
-        plt.plot(x,d,'--',color=colorhex)
+        plt.plot(x,d,':',color=colorhex)
         
 #plot dymore frequencies:
 x = RPM_vec/Omega
-ref_str = ['l1','f1','f2','f3','f4','t1','f5']
+ref_str = ['l1','f1','f2','f3','l2','t1','f4']
+D = {'1':'s','2':'^','3':'o','4':'d'}
+ms = 3
 for i,d in enumerate(res[:,:len(ref_str)].T):
     s=ref_str[i]
     plt.plot(x,d,'b')
+    m = D[s[-1]] 
     if 'f' in s:
         colorhex = 'blue'
-        plt.plot(x, d, 'o-', color=colorhex)
+        plt.plot(x, d, '-', color=colorhex, marker=m, markersize = ms)
         string = r'%s flap' % (s[-1])
         plt.text(x[-1]+.01, d[-1], string, color=colorhex)
     elif 'l' in s:
         colorhex = 'red'
-        plt.plot(x, d, 'o-', color=colorhex)
+        plt.plot(x, d, 'o-', color=colorhex, marker=m, markersize = ms)
         string = r'%s lead-lag' % (s[-1])
         plt.text(x[-1]+.01, d[-1], string, color=colorhex)
     elif 't' in s:
         colorhex = 'green'
-        plt.plot(x, d, 'o-', color=colorhex)
+        plt.plot(x, d, 'o-', color=colorhex, marker=m, markersize = ms)
         string = r'%s torsion' % (s[-1])
         plt.text(x[-1]+.01, d[-1], string, color=colorhex)
         
+line1 = mlines.Line2D([], [], color='black', linestyle='-', marker='o', label='Eigenfrequencies')
+line2 = mlines.Line2D([], [], color='black', linestyle=':', label='UH-60A Reference')
+
 plt.ylim((0,40))
 plt.xlim((0,1.2))
 plt.title('Fan-Plot')
-plt.xlabel(r'Main Rotor Speed $\Omega$ [1/Rev]')
-plt.ylabel(r'Eigenfrequencies $\omega$ [Hz]')
+plt.xlabel(r'Rotor Rotational Speed, $\Omega / \Omega_{ref}$')
+plt.ylabel(r'Eigenfrequencies, $\omega$ [Hz]')
+plt.legend(handles=[line1,line2])
+plt.show()
+tikz_save('/media/gu32kij/HTMWTUM/Oeffentlich/Publikationen/ERF/2018/TPflumm, WGarre/paper/img/UH60A_fanplot.tikz', figureheight='\\figureheight', figurewidth='\\figurewidth' )
+
+#==========================EIGEN-MODES==========================================
+eigv = job_pym.analysis.eigv
+
+blade_len = 7.36082856
+r_attachment = 0.81786984
+r_hinge = 0.378
+station = 8
+blade_with_att = blade_len + r_attachment - r_hinge
+R = blade_len + r_attachment
+#        fan_plot(np.real(freq), val_fname, RPM_vec, result_dir)
+#sim_plot(freq, RPM_vec)
+
+plt.figure()
+plt.subplot(311)
+i = 1
+#            plt.plot(eigVec[0,70*i:70*(i+1)], 'k--')
+pos = (np.hstack((0.0,np.linspace(3.39,42.39,40.0)))*blade_with_att/42.39 + 0.378)
+IDs = np.hstack((70*(i+1), np.linspace(30+70*i,70*(i+1)-1,40,dtype=int)))
 
 
-#==========================CROSS-SECTIONS==========================================
+for x in range(eigv[:,IDs,:].shape[0]):
+    for z in range(eigv[:,IDs,:].shape[2]):
+        eigv[x,0,z] = np.interp(r_attachment, pos, eigv[x,IDs,z])
+
+pos = (np.hstack((0.0,np.linspace(2.39,42.39,41.0)))*blade_with_att/42.39 + 0.378)/R
+IDs = np.hstack((70*(i+1), 0, np.linspace(30+70*i,70*(i+1)-1,40,dtype=int)))
+
+scale_vals = np.amax(eigv[:,IDs,:], axis = 1)
+scale_vals_min = np.amin(eigv[:,IDs,:], axis = 1)
+
+for index, x in np.ndenumerate(scale_vals):
+    if np.absolute(scale_vals_min[index]) > x:
+        scale_vals[index] = scale_vals_min[index]
+
+#scale_vals = np.ones(scale_vals.shape)
+
+plt.plot(pos,eigv[0,IDs,station]/scale_vals[0,station], color='red', marker='s', markersize=2, label='1. lead-lag')
+#plt.plot(pos,eigv[1,IDs,station]/scale_vals[1,station], 'k-.^', label='2.mode: lead-lag')
+#plt.plot(pos,eigv[2,IDs,station]/scale_vals[2,station], 'k:',   label='3.mode: lead-lag')
+plt.plot(pos,eigv[3,IDs,station]/scale_vals[3,station],  color='blue', marker='o', markersize=2, label='3. flap')
+plt.plot(pos,eigv[4,IDs,station]/scale_vals[4,station],  color='red', marker='^', markersize=2, label='2. lead-lag')
+#plt.plot(pos,eigv[5,IDs,station]/scale_vals[5,station], 'k--+', label='6.mode: lead-lag')
+#        plt.plot(pos,eigv[6,IDs,station]/scale_vals[6,station], 'k-',   label='7.mode: lead-lag')
+
+plt.grid()
+plt.legend()
+plt.ylim([-1.05,1.05])
+plt.ylabel('Normalized Lead-Lag')
+
+plt.subplot(312)
+i = 2
+#            plt.plot(eigVec[0,70*i:70*(i+1)], 'k--')
+#            plt.plot(eigVec[0,30+70*i:70*(i+1)], 'r--', label='1.mode: flap')
+pos = (np.hstack((0.0,np.linspace(3.39,42.39,40.0)))*blade_with_att/42.39 + 0.378)
+IDs = np.hstack((70*(i+1), np.linspace(30+70*i,70*(i+1)-1,40,dtype=int)))
+for x in range(eigv[:,IDs,:].shape[0]):
+    for z in range(eigv[:,IDs,:].shape[2]):
+        eigv[x,0,z] = np.interp(r_attachment, pos, eigv[x,IDs,z])
+
+pos = (np.hstack((0.0,np.linspace(2.39,42.39,41.0)))*blade_with_att/42.39 + 0.378)/R
+IDs = np.hstack((70*(i+1), 0, np.linspace(30+70*i,70*(i+1)-1,40,dtype=int)))
+
+scale_vals = np.amax(eigv[:,IDs,:], axis = 1)
+scale_vals_min = np.amin(eigv[:,IDs,:], axis = 1)
+
+for index, x in np.ndenumerate(scale_vals):
+    if np.absolute(scale_vals_min[index]) > x:
+        scale_vals[index] = scale_vals_min[index]
+
+#scale_vals = np.ones(scale_vals.shape)
+
+#plt.plot(pos,eigv[0,IDs,station]/scale_vals[0,station], 'k-.',  label='1.mode: flap')       
+plt.plot(pos,eigv[1,IDs,station]/scale_vals[1,station], color='blue', marker='s', markersize=2, label='1. flap')
+plt.plot(pos,eigv[2,IDs,station]/scale_vals[2,station], color='blue', marker='^', markersize=2, label='2. flap')
+plt.plot(pos,eigv[3,IDs,station]/scale_vals[3,station], color='blue', marker='o', markersize=2, label='3. flap')
+plt.plot(pos,eigv[4,IDs,station]/scale_vals[4,station], color='red', marker='^', markersize=2, label='2. lead-lag')
+#plt.plot(pos,eigv[5,IDs,station]/scale_vals[4,station], 'k--+', label='6.mode: flap')
+plt.plot(pos,eigv[6,IDs,station]/scale_vals[6,station], color='blue', marker='d', markersize=2, label='4. flap')
+plt.grid()
+plt.legend(loc='lower center', ncol=5)
+plt.ylim([-1.05,1.05])
+plt.ylabel('Normalized Flap')
+
+plt.subplot(313)
+i = 3
+pos = (np.hstack((0.0,np.linspace(3.39,42.39,40.0)))*blade_with_att/42.39 + 0.378)
+IDs = np.hstack((70*(i+1), np.linspace(30+70*i,70*(i+1)-1,40,dtype=int)))
+for x in range(eigv[:,IDs,:].shape[0]):
+    for z in range(eigv[:,IDs,:].shape[2]):
+        eigv[x,0,z] = 0.0
+
+pos = (np.hstack((0.0,np.linspace(2.39,42.39,41.0)))*blade_with_att/42.39 + 0.378)/R
+IDs = np.hstack((70*(i+1), 0, np.linspace(30+70*i,70*(i+1)-1,40,dtype=int)))
+
+
+scale_vals = np.amax(eigv[:,IDs,:], axis = 1)
+scale_vals_min = np.amin(eigv[:,IDs,:], axis = 1)
+
+for index, x in np.ndenumerate(scale_vals):
+    if np.absolute(scale_vals_min[index]) > x:
+        scale_vals[index] = scale_vals_min[index]
+
+#scale_vals = np.ones(scale_vals.shape)
+
+#plt.plot(pos,eigv[0,IDs,station]/scale_vals[0,station], 'k-.',  label='1.mode: torsion')
+#plt.plot(pos,eigv[1,IDs,station]/scale_vals[1,station], 'k-.^', label='2.mode: torsion')
+#plt.plot(pos,eigv[2,IDs,station]/scale_vals[2,station], 'k:',   label='3.mode: torsion')
+#plt.plot(pos,eigv[3,IDs,station]/scale_vals[3,station], 'k--',  label='4.mode: torsion')
+#plt.plot(pos,eigv[4,IDs,station]/scale_vals[4,station], 'k--*', label='5.mode: torsion')
+plt.plot(pos,eigv[5,IDs,station]/scale_vals[5,station], color='green', marker='s', markersize=2, label='1. torsion')
+#plt.plot(pos,eigv[6,IDs,station]/scale_vals[6,station], 'k-',   label='7.mode: torsion')
+
+plt.grid()
+plt.legend()
+plt.ylim([-1.05,1.05])
+plt.xlabel('Radial Station, r/R')
+plt.ylabel('Normalized Torsion')
+#plt.subplots_adjust(wspace=0.3, left=0.1, right=0.9)
+tikz_save('/media/gu32kij/HTMWTUM/Oeffentlich/Publikationen/ERF/2018/TPflumm, WGarre/paper/img/UH60A_eigenmodes.tikz', figureheight='\\figureheight', figurewidth='\\figurewidth' )
+
+#%%==========================CROSS-SECTIONS==========================================
 for k in dct_cbm_job_ref:
     title = 'Reference at R=%i' % (k)
     dct_cbm_job_ref[k].cbm_post_2dmesh(title = title)
@@ -259,37 +381,54 @@ for k in dct_cbm_job_opt:
     title = 'Optimization Result at R=%i' % (k)
     dct_cbm_job_opt[k].cbm_post_2dmesh(title = title)
     
-#==========================BEAM-PROPERTIES=======================================    
+#%%==========================BEAM-PROPERTIES=======================================    
 plt.rc('text', usetex=False)
 f, axarr = plt.subplots(3,2, sharex=True)    
 
 #---------------m00------------------------------------------------------------
-axarr[0,0].plot(dct_davis['mass'][:,0],dct_davis['mass'][:,1],'r:', label='from S.J. Davis (1981, Sikorsky Aircraft Division)')
-axarr[0,0].plot(dct_dym['x'],dct_dym['mass_per_unit_span'],'--', label='from DYMORE UH-60A (Yeo)')
+#axarr[0,0].plot(dct_davis['mass'][:,0],dct_davis['mass'][:,1],'r:', label='from S.J. Davis (1981, Sikorsky Aircraft Division)')
+axarr[0,0].plot(dct_dym['x'],dct_dym['mass_per_unit_span'],'--', label='UH-60A Reference')
 #axarr[0,0].plot(dct_interp['x'],dct_interp['mass_per_unit_span'],'gx', label='lin. interp. from DYMORE')
 
+tmp_lst = []
 for k in dct_cbm_job_ref:
     job = dct_cbm_job_ref[k]
-    axarr[0,0].plot(job.config.setup['radial_station'],job.BeamProperties.MpUS,'o', color='grey', label='SONATA CBM (VABS)')
+    tmp_lst.append([job.config.setup['radial_station'],job.BeamProperties.MpUS])
+tmp_arr = np.asarray(tmp_lst)
+axarr[0,0].plot(tmp_arr[:,0],tmp_arr[:,1],'o', color='grey', label='Initial Cross-Sections')
+
+tmp_lst = [[dct_dym['x'][0][0],dct_dym['mass_per_unit_span'][0][0]]]
 for k in dct_cbm_job_opt:
     job_opt = dct_cbm_job_opt[k]
-    axarr[0,0].plot(job_opt.config.setup['radial_station'],job_opt.BeamProperties.MpUS,'k^', label='SONATA CBM OPT w. VABS')
-    
-axarr[0,0].set_ylim([5,40])
+    tmp_lst.append([job_opt.config.setup['radial_station'],job_opt.BeamProperties.MpUS])
+tmp_lst.append([dct_dym['x'][-1][0],dct_dym['mass_per_unit_span'][-1][0]])    
+tmp_arr = np.asarray(tmp_lst)
+
+axarr[0,0].plot(tmp_arr[:,0],tmp_arr[:,1],'k^:', markerfacecolor='none', label='UH-60A Reference')
+axarr[0,0].plot(tmp_arr[1:-1,0],tmp_arr[1:-1,1],'k^', label='Optimized Cross-Sections')
+
+axarr[0,0].set_ylim([0,50])
 axarr[0,0].set_ylabel(r'$m_{00}$ [kg/m]')
 axarr[0,0].legend(loc='upper center', bbox_to_anchor=(0.5, 1.5), ncol=2)
 
 #---------------Xm2------------------------------------------------------------
-axarr[0,1].plot(dct_davis['cg'][:,0],dct_davis['cg'][:,1],'r:')
+#axarr[0,1].plot(dct_davis['cg'][:,0],dct_davis['cg'][:,1],'r:')
 axarr[0,1].plot(dct_dym['x'],dct_dym['centre_of_mass_location'][:,0]*1000,'--')
+axarr[0,1].plot(dct_dym['x'][0],dct_dym['centre_of_mass_location'][0,0]*1000,'k^',markerfacecolor='none')
 #axarr[1,0].plot(dct_interp['x'],dct_interp['centre_of_mass_location'][0]*1000,'gx')
 for k in dct_cbm_job_ref:
     job = dct_cbm_job_ref[k]
     axarr[0,1].plot(job.config.setup['radial_station'],job.BeamProperties.Xm2,'o',color='grey')
+    
+tmp_lst = [[dct_dym['x'][0][0],dct_dym['centre_of_mass_location'][0,0]*1000]]   
 for k in dct_cbm_job_opt:
     job_opt = dct_cbm_job_opt[k]
-    axarr[0,1].plot(job_opt.config.setup['radial_station'],job_opt.BeamProperties.Xm2,'k^')
-axarr[0,1].set_ylim([-100,100])
+    tmp_lst.append([job_opt.config.setup['radial_station'],job_opt.BeamProperties.Xm2])
+tmp_lst.append([dct_dym['x'][-1][0], dct_dym['centre_of_mass_location'][-1,0]*1000])    
+tmp_arr = np.asarray(tmp_lst)
+axarr[0,1].plot(tmp_arr[:,0],tmp_arr[:,1],'k^:', markerfacecolor='none')
+axarr[0,1].plot(tmp_arr[1:-1,0],tmp_arr[1:-1,1],'k^')
+axarr[0,1].set_ylim([-120,120])
 axarr[0,1].set_ylabel(r' $X_{m2}$ [mm]')
 
 #---------------EA-------------------------------------------------------------
@@ -298,51 +437,85 @@ axarr[1,0].plot(dct_dym['x'],dct_dym['axial_stiffness'],'--')
 for k in dct_cbm_job_ref:
     job = dct_cbm_job_ref[k]
     axarr[1,0].plot(job.config.setup['radial_station'],job.BeamProperties.CS[0,0],'o', color='grey')
+
+    
+tmp_lst = [[dct_dym['x'][0][0],dct_dym['axial_stiffness'][0][0]]]       
 for k in dct_cbm_job_opt:
     job_opt = dct_cbm_job_opt[k]
-    axarr[1,0].plot(job_opt.config.setup['radial_station'],job_opt.BeamProperties.CS[0,0],'k^')
+    tmp_lst.append([job_opt.config.setup['radial_station'],job_opt.BeamProperties.CS[0,0]])
+tmp_lst.append([dct_dym['x'][-1][0],dct_dym['axial_stiffness'][-1][0]])      
+tmp_arr = np.asarray(tmp_lst)
+axarr[1,0].plot(tmp_arr[:,0],tmp_arr[:,1],'k^:', markerfacecolor='none')
+axarr[1,0].plot(tmp_arr[1:-1,0],tmp_arr[1:-1,1],'k^') 
+
 axarr[1,0].set_ylabel(r'$EA \; [N]$')
+axarr[1,0].set_ylim((0,1.4e9))
 axarr[1,0].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
 #---------------GJ-------------------------------------------------------------
-axarr[1,1].plot(dct_davis['torsional_stiffness'][:,0],dct_davis['torsional_stiffness'][:,1],'r:')
+#axarr[1,1].plot(dct_davis['torsional_stiffness'][:,0],dct_davis['torsional_stiffness'][:,1],'r:')
 axarr[1,1].plot(dct_dym['x'],dct_dym['torsional_stiffness'],'--')
 #axarr[1,1].plot(dct_interp['x'],dct_interp['torsional_stiffness'],'gx')
 
 for k in dct_cbm_job_ref:
     job = dct_cbm_job_ref[k]
     axarr[1,1].plot(job.config.setup['radial_station'], job.BeamProperties.CS[1,1]*1e-6,'o', color='grey')
+    
+tmp_lst = [[dct_dym['x'][0][0],dct_dym['torsional_stiffness'][0][0]]]       
 for k in dct_cbm_job_opt:
     job_opt = dct_cbm_job_opt[k]
-    axarr[1,1].plot(job_opt.config.setup['radial_station'], job_opt.BeamProperties.CS[1,1]*1e-6,'k^')
+    tmp_lst.append([job_opt.config.setup['radial_station'],job_opt.BeamProperties.CS[1,1]*1e-6])
+tmp_lst.append([dct_dym['x'][-1][0],dct_dym['torsional_stiffness'][-1][0]])      
+tmp_arr = np.asarray(tmp_lst)
+axarr[1,1].plot(tmp_arr[:,0],tmp_arr[:,1],'k^:', markerfacecolor='none')
+axarr[1,1].plot(tmp_arr[1:-1,0],tmp_arr[1:-1,1],'k^')  
+
+tmp_arr = np.asarray(tmp_lst)
 axarr[1,1].set_ylabel(r'$GJ \; [Nm^2]$')
+axarr[1,1].set_ylim((0.5e5,2.25e5))
 axarr[1,1].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 x_offset = 0.81786984
 
 #---------------EI2------------------------------------------------------------
-axarr[2,0].plot(dct_davis['flapping_stiffness'][:,0],dct_davis['flapping_stiffness'][:,1],'r:')
+#axarr[2,0].plot(dct_davis['flapping_stiffness'][:,0],dct_davis['flapping_stiffness'][:,1],'r:')
 axarr[2,0].plot(dct_dym['x'],dct_dym['bending_stiffnesses'][:,0],'--') 
 #axarr[2,1].plot(dct_interp['x'],dct_interp['bending_stiffnesses'][0],'gx') 
 for k in dct_cbm_job_ref:
     job = dct_cbm_job_ref[k]
     axarr[2,0].plot(job.config.setup['radial_station'], job.BeamProperties.CS[2,2]*1e-6,'o', color='grey') 
+    
+tmp_lst = [[dct_dym['x'][0][0],dct_dym['bending_stiffnesses'][:,0][0]]]       
 for k in dct_cbm_job_opt:
     job_opt = dct_cbm_job_opt[k]
-    axarr[2,0].plot(job_opt.config.setup['radial_station'],job_opt.BeamProperties.CS[2,2]*1e-6,'k^') 
+    tmp_lst.append([job_opt.config.setup['radial_station'],job_opt.BeamProperties.CS[2,2]*1e-6])
+tmp_lst.append([dct_dym['x'][-1][0],dct_dym['bending_stiffnesses'][:,0][-1]])      
+tmp_arr = np.asarray(tmp_lst)
+axarr[2,0].plot(tmp_arr[:,0],tmp_arr[:,1],'k^:', markerfacecolor='none')    
+axarr[2,0].plot(tmp_arr[1:-1,0],tmp_arr[1:-1,1],'k^')  
+
 axarr[2,0].set_ylabel(r'$EI_{2} \; [Nm^2]$')
+axarr[2,0].set_ylim((0,3e5))
 axarr[2,0].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
 #---------------EI3------------------------------------------------------------
-axarr[2,1].plot(dct_davis['edgewise_stiffness'][:,0],dct_davis['edgewise_stiffness'][:,1],'r:')
+#axarr[2,1].plot(dct_davis['edgewise_stiffness'][:,0],dct_davis['edgewise_stiffness'][:,1],'r:')
 axarr[2,1].plot(dct_dym['x'],dct_dym['bending_stiffnesses'][:,1],'--')
 #axarr[3,1].plot(dct_interp['x'],dct_interp['bending_stiffnesses'][1],'gx')
 for k in dct_cbm_job_ref:
     job = dct_cbm_job_ref[k]
     axarr[2,1].plot(job.config.setup['radial_station'],job.BeamProperties.CS[3,3]*1e-6,'o', color='grey') 
+    
+tmp_lst = [[dct_dym['x'][0][0],dct_dym['bending_stiffnesses'][:,1][0]]]     
 for k in dct_cbm_job_opt:
     job_opt = dct_cbm_job_opt[k]
-    axarr[2,1].plot(job_opt.config.setup['radial_station'],job_opt.BeamProperties.CS[3,3]*1e-6,'k^') 
+    tmp_lst.append([job_opt.config.setup['radial_station'],job_opt.BeamProperties.CS[3,3]*1e-6])
+tmp_lst.append([dct_dym['x'][-1][0],dct_dym['bending_stiffnesses'][:,1][-1]])      
+tmp_arr = np.asarray(tmp_lst)
+axarr[2,1].plot(tmp_arr[:,0],tmp_arr[:,1],'k^:', markerfacecolor='none')      
+axarr[2,1].plot(tmp_arr[1:-1,0],tmp_arr[1:-1,1],'k^')  
+    
 axarr[2,1].set_ylabel(r'$EI_3 \; [Nm^2]$')
+axarr[2,1].set_ylim((0,3.5e6))
 axarr[2,1].set_xlabel('Radius [mm]')
 axarr[2,1].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
@@ -383,5 +556,7 @@ axarr[2,1].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 #axarr[0,1].set_ylabel(r'$X_{s2}$ [mm]')
 
 
+plt.subplots_adjust(wspace=0.6)
+plt.show()
 #from matplotlib2tikz import save as tikz_save
-#tikz_save('UH60A_beam.tikz', figureheight='\\figureheight', figurewidth='\\figurewidth' )
+tikz_save('/media/gu32kij/HTMWTUM/Oeffentlich/Publikationen/ERF/2018/TPflumm, WGarre/paper/img/UH60A_beam.tikz', figureheight='\\figureheight', figurewidth='\\figurewidth' )
