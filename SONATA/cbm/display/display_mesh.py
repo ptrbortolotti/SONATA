@@ -105,7 +105,7 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
 
         if VABSProperties.Xs2 != None:
             SC, = plt.plot(VABSProperties.Xs2,VABSProperties.Xs3,'kD',label='SC: Generalized Shear Center')
-            ax.annotate('SC', (VABSProperties.Xs2,VABSProperties.Xs3),fontsize=20)
+            #ax.annotate('SC', (VABSProperties.Xs2,VABSProperties.Xs3),fontsize=20)
             plt.legend(handles=[CG,GC,NA,SC])
 
     

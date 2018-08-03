@@ -196,7 +196,7 @@ for i in range(1,9):
     color = '#333333'
     plt.plot(x,i*y,'--',color='grey')
     string = r'$%i\Omega$' % (i)
-    plt.text(x[-1]+.01, i*y[-1], string)
+    plt.text(x[-1]-.06, i*y[-1]+.5, string, color='grey')
 
 #read and plot reference data:
 fname = 'jobs/VariSpeed/uh60a_data_blade/fanplot_uh60a_bowen-davies-PhD.txt'
@@ -243,14 +243,14 @@ for i,d in enumerate(res[:,:len(ref_str)].T):
 line1 = mlines.Line2D([], [], color='black', linestyle='-', marker='o', label='Eigenfrequencies')
 line2 = mlines.Line2D([], [], color='black', linestyle=':', label='UH-60A Reference')
 
-plt.ylim((0,40))
+plt.ylim((0,45))
 plt.xlim((0,1.2))
 plt.title('Fan-Plot')
 plt.xlabel(r'Rotor Rotational Speed, $\Omega / \Omega_{ref}$')
 plt.ylabel(r'Eigenfrequencies, $\omega$ [Hz]')
 plt.legend(handles=[line1,line2])
 plt.show()
-tikz_save('/media/gu32kij/HTMWTUM/Oeffentlich/Publikationen/ERF/2018/TPflumm, WGarre/paper/img/UH60A_fanplot.tikz', figureheight='\\figureheight', figurewidth='\\figurewidth' )
+#tikz_save('/media/gu32kij/HTMWTUM/Oeffentlich/Publikationen/ERF/2018/TPflumm, WGarre/paper/img/UH60A_fanplot.tikz', figureheight='\\figureheight', figurewidth='\\figurewidth' )
 
 #==========================EIGEN-MODES==========================================
 eigv = job_pym.analysis.eigv
@@ -288,16 +288,16 @@ for index, x in np.ndenumerate(scale_vals):
 
 #scale_vals = np.ones(scale_vals.shape)
 
-plt.plot(pos,eigv[0,IDs,station]/scale_vals[0,station], color='red', marker='s', markersize=2, label='1. lead-lag')
+plt.plot(pos,eigv[0,IDs,station]/scale_vals[0,station], color='red', marker='s', markersize=1.5, label='1. lead-lag')
 #plt.plot(pos,eigv[1,IDs,station]/scale_vals[1,station], 'k-.^', label='2.mode: lead-lag')
 #plt.plot(pos,eigv[2,IDs,station]/scale_vals[2,station], 'k:',   label='3.mode: lead-lag')
-plt.plot(pos,eigv[3,IDs,station]/scale_vals[3,station],  color='blue', marker='o', markersize=2, label='3. flap')
-plt.plot(pos,eigv[4,IDs,station]/scale_vals[4,station],  color='red', marker='^', markersize=2, label='2. lead-lag')
+plt.plot(pos,eigv[3,IDs,station]/scale_vals[3,station],  color='blue', marker='o', markersize=1.5, label='3. flap')
+plt.plot(pos,eigv[4,IDs,station]/scale_vals[4,station],  color='red', marker='^', markersize=1.5, label='2. lead-lag')
 #plt.plot(pos,eigv[5,IDs,station]/scale_vals[5,station], 'k--+', label='6.mode: lead-lag')
 #        plt.plot(pos,eigv[6,IDs,station]/scale_vals[6,station], 'k-',   label='7.mode: lead-lag')
 
 plt.grid()
-plt.legend()
+#plt.legend()
 plt.ylim([-1.05,1.05])
 plt.ylabel('Normalized Lead-Lag')
 
@@ -324,14 +324,14 @@ for index, x in np.ndenumerate(scale_vals):
 #scale_vals = np.ones(scale_vals.shape)
 
 #plt.plot(pos,eigv[0,IDs,station]/scale_vals[0,station], 'k-.',  label='1.mode: flap')       
-plt.plot(pos,eigv[1,IDs,station]/scale_vals[1,station], color='blue', marker='s', markersize=2, label='1. flap')
-plt.plot(pos,eigv[2,IDs,station]/scale_vals[2,station], color='blue', marker='^', markersize=2, label='2. flap')
-plt.plot(pos,eigv[3,IDs,station]/scale_vals[3,station], color='blue', marker='o', markersize=2, label='3. flap')
-plt.plot(pos,eigv[4,IDs,station]/scale_vals[4,station], color='red', marker='^', markersize=2, label='2. lead-lag')
+plt.plot(pos,eigv[1,IDs,station]/scale_vals[1,station], color='blue', marker='s', markersize=1.5, label='1. flap')
+plt.plot(pos,eigv[2,IDs,station]/scale_vals[2,station], color='blue', marker='^', markersize=1.5, label='2. flap')
+plt.plot(pos,eigv[3,IDs,station]/scale_vals[3,station], color='blue', marker='o', markersize=1.5, label='3. flap')
+plt.plot(pos,eigv[4,IDs,station]/scale_vals[4,station], color='red', marker='^', markersize=1.5, label='2. lead-lag')
 #plt.plot(pos,eigv[5,IDs,station]/scale_vals[4,station], 'k--+', label='6.mode: flap')
-plt.plot(pos,eigv[6,IDs,station]/scale_vals[6,station], color='blue', marker='d', markersize=2, label='4. flap')
+plt.plot(pos,eigv[6,IDs,station]/scale_vals[6,station], color='blue', marker='d', markersize=1.5, label='4. flap')
 plt.grid()
-plt.legend(loc='lower center', ncol=5)
+#plt.legend(loc='lower center', ncol=5)
 plt.ylim([-1.05,1.05])
 plt.ylabel('Normalized Flap')
 
@@ -361,28 +361,50 @@ for index, x in np.ndenumerate(scale_vals):
 #plt.plot(pos,eigv[2,IDs,station]/scale_vals[2,station], 'k:',   label='3.mode: torsion')
 #plt.plot(pos,eigv[3,IDs,station]/scale_vals[3,station], 'k--',  label='4.mode: torsion')
 #plt.plot(pos,eigv[4,IDs,station]/scale_vals[4,station], 'k--*', label='5.mode: torsion')
-plt.plot(pos,eigv[5,IDs,station]/scale_vals[5,station], color='green', marker='s', markersize=2, label='1. torsion')
+plt.plot(pos,eigv[5,IDs,station]/scale_vals[5,station], color='green', marker='s', markersize=1.5)
 #plt.plot(pos,eigv[6,IDs,station]/scale_vals[6,station], 'k-',   label='7.mode: torsion')
 
+line1 = mlines.Line2D([], [], color='red', linestyle='-', marker='s', label='1 lead-lag')
+line2 = mlines.Line2D([], [], color='blue', linestyle='-',marker='s', label='1 flap')
+line3 = mlines.Line2D([], [], color='blue', linestyle='-',marker='^', label='2 flap')
+line4 = mlines.Line2D([], [], color='blue', linestyle='-',marker='o', label='3 flap')
+line5 = mlines.Line2D([], [], color='red', linestyle='-',marker='^',  label='2 lead-lag')
+line6 = mlines.Line2D([], [], color='green',linestyle='-',marker='s', label='1 torsion')
+line7 = mlines.Line2D([], [], color='blue', linestyle='-', marker='d', label='4 flap')
+
 plt.grid()
-plt.legend()
+#plt.legend()
+plt.subplots_adjust(bottom=0.3)
+plt.legend(handles=[line1,line2,line3,line4,line5,line6,line7],loc='lower center', ncol=4, bbox_to_anchor=(0.5, -0.7),)
 plt.ylim([-1.05,1.05])
 plt.xlabel('Radial Station, r/R')
 plt.ylabel('Normalized Torsion')
 #plt.subplots_adjust(wspace=0.3, left=0.1, right=0.9)
-tikz_save('/media/gu32kij/HTMWTUM/Oeffentlich/Publikationen/ERF/2018/TPflumm, WGarre/paper/img/UH60A_eigenmodes.tikz', figureheight='\\figureheight', figurewidth='\\figurewidth' )
+#tikz_save('/media/gu32kij/HTMWTUM/Oeffentlich/Publikationen/ERF/2018/TPflumm, WGarre/paper/img/UH60A_eigenmodes.tikz', figureheight='\\figureheight', figurewidth='\\figurewidth' )
 
 #%%==========================CROSS-SECTIONS==========================================
+dest_folder = '/media/gu32kij/HTMWTUM/Oeffentlich/Publikationen/ERF/2018/TPflumm, WGarre/paper/img/'
 for k in dct_cbm_job_ref:
     title = 'Reference at R=%i' % (k)
     dct_cbm_job_ref[k].cbm_post_2dmesh(title = title)
+    savepath = dest_folder+'Reference_R%i.jpg' % (k)
+    f = plt.gcf()  # f = figure(n) if you know the figure number
+    f.set_size_inches(50,25)
+    plt.tight_layout()
+    plt.savefig(savepath, dpi=200)
     
 for k in dct_cbm_job_opt:
     title = 'Optimization Result at R=%i' % (k)
     dct_cbm_job_opt[k].cbm_post_2dmesh(title = title)
+    plt.tight_layout()
+    savepath = dest_folder+'Optimization_%i.jpg' % (k)
+    f = plt.gcf()  # f = figure(n) if you know the figure number
+    f.set_size_inches(50,25)
+    plt.savefig(savepath, dpi=200)
+    
     
 #%%==========================BEAM-PROPERTIES=======================================    
-plt.rc('text', usetex=False)
+#plt.rc('text', usetex=False)
 f, axarr = plt.subplots(3,2, sharex=True)    
 
 #---------------m00------------------------------------------------------------
@@ -404,12 +426,12 @@ for k in dct_cbm_job_opt:
 tmp_lst.append([dct_dym['x'][-1][0],dct_dym['mass_per_unit_span'][-1][0]])    
 tmp_arr = np.asarray(tmp_lst)
 
-axarr[0,0].plot(tmp_arr[:,0],tmp_arr[:,1],'k^:', markerfacecolor='none', label='UH-60A Reference')
+axarr[0,0].plot(tmp_arr[:,0],tmp_arr[:,1],'k^:', markerfacecolor='none', label='New Composite Beam')
 axarr[0,0].plot(tmp_arr[1:-1,0],tmp_arr[1:-1,1],'k^', label='Optimized Cross-Sections')
 
 axarr[0,0].set_ylim([0,50])
 axarr[0,0].set_ylabel(r'$m_{00}$ [kg/m]')
-axarr[0,0].legend(loc='upper center', bbox_to_anchor=(0.5, 1.5), ncol=2)
+
 
 #---------------Xm2------------------------------------------------------------
 #axarr[0,1].plot(dct_davis['cg'][:,0],dct_davis['cg'][:,1],'r:')
@@ -555,8 +577,8 @@ axarr[2,1].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 #axarr[0,1].set_ylim([-100,100])
 #axarr[0,1].set_ylabel(r'$X_{s2}$ [mm]')
 
-
-plt.subplots_adjust(wspace=0.6)
+axarr[0,0].legend(loc='upper center', bbox_to_anchor=(0.1, 1.5), ncol=2)
+f.subplots_adjust(bottom=0.3, wspace=0.5)
 plt.show()
 #from matplotlib2tikz import save as tikz_save
-tikz_save('/media/gu32kij/HTMWTUM/Oeffentlich/Publikationen/ERF/2018/TPflumm, WGarre/paper/img/UH60A_beam.tikz', figureheight='\\figureheight', figurewidth='\\figurewidth' )
+#tikz_save('/media/gu32kij/HTMWTUM/Oeffentlich/Publikationen/ERF/2018/TPflumm, WGarre/paper/img/UH60A_beam.tikz', figureheight='\\figureheight', figurewidth='\\figurewidth' )

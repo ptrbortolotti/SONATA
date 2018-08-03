@@ -489,29 +489,42 @@ class CBM(object):
         self.display, self.start_display, self.add_menu, self.add_function_to_menu = init_display()
         self.display.Context.SetDeviationAngle(1e-6)       # 0.001 default. Be careful to scale it to the problem.
         self.display.Context.SetDeviationCoefficient(1e-6) # 0.001 default. Be careful to scale it to the problem. 
-        self.display.set_bg_gradient_color(20,6,111,200,200,200)
+        #self.display.set_bg_gradient_color(20,6,111,200,200,200)
+        self.display.set_bg_gradient_color(255,255,255,255,255,255)
         show_coordinate_system(self.display,5)
-        self.add_menu('screencapture')
-        self.add_function_to_menu('screencapture', export_png)
-        self.add_function_to_menu('screencapture', export_jpg)
-        self.add_function_to_menu('screencapture', export_pdf)
-        self.add_function_to_menu('screencapture', export_svg)
-        self.add_function_to_menu('screencapture', export_ps)
-            
+        
+        self.add_menu('View')
+        self.add_function_to_menu('View', self.display.FitAll)
+        self.add_function_to_menu('View', self.display.View_Bottom)
+        self.add_function_to_menu('View', self.display.View_Top)
+        self.add_function_to_menu('View', self.display.View_Left)
+        self.add_function_to_menu('View', self.display.View_Right)
+        self.add_function_to_menu('View', self.display.View_Front)
+        self.add_function_to_menu('View', self.display.View_Rear)
+        self.add_function_to_menu('View', self.display.View_Iso)
+        
+        self.add_menu('Screencapture')
+        self.add_function_to_menu('Screencapture', export_png)
+        self.add_function_to_menu('Screencapture', export_jpg)
+        self.add_function_to_menu('Screencapture', export_pdf)
+        self.add_function_to_menu('Screencapture', export_svg)
+        self.add_function_to_menu('Screencapture', export_ps)
+       
         return (self.display, self.start_display, self.add_menu, self.add_function_to_menu)
         
     
     def cbm_post_3dtopo(self):
+        
         self.cbm_display_config()
         #display.DisplayShape(SegmentLst[0].BSplineLst[0].StartPoint())
         #display_custome_shape(display,SegmentLst[0].wire,2,0,[0,0,0])
 
         if self.config.setup['input_type'] == 3 or self.config.setup['input_type'] == 4:
-            self.display.Context.SetDeviationAngle(1e-5)       # 0.001 default. Be careful to scale it to the problem, or else it will crash :) 
-            self.display.Context.SetDeviationCoefficient(1e-5) 
+            self.display.Context.SetDeviationAngle(1e-6)       # 0.001 default. Be careful to scale it to the problem, or else it will crash :) 
+            self.display.Context.SetDeviationCoefficient(1e-6) 
             
             display_SONATA_SegmentLst(self.display,self.SegmentLst,self.config.setup['radial_station'],-math.pi/2,-math.pi/2)
-            self.display.DisplayShape(self.surface3d, color=None, transparency=0.7, update=True)
+            #self.display.DisplayShape(self.surface3d, color=None, transparency=0.7, update=True)
             
             if self.config.setup['BalanceWeight']:
                 transform_wire_2to3d(self.display,self.BW.wire,self.config.setup['radial_station'],-math.pi/2,-math.pi/2)
@@ -520,7 +533,8 @@ class CBM(object):
             display_SONATA_SegmentLst(self.display,self.SegmentLst)
             if self.config.setup['BalanceWeight']:
                 self.display.DisplayShape(self.BW.Curve, color="BLACK")
-        #self.display.View_ISO()
+        #self.display.View_Iso()
+        self.display.View_Right()
         self.display.FitAll()
         self.start_display()   
         return None
