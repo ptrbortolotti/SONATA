@@ -46,7 +46,7 @@ class Cell(object):
         
         #THE AVERAGE OF 3D strain and Stress Results at Gaussian Points within each element.
 #        self.strain = Strain()      #[psilon11,2epsilon12,2epsilon13,epsilon22,2epsilon24,epsilon33
-#        self.strainM = Strain()   #[epsilon11,2epsilon12,2epsilon13,epsilon22,2epsilon24,epsilon33]M
+#        self.strainM = Strain()   #[epsilon11,2epsilon12,2epsilon13,epsilon22,2epsilon24,epsil$b_\text{nodes}$on33]M
 #        self.stress =  Stress()     #sigma11,sigma12,sigma13,sigma22,sigma23,sigma33]
 #        self.stressM = Stress()   #[sigma11,sigma12,sigma13,sigma22,sigma23,sigma33]M
 
