@@ -45,43 +45,43 @@ def init_viewer():
     
 def export_to_PDF(display,event=None):
     f = display.View.View().GetObject()
-    display.set_bg_gradient_color(255,255,255,255,255,255)
+    #display.set_bg_gradient_color(255,255,255,255,255,255)
     i = 0
     while os.path.exists('img/capture_pdf%s.pdf' % i):
         i += 1
     f.Export('img/capture_pdf%s.pdf' % i, Graphic3d_EF_PDF)
     print("EXPORT: \t Screencapture exported to img/capture_pdf%s.pdf" % i)
-    display.set_bg_gradient_color(20,6,111,200,200,200)
+    #display.set_bg_gradient_color(20,6,111,200,200,200)
     
 def export_to_SVG(display,event=None):
     f = display.View.View().GetObject()
-    display.set_bg_gradient_color(255,255,255,255,255,255)
+    #display.set_bg_gradient_color(255,255,255,255,255,255)
     i = 0
     while os.path.exists('img/capture_svg%s.svg' % i):
         i += 1
     f.Export('img/capture_svg_%s.svg' % i, Graphic3d_EF_SVG)
     print("EXPORT: \t Screencapture exported to img/capture_svg%s.svg" % i)
-    display.set_bg_gradient_color(20,6,111,200,200,200)
+    #display.set_bg_gradient_color(20,6,111,200,200,200)
     
 def export_to_PS(display,event=None):
     f = display.View.View().GetObject()
-    display.set_bg_gradient_color(255,255,255,255,255,255)
+    #display.set_bg_gradient_color(255,255,255,255,255,255)
     i = 0
     while os.path.exists('img/capture_ps%s.ps' % i):
         i += 1
     f.Export('img/capture_ps%s.ps' % i, Graphic3d_EF_PostScript)
     print("EXPORT: \t Screencapture exported to img/capture_ps%s.ps" % i)
-    display.set_bg_gradient_color(20,6,111,200,200,200)
+    #display.set_bg_gradient_color(20,6,111,200,200,200)
 
 def export_to_EnhPS(display,event=None):
     f = display.View.View().GetObject()
-    display.set_bg_gradient_color(255,255,255,255,255,255)
+    #display.set_bg_gradient_color(255,255,255,255,255,255)
     i = 0
     while os.path.exists('img/capture_Enh_ps%s.ps' % i):
         i += 1
     f.Export('img/capture_Enh_ps%s.ps' % i, Graphic3d_EF_EnhPostScript)
     print("EXPORT: \t Screencapture exported to img/capture_Enh_ps%s.ps" % i)
-    display.set_bg_gradient_color(20,6,111,200,200,200)
+    #display.set_bg_gradient_color(20,6,111,200,200,200)
     
 def export_to_TEX(display,event=None):
     f = display.View.View().GetObject()
