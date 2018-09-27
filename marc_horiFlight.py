@@ -46,9 +46,9 @@ if __name__ == "__main__":
     #%%===================================#
     #   Simulation Settings               #
     #=====================================#
-    recalc = False
+    recalc = True
     result_dir = 'SONATA/Pymore/rlt/'
-    identifier = 'vertFlight'
+    identifier = 'vertFlight_invDamp'
     N_b = 4.0
     c_ref = 0.53
     R_ref = 8.179
@@ -111,8 +111,8 @@ if __name__ == "__main__":
             else:
                 Omega = (Psi[i]-Psi[i-1]) / tim[4]
                 
-            job.marc_time_step(Omega, tim[4], Psi[i], Col[i], LatCyc[i], LngCyc[i], Vinf[i])
-            T, Q, P, f, x, v = job.marc_get_hubloads()
+            job.analysis.dyn_timeStep(Omega, tim[4], Psi[i], Col[i], LatCyc, LngCyc, Vinf[:,i])
+            T, Q, P, f, x, v = job.analysis.dyn_get_hubloads(job)
             
             # STORE DYMORE MODEL OUTPUT
             u_stack = np.vstack((u_stack, np.array([tim[4],Col[i],Psi[i],Omega])))
