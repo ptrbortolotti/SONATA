@@ -30,7 +30,6 @@ class CBM_ExplComp(ExplicitComponent):
         else:    
             self.ref_dct = {}
 
-    
     def setup(self):
         self.counter = 0
         self.startTime = datetime.now()

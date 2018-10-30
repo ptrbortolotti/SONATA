@@ -2,6 +2,7 @@ import sys
 import os
 import math
 import numpy as np
+import matplotlib.pyplot as plt
 
 from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax3,gp_Ax1
 
@@ -323,8 +324,10 @@ def BSplineLst_from_intersect_shape(aResShape,R,scale_factor,Theta):
     wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,1,0)),math.pi/2)
     wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,0,1)),math.pi/2)
     
+    #TODO: jobs/MSmialy/Testblade
+    print()
     print('STATUS:\t CHECK ClosedWire: \t\t ', str(wire.Closed()))
-    npArray = discretize_wire_TangentialDeflection(wire,70,0.013)
+    npArray = discretize_wire_TangentialDeflection(wire,80,0.013)
     npArray = np.multiply(npArray,scale_factor)
     BSplineLst = BSplineLst_from_dct(npArray,2)
     BSplineLst = set_BSplineLst_to_Origin(BSplineLst,Theta) 
@@ -337,7 +340,7 @@ def BSplineLst_from_intersect_shape(aResShape,R,scale_factor,Theta):
     print('STATUS:\t CHECK Counterclockwise: \t ', BSplineLst_Orientation(BSplineLst,11))
     
 #    display.DisplayShape(wire)
-#    
+    
 #    plt.figure(1)
 #    plt.clf()         
 #    plt.plot(*npArray.T, color='black', marker='.')

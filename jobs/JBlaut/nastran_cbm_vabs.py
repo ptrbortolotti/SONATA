@@ -9,6 +9,7 @@ import os
 import platform
 import subprocess
 import shutil
+import matplotlib.pyplot as plt
 
 if __name__ == '__main__':   #Make Sure to be in the SONATA working directory!
     os.chdir('../..')  #print(os.getcwd())
@@ -22,6 +23,7 @@ from SONATA.vabs.VABS_interface import VABS_config, export_cells_for_VABS, XSect
 from SONATA.vabs.strain import Strain
 from SONATA.vabs.stress import Stress
 
+plt.close('all')
 
 MaterialLst = read_yaml_materialdb('jobs/JBlaut/mat_db.yml')
 filename = 'jobs/JBlaut/Querschnitt.nas'
@@ -36,10 +38,11 @@ nodes,mesh = read_nastran_bulkdata(filename)
 for c in mesh:
     if c.MatID == 3:
         c.MatID = 1
-        c.theta_3 = 45
+        c.theta_3 = 0
 
     elif c.MatID == 10:
         c.MatID = 1
+        c.theta_3 = 45
         
     elif c.MatID == 11:
         c.MatID = 3   
@@ -63,7 +66,8 @@ elif platform.system == 'Windows':
     executable = 'SONATA/vabs/bin/VABSIII.exe'
     
 vabs_cfg = VABS_config()
-vabs_cfg.recover_flag = 1
+vabs_cfg.recover_flag = 0
+vabs_cfg.F = [0,0,0]
 vabs_cfg.M = [2000e3,0,0]
 
 if vabs_cfg.recover_flag == 1:
@@ -106,6 +110,6 @@ if vabs_cfg.recover_flag == 1:
         n.displacement = BeamProperties.U[i][3:6]
 
 #PLOT!
-plot_cells(mesh,nodes,'MatID')
+plot_cells(mesh,nodes,'MatID', plotTheta11=True)
 plot_cells(mesh,nodes,'theta_3', BeamProperties, title='None', plotTheta11=False, plotDisplacement=False)
-plot_cells(mesh,nodes,'stress.sigma12', BeamProperties, title='None', plotTheta11=False, plotDisplacement=False)
+#plot_cells(mesh,nodes,'stress.sigma12', BeamProperties, title='None', plotTheta11=True, plotDisplacement=False)
