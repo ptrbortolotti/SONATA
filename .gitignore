@@ -46,8 +46,14 @@
 *.zip
 
 #ignored folders
+jobs/AAbdelmoula
 jobs/Epiet
+jobs/JBlaut
+jobs/MSmialy
+jobs/SBeer
 jobs/SSuesse
+jobs/Statistics
+jobs/VHeuschneider
 img/
 bugreport/
 publication/
