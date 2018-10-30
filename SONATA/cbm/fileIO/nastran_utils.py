@@ -16,7 +16,7 @@ import shutil
 from datetime import datetime
 if __name__ == '__main__':
     #Sonata Modules: Make Sure to be in the SONATA working directory!
-    os.chdir('../..')  #print(os.getcwd())
+    os.chdir('../../..')  #print(os.getcwd())
     
 from SONATA.cbm.mesh.node import Node
 from SONATA.cbm.mesh.cell import Cell
@@ -63,7 +63,7 @@ def read_nastran_bulkdata(filename):
                 #Important See CTRIA3 Element Geometry and Coordinate System in NASTRAN Reference Guide
                 nas_theta = float(tmp[5])
                 v0 = gp_Vec2d(gp_Pnt2d(0,0),gp_Pnt2d(1,0))
-                v1 = gp_Vec2d(cell.nodes[0].Pnt2d,cell.nodes[1].Pnt2d)
+                v1 = gp_Vec2d(cell.nodes[0].Pnt2d,cell.nodes[2].Pnt2d)
                 theta_11 = (v0.Angle(v1))*180/np.pi+nas_theta
                 if theta_11<0:
                     theta_11 = 360+theta_11
@@ -86,7 +86,7 @@ def read_nastran_bulkdata(filename):
                 #Important See CQUAD4 Element Geometry and Coordinate System in NASTRAN Reference Guide
                 nas_theta = float(tmp[6])
                 v0 = gp_Vec2d(gp_Pnt2d(0,0),gp_Pnt2d(1,0))
-                v1 = gp_Vec2d(cell.nodes[0].Pnt2d,cell.nodes[1].Pnt2d)
+                v1 = gp_Vec2d(cell.nodes[0].Pnt2d,cell.nodes[3].Pnt2d)
                 theta_11 = (v0.Angle(v1))*180/np.pi+nas_theta
                 if theta_11<0:
                     theta_11 = 360+theta_11
@@ -100,6 +100,4 @@ if __name__ == '__main__':
     filename = 'jobs/JBlaut/Querschnitt.nas'
     nodes,mesh = read_nastran_bulkdata(filename)
     plot_cells(mesh,nodes,'MatID')
-    plot_cells(mesh,nodes,'theta_3')
-
-
+    plot_cells(mesh,nodes,'theta_3', plotTheta11=True)
