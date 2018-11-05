@@ -50,18 +50,21 @@ if recalc:
 #    col = np.array([0.02,  0.005, 0.04, 15])
 #    rpm = np.array([100.0, 70.0,  110.0, 4.3*2*np.pi, 9])
     rpm = np.array([100.0, 100.0, 100.0, 4.3*2*np.pi, 2])
+
+    #rpm_ref = 4.3*2*np.pi 
+    
+    
 #    tim = np.array([0.0,   3.0,   3.0,   1.5,         0.001])
     tim = np.array([0.0,   1.0,   1.0,   0.5,         0.001])
     psi = np.array([172.0+tim[4]*rpm[3]])
     
     Col, RPM, Psi, Sty = slope.rpm_col(col, rpm, tim, psi)
-    
+    #Sty: 
     #-------------------------------------#
     #   Create MARC instance              #
     #-------------------------------------#
 #    job = MARC()  
     dir_root = 'SONATA/Pymore/dym/mdl/03_rotormodel/03_UH60_rotor_hover/05_UH60_rotor_fourblade_3Dinfl_baseline/'
-
     job = MARC(dir_root, 'rotor_assembly.dym')        
     #-------------------------------------#
     #   initialize storage                #
@@ -74,7 +77,6 @@ if recalc:
     #   Run Simulations                   #
     #=====================================#
     starttime = datetime.now()
-
     for i, val in enumerate(Psi):
         if i==0:
             Omega = (Psi[i]-psi[0]) / tim[4]

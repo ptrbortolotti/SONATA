@@ -1,16 +1,3 @@
-################################################################################
-#                                                                              #
-#                                                                              #
-#                        Author:  Willem Garre                                 #
-#                        File:    PymoreRun.py                                 #
-#                        Date:    04.04.2017                                   #
-#                        Version: V0.2                                         #
-#                                                                              #
-#                                                                              #
-################################################################################
-#%%===================================#
-#   Import Required Modules           #
-#=====================================#
 import numpy as np
 
 from SONATA.Pymore.marc.marc import MARC
@@ -22,63 +9,50 @@ if __name__ == "__main__":
     #-----------Simulation Setting---------------------------------
     recalc = True
     result_dir = 'SONATA/Pymore/rlt/'
+    Omega = 4.3*2*np.pi  # [rad/sec]
     
     if recalc:
         #-----------Create Marc Instance---------------------------------
     #    dir_root = 'dym/mdl/03_rotormodel/05_UH60_rotor_optimization/03_UH60_rotor_snglblade_static_locBladeMass/'
-        dir_root = 'SONATA/Pymore/dym/mdl/03_rotormodel/05_UH60_rotor_optimization/01_UH60_rotor_snglblade_static/'
     #    dir_root = '/work/WGarre/02_Projects/01_pymore/11_dymore/00_mdl/03_rotormodel/03_UH60_rotor_hover/05_UH60_rotor_fourblade_3Dinfl_baseline/'
+        dir_root = 'SONATA/Pymore/dym/mdl/03_rotormodel/05_UH60_rotor_optimization/01_UH60_rotor_snglblade_static/'
         job = MARC(dir_root, 'rotor_assembly.dym')
 
         #-----------prepare permutations---------------------------------
-        nbOfEig = job.analysis.sta_get_eigNb()
-        nbOfNod = job.analysis.sta_get_nodNb()
-        nbOfLoc = 11
-        Omega = 4.3*2*np.pi #in rad/sec
-        RPM_vec = np.linspace(0.2*Omega, 1.2*Omega, nbOfLoc)
+        RPM_vec = np.linspace(0.2*Omega, 1.2*Omega, 11)
 
+        # in case of more than one blade but only one table of beam properties all blades are updated simultaneously! 
         beamProp = coef.refBeamProp()
-    #    beamProp = coef.testBeamProp()
-        # in case of more than one blade but only one table of beam properties
-        # all blades are updated simultaneously! 
-    #    beamProp = coef.optBaseLineBeamProp()
-    #    k = 0.5
-    #    beamProp[0:12,20] = beamProp[0:12,20] * k
-    #    beamProp[12:24,20] = beamProp[12:24,20] * k
-    #    beamProp[24:36,20] = beamProp[24:36,20] * k
-    #    beamProp[36:,20] = beamProp[36:,20] * k
-    #    job.marc_set_beamProp('BLADE_BP_CD01', beamProp)
         job.marc_set_beamProp('BLADE_BP_CG01', beamProp)
 
-        #-----------Calculate Fanplot---------------------------------
-        nbOfEig = job.analysis.sta_get_eigNb()              #initialize storage
-        nbOfNod = job.analysis.sta_get_nodNb()
-        freq = np.empty([nbOfEig])
-        eigv = np.expand_dims(np.ones([nbOfEig, nbOfNod*6]), 2)
-    
-        for RPM in RPM_vec:
-            job.analysis.sta_iterate(RPM)
+        #-----------Calculate Fanplot---------------------------------    
+        for i, rpm in enumerate(RPM_vec):
+            job.analysis.sta_iterate(rpm)
             eigFreq, eigVec = job.analysis.sta_get_eigenSol()
 
-            freq = np.vstack((freq, eigFreq))                     #store result
-            eigv = np.concatenate((eigv, eigVec), axis=2)
+            if i == 0:
+                freq = eigFreq/(2*np.pi) #in [Hz]
+                eigv = eigVec
+            
+            else:
+                freq = np.vstack((freq, eigFreq/(2*np.pi)))   
+                eigv = np.concatenate((eigv, eigVec), axis=2)
     
-        # scale and skip first entry    
-        job.analysis.freq = freq[1:,:]/(2*np.pi)
-        job.analysis.eigv = eigv[:,:,1:]
-           
+        job.analysis.freq = freq
+        job.analysis.eigv = eigv
+
         #-----------Plot--------------------------------
         ref_fname = 'jobs/VariSpeed/uh60a_data_blade/fanplot_uh60a_bowen-davies-PhD.txt'
         ref_str = ['l1','f1','f2','f3','l2','t1','f4']
-        plot_fandiagram(job.analysis.freq, job.analysis.eigv, Omega, RPM_vec, ref_fname=ref_fname, ref_str = ref_str)
+        plot_fandiagram(job.analysis.freq, Omega, RPM_vec, ref_fname=ref_fname)
         
         #-----------Save Results--------------------------------
         np.save(result_dir+'freq', freq, allow_pickle=True, fix_imports=True)
         np.save(result_dir+'RPM', RPM_vec, allow_pickle=True, fix_imports=True)
 
     else:
-        #   Load Results                      #
+        #-----------Load Results----------------------                   
         freq = np.load(result_dir+'freq.npy', mmap_mode=None, allow_pickle=True, fix_imports=True, encoding='ASCII')
         RPM_vec = np.load(result_dir+'RPM.npy', mmap_mode=None, allow_pickle=True, fix_imports=True, encoding='ASCII')
-    
-        #job.fanplot_show()
+        ref_fname = 'jobs/VariSpeed/uh60a_data_blade/fanplot_uh60a_bowen-davies-PhD.txt'
+        plot_fandiagram(freq, Omega, RPM_vec, ref_fname=ref_fname)
