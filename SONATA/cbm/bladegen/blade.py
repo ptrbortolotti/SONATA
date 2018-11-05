@@ -5,6 +5,7 @@ Created on Mon Sep 04 10:45:43 2017
 @author: TPflumm
 testbed for the bladegen tool!
 """
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
@@ -14,8 +15,10 @@ import math
 from OCC.Display.SimpleGui import init_display
 from OCC.gp import gp_Pnt, gp_Dir, gp_Ax1
 
-import sys
-#sys.path.insert(0, 'C:\TPflumm_local\work\SONATA')
+#SONATA Modules
+if __name__ == '__main__':
+    os.chdir('../../..')
+
 from SONATA.cbm.bladegen.airfoil import Airfoil
 from SONATA.cbm.bladegen.bladegen_utils import make_loft
 from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire,scale_wire, mirror_wire_pnt_dir
@@ -139,18 +142,13 @@ class Blade(object):
     
 #===========================MAIN===============================================
 if __name__ == '__main__':
-    UH60A_blade = Blade('UH-60A_zeroTwist','UH-60A',True,True)
+    UH60A_blade = Blade('examples/UH-60A','UH-60A',True,True)
     display, start_display, add_menu, add_function_to_menu = init_display('qt-pyqt5')
     BSplineLst = UH60A_blade.get_crosssection(7600)
     UH60A_blade.display(display)
     TopoDS_Shape = UH60A_blade.surface
     
-
-    display.DisplayMessage(gp_Pnt(100,0,0),'UH-60A Main Rotor Blade')
-        
-    
-    
-    
-    
+    #display.DisplayMessage(gp_Pnt(100,0,0),'UH-60A Main Rotor Blade')
+            
     display.FitAll()
     start_display()   

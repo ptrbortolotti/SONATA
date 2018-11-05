@@ -54,6 +54,7 @@ jobs/SBeer
 jobs/SSuesse
 jobs/Statistics
 jobs/VHeuschneider
+jobs/VariSpeed/**/*.png
 img/
 bugreport/
 publication/

@@ -64,7 +64,9 @@ class CBM(object):
     ----------
     config : <Configuration>
         Pointer to the <Configuration> object.
+        
     MaterialLst: list of <Materials> object instances.
+    
     SegmentLst: list of <Segment> object instances
     
     Notes
@@ -232,6 +234,7 @@ class CBM(object):
         (self.mesh, nodes) = sort_and_reassignID(mesh)
         return None
 
+
     def cbm_generate_SegmentLst(self):
         ''' generate Segment Lst'''
         self.SegmentLst = []   #List of Segment Objects
@@ -311,15 +314,15 @@ class CBM(object):
 
 
     def cbm_gen_mesh(self):
-        """
-        generates the dicretization of topology and stores the cells and nodes
-        in both the <Layer> instances, the <Segment> instances and the attribute 
-        self.mesh that is a list of <Cell> instances
+        '''
+        CBM Method that generates the dicretization of topology and stores the 
+        cells and nodes in both the <Layer> instances, the <Segment> instances 
+        and the attribute self.mesh that is a list of <Cell> instances
 
         Returns
         -------
         None
-        """
+        '''
         self.mesh = []
         Node.class_counter = 1
         Cell.class_counter = 1
@@ -376,7 +379,11 @@ class CBM(object):
     
 
     def cbm_review_mesh(self):
-        '''prints a summary of the mesh properties to the screen '''
+        '''
+        CBM method that prints a summary of the mesh properties to the 
+        screen 
+        '''
+        
         print('STATUS:\t Review Mesh:')
         print('\t   - Total Number of Cells: %s' %(len(self.mesh)))
         print('\t   - Duration: %s' % (datetime.now() - self.startTime))
@@ -387,14 +394,18 @@ class CBM(object):
         print('\t   - smallest angle [deg]: %s' % minimum_angle) 
         #orientation = all([c.orientation for c in mesh])
         #print '\t   - Orientation [CC]: %s' % orientation 
+        
         return None
 
     
     def cbm_run_vabs(self, jobid=str(uuid.uuid4())[:8], rm_vabfiles=True):
-        '''runs the solver
+        '''CBM method to run the solver VABS (Variational Asymptotic Beam 
+        Sectional Analysis).
         
         Args:
-            filename: <string> of the configuration file with path.        
+            jobid: assign a unique ID for the job.
+            rm_vabfiles: removes VABS files after the calculation is completed 
+            and the results are stored.
         '''
         self.mesh,nodes = sort_and_reassignID(self.mesh)
         fstring = '_'+jobid+'.vab'
@@ -470,13 +481,47 @@ class CBM(object):
            
             
     def cbm_post_2dmesh(self, attribute='MatID',title='NOTITLE', **kw):
+        '''
+        CBM Postprocessing method that displays the mesh with matplotlib.
+        The a
+        
+        Args:
+            attribute (string): Uses the string to look for the cell attributes. 
+            The default attribute is MatID. Possible other attributes can be 
+            fiber orientation (Theta3) or strains and stresses. 
+            If BeamProperties are allready calculated by VABS or something 
+            simila Elastic Axis, Center of Gravity... are displayed.
+            
+            title (string): to be placed over the plot
+            **kw: the keyword arguments are passed to the lower plot_cells function
+        
+        '''
+        
         mesh,nodes = sort_and_reassignID(self.mesh)
         fig,ax = plot_cells(self.mesh, nodes, attribute, self.BeamProperties, title, **kw)
         return fig,ax
                 
-       
     
-    def cbm_display_config(self, DeviationAngle = 1e-5, DeviationCoefficient = 1e-5):
+    def cbm_display_config(self, DeviationAngle = 1e-5, DeviationCoefficient = 1e-5, bg_c = ((20,6,111),(200,200,200)), cs_size = 25):
+        '''
+        CBM method that initializes and configures the pythonOcc 3D Viewer 
+        and adds Menues to the toolbar. 
+        
+        Args: 
+            DeviationAngle:
+            DeviationCoefficient:
+            bg_c: Background Gradient Color ((RBG Tuple),(RBG Tuple)) the default values are
+            a CATIA style gradient for better 3D visualization. 
+            for a white background use: ((255,255,255,255,255,255))
+            cs_size: coordinate system size in [mm]
+            
+        Returns: Tuple of:
+            (self.display: the display handler for the pythonOcc 3D Viewer
+            self.start_display: function handle
+            self.add_menu: function handle
+            self.add_function_to_menu: function handle)
+        '''
+        
         def export_png(): return export_to_PNG(self.display)
         def export_jpg():return export_to_JPEG(self.display)
         def export_pdf(): return export_to_PDF(self.display)
@@ -487,9 +532,8 @@ class CBM(object):
         self.display, self.start_display, self.add_menu, self.add_function_to_menu = init_display()
         self.display.Context.SetDeviationAngle(DeviationAngle) # 0.001 default. Be careful to scale it to the problem.
         self.display.Context.SetDeviationCoefficient(DeviationCoefficient) # 0.001 default. Be careful to scale it to the problem. 
-        self.display.set_bg_gradient_color(20,6,111,200,200,200)
-        #self.display.set_bg_gradient_color(255,255,255,255,255,255) #white
-        show_coordinate_system(self.display,25)
+        self.display.set_bg_gradient_color(bg_c[0][0],bg_c[0][1],bg_c[0][2],bg_c[1][0],bg_c[1][1],bg_c[1][2])
+        show_coordinate_system(self.display,cs_size)
         
         self.add_menu('View')
         self.add_function_to_menu('View', self.display.FitAll)
@@ -512,8 +556,20 @@ class CBM(object):
         
     
     def cbm_post_3dtopo(self):
+        '''
+        CBM Postprocessing method that displays the topology with the pythonocc
+        3D viewer. If the input_type is 3 (3d *.stp + radial station) or 4 
+        (generic blade definiton) the 3D Surface is displayed, 
+        else only the 2D Topoloty is shown.
+        
+        Notes:
+            Be careful to set the DeviationAngle/Coeficient and scale it to the
+            prolem or else it might crash. Remeber that is is in absolute 
+            values (mm).
+        
+        '''
+        
         self.cbm_display_config()
-        #display.DisplayShape(SegmentLst[0].BSplineLst[0].StartPoint())
         #display_custome_shape(display,SegmentLst[0].wire,2,0,[0,0,0])
 
         if self.config.setup['input_type'] == 3 or self.config.setup['input_type'] == 4:
@@ -532,21 +588,27 @@ class CBM(object):
                 self.display.DisplayShape(self.BW.Curve, color="BLACK")
         
         self.display.View_Iso()
-        #self.display.View_Right()
         self.display.FitAll()
         self.start_display()   
+        
         return None
     
     
     def cbm_post_3dmesh(self):
+        '''
+        CBM Postprocessing method that displays the 2D mesh with the pythonocc
+        3D viewer. Similar functionality can be used when debuggin in the 
+        meshing routines. 
+        '''
+                
         self.cbm_display_config()
         for c in self.mesh:
             self.display.DisplayColoredShape(c.wire, 'BLACK')    
-            
         self.display.View_Top()
         self.display.FitAll()
         self.start_display()   
         return None
+    
     
     def cbm_set_DymoreMK(self, x_offset = 0):
         '''
