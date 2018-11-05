@@ -1,5 +1,12 @@
-{: .text-center}
+
+
+
+
 <img src="docs/logo_wframe.png" align="left"  width="140">
+
+
+
+
 
 # SONATA: Multidiciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis
 
@@ -7,16 +14,14 @@
 
 Structural helicopter rotor blade optimization comprises classical aeroelastic problems, where the aerodynamic behavior, the structural elasticity and vibrational dynamics have to be studied simultaneously. Since the dynamic and modal behavior is strongly related to the structural properties of the rotor blades, adjusting these properties is essential for an effective optimization. Nevertheless, identifying constraints based on elemental matrices to keep the solution within feasible boundaries is often a protracted and iterative task. The herein presented definition of the rotor blade topology is deliberately associated to the production of composite rotor blades. Thus, manufacturability is inherent from the geometric layup definition. Using orthogonal projection with corner-style differentiation the cross-section is discretized and processed by the Variational Asymptotic Beam Sectional Analysis (VABS) afterwards.
 
-- TOC
-
 ## Installation
 
-To use the full functionality of SONATA a bunch of installations have to be made and packages to be gathered. In this section a brief insallation guide is presented that will help the user to install it properly. 
+To use the full functionality of SONATA a bunch of installations have to be made and packages to be gathered. In this section a brief installation guide is presented that will help the user to install it properly. 
 SONATA is developed to work with a python version >3.6. An old python 2.7 release can be found under the tag v0.1
 
-1. A python >3.6 distribution is needed. It is recommended to use use Anaconda for easier package management https://www.anaconda.com/download/
+1. A python >3.6 distribution is needed. It is recommended to use Anaconda for easier package management https://www.anaconda.com/download/
 
-2. Install the **pythonocc** precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. Simply run the following commands in the terminal (for Windows users: execute the cmd command terminal):
+2. Install the **pythonocc** precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. Simply run the following commands in the terminal 
    ```	conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.18	```
 
 3. Install the **pint** module. This is used to change units in the SONATA/CBM - DYMORE interface.
@@ -49,7 +54,6 @@ SONATA is developed to work with a python version >3.6. An old python 2.7 releas
 8. Install the **openmdao** package. This is the python package that provides the necessary framework for SONATA. you can either use the pip to install the openmdao or clone it directly from https://github.com/OpenMDAO/OpenMDAO
 
    - `pip install openmdao`  
-   - To use the pyoptsparse optimisation package within openmdao you need to install conda-	build ` conda install conda-build`. Then clone or download the repository from https://bitbucket.org/mdolab/pyoptsparse and build it like so ` conda build pyoptsparse `.   To use parallel computing features you need to follow the following instructions https://openmdao.readthedocs.io/en/1.7.3/getting-started/mpi_windows.html
 
 9. Test the installation and all packages by excecuting the folloging python script:
    ```	python test_install.py```
@@ -60,25 +64,25 @@ SONATA is developed to work with a python version >3.6. An old python 2.7 releas
 ## Introduction:
 
 The large number of constraints and design drivers from various disciplines makes the helicopter rotor blade development process difficult, time consuming and costly.
-The entire design process represents a classical aeroelastic problem, where the aerodynamic behavior, the structural elasticity and vibrational dynamics have to be studied simultaneously. The behavior can therefore not be examined with separate analysis of the different disciplines \cite{Tarzanin1998}. The integration of all the appropriate disciplines in the design process implies not only limitations on the design from various disciplines, but also defining and accounting for interactions so that the disciplines influence design decisions simultaneously rather than sequentially \cite{Adelman1989}.
-Historically, the design and development of improved or entirely new rotor blades is conducted by departments in a company that maintain their separate simulation codes for performing their specific tasks. The aerodynamics department is responsible for performance calculations, aero-acoustics, rotor-wake interaction, unsteady airload prediction and computational fluid dynamics while the dynamics department focuses on rotor vibratory loads, stability and aeroelastic models\cite{Tarzanin1998}. The structural department determines the elastic properties as well as strength and fatigue characteristics.  A Blade and Rotor Design Department often bundles the different aspects while considering materials, manufacturability, maintainability and safety requirements. \cite{Tarzanin1998}
+The entire design process represents a classical aeroelastic problem, where the aerodynamic behavior, the structural elasticity and vibrational dynamics have to be studied simultaneously. The behavior can therefore not be examined with separate analysis of the different disciplines [1]. The integration of all the appropriate disciplines in the design process implies not only limitations on the design from various disciplines, but also defining and accounting for interactions so that the disciplines influence design decisions simultaneously rather than sequentially [2].
+Historically, the design and development of improved or entirely new rotor blades is conducted by departments in a company that maintain their separate simulation codes for performing their specific tasks. The aerodynamics department is responsible for performance calculations, aero-acoustics, rotor-wake interaction, unsteady airload prediction and computational fluid dynamics while the dynamics department focuses on rotor vibratory loads, stability and aeroelastic models [1]. The structural department determines the elastic properties as well as strength and fatigue characteristics.  A Blade and Rotor Design Department often bundles the different aspects while considering materials, manufacturability, maintainability and safety requirements. [1]
 This modular approach narrows the scope of solutions, because each department focuses on individual objectives satisfied by individual design parameters. Mutual interactions can only be covered by numerous iterations.
-In contrast to that, a multidisciplinary approach offers a more systematic development process that is able to design a better helicopter rotor \cite{Adelman1989}. Because of the impact the rotor behavior has on the overall performance of the helicopter and on customer noticeable vibratory characteristics, rotor aeroelastic effects should be considered in the earliest stages of the design process \cite{Rohl2012a}.
-In the last 25 years, researchers have repeatedly stated the need for a design methodology and optimization framework that combines computational efficiency of a beam description in aeromechanic analysis with a rotor blade structural model that is capable at describing realistic composite rotor blade cross-sections with respect to the structural properties, applied load, stress and strain distributions as well as design constraints \cite{Friedmann1991, Weller1988, Lim2016}. 
+In contrast to that, a multidisciplinary approach offers a more systematic development process that is able to design a better helicopter rotor [2]. Because of the impact the rotor behavior has on the overall performance of the helicopter and on customer noticeable vibratory characteristics, rotor aeroelastic effects should be considered in the earliest stages of the design process [3].
+In the last 25 years, researchers have repeatedly stated the need for a design methodology and optimization framework that combines computational efficiency of a beam description in aeromechanic analysis with a rotor blade structural model that is capable at describing realistic composite rotor blade cross-sections with respect to the structural properties, applied load, stress and strain distributions as well as design constraints [4-6]. 
 
 ## Framework:
 
-Our multidisciplinary rotor blade design framework is named SONATA (**S**tructural **O**ptimization a**n**d **A**eroelas**t**ic **A**nalysis) and is illustrated in the following figure \ref{fig:framework}. Like most environments it comprises of **three** main components that are wrapped into an optimization framework. 
+Our multidisciplinary rotor blade design framework is named SONATA (**S**tructural **O**ptimization a**n**d **A**eroelas**t**ic **A**nalysis) and is illustrated in the following figure 1. Like most environments it comprises of **three** main components that are wrapped into an optimization framework. 
 
 <img src="docs/environment.png" width="750" align='left'>
 
 Fig. 1: SONATA: Multidisciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis embedded in OpenMDAO.
 
-1. As a **first** component, the current state of the art involves an aeromechanical analysis of rotorcraft blades which includes flexible multibody dynamics, nonlinear finite elements and various rotorcraft aerodynamic models. They are often referred to as Comprehensive Analysis. Examples are the widely used Comprehensive Analytical Model of Rotorcraft Aerodynamics and Dynamics II (CAMRAD II) \cite{Johnson2013} and the software Dymore \cite{Bauchau2001} beyond several others. Both of these codes are presently in use in the rotorcraft industry, academic institutions and government laboratories. The quality of the predictions have been documented in numerous publications. In our SONATA environment Dymore was chosen as aeromechanic tool for both a dynamic analysis in the time domain as well a modal analysis within the frequency domain. In this context classical 1D-beam elements are used to describe the rotor blade due to the much simpler mathematical formulation and reduced computational effort compared to a full three-dimensional finite element model of the composite rotor blade \cite{Datta2011a}. Typically, this approach decouples the realistic composite blade definition and the manufacturability constraints from the aeromechanic analysis and the predesign of structural blade properties. That way, problems in the blade design cannot be discovered until later in the process where changes are costly and time consuming \cite{Rohl2012b}. 
-2. Although the three-dimensional finite element method is the most accurate approach to model realistic rotor blades, it is still not appropriate for the use in rotor blade predesign \cite{Li2008, Datta2011a}. The slender characteristic of rotor blades allows the simplification to treat them as one-dimensional body \cite{Yeo2010}. Cesnik and Hodges \cite{Cesnik1995} formulated the Variational Asymptotic Beam Sectional Analysis (VABS) to accurately represent the behavior that is associated with the reduction of two-dimensions. In other words, this method splits the three-dimensional elastic problem into a two-dimensional linear cross-section analysis and a one-dimensional nonlinear beam analysis, which is able to consider initially twisted and curved, anisotropic, non-homogeneous materials to model general composite cross-sectional geometries \cite{Cesnik1995, Li2008}. VABS is the **second** component of our environment. In the last 20 years, VABS and its variations have become a popular tool in rotor blade predesign and multidisciplinary rotor design optimization and their accuracy and efficiency has been validated in numerous publications \cite{Cesnik1995, Cesnik2004, Rohl2012a}.
+1. As a **first** component, the current state of the art involves an aeromechanical analysis of rotorcraft blades which includes flexible multibody dynamics, nonlinear finite elements and various rotorcraft aerodynamic models. They are often referred to as Comprehensive Analysis. Examples are the widely used Comprehensive Analytical Model of Rotorcraft Aerodynamics and Dynamics II (CAMRAD II) [9] and the software Dymore [10] beyond several others. Both of these codes are presently in use in the rotorcraft industry, academic institutions and government laboratories. The quality of the predictions have been documented in numerous publications. In our SONATA environment Dymore was chosen as aeromechanic tool for both a dynamic analysis in the time domain as well a modal analysis within the frequency domain. In this context classical 1D-beam elements are used to describe the rotor blade due to the much simpler mathematical formulation and reduced computational effort compared to a full three-dimensional finite element model of the composite rotor blade [11]. Typically, this approach decouples the realistic composite blade definition and the manufacturability constraints from the aeromechanic analysis and the predesign of structural blade properties. That way, problems in the blade design cannot be discovered until later in the process where changes are costly and time consuming [12]. 
+2. Although the three-dimensional finite element method is the most accurate approach to model realistic rotor blades, it is still not appropriate for the use in rotor blade predesign [11, 13]. The slender characteristic of rotor blades allows the simplification to treat them as one-dimensional body [14] Cesnik and Hodges [15] formulated the Variational Asymptotic Beam Sectional Analysis (VABS) to accurately represent the behavior that is associated with the reduction of two-dimensions. In other words, this method splits the three-dimensional elastic problem into a two-dimensional linear cross-section analysis and a one-dimensional nonlinear beam analysis, which is able to consider initially twisted and curved, anisotropic, non-homogeneous materials to model general composite cross-sectional geometries [13, 15]. VABS is the **second** component of our environment. In the last 20 years, VABS and its variations have become a popular tool in rotor blade predesign and multidisciplinary rotor design optimization and their accuracy and efficiency has been validated in numerous publications [3, 15, 16].
 3. Consequently, most researches have developed individual parametric mesh generators for the cross-sectional analysis, that reduces their structural model to few design variables in the process. Such a preprocessor for parametric composite rotor blade cross-sections is referred to as *SONATA-CBM* in this framework. It is the **third** component of the SONATA environment. 
 
-Last but not least, the tree components are managed by an environment where design variables and objectives can be defined, constraints to be applied and solvers to be launched. The **SONATA** framework uses [OpenMDAO](http://openmdao.org/)  \cite{Gray_2014, hwang_thesis_2015, Heath2013}, an open-source computing platform for system analysis and multidisciplinary optimization, written in Python. It allows the user to break down the structure of complex optimization tasks into a hierarchic manner while managing the numerical methods. A Python-based wrapper for Dymore has been developed to integrate the dynamic and modal analysis into the OpenMDAO-driven optimizations. Consequently \textit{SONATA-CBM} has been written in Python using the Python wrapper for the CAD-Kernel Opencascade [pythonOCC](http://www.pythonocc.org/ ). 
+Last but not least, the tree components are managed by an environment where design variables and objectives can be defined, constraints to be applied and solvers to be launched. The **SONATA** framework uses [OpenMDAO](http://openmdao.org/)  [7, 8, 27], an open-source computing platform for system analysis and multidisciplinary optimization, written in Python. It allows the user to break down the structure of complex optimization tasks into a hierarchic manner while managing the numerical methods. A Python-based wrapper for Dymore has been developed to integrate the dynamic and modal analysis into the OpenMDAO-driven optimizations. Consequently *SONATA-CBM* has been written in Python using the Python wrapper for the CAD-Kernel Opencascade [pythonOCC](http://www.pythonocc.org/ ). 
 
 **Why Python?**
 
@@ -90,31 +94,35 @@ Last but not least, the tree components are managed by an environment where desi
 
 ### 1. DYMORE (PYMORE):
 
-this module comes [https://gitlab.lrz.de/wgarre/Pymore](https://gitlab.lrz.de/wgarre/Pymore)
+A Python-based wrapper for Dymore has been developed to integrate the dynamic and modal analysis into the OpenMDAO-driven optimizations.
+
+This module is developed by W. Garre and is hosted @ [https://gitlab.lrz.de/wgarre/Pymore](https://gitlab.lrz.de/wgarre/Pymore)
 
 ### 2. VABS (Variational Asymptotic Beam Sectional Analysis):
 
-Analyswift: Free Academic Liceses for Universities
+http://analyswift.com/vabs-cross-sectional-analysis-tool-for-composite-beams/
+
+Analyswift: Free Academic Licenses for Universities
 
 ### 3. SONATA-CBM:
-*SONATA-CBM'*s composite topology generation originates from an arbitrary closed curve that can be obtained from various input formats that range from airfoil coordinate tables over a 3D CAD rotor blade surface  definition (.step or .iges) with radial station to a parameterized rotor blade with twist, planform, airfoil and chord-line distribution. In the case of the latter two, the 3D surface is intersected at a certain radial station to obtain once again a two-dimensional outer boundary of the cross-section. Figure \ref{fig:3dtopo} shows the resulting parameterized 3D surface of the UH-60A rotor blade with a cross-section topology at radial station $R=2000$mm.\\
+*SONATA-CBM'*s composite topology generation originates from an arbitrary closed curve that can be obtained from various input formats that range from airfoil coordinate tables over a 3D CAD rotor blade surface  definition (.step or .iges) with radial station to a parameterized rotor blade with twist, planform, airfoil and chord-line distribution. In the case of the latter two, the 3D surface is intersected at a certain radial station to obtain once again a two-dimensional outer boundary of the cross-section. Figure 2 shows the resulting parameterized 3D surface of the UH-60A rotor blade with a cross-section topology at radial station R = 2000 mm.\\
 While the following methodology is shown  with the example of the UH-60A rotor-blade, it should be noted that this procedure can be applied to any closed curve cross-section, and therefore be also used to model rotor blade root sections or any other composite beam cross-sections. 
 
 <img src="docs/3dtopo.png" width="500">
 
-Fig. 2: Parameterized 3D surface of the UH-60A rotor blade created with twist, planform, airfoil and axis information from Davis [...]
+Fig. 2: Parameterized 3D surface of the UH-60A rotor blade created with twist, planform, airfoil and axis information from Davis [29]
 
 #### Topology Generation
 
-The process behind the composite topology generation is derived from the manufacturing process, where the layers are placed on top of each other in negative molds in a consecutive manner to avoid complex constraints in the optimization and to keep the solution within proper bounds. Each layer has an assigned material with start and end coordinates, a thickness and fiber orientation (see table \ref{tab:layup}). Every parameter or groups of them can serve as design variable in the later optimization. After the layup process on top of the outer boundary curve is completed, webs are introduced and subsequently new closed curved geometries are generated where the layup procedure is repeated. Cavities can be filled with core materials and additional trim masses can be inserted.
+The process behind the composite topology generation is derived from the manufacturing process, where the layers are placed on top of each other in negative molds in a consecutive manner to avoid complex constraints in the optimization and to keep the solution within proper bounds. Each layer has an assigned material with start and end coordinates, a thickness and fiber orientation (see table 1). Every parameter or groups of them can serve as design variable in the later optimization. After the layup process on top of the outer boundary curve is completed, webs are introduced and subsequently new closed curved geometries are generated where the layup procedure is repeated. Cavities can be filled with core materials and additional trim masses can be inserted.
 At first the outer boundary curve, represented as counterclockwise sets of consecutive B-splines, is defined in curve coordinates **s** between zero and one. The origin is typically located at the trailing edge (TE). The curve coordinate system propagates through the layers with an interval tree structure. It allows to efficiently find the intervals/layers that overlap and locate the corresponding coordinate for each layer. 
 Subsequently, each layer is generated by the following consecutive steps. 
 
-- Determine the relevant set of underlying B-Splines between \textit{start} and \textit{end} coordinate of the layer using an interval tree data structure.
+- Determine the relevant set of underlying B-Splines between *start* and *end* coordinate of the layer using an interval tree data structure.
 - Discretize the set of B-Splines and perform an parallel offset to return an approximate representation of all points with a given thickness of each layer.
 - Generate a new set of B-Splines by interpolation and add smooth layer cutoffs to connect the lower and upper set of B-Splines if necessary.
 
-In table 1 the layup definition of the cross-section, illustrated in figure 2, is displayed. Note that the shown genetic composite cross-section of the UH-60A serves as demonstration of the modeling capabilities.
+In table 1 the layup definition of the cross-section, illustrated in figure 3, is displayed. Note that the shown genetic composite cross-section of the UH-60A serves as demonstration of the modeling capabilities.
 
 
 
@@ -128,7 +136,7 @@ Fig. 3: Topology definition of a generic composite UH-60A rotor blade cross sect
 
 ​	<img src="docs/2dmesh.png" width="800">
 
-Fig. 4: SONATA-CBM discretization of a generic composite UH-60A rotor blade cross-section in reference to [Rohl] to illustrate the modeling capabilities.
+Fig. 4: SONATA-CBM discretization of a generic composite UH-60A rotor blade cross-section in reference to [3] to illustrate the modeling capabilities.
 
 The first set of layers are grouped into Segment 0. The first layer that is generated is a steel erosion protection strip that ranges from coordinate 0.44 to 0.56 with a thickness of 0.82mm. Because of the isotropic material used, the orientation can be neglected for this layer. The material ID represents a reference index of an associated material database. The next 4 layers define the skin of the rotor blade placed in both 0°and +-45° orientation on top of each other. The layers Spar 1 to Spar 7 are unidirectional carbon fiber composite layers that generate a C type spar with ply drops in the leading edge region of the cross-section.
 Once the first set of layers (Segment 0) has been created, webs are introduced to the structure. They are defined as straight line between two positions. In this example the first web ranges from coordinate 0.43 to 0.57 while the second is placed behind from 0.30 to 0.70. The three newly generated closed curved geometries are used to repeat the layup procedure. During the manufacturing process this translates to a process of wrapping plies around a core. A core material is assigned to Segment 1 and 3 that fills up the remaining cavity. Segment 2 consists of four carbon fiber layers of different orientation from 0 to 1 to generate a hollow box spar. After the layup is defined a trim mass can be placed on top of the existing layers and will be integrated in the structure during the discretization.
@@ -136,18 +144,18 @@ Once the first set of layers (Segment 0) has been created, webs are introduced t
 #### Discretization:
 
 The discretization follows the topology generation procedure, yet in a reversed direction with respect to the layup definition, starting from the innermost layers and moving outwards. Each layer is meshed by an orthogonal projection with corner style differentiation. 
-Figure \ref{fig:box_spar_example} shows the final result of the described procedure.
+Figure 4 shows the final result of the described procedure.
 
-Each layer can be described by two sets of B-splines, the inner $a_\text{bsplines}$ and outer $b_\text{bsplines}$. The nodes placed on them are called accordingly $a_\text{nodes}$ and $b_\text{nodes}$. 
+Each layer can be described by two sets of B-splines, the inner a_bsplines and outer b_bsplines. The nodes placed on them are called accordingly a_nodes and b_nodes. 
 The following procedure is applied to each layer, starting at the innermost, and moving outwards. 
 
-- Determine existing $a_\text{nodes}$ based on the intervaltree structure of the layup. If sections on the $a_\text{bsplines}$  are found with no preexisting nodes, distribute new nodes equidistantly. 
-- Create an orthogonal projection of each $a_\text{node}$ onto the set of $b_\text{bsplines}$. If two or more projections are found determine the angle $\alpha$ and the number of potential $b_\text{bsplines}$ corners between them.
-- Based on a critical angle $\alpha_\text{crit}$ and the number of exterior corners determine the corner style and as a consequence the meshing procedure. In figure \ref{fig:cornerstyle_01}-\ref{fig:cornerstyle_45} the first 6 different corner styles are shown.   
+- Determine existing a_nodes based on the intervaltree structure of the layup. If sections on the a_bsplines are found with no preexisting nodes, distribute new nodes equidistantly. 
+- Create an orthogonal projection of each a_node onto the set of b_bsplines. If two or more projections are found determine the angle alpha and the number of potential b_bsplines corners between them.
+- Based on a critical angle alpha_crit and the number of exterior corners determine the corner style and as a consequence the meshing procedure. In figure 5-7 the first 6 different corner styles are shown.   
 - After all nodes are placed on both sets of B-splines, they are connected to form cells with associated  material and ply angles.
 - In subsequent steps sharp cells, large aspect-ratio cells and cell angles are modified to improve mesh quality. 
 
-As soon as every layer of the segment is meshed, the remaining cavities are triangulated using Shewchuk \cite{shewchuk96b} algorithm with an area constraint. To avoid hanging nodes between two neighboring segments, the cells are consolidated on web interfaces.
+As soon as every layer of the segment is meshed, the remaining cavities are triangulated using Shewchuk [30] algorithm with an area constraint. To avoid hanging nodes between two neighboring segments, the cells are consolidated on web interfaces.
 
 <img src="docs/CS0.png" width="400"><img src="docs/CS2.png" width="400">
 
@@ -155,15 +163,13 @@ As soon as every layer of the segment is meshed, the remaining cavities are tria
 
 Fig. 5-7: Corner-style **0**: no exterior corner on bbsplines and α > αcrit ; Corner-style **1**: one exterior corner on bbsplines and α > αcrit. Corner-style **2**: no exterior corner on bbsplines and α < αcrit ; Corner-style **3**: one exterior corner on bbsplines and α < αcrit.  Corner-style **4**: two exterior corners on bbsplines and α < αcrit ; Corner-style **5**: three exterior corners on bbsplines and α < αcrit.
 
-
-
-In a final step, the previously defined trim mass is integrated into the described mesh by mapping existing nodes onto the trim mass contour. The corresponding algorithm is schematically illustrated in Figure \ref{fig:mapping} and described below:
+In a final step, the previously defined trim mass is integrated into the described mesh by mapping existing nodes onto the trim mass contour. The corresponding algorithm is schematically illustrated in Figure [8] and described below:
 
 - Determine the number of inner nodes of the intersected cells. 
-- Move the inner nodes of the cells marked \textit{1} along the cell edge with shortest distance to the intersecting curve.
-- Move the remaining inner nodes of the cells marked \textit{2} along the cell edge with shortest distance to the intersecting curve.
-- Move the outer node of the cells marked \textit{3} along the edge direction onto the intersecting curve.
-- Delete cells marked \textit{3} and \textit{4}.
+- Move the inner nodes of the cells marked *1* along the cell edge with shortest distance to the intersecting curve.
+- Move the remaining inner nodes of the cells marked *2* along the cell edge with shortest distance to the intersecting curve.
+- Move the outer node of the cells marked *3* along the edge direction onto the intersecting curve.
+- Delete cells marked *3* and *4.*
 - Use the boundary nodes as starting point for the inner triangulation.  
 
 <img src="docs/mapping.png" width="400"><img src="docs/LE.png" width="400">
@@ -172,7 +178,7 @@ Fig. 8-9: (Left) Mapping algorithm to integrate cuves into an existing mesh. (Ri
 
 The final result is displayed in the magnified cutout of the leading edge region in figure 9. Finally, the VABS input files are generated from the mesh together with the material information from an associated database. 
 
-To verify the resulting stiffness properties, simple benchmark testcases for isotropic and anisotropic box-beam cross-sections have been set up and compared to results from \cite{POPESCU2000}. Moreover, the rotor blades of the institute's high altitude synchropter UAV (AREA) \cite{Barth2018, Pflumm2015} have been reengineered with SONATA-CBM and compared to experimental results from Suesse \cite{Suesse2018}.
+To verify the resulting stiffness properties, simple benchmark testcases for isotropic and anisotropic box-beam cross-sections have been set up and compared to results from [31]. Moreover, the rotor blades of the institute's high altitude synchropter UAV (AREA) [32, 33] have been reengineered with SONATA-CBM and compared to experimental results from Suesse [34].
 
 
 ## Resources
