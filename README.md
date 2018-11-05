@@ -19,47 +19,36 @@ Structural helicopter rotor blade optimization comprises classical aeroelastic p
 To use the full functionality of SONATA a bunch of installations have to be made and packages to be gathered. In this section a brief installation guide is presented that will help the user to install it properly. 
 SONATA is developed to work with a python version >3.6. An old python 2.7 release can be found under the tag v0.1
 
-1. A python >3.6 distribution is needed. It is recommended to use Anaconda for easier package management https://www.anaconda.com/download/
+1. A **python > 3.6** distribution is needed. It is recommended to use anaconda for easier package management https://www.anaconda.com/download/
 
-2. Install the **pythonocc** precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. Simply run the following commands in the terminal 
-   ```	conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.18	```
+2. Install the **pythonocc** precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. Simply run the following commands in the terminal.
+   ```	conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.17.3	```
 
 3. Install the **pint** module. This is used to change units in the SONATA/CBM - DYMORE interface.
    ``` conda install -c conda-forge pint ```
 
-4. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
-
-   - ` conda install -c conda-forge intervaltree `
+4. Install the **intervaltree** package. This is used for structuring the topology and the calculation of layup coordinates. 
+   ``` conda install -c conda-forge intervaltree ```
 
 5. Install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
 
-   - __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
+   *Windows*: Install the precompiled binaries from the /package directory by running the following command: ```pip install Shapely-1.6.4.post1-cp36-cp36m-win_amd64```
 
-     ```pip install Shapely-1.6.4.post1-cp36-cp36m-win_amd64```
+   *Linux*: ```pip install shapely==1.6.4```
 
-   - Linux: ```pip install shapely==1.6.4```
+6. Install the **triangle** package. This is used for the unstructured triangulation of the cavities and balance weight materials during the meshing process:
 
-6. Install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
+   *Windows*: Install the precompiled binaries from the /packages directory by running the following command: ```pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl```
 
-   - __Windows__: Install the precompiled binaries from the /packages directory by running the following command: 
+   *Linux*: ```pip install triangle```
 
-     ```pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl```
+7. Install the **openmdao** package. This is the python package that provides the necessary framework for SONATA. you can either use the pip to install the openmdao or clone it directly from https://github.com/OpenMDAO/OpenMDAO ```pip install openmdao```
 
-   - __Linux__: ```pip install triangle```
-
-7. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
-
-   - ` conda install -c bioconda intervaltree `
-
-8. Install the **openmdao** package. This is the python package that provides the necessary framework for SONATA. you can either use the pip to install the openmdao or clone it directly from https://github.com/OpenMDAO/OpenMDAO
-
-   - `pip install openmdao`  
-
-9. Test the installation and all packages by excecuting the folloging python script:
+8. Test the installation and all packages by excecuting the folloging python script:
    ```	python test_install.py```
 
-10. Now you can download or clone the repository and execute the main SONATA script. 
-    ```	python SONATA.py```
+9. Now you can download or clone the repository and execute the main SONATA script. 
+   ```	python SONATA.py```
 
 ## Introduction:
 
