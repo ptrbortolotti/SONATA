@@ -1,5 +1,3 @@
-
-
 <img src="docs/logo_wframe.png" align="left"  width="140">
 
 # SONATA: Multidiciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis
@@ -8,9 +6,55 @@
 
 Structural helicopter rotor blade optimization comprises classical aeroelastic problems, where the aerodynamic behavior, the structural elasticity and vibrational dynamics have to be studied simultaneously. Since the dynamic and modal behavior is strongly related to the structural properties of the rotor blades, adjusting these properties is essential for an effective optimization. Nevertheless, identifying constraints based on elemental matrices to keep the solution within feasible boundaries is often a protracted and iterative task. The herein presented definition of the rotor blade topology is deliberately associated to the production of composite rotor blades. Thus, manufacturability is inherent from the geometric layup definition. Using orthogonal projection with corner-style differentiation the cross-section is discretized and processed by the Variational Asymptotic Beam Sectional Analysis (VABS) afterwards.
 
+{:toc}
 
+## Installation
 
-[[__TOC__]]
+To use the full functionality of SONATA a bunch of installations have to be made and packages to be gathered. In this section a brief insallation guide is presented that will help the user to install it properly. 
+SONATA is developed to work with a python version >3.6. An old python 2.7 release can be found under the tag v0.1
+
+1. A python >3.6 distribution is needed. It is recommended to use use Anaconda for easier package management https://www.anaconda.com/download/
+
+2. Install the **pythonocc** precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. Simply run the following commands in the terminal (for Windows users: execute the cmd command terminal):
+   ```	conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.18	```
+
+3. Install the **pint** module. This is used to change units in the SONATA/CBM - DYMORE interface.
+   ``` conda install -c conda-forge pint ```
+
+4. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
+
+   - ` conda install -c conda-forge intervaltree `
+
+5. Install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
+
+   - __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
+
+     ```pip install Shapely-1.6.4.post1-cp36-cp36m-win_amd64```
+
+   - Linux: ```pip install shapely==1.6.4```
+
+6. Install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
+
+   - __Windows__: Install the precompiled binaries from the /packages directory by running the following command: 
+
+     ```pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl```
+
+   - __Linux__: ```pip install triangle```
+
+7. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
+
+   - ` conda install -c bioconda intervaltree `
+
+8. Install the **openmdao** package. This is the python package that provides the necessary framework for SONATA. you can either use the pip to install the openmdao or clone it directly from https://github.com/OpenMDAO/OpenMDAO
+
+   - `pip install openmdao`  
+   - To use the pyoptsparse optimisation package within openmdao you need to install conda-	build ` conda install conda-build`. Then clone or download the repository from https://bitbucket.org/mdolab/pyoptsparse and build it like so ` conda build pyoptsparse `.   To use parallel computing features you need to follow the following instructions https://openmdao.readthedocs.io/en/1.7.3/getting-started/mpi_windows.html
+
+9. Test the installation and all packages by excecuting the folloging python script:
+   ```	python test_install.py```
+
+10. Now you can download or clone the repository and execute the main SONATA script. 
+    ```	python SONATA.py```
 
 ## Introduction:
 
@@ -25,7 +69,7 @@ In the last 25 years, researchers have repeatedly stated the need for a design m
 
 Our multidisciplinary rotor blade design framework is named SONATA (**S**tructural **O**ptimization a**n**d **A**eroelas**t**ic **A**nalysis) and is illustrated in the following figure \ref{fig:framework}. Like most environments it comprises of **three** main components that are wrapped into an optimization framework. 
 
-![test123](docs/environment.png)
+<img src="docs/environment.png" width="750" align='left'>
 
 Fig. 1: SONATA: Multidisciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis embedded in OpenMDAO.
 
@@ -57,7 +101,9 @@ While the following methodology is shown  with the example of the UH-60A rotor-b
 
 <img src="docs/3dtopo.png" width="500">
 
-<center>Fig. 2: Parameterized 3D surface of the UH-60A rotor blade created with twist, planform, airfoil and axis information from Davis [...] </center>
+Fig. 2: Parameterized 3D surface of the UH-60A rotor blade created with twist, planform, airfoil and axis information from Davis [...]
+
+#### Topology Generation
 
 The process behind the composite topology generation is derived from the manufacturing process, where the layers are placed on top of each other in negative molds in a consecutive manner to avoid complex constraints in the optimization and to keep the solution within proper bounds. Each layer has an assigned material with start and end coordinates, a thickness and fiber orientation (see table \ref{tab:layup}). Every parameter or groups of them can serve as design variable in the later optimization. After the layup process on top of the outer boundary curve is completed, webs are introduced and subsequently new closed curved geometries are generated where the layup procedure is repeated. Cavities can be filled with core materials and additional trim masses can be inserted.
 At first the outer boundary curve, represented as counterclockwise sets of consecutive B-splines, is defined in curve coordinates **s** between zero and one. The origin is typically located at the trailing edge (TE). The curve coordinate system propagates through the layers with an interval tree structure. It allows to efficiently find the intervals/layers that overlap and locate the corresponding coordinate for each layer. 
@@ -73,52 +119,49 @@ In table 1 the layup definition of the cross-section, illustrated in figure 2, i
 
 <img src="docs/layup.png" width="360">
 
-<center>Table 1: Layup definition of figure 3 </center>
+Table 1: Layup definition of figure 3
 
-​						
+<img src="docs/2dtopo.png" width="800">
 
-## Installation
+Fig. 3: Topology definition of a generic composite UH-60A rotor blade cross section.
 
-To use the full functionality of SONATA a bunch of installations have to be made and packages to be gathered. In this section a brief insallation guide is presented that will help the user to install it properly. 
-SONATA is developed to work with a python version >3.6. An old python 2.7 release can be found under the tag v0.1
+​	<img src="docs/2dmesh.png" width="800">
 
-1. A python 2.7 distribution is needed. It is recommended to use use Anaconda for easier package management https://www.anaconda.com/download/
-2. Install the **pythonocc** precompiled binaries for MacOSX/Linux/Windows 32 or 64 with the amazing conda package management system. Simply run the following commands in the terminal (for Windows users: execute the cmd command terminal):
-    ```	conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.18	```
+Fig. 4: SONATA-CBM discretization of a generic composite UH-60A rotor blade cross-section in reference to [Rohl] to illustrate the modeling capabilities.
 
-3. Install the **pint** module. This is used to change units in the SONATA/CBM - DYMORE interface.
-    ``` conda install -c conda-forge pint ```
+The first set of layers are grouped into Segment 0. The first layer that is generated is a steel erosion protection strip that ranges from coordinate 0.44 to 0.56 with a thickness of 0.82mm. Because of the isotropic material used, the orientation can be neglected for this layer. The material ID represents a reference index of an associated material database. The next 4 layers define the skin of the rotor blade placed in both 0°and +-45° orientation on top of each other. The layers Spar 1 to Spar 7 are unidirectional carbon fiber composite layers that generate a C type spar with ply drops in the leading edge region of the cross-section.
+Once the first set of layers (Segment 0) has been created, webs are introduced to the structure. They are defined as straight line between two positions. In this example the first web ranges from coordinate 0.43 to 0.57 while the second is placed behind from 0.30 to 0.70. The three newly generated closed curved geometries are used to repeat the layup procedure. During the manufacturing process this translates to a process of wrapping plies around a core. A core material is assigned to Segment 1 and 3 that fills up the remaining cavity. Segment 2 consists of four carbon fiber layers of different orientation from 0 to 1 to generate a hollow box spar. After the layup is defined a trim mass can be placed on top of the existing layers and will be integrated in the structure during the discretization.
 
-4. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
+#### Discretization:
 
-  * ` conda install -c conda-forge intervaltree `
+The discretization follows the topology generation procedure, yet in a reversed direction with respect to the layup definition, starting from the innermost layers and moving outwards. Each layer is meshed by an orthogonal projection with corner style differentiation. 
+Figure \ref{fig:box_spar_example} shows the final result of the described procedure.
 
-5. Install the **shapely** package. This is used for the discretization and approximation of offset curves during the topology generation process:
-	* __Windows__: Install the precompiled binaries from the /package directory by running the following command: 
-		
-        ```pip install Shapely-1.6.4.post1-cp36-cp36m-win_amd64```
-	* Linux: ```pip install shapely==1.6.4```
-	
-6. Install the **triangle** package. This is used for the unstructured triangulation of the core and balance weight materials during the meshing process:
-	* __Windows__: Install the precompiled binaries from the /packages directory by running the following command: 
-		
-        ```pip install packages/triangle-20170106-cp27-cp27m-win_amd64.whl```
-	* __Linux__: ```pip install triangle```
+Each layer can be described by two sets of B-splines, the inner $a_\text{bsplines}$ and outer $b_\text{bsplines}$. The nodes placed on them are called accordingly $a_\text{nodes}$ and $b_\text{nodes}$. 
+The following procedure is applied to each layer, starting at the innermost, and moving outwards. 
 
-7. Install the **intervaltree** package. This is (will be) used for structuring the topology and the calculation of layup coordinates. 
+- Determine existing $a_\text{nodes}$ based on the intervaltree structure of the layup. If sections on the $a_\text{bsplines}$  are found with no preexisting nodes, distribute new nodes equidistantly. 
+- Create an orthogonal projection of each $a_\text{node}$ onto the set of $b_\text{bsplines}$. If two or more projections are found determine the angle $\alpha$ and the number of potential $b_\text{bsplines}$ corners between them.
+- Based on a critical angle $\alpha_\text{crit}$ and the number of exterior corners determine the corner style and as a consequence the meshing procedure. In figure \ref{fig:cornerstyle_01}-\ref{fig:cornerstyle_45} the first 6 different corner styles are shown.   
+- After all nodes are placed on both sets of B-splines, they are connected to form cells with associated  material and ply angles.
+- In subsequent steps sharp cells, large aspect-ratio cells and cell angles are modified to improve mesh quality. 
 
-  * ` conda install -c bioconda intervaltree `
+As soon as every layer of the segment is meshed, the remaining cavities are triangulated using Shewchuk \cite{shewchuk96b} algorithm with an area constraint. To avoid hanging nodes between two neighboring segments, the cells are consolidated on web interfaces.
 
-8. Install the **openmdao** package. This is the python package that provides the necessary framework for SONATA. you can either use the pip to install the openmdao or clone it directly from https://github.com/OpenMDAO/OpenMDAO
-	
-	* `pip install openmdao`  
-	* To use the pyoptsparse optimisation package within openmdao you need to install conda-	build ` conda install conda-build`. Then clone or download the repository from https://bitbucket.org/mdolab/pyoptsparse and build it like so ` conda build pyoptsparse `.   To use parallel computing features you need to follow the following instructions https://openmdao.readthedocs.io/en/1.7.3/getting-started/mpi_windows.html
-	
-9. Test the installation and all packages by excecuting the folloging python script:
-	```	python test_install.py```
+In a final step, the previously defined trim mass is integrated into the described mesh by mapping existing nodes onto the trim mass contour. The corresponding algorithm is schematically illustrated in Figure \ref{fig:mapping} and described below:
 
-10. Now you can download or clone the repository and execute the main SONATA script. 
-	```	python SONATA.py```
+- Determine the number of inner nodes of the intersected cells. 
+- Move the inner nodes of the cells marked \textit{1} along the cell edge with shortest distance to the intersecting curve.
+- Move the remaining inner nodes of the cells marked \textit{2} along the cell edge with shortest distance to the intersecting curve.
+- Move the outer node of the cells marked \textit{3} along the edge direction onto the intersecting curve.
+- Delete cells marked \textit{3} and \textit{4}.
+- Use the boundary nodes as starting point for the inner triangulation.  
+
+The final result is displayed in the magnified cutout of the leading edge region in figure \ref{fig:nose}. 
+
+Finally, the VABS input files are generated from the mesh together with the material information from an associated database. 
+
+To verify the resulting stiffness properties, simple benchmark testcases for isotropic and anisotropic box-beam cross-sections have been set up and compared to results from \cite{POPESCU2000}. Moreover, the rotor blades of the institute's high altitude synchropter UAV (AREA) \cite{Barth2018, Pflumm2015} have been reengineered with SONATA-CBM and compared to experimental results from Suesse \cite{Suesse2018}.
 
 
 ## Resources
