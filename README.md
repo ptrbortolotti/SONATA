@@ -72,11 +72,9 @@ In the last 25 years, researchers have repeatedly stated the need for a design m
 
 ## Framework:
 
-Our multidisciplinary rotor blade design framework is named SONATA (**S**tructural **O**ptimization a**n**d **A**eroelas**t**ic **A**nalysis) and is illustrated in the following figure 1. Like most environments it comprises of **three** main components that are wrapped into an optimization framework. 
+Our multidisciplinary rotor blade design framework is named SONATA (Structural Optimization and Aeroelastic Analysis) and is illustrated in the following figure 1. Like most environments it comprises of **three** main components that are wrapped into an optimization framework. 
 
-<img src="docs/environment.png" width="800" align='left'>
-
-
+<img src="docs/environment.png" width="800">
 
 Fig. 1: SONATA: Multidisciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis embedded in OpenMDAO.
 
