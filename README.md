@@ -6,7 +6,7 @@
 
 Structural helicopter rotor blade optimization comprises classical aeroelastic problems, where the aerodynamic behavior, the structural elasticity and vibrational dynamics have to be studied simultaneously. Since the dynamic and modal behavior is strongly related to the structural properties of the rotor blades, adjusting these properties is essential for an effective optimization. Nevertheless, identifying constraints based on elemental matrices to keep the solution within feasible boundaries is often a protracted and iterative task. The herein presented definition of the rotor blade topology is deliberately associated to the production of composite rotor blades. Thus, manufacturability is inherent from the geometric layup definition. Using orthogonal projection with corner-style differentiation the cross-section is discretized and processed by the Variational Asymptotic Beam Sectional Analysis (VABS) afterwards.
 
-{:toc}
+[[_TOC_]]
 
 ## Installation
 
@@ -148,6 +148,14 @@ The following procedure is applied to each layer, starting at the innermost, and
 
 As soon as every layer of the segment is meshed, the remaining cavities are triangulated using Shewchuk \cite{shewchuk96b} algorithm with an area constraint. To avoid hanging nodes between two neighboring segments, the cells are consolidated on web interfaces.
 
+<img src="docs/CS0.png" width="400"><img src="docs/CS2.png" width="400">
+
+<img src="docs/CS4.png" width="400">
+
+Fig. 5-7: Corner-style **0**: no exterior corner on bbsplines and α > αcrit ; Corner-style **1**: one exterior corner on bbsplines and α > αcrit. Corner-style **2**: no exterior corner on bbsplines and α < αcrit ; Corner-style **3**: one exterior corner on bbsplines and α < αcrit.  Corner-style **4**: two exterior corners on bbsplines and α < αcrit ; Corner-style **5**: three exterior corners on bbsplines and α < αcrit.
+
+
+
 In a final step, the previously defined trim mass is integrated into the described mesh by mapping existing nodes onto the trim mass contour. The corresponding algorithm is schematically illustrated in Figure \ref{fig:mapping} and described below:
 
 - Determine the number of inner nodes of the intersected cells. 
@@ -157,9 +165,11 @@ In a final step, the previously defined trim mass is integrated into the describ
 - Delete cells marked \textit{3} and \textit{4}.
 - Use the boundary nodes as starting point for the inner triangulation.  
 
-The final result is displayed in the magnified cutout of the leading edge region in figure \ref{fig:nose}. 
+<img src="docs/mapping.png" width="400"><img src="docs/LE.png" width="400">
 
-Finally, the VABS input files are generated from the mesh together with the material information from an associated database. 
+Fig. 8-9: (Left) Mapping algorithm to integrate cuves into an existing mesh. (Right) Leading edge region of figure 4 showing the plydrops of the C-Spar and the integration of the trim mass into the existing mesh.
+
+The final result is displayed in the magnified cutout of the leading edge region in figure 9. Finally, the VABS input files are generated from the mesh together with the material information from an associated database. 
 
 To verify the resulting stiffness properties, simple benchmark testcases for isotropic and anisotropic box-beam cross-sections have been set up and compared to results from \cite{POPESCU2000}. Moreover, the rotor blades of the institute's high altitude synchropter UAV (AREA) \cite{Barth2018, Pflumm2015} have been reengineered with SONATA-CBM and compared to experimental results from Suesse \cite{Suesse2018}.
 
@@ -168,29 +178,101 @@ To verify the resulting stiffness properties, simple benchmark testcases for iso
 * [PythonOCC](http://www.pythonocc.org/)
 * [openMDAO](http://openmdao.org/)
 
-
-#### Documentation for Developers:
+Documentation for Developers:
 
 * [OpenCascadeTechnology Documentation](https://www.opencascade.com/doc/occt-6.9.1/refman/html/index.html)
 * [PythonOCC API Documentation](http://api.pythonocc.org/)
 * [OpenMDAO Documentation](http://openmdao.org/twodocs/versions/latest/)
 
 ## Publications:
-to follow...
+**Pflumm, T., Garre, W., Hajek, M.:** A Preprocessor for Parametric Composite Rotor Blade Cross-Sections, 44th European Rotorcraft Forum, Delft, The Netherlands, 2018  [[mehr…\]](https://mediatum.ub.tum.de/604993?query=Pflumm&show_id=1455385) [[BibTeX\]](https://mediatum.ub.tum.de/export/1455385/bibtex)
 
 
 ## Referencencs:
-[1] Tarzanin, F., and Young, D., “Boeing rotorcraft experience with rotor design and optimization,” 7th AIAA/USAF/ ASA/ISSMO Symp. Multidiscip. Anal. Optim., American Institute ofAeronautics and Astronautics, Reston,Virigina, 1998. doi:10.2514/6.1998-4733, URL [http://arc.aiaa.org/doi/abs/10.2514/6.1998-4733](http://arc.aiaa.org/doi/abs/10.2514/6.1998-4733).
+[1] Tarzanin, F. and Young, D., “Boeing rotorcraft experience with rotor design and optimization,” 7th
+AIAA/USAF/NASA/ISSMO Symp. Multidiscip. Anal. Optim., American Institute of Aeronautics and Astronautics, Reston, Virigina, sep 1998. [http://arc.aiaa.org/doi/abs/10.2514/6.1998-4733](http://arc.aiaa.org/doi/abs/10.2514/6.1998-4733).
 
-[2] Adelman, H. M., and Mantay, W. R., “Integrated Multidisciplinary Optimization of Rotorcraft: A Plan for  Development,” Tech. rep., NASA, 1989.
+[2] Adelman, H. M. and Mantay, W. R., “Integrated Multidisciplinary Optimization of Rotorcraft: A Plan for Development,” Tech. rep., NASA, 1989.
 
-[3] Rohl, P. J., Kumar, D., Dorman, P., Sutton, M., and Cesnik, C. E. S., “A Composite Rotor Blade Structural Design Environment for Aeromechanical Assessments in Conceptual and Preliminary Design,” American Helicopter Society 68th Annual Forum, American Helicopter Society, 2012. URL [http://ebooks.cambridge.org/ref/id/CBO9781107415324A009](http://ebooks.cambridge.org/ref/id/CBO9781107415324A009).
+[3] Rohl, P. J., Kumar, D., Dorman, P., Sutton, M., and Cesnik, C. E. S., “A Composite Rotor Blade Structural
+Design Environment for Aeromechanical Assessments in Conceptual and Preliminary Design,” American Helicopter Society 68th Annual Forum, American Helicopter Society, 2012. [http://ebooks.cambridge.org/ref/id/CBO9781107415324A009](http://ebooks.cambridge.org/ref/id/CBO9781107415324A009).
 
-[4] Rohl, P., Dorman, P., Sutton, M., Kumar, D., and Cesnik, C., “A Multidisciplinary Design Environment for Composite Rotor Blades,” 53rd AIAA/ASME/ASCE/AHS/ASC Structures, Structural Dynamics and Materials Conference, American Institute of Aeronautics and Astronautics (AIAA), Reston, Virigina, 2012, pp. 1–15. doi:10.2514/6.2012-1842, URL [http://dx.doi.org/10.2514/6.2012-1842](http://dx.doi.org/10.2514/6.2012-1842). 
+[4] Friedmann, P. P., “Helicopter Vibration Reduction Using Structural Optimization with Aeroelas-
+tic/multidisciplinary Constraints - A Survey,” Journal of Aircraft, Vol. 28, No. 1, jan 1991, pp. 8–21. http://dx.doi.org/10.2514/3.45987](http://dx.doi.org/10.2514/3.45987).
 
-[5] Friedmann, P. P., “Helicopter Vibration Reduction Using Structural Optimization with Aeroelastic/multidisciplinary Constraints- A Survey,” Journal of Aircraft, Vol. 28, No. 1, 1991, pp. 8–21. doi:10.2514/3.45987, URL [http://dx.doi.org/10.2514/3.45987](http://dx.doi.org/10.2514/3.45987).
+[5] Weller, W. H. and Davis, M. W., “Wind Tunnel Tests of Helicopter Blade Designs Optimized for Minimum Vibration,” American Helicopter Society 44th Annual Forum, 1988.  [
 
-6] Weller, W. H., and Davis, M. W., “Wind Tunnel Tests of Helicopter Blade Designs Optimized for Minimum Vibration,”
-American Helicopter Society 44th Annual Forum, 1988.
+[9]Johnson, W., “A History of Rotorcraft Comprehensive Analyses,” American Helicopter Society 60th Annual Forum, 2013. 
 
-[7] Lim, J., Shin, S., and Kee, Y., “Optimization of Rotor Structural Design in Compound Rotorcraft with Lift Offset,” Journal of the American Helicopter Society, Vol. 61, No. 1, 2016, pp. 1–14. doi:10.4050/jahs.61.012005, URL [http://dx.doi.org/10.4050/JAHS.61.012005](http://dx.doi.org/10.4050/JAHS.61.012005).
+[10] Bauchau, O., Bottasso, C., and Nikishkov, Y., “Modeling rotorcraft dynamics with finite element multi-
+body procedures,” Mathematical and Computer Modelling, Vol. 33, No. 10-11, 2001, pp. 1113–1137.
+
+[11] Datta, A. and Johnson, W., “Three-Dimensional Finite Element Formulation and Scalable Domain Decomposition for High-Fidelity Rotor Dynamic Analysis,” Journal of the American Helicopter Society, 2011.
+
+[12] Rohl, P., Dorman, P., Sutton, M., Kumar, D., and Cesnik, C., “A Multidisciplinary Design Environment for Composite Rotor Blades,” 53rd AIAA/ASME/ASCE/AHS/ASC Structures, Structural Dynamics and Materials Conference, No. April, American Institute of Aeronautics and Astronautics (AIAA), Reston, Virigina, apr 2012, pp. 1–15.  http://dx.doi.org/10.2514/6.2012-1842](http://dx.doi.org/10.2514/6.2012-1842). 
+
+[13] Li, L., Structural Design of Composite Rotor Blades with Consideration of Manufacturability, Durability, and Manufacturing Uncertainties, Ph.d. thesis, Georgia Institute of Technology, 2008.
+
+[14] Yeo, H., Truong, K.-V., and Ormiston, R. A., “Asessment of 1D Versus 3D Methods for Modeling Rotor Blade Structural Dynamics,” AIAA, 2010.
+
+[15] Cesnik, C. E. S. and Hodges, D. H., “VABS: A New Concept for Composite Rotor Blade Cross-Sectional Modeling,” American Helicopter Society 51st Annual Forum, 1995.
+
+[16] Cesnik, C., Mok, J., Parikh, A., and Shin, S., “Optimum Design Framework for Integrally Twisted Helicopter
+Blades,” 45th AIAA/ASME/ASCE/AHS/ASC Structures, Structural Dynamics and Materials Conference, Ameri-
+can Institute of Aeronautics and Astronautics (AIAA), apr 2004.
+
+[17] Kumar, D. and Cesnik, C. E., “Optimization Framework for the Dynamic Analysis and Design of Active Twist Rotors,” American Helicopter Society 68th Annual Forum, 2012.
+
+[18] Kumar, D. and Cesnik, C. E., “New Hybrid Optimization for Design of Active Twist Rotors,” 54th
+AIAA/ASME/ASCE/AHS/ASC Structures, Structural Dynamics, and Materials Conference, American Institute of Aeronautics and Astronautics (AIAA), 2013. 
+
+[19] Silva, C. and Johnson, W., “Multidisciplinary Conceptual Design for Reduced-Emission Rotorcraft,” AHS
+Specialists Conference on Aeromechanics Design for Transformative Vertical Flight, AHS, San Francisco, Cali-
+fornia, jan 2018.
+
+[20] Meyn, L., “Rotorcraft Optimization Tools: Incorporating Rotorcraft Design Codes into Multi-Disciplinary Design, Analysis, and Optimization,” .
+
+[21] Glaz, B., Friedmann, P. P., and Liu, L., “Helicopter Vibration Reduction throughout the Entire Flight Enve-
+lope Using Surrogate-Based Optimization,” Journal of the American Helicopter Society, Vol. 54, No. 1, 2009.
+[22] Glaz, B., Friedmann, P. P., Liu, L., Kumar, D., and Cesnik, C. E. S., “The AVINOR Aeroelastic Simulation
+Code and its Application to Reduced Vibration Composite Rotor Blade Design,” 50th AIAA/ASME/ASCE/AHS/ASC Structures, Structural Dynamics, and Materials Confer-
+ence, 2009. 
+
+[23] Yu, W., Volovoi, V., Hodges, D. H., and Hong, X., “Validation of the variational asymptotic beam sectional analysis,” AIAA Journal, Vol. 40, No. 10, jan 2002,
+pp. 2105–2112. 
+
+[24] Tian, S., Liu, X., and Yu, W., “PreVABS,
+https://cdmhub.org/resources/1597,” Nov 2017.
+
+[25] Fanjoy, D. and Crossley, W., “Using a Genetic Algorithm for Structural Topology Design of Helicopter Ro-
+tor Blades,” 19th AIAA Applied Aerodynamics Conference, American Institute of Aeronautics and Astronautics (AIAA), jun 2001.
+
+[26] Blasques, J. P., “Multi-material topology optimization of laminated composite beams with eigenfrequency constraints,” Composite Structures, Vol. 111, 2013, pp. 45 – 55.
+
+[27] Heath, C. M. and Gray, J. S., “OpenMDAO: Framework for Flexible Multidisciplinary Design, Analysis and
+Optimization Methods,” 8th AIAA Multidisciplinary Design Optimization Specialist Conference (MDO), Hon-
+olulu, Hawaii, 2012, pp. 1–13. 
+
+[28] Paviot, T., “pythonOCC, 3D CAD/CAE/PLM development framework for the Python programming language,http://www.pythonocc.org/,” .
+
+[29] Davis, S. J., “Predesign Study For a Modern 4-Bladed Rotor for the RSRA,” Tech. Rep. 16155, NASA, 1981.
+
+[30] Shewchuk, J. R., “Triangle: Engineering a 2D Quality Mesh Generator and Delaunay Triangulator,” Applied Computational Geometry: Towards Geometric Engineering, Vol. 1148 of Lecture Notes in Computer Science, Springer-Verlag, 1996, pp. 203–222.
+
+[31] Popescu, B. and Hodges, D. H., “On asymptotically correct Timoshenko-like anisotropic beam theory,” Inter national Journal of Solids and Structures, Vol. 37, No. 3, 2000, pp. 535 – 558.
+
+[32] Barth, A., Spiess, C., Kondak, K., and Hajek, M., “Design, Analysis and Flight Testing of a High Altitude
+Synchropter UAV,” American Helicopter Society 74th Annual Forum, 2018.
+
+[33] Pflumm, T., Barth, A., Kondak, K., and Hajek, M., “Auslegung und Konstruktion eines Hauptrotorblattes fuer ein in extremen Flughoehen operierendes Drehfluegel UAV,” Deutscher Luft- und Raumfahrtkongress 2015, Rostock, Germany, 2015.
+
+[34] Suesse, S. and Hajek, M., “Rotor Blade Displacement and Load Estimation with Fiber-Optical Sensors for a Fu ture Health and Usage Monitoring System,” American Helicopter Society 74th Annual Forum, 2018.
+
+[35] McColl, C., Palmer, D., Chierichetti, M., Bauchau, O. A., and Ruzzene, M., “Comprehensive UH-60 Loads
+Model Validation,” AHS Forum, 2010. [36]Bowen-Davies, G. M., Performance and Loads of Variable Top Speed Rotorcraft at High Advance Ratios, Ph.D. thesis, University of Maryland, 2015.
+
+## Acknowledgment:
+
+This work is supported by the German Federal Minisfor Economic Affairs and Energy through the German Aation Research Program LuFo V-2 and the Austrian Rsearch Promotion Agency through the Austrian ReseaProgram TAKE OFF in the project VARI-SPEED.
+
+<img src="docs/acknowledgment.png" width="400">
