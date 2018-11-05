@@ -2,9 +2,7 @@
 
 <img src="docs/logo_wframe.png" align="left"  width="140">
 
-# SONATA: 
-
-Multidiciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis
+# SONATA: Multidiciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis
 
 ## **Abstract:**
 
@@ -12,7 +10,7 @@ Structural helicopter rotor blade optimization comprises classical aeroelastic p
 
 
 
-[TOC]
+[[__TOC__]]
 
 ## Introduction:
 
