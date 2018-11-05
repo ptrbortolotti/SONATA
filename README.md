@@ -10,7 +10,12 @@ Multidiciplinary Rotor Blade Design Environment for Structural Optimization and 
 
 Structural helicopter rotor blade optimization comprises classical aeroelastic problems, where the aerodynamic behavior, the structural elasticity and vibrational dynamics have to be studied simultaneously. Since the dynamic and modal behavior is strongly related to the structural properties of the rotor blades, adjusting these properties is essential for an effective optimization. Nevertheless, identifying constraints based on elemental matrices to keep the solution within feasible boundaries is often a protracted and iterative task. The herein presented definition of the rotor blade topology is deliberately associated to the production of composite rotor blades. Thus, manufacturability is inherent from the geometric layup definition. Using orthogonal projection with corner-style differentiation the cross-section is discretized and processed by the Variational Asymptotic Beam Sectional Analysis (VABS) afterwards.
 
+
+
+[TOC]
+
 ## Introduction:
+
 The large number of constraints and design drivers from various disciplines makes the helicopter rotor blade development process difficult, time consuming and costly.
 The entire design process represents a classical aeroelastic problem, where the aerodynamic behavior, the structural elasticity and vibrational dynamics have to be studied simultaneously. The behavior can therefore not be examined with separate analysis of the different disciplines \cite{Tarzanin1998}. The integration of all the appropriate disciplines in the design process implies not only limitations on the design from various disciplines, but also defining and accounting for interactions so that the disciplines influence design decisions simultaneously rather than sequentially \cite{Adelman1989}.
 Historically, the design and development of improved or entirely new rotor blades is conducted by departments in a company that maintain their separate simulation codes for performing their specific tasks. The aerodynamics department is responsible for performance calculations, aero-acoustics, rotor-wake interaction, unsteady airload prediction and computational fluid dynamics while the dynamics department focuses on rotor vibratory loads, stability and aeroelastic models\cite{Tarzanin1998}. The structural department determines the elastic properties as well as strength and fatigue characteristics.  A Blade and Rotor Design Department often bundles the different aspects while considering materials, manufacturability, maintainability and safety requirements. \cite{Tarzanin1998}
@@ -24,7 +29,7 @@ Our multidisciplinary rotor blade design framework is named SONATA (**S**tructur
 
 ![test123](docs/environment.png)
 
-
+Fig. 1: SONATA: Multidisciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis embedded in OpenMDAO.
 
 1. As a **first** component, the current state of the art involves an aeromechanical analysis of rotorcraft blades which includes flexible multibody dynamics, nonlinear finite elements and various rotorcraft aerodynamic models. They are often referred to as Comprehensive Analysis. Examples are the widely used Comprehensive Analytical Model of Rotorcraft Aerodynamics and Dynamics II (CAMRAD II) \cite{Johnson2013} and the software Dymore \cite{Bauchau2001} beyond several others. Both of these codes are presently in use in the rotorcraft industry, academic institutions and government laboratories. The quality of the predictions have been documented in numerous publications. In our SONATA environment Dymore was chosen as aeromechanic tool for both a dynamic analysis in the time domain as well a modal analysis within the frequency domain. In this context classical 1D-beam elements are used to describe the rotor blade due to the much simpler mathematical formulation and reduced computational effort compared to a full three-dimensional finite element model of the composite rotor blade \cite{Datta2011a}. Typically, this approach decouples the realistic composite blade definition and the manufacturability constraints from the aeromechanic analysis and the predesign of structural blade properties. That way, problems in the blade design cannot be discovered until later in the process where changes are costly and time consuming \cite{Rohl2012b}. 
 2. Although the three-dimensional finite element method is the most accurate approach to model realistic rotor blades, it is still not appropriate for the use in rotor blade predesign \cite{Li2008, Datta2011a}. The slender characteristic of rotor blades allows the simplification to treat them as one-dimensional body \cite{Yeo2010}. Cesnik and Hodges \cite{Cesnik1995} formulated the Variational Asymptotic Beam Sectional Analysis (VABS) to accurately represent the behavior that is associated with the reduction of two-dimensions. In other words, this method splits the three-dimensional elastic problem into a two-dimensional linear cross-section analysis and a one-dimensional nonlinear beam analysis, which is able to consider initially twisted and curved, anisotropic, non-homogeneous materials to model general composite cross-sectional geometries \cite{Cesnik1995, Li2008}. VABS is the **second** component of our environment. In the last 20 years, VABS and its variations have become a popular tool in rotor blade predesign and multidisciplinary rotor design optimization and their accuracy and efficiency has been validated in numerous publications \cite{Cesnik1995, Cesnik2004, Rohl2012a}.
@@ -67,6 +72,12 @@ Subsequently, each layer is generated by the following consecutive steps.
 In table 1 the layup definition of the cross-section, illustrated in figure 2, is displayed. Note that the shown genetic composite cross-section of the UH-60A serves as demonstration of the modeling capabilities.
 
 
+
+<img src="docs/layup.png" width="360">
+
+<center>Table 1: Layup definition of figure 3 </center>
+
+​						
 
 ## Installation
 
