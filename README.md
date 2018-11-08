@@ -2,7 +2,7 @@
 
 
 
-<img src="docs/logo_wframe.png" align="left"  width="140">
+<img src="docs/img/logo_wframe.png" align="left"  width="140">
 
 
 
@@ -55,7 +55,7 @@ In the last 25 years, researchers have repeatedly stated the need for a design m
 
 Our multidisciplinary rotor blade design framework is named SONATA (Structural Optimization and Aeroelastic Analysis) and is illustrated in the following figure 1. Like most environments it comprises of **three** main components that are wrapped into an optimization framework. 
 
-<img src="docs/environment.png" width="800">
+<img src="docs/img/environment.png" width="800">
 
 Fig. 1: SONATA: Multidisciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis embedded in OpenMDAO.
 
@@ -91,7 +91,7 @@ Analyswift: Free Academic Licenses for Universities
 *SONATA-CBM'*s composite topology generation originates from an arbitrary closed curve that can be obtained from various input formats that range from airfoil coordinate tables over a 3D CAD rotor blade surface  definition (.step or .iges) with radial station to a parameterized rotor blade with twist, planform, airfoil and chord-line distribution. In the case of the latter two, the 3D surface is intersected at a certain radial station to obtain once again a two-dimensional outer boundary of the cross-section. Figure 2 shows the resulting parameterized 3D surface of the UH-60A rotor blade with a cross-section topology at radial station R = 2000 mm.\\
 While the following methodology is shown  with the example of the UH-60A rotor-blade, it should be noted that this procedure can be applied to any closed curve cross-section, and therefore be also used to model rotor blade root sections or any other composite beam cross-sections. 
 
-<img src="docs/3dtopo.png" width="500">
+<img src="docs/img/3dtopo.png" width="500">
 
 Fig. 2: Parameterized 3D surface of the UH-60A rotor blade created with twist, planform, airfoil and axis information from Davis [29]
 
@@ -109,15 +109,15 @@ In table 1 the layup definition of the cross-section, illustrated in figure 3, i
 
 
 
-<img src="docs/layup.png" width="360">
+<img src="docs/img/layup.png" width="360">
 
 Table 1: Layup definition of figure 3
 
-<img src="docs/2dtopo.png" width="800">
+<img src="docs/img/2dtopo.png" width="800">
 
 Fig. 3: Topology definition of a generic composite UH-60A rotor blade cross section.
 
-​	<img src="docs/2dmesh.png" width="800">
+​	<img src="docs/img/2dmesh.png" width="800">
 
 Fig. 4: SONATA-CBM discretization of a generic composite UH-60A rotor blade cross-section in reference to [3] to illustrate the modeling capabilities.
 
@@ -140,9 +140,9 @@ The following procedure is applied to each layer, starting at the innermost, and
 
 As soon as every layer of the segment is meshed, the remaining cavities are triangulated using Shewchuk [30] algorithm with an area constraint. To avoid hanging nodes between two neighboring segments, the cells are consolidated on web interfaces.
 
-<img src="docs/CS0.png" width="400"><img src="docs/CS2.png" width="400">
+<img src="docs/img/CS0.png" width="400"><img src="docs/img/CS2.png" width="400">
 
-<img src="docs/CS4.png" width="400">
+<img src="docs/img/CS4.png" width="400">
 
 Fig. 5-7: Corner-style **0**: no exterior corner on bbsplines and α > αcrit ; Corner-style **1**: one exterior corner on bbsplines and α > αcrit. Corner-style **2**: no exterior corner on bbsplines and α < αcrit ; Corner-style **3**: one exterior corner on bbsplines and α < αcrit.  Corner-style **4**: two exterior corners on bbsplines and α < αcrit ; Corner-style **5**: three exterior corners on bbsplines and α < αcrit.
 
@@ -155,7 +155,7 @@ In a final step, the previously defined trim mass is integrated into the describ
 - Delete cells marked *3* and *4.*
 - Use the boundary nodes as starting point for the inner triangulation.  
 
-<img src="docs/mapping.png" width="400"><img src="docs/LE.png" width="400">
+<img src="docs/img/mapping.png" width="400"><img src="docs/img/LE.png" width="400">
 
 Fig. 8-9: (Left) Mapping algorithm to integrate cuves into an existing mesh. (Right) Leading edge region of figure 4 showing the plydrops of the C-Spar and the integration of the trim mass into the existing mesh.
 
@@ -265,4 +265,4 @@ Model Validation,” AHS Forum, 2010. [36]Bowen-Davies, G. M., Performance and L
 
 This work is supported by the German Federal Minisfor Economic Affairs and Energy through the German Aation Research Program LuFo V-2 and the Austrian Rsearch Promotion Agency through the Austrian ReseaProgram TAKE OFF in the project VARI-SPEED.
 
-<img src="docs/acknowledgment.png" width="400">
+<img src="docs/img/acknowledgment.png" width="400">
