@@ -12,7 +12,7 @@
 
 ## **Abstract:**
 
-Structural helicopter rotor blade optimization comprises classical aeroelastic problems, where the aerodynamic behavior, the structural elasticity and vibrational dynamics have to be studied simultaneously. Since the dynamic and modal behavior is strongly related to the structural properties of the rotor blades, adjusting these properties is essential for an effective optimization. Nevertheless, identifying constraints based on elemental matrices to keep the solution within feasible boundaries is often a protracted and iterative task. The herein presented definition of the rotor blade topology is deliberately associated to the production of composite rotor blades. Thus, manufacturability is inherent from the geometric layup definition. Using orthogonal projection with corner-style differentiation the cross-section is discretized and processed by the Variational Asymptotic Beam Sectional Analysis (VABS) afterwards.
+Structural helicopter rotor blade optimization comprises classical aeroelastic problems, where the aerodynamic behavior, the structural elasticity and vibrational dynamics have to be studied simultaneously. Since the dynamic and modal behavior is strongly related to the structural properties of the rotor blades, adjusting these properties is essential for an effective optimization. Nevertheless, identifying constraints based on elemental matrices to keep the solution within feasible boundaries is often a protracted and iterative task. The herein presented definition of the rotor blade topology is deliberately associated to the production of composite rotor blades. Thus, manufacturability is inherent from the geometric layup definition. Using orthogonal projection with corner-style differentiation the cross-section is discretized and processed by the Variational Asymptotic Beam Sectional Analysis (VABS) afterwards. 
 
 ## Installation
 
@@ -69,23 +69,32 @@ Last but not least, the tree components are managed by an environment where desi
 
 **Why Python?**
 
--  Python can be easy to pick up whether you're a first time programmer or you're experienced with other languages. 
--  Python is developed under an OSI-approved open source license, making it freely usable and distributable, even for commercial use. 
--  The Python Package Index (PyPI) hosts thousands of third-party modules for Python. Both Python's standard library and the community-contributed modules allow for endless possibilities. Two of the most important python modules used in SONATA are the openMDAO and the pythonocc module.
--  [openMDAO](http://openmdao.org/) is an open-source high-performance computing platform for systems analysis and multidisciplinary optimization, written in Python.
--   [pythonOCC](http://www.pythonocc.org/ )  is a python library whose purpose is to provide 3D modeling features. It is intended to developers who aim at developing CAD/PDM/PLM applications.
+- Python can be easy to pick up whether you're a first time programmer or you're experienced with other languages. 
+
+- Python is developed under an OSI-approved open source license, making it freely usable and distributable, even for commercial use. 
+
+- The Python Package Index (PyPI) hosts thousands of third-party modules for Python. Both Python's standard library and the community-contributed modules allow for endless possibilities. Two of the most important python modules used in SONATA are the openMDAO and the pythonocc module.
+
+- [openMDAO](http://openmdao.org/) is an open-source high-performance computing platform for systems analysis and multidisciplinary optimization, written in Python.
+
+- [pythonOCC](http://www.pythonocc.org/ )  is a python library whose purpose is to provide 3D modeling features. It is intended to developers who aim at developing CAD/PDM/PLM applications.
+
 
 ### 1. DYMORE (PYMORE):
 
-A Python-based wrapper for Dymore has been developed to integrate the dynamic and modal analysis into the OpenMDAO-driven optimizations.
+Dymore is a finite element based multibody dynamics code for the comprehensive modeling of flexible multibody systems. Dymore has been implemented in industrial settings, it is presently used by a number of rotorcraft, wind energy, and aerospace companies and research laboratories. Dymore has been developed by Prof. [Bauchau](http://www.dymoresolutions.com/resume/Resume.html) and his students. The documentation can be found in the [user's manual](http://www.dymoresolutions.com/UsersManual/UsersManual.html).
 
-This module is developed by W. Garre and is hosted @ [https://gitlab.lrz.de/wgarre/Pymore](https://gitlab.lrz.de/wgarre/Pymore)
+A Python-based wrapper for Dymore has been developed (called Pymore) to integrate the dynamic and modal analysis into the OpenMDAO-driven optimizations. This module is developed by W. Garre and is hosted @ [https://gitlab.lrz.de/wgarre/Pymore](https://gitlab.lrz.de/wgarre/Pymore)
+
+
 
 ### 2. VABS (Variational Asymptotic Beam Sectional Analysis):
 
-http://analyswift.com/vabs-cross-sectional-analysis-tool-for-composite-beams/
+"VABS (Variational Asymptotic Beam Sectional Analysis) is a code implementing the various beam theories based on the concept of simplifying the original nonlinear three-dimensional (3D) analysis of slender structures into a two-dimensional (2D) cross-sectional analysis and a one- dimensional (1D) nonlinear beam analysis using a powerful mathematical method, the variational asymptotic method. VABS takes a finite element mesh of the cross section including all the details of geometry and material as inputs to calculate the sectional properties including structural properties and inertial properties. These properties are needed for the 1D beam analysis to predict the global behavior of the slender structure. The 3D pointwise displacement/strain/stress distribution within the structure can also be recovered based on the global behavior of the 1D beam analysis." from [[VABS Manual for Users](docs/man/VABS-Manual.pdf)]
 
-Analyswift: Free Academic Licenses for Universities
+Thanks to [Analyswift](http://analyswift.com/vabs-cross-sectional-analysis-tool-for-composite-beams/), the distributer of VABS, the Technical University of Munich has received academic licenses free of charge.
+
+
 
 ### 3. SONATA-CBM:
 *SONATA-CBM'*s composite topology generation originates from an arbitrary closed curve that can be obtained from various input formats that range from airfoil coordinate tables over a 3D CAD rotor blade surface  definition (.step or .iges) with radial station to a parameterized rotor blade with twist, planform, airfoil and chord-line distribution. In the case of the latter two, the 3D surface is intersected at a certain radial station to obtain once again a two-dimensional outer boundary of the cross-section. Figure 2 shows the resulting parameterized 3D surface of the UH-60A rotor blade with a cross-section topology at radial station R = 2000 mm.\\
@@ -166,13 +175,15 @@ To verify the resulting stiffness properties, simple benchmark testcases for iso
 
 ## Resources
 * [PythonOCC](http://www.pythonocc.org/)
+
 * [openMDAO](http://openmdao.org/)
 
-Documentation for Developers:
+  Documentation for Developers:
 
 * [OpenCascadeTechnology Documentation](https://www.opencascade.com/doc/occt-6.9.1/refman/html/index.html)
 * [PythonOCC API Documentation](http://api.pythonocc.org/)
 * [OpenMDAO Documentation](http://openmdao.org/twodocs/versions/latest/)
+* [Dymoresolutions User's Manual](http://www.dymoresolutions.com/UsersManual/UsersManual.html)
 
 ## Publications:
 **Pflumm, T., Garre, W., Hajek, M.:** A Preprocessor for Parametric Composite Rotor Blade Cross-Sections, 44th European Rotorcraft Forum, Delft, The Netherlands, 2018  [[pdf]](docs/Pflumm,%20T.%20-%20A%20Preprocessor%20for%20Parametric%20Composite%20Rotor%20Blade%20Cross-Sections%20(2018,%20ERF).pdf) [[more…\]](https://mediatum.ub.tum.de/604993?query=Pflumm&show_id=1455385) [[BibTeX\]](https://mediatum.ub.tum.de/export/1455385/bibtex)
