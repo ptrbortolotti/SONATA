@@ -565,7 +565,7 @@ def trim_BSplineLst_by_Pnt2d(BSplineLst,Pos1_Pnt2d,Pos2_Pnt2d):
     
 def seg_boundary_from_dct(DCT_data,angular_deflection = 30):
     #Check if DCT_Definition is closed, if not: close it
-    if not np.array_equal(DCT_data[0],DCT_data[-1]):
+    if not np.allclose(DCT_data[0],DCT_data[-1]):
         print('INFO:\t Closing open discrete boundary definition')
         DCT_data = np.concatenate((DCT_data,DCT_data[0:1,:]),axis=0)
         
@@ -589,15 +589,14 @@ def seg_boundary_from_dct(DCT_data,angular_deflection = 30):
                   
     list_of_bsplines = []
     for i,item in enumerate(DCT_Segments):
-        #print i
         data = item.T
-        #print data
+               
         tmp_harray = TColgp_HArray1OfPnt2d_from_nparray(data)
         if NbCorners == 0:
-            #tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), True, 0.0000001)             #Interpolate datapoints to bspline
-            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 0.0000001)             #Interpolate datapoints to bspline
+            #tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), True, 1e-6)             #Interpolate datapoints to bspline
+            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 1e-6)             #Interpolate datapoints to bspline
         else:     
-            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 0.0000001)             #Interpolate datapoints to bspline
+            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 1e-6)             #Interpolate datapoints to bspline
         tmp_interpolation.Perform()                                               
         tmp_bspline = tmp_interpolation.Curve().GetObject()
         list_of_bsplines.append(tmp_bspline)
@@ -634,7 +633,6 @@ def discretize_BSplineLst(BSplineLst, Deflection = 2e-4, AngularDeflection=0.02,
              
     
 def BSplineLst_from_dct(DCT_data,angular_deflection=15):
-           
     #Find corners and edges of data
     DCT_angles = calc_DCT_angles(DCT_data)
     corners = []

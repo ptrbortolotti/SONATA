@@ -11,7 +11,8 @@ from SONATA.cbm.fileIO.readinput import UIUCAirfoil2d, AirfoilDat2d
 from SONATA.cbm.topo.BSplineLst_utils import get_BSpline_length, get_BSplineLst_length, \
                             find_BSplineLst_coordinate, get_BSplineLst_Pnt2d, \
                             trim_BSplineLst, seg_boundary_from_dct, set_BSplineLst_to_Origin, \
-                            copy_BSplineLst, trim_BSplineLst_by_Pnt2d, reverse_BSplineLst
+                            copy_BSplineLst, trim_BSplineLst_by_Pnt2d, reverse_BSplineLst, \
+                            BSplineLst_from_dct
 from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst
 from SONATA.cbm.topo.projection import cummulated_layup_boundaries, relevant_cummulated_layup_boundaries,\
                                     plot_layup_projection, inverse_relevant_cummulated_layup_boundaries, \
@@ -187,8 +188,9 @@ class Segment(object):
         '''returns a Pnt2d for the coresponding layer number and the coordinate S'''
         a = self.final_Boundary_ivLst
         #select interval were S can be found
+        
         for it, e in enumerate(a):
-            if e[0]<S<e[1]:
+            if e[0]<S<=e[1]:
                 lid = e[2]
                 break
 
@@ -399,8 +401,8 @@ class Segment(object):
         '''
         DCT_data = AirfoilDat2d(filename).T
         DCT_data = np.multiply(DCT_data,scale_factor)
-        self.BSplineLst = seg_boundary_from_dct(DCT_data,angular_deflection)
-        return seg_boundary_from_dct(DCT_data,angular_deflection)
+        self.BSplineLst = seg_boundary_from_dct(DCT_data, angular_deflection)
+        return self.BSplineLst
             
 
     def build_segment_boundary_from_WebLst(self,WebLst,Segment0):

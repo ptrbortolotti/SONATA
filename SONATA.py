@@ -16,6 +16,8 @@ from SONATA.cbm.fileIO.configuration import Configuration
 from SONATA.cbm.sonata_cbm import CBM
 
 filename = 'jobs/VariSpeed/uh60a_cbm_advanced/sec_config.yml'
+# filename = 'examples/sec_config_windturbine.yml'
+# filename = 'examples/sec_config_windturbine_root.yml'
 config = Configuration(filename)
 
 job = CBM(config)
@@ -25,5 +27,5 @@ job.cbm_review_mesh()
 
 job.cbm_run_vabs()
 
-job.cbm_post_2dmesh(title='ERF2018 Example')
+job.cbm_post_2dmesh(title='NoTitle')
 #job.cbm_post_3dtopo()
