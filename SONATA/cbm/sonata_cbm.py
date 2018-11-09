@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Define the Composite Beam Model (CBM) class
+"""Defines the Composite Beam Model (CBM) class
 Created on Wed Jan 03 13:56:37 2018
 @author: TPflumm
  """
@@ -9,9 +9,9 @@ import pickle as pkl
 import matplotlib.pyplot as plt
 from datetime import datetime
 import subprocess
-import sys,os,math
+import os 
+import math
 import numpy as np
-import re
 import uuid
 import platform
 import shutil
@@ -22,9 +22,7 @@ from OCC.Display.SimpleGui import init_display
 #SONATA modules:
 from SONATA.cbm.fileIO.CADoutput import export_to_step
 from SONATA.cbm.fileIO.CADinput import load_3D, import_2d_stp, import_3d_stp
-from SONATA.cbm.fileIO.readinput import read_material_input
 from SONATA.cbm.fileIO.read_yaml_input import read_yaml_materialdb
-
 
 from SONATA.cbm.bladegen.blade import Blade
 
@@ -80,7 +78,7 @@ class CBM(object):
     '''
 
         
-    #__slots__ = ('Configuration','MaterialLst','__tel','__email','__alter','__partner')
+    #__slots__ = ('config' , 'MaterialLst' , 'SegmentLst' , 'WebLst' , 'BW' , 'mesh', 'BeamProperties', 'display', )
     def __init__(self, Configuration):
         """
         Initialize attributes.
@@ -91,7 +89,6 @@ class CBM(object):
             Pointer to the <Configuration> object.
         MaterialLst : <MaterialLst>
         Pointer to the  <MaterialLst> object.
-
         """
         
         self.config = Configuration
@@ -235,8 +232,11 @@ class CBM(object):
         return None
 
 
-    def cbm_generate_SegmentLst(self):
-        ''' generate Segment Lst'''
+    def __cbm_generate_SegmentLst(self):
+        '''
+        psydo private method of the cbm class to generate the list of 
+        Segments
+        '''
         self.SegmentLst = []   #List of Segment Objects
         
         #TODO cleanup this mess!
@@ -276,11 +276,16 @@ class CBM(object):
 
 
     def cbm_gen_topo(self):
-        '''generates the topology 
+        '''
+        CBM Method that generates the topology. It starts by generating the 
+        list of Segments. It continous to gen all layers for Segment 0. 
+        Subsequently the webs are defined and afterwards the layers of the 
+        remaining Segments are build. The Balance Weight is defined at the end
+        of this method.        
         '''               
         #Generate SegmentLst from config:
         self.SegmentLst = []
-        self.cbm_generate_SegmentLst()
+        self.__cbm_generate_SegmentLst()
         #Build Segment 0:
         self.SegmentLst[0].build_wire()
         self.SegmentLst[0].build_layers()
@@ -319,9 +324,6 @@ class CBM(object):
         cells and nodes in both the <Layer> instances, the <Segment> instances 
         and the attribute self.mesh that is a list of <Cell> instances
 
-        Returns
-        -------
-        None
         '''
         self.mesh = []
         Node.class_counter = 1
@@ -480,7 +482,7 @@ class CBM(object):
         
            
             
-    def cbm_post_2dmesh(self, attribute='MatID',title='NOTITLE', **kw):
+    def cbm_post_2dmesh(self, attribute='MatID', title='NOTITLE', **kw):
         '''
         CBM Postprocessing method that displays the mesh with matplotlib.
         The a

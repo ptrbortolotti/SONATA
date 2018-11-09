@@ -11,6 +11,7 @@ Variational Asymptotic Beam Sectional Analysis (VABS) afterwards.
 Date: 30/10/2018
 @author: T.Pflumm, W.Garre
 """
+import numpy as np
 from SONATA.cbm.fileIO.configuration import Configuration
 from SONATA.cbm.sonata_cbm import CBM
 
@@ -24,5 +25,5 @@ job.cbm_review_mesh()
 
 job.cbm_run_vabs()
 
-job.cbm_post_2dmesh()
-job.cbm_post_3dtopo()
+job.cbm_post_2dmesh(title='ERF2018 Example')
+#job.cbm_post_3dtopo()

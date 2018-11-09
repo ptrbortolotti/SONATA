@@ -75,25 +75,44 @@ class Cell(object):
         return np.amax(calc_cell_angles(self))  
     
     def __repr__(self): 
-        #we can tell Python how to prepresent an object of our class (when using a print statement) for general purposes use  __repr__(self): 
+        '''
+        tells Python how to represent an the Cell object (when using a print 
+        statement) for a general purposes we use  def __repr__(self):
+            
+        Returns: String
+        '''
         STR = ''
         STR += str('Cell %s w. nodes:\t' % (self.id))
         for n in self.nodes:
             STR += str('%i, ' % (n.id))
-            
+        
         return  STR
     
     def __getstate__(self):
-        """Return state values to be pickled."""
+        '''Return state values to be pickled.'''
         return (self.id, self.nodes, self.theta_3, self.MatID, self.theta_1, self.structured, self.interior_nodes)   
     
     def __setstate__(self, state):
-        """Restore state from the unpickled state values."""
+        '''Restore state from the unpickled state values.'''
         self.id, self.nodes, self.theta_3, self.MatID, self.theta_1, self.structured, self.interior_nodes = state
         #self.wire = self.build_wire()
     
     
     def calc_theta_1(self):
+        '''This method calculates the theta_1 vector. theta_1[0] represents the 
+        ply coordinate system, which is formed by roating the global coordinate 
+        system in the right-hand sense about x1 by the amount theta_1[0] 
+        (theta_11). Afterwards the ply coordinate system us ritated avizt y3 in 
+        the right-hand sens by the amount of Theta_3 to form the material 
+        system. 
+        For a detailed description see docs/man/VABS-Manual.pdf Figure 4.
+        
+        theta_11 is calculated as the angle between the x-axis and the Vector 
+        from Node 1 to Node 2.
+        
+        Returns:
+           None, but stores the theta_1 definition      
+        '''       
         theta_1 = [0] * 9
         if self.structured:
             v0 = gp_Vec2d(gp_Pnt2d(0,0),gp_Pnt2d(1,0))
@@ -115,6 +134,7 @@ class Cell(object):
 
 
     def calc_area(self):  
+        '''Calculates and returns the surface area of the cell''' 
         corners = []
         for node in self.nodes:
             corners.append(node.coordinates)      
@@ -122,6 +142,12 @@ class Cell(object):
 
 
     def calc_orientation(self):  
+        '''Calculates the orientation of the cell.
+        
+        Returns:
+            - True: if counterclockwise 
+            - False: else
+        ''' 
         corners = []
         for node in self.nodes:
             corners.append(node.coordinates)      
