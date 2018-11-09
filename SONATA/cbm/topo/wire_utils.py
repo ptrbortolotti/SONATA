@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 
 #PythonOCC Libraries
 from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax1
-from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_TangentialDeflection
+from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection,GCPnts_UniformDeflection, GCPnts_TangentialDeflection, GCPnts_QuasiUniformAbscissa
 from OCC.BRepAdaptor import BRepAdaptor_CompCurve, BRepAdaptor_Curve
+
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge, BRepBuilderAPI_Transform
 from OCC.BRepLib import BRepLib_MakeFace
 from OCC.BRepTools import BRepTools_WireExplorer
@@ -47,15 +48,12 @@ def Wire_Orientation(wire, NbPoints=31):
         Pnt2dLst.append(Pnt2d)
     b = Pnt2dLst_to_npArray(Pnt2dLst)
     
-    
-    plt.figure(3)
-    plt.clf()         
-    plt.plot(*b.T, color='black', marker='.')
-    plt.axis('equal')  
-    plt.show()   
-    
-    
-    
+    # plt.figure(3)
+    # plt.clf()         
+    # plt.plot(*b.T, color='black', marker='.')
+    # plt.axis('equal')  
+    # plt.show()   
+        
     #Calculate of Polygon.
     area = PolygonArea(b)
     #print area
@@ -66,7 +64,6 @@ def Wire_Orientation(wire, NbPoints=31):
     else: return None
 
       
-
 def NbEdges_in_wire(Wire):
     ex = BRepTools_WireExplorer(Wire)
     counter = 0
@@ -165,17 +162,19 @@ def find_coordinate_on_ordered_edges(TopoDS_wire,S):
     return [idx,U]  #Return index of edge and parameter U on edge!
 
 
-def discretize_wire_TangentialDeflection(wire,Resolution=600,AngularDeflection = 0.015,CurvatureDeflection = 0.1,MinimumOfPoints = 500,UTol = 1.0e-9):
+def discretize_wire(wire, Resolution=600, Deflection = 5e-3, display=None):
     Pnt2dLst = []
     AdaptorComp = BRepAdaptor_CompCurve(wire, True)
-    discretization = GCPnts_TangentialDeflection(AdaptorComp,AngularDeflection,CurvatureDeflection,MinimumOfPoints, UTol)
+    #discretization = GCPnts_TangentialDeflection(AdaptorComp,AngularDeflection,CurvatureDeflection,MinimumOfPoints, UTol)
+    discretization = GCPnts_QuasiUniformDeflection(AdaptorComp, Deflection , 1)
     #print 'NbPoints3 = ', discretization.NbPoints()
     
     NbPoints = discretization.NbPoints()
     for j in range(1, NbPoints+1):
         Pnt = discretization.Value(j)
         Pnt2dLst.append(Pnt)
-    
+        #display.DisplayShape(Pnt)
+        
     a = Pnt2dLst_to_npArray(Pnt2dLst)
     b = np.around(a,10) # Evenly round to the given number of decimals. 
     
@@ -189,7 +188,6 @@ def discretize_wire_TangentialDeflection(wire,Resolution=600,AngularDeflection =
     if closed:
         npArray = np.vstack((npArray,b[0]))
     else: None
-        
         
     #Interpolate Large spaces! 
     seg_P2Plength = []

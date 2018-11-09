@@ -692,7 +692,7 @@ def BSplineLst_from_dct(DCT_data,angular_deflection=15):
             
         data = item.T
 
-#        plt.plot(*item.T, marker='.')
+        #plt.plot(*item.T, marker='.')
     
         tmp_harray = TColgp_HArray1OfPnt2d_from_nparray(data)
         try: tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 1e-06)             #Interpolate datapoints to bspline

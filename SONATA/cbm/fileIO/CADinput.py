@@ -21,13 +21,12 @@ from OCC.Quantity import Quantity_Color
 from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
 from OCC.Display.SimpleGui import init_display
 from OCC.BRepAlgoAPI import BRepAlgoAPI_Section
-from OCC.BRepAdaptor import BRepAdaptor_CompCurve, BRepAdaptor_Curve
+from OCC.BRepAdaptor import BRepAdaptor_CompCurve, BRepAdaptor_Curve, BRepAdaptor_Curve2d
 from OCC.BRepAlgo import BRepAlgo_Section
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeFace
 from OCC.TopExp import TopExp_Explorer
 from OCC.TopTools import TopTools_ListIteratorOfListOfShape, TopTools_ListOfShape
 import OCC.TopoDS as TopoDS
-from OCC.BRepAdaptor import  BRepAdaptor_Curve2d, BRepAdaptor_Curve
 from OCC.BRepBuilderAPI import BRepBuilderAPI_Transform
 from OCC.TopOpeBRep import TopOpeBRep_ShapeIntersector
 from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection, GCPnts_TangentialDeflection, GCPnts_QuasiUniformAbscissa, GCPnts_UniformDeflection
@@ -37,7 +36,11 @@ from OCC.TopoDS import topods
 from OCC.ShapeAnalysis import ShapeAnalysis_Wire, ShapeAnalysis_WireOrder
 from OCC.ShapeFix import ShapeFix_Wire
 
-from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst,rotate_wire, translate_wire, NbEdges_in_wire, Unique_EdgeLst, Wire_Orientation,discretize_wire_TangentialDeflection
+
+if __name__ == '__main__':
+    os.chdir('../../..')
+
+from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst,rotate_wire, translate_wire, discretize_wire, NbEdges_in_wire, Unique_EdgeLst, Wire_Orientation
 from SONATA.cbm.topo.explorer import WireExplorer
 from SONATA.cbm.topo.utils import point2d_list_to_TColgp_HArray1OfPnt2d, Pnt2dLst_to_npArray, PolygonArea, unique_rows,Polygon_orientation
 from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
@@ -178,6 +181,8 @@ def EdgeLst_to_Wire(EdgeLst):
 
 
 def wire_to_BSplineLst(wire):
+    #TODO: Possible Obsolete!!!!
+    
     BSplineLst = []
     #Define the Point and direction of the slicing plane
     Dir = gp_Dir(0., 0., 1.) 
@@ -223,10 +228,6 @@ def wire_to_BSplineLst(wire):
             BSplineLst.append(Adaptor.BSpline().GetObject())
             
     return BSplineLst    
-
-
-
-
 
 
 def stp2d_to_wire(TopoDS_Shape):
@@ -284,55 +285,57 @@ def stp3d_to_wire(TopoDS_Shape, R):
    
     
 
-def import_2d_stp(filename,scale_factor,Theta=0):
+def import_2d_stp(fname, scale_factor=1, Theta=0):
     '''
-    The 2D Shape must given in SONATA Coordinates!
+    Imports a 2D Geometry in *.step format. Make sure to define it in SONATA 
+    Crosssectional Coordinates
+    
+    Parameters:
+        - fname (string): filename
+        - R (float): radial station
+        - scale_factor (float): scaling factor
+        - Theta (float):  Angle to determine Origin
+            
+    Returns: 
+        List of B-Splines
     '''
     print('STATUS: \t IMPORT_2d_STP')
-    aResShape = load_3D(filename) 
+    aResShape = load_3D(fname) 
     wire = stp2d_to_wire(aResShape)
     
-    
     print('STATUS: \t CHECK ClosedWire: \t\t ', str(wire.Closed()))
-    npArray = discretize_wire_TangentialDeflection(wire,70,0.013)
+    npArray = discretize_wire(wire, Deflection = 5e-4)
     npArray = np.multiply(npArray,scale_factor)
-    BSplineLst = BSplineLst_from_dct(npArray,2)
+            
+    BSplineLst = BSplineLst_from_dct(npArray, angular_deflection=4)
     BSplineLst = set_BSplineLst_to_Origin(BSplineLst,Theta) 
        
-        
+    
     if BSplineLst_Orientation(BSplineLst,11) == False:
         BSplineLst = reverse_BSplineLst(BSplineLst)  
     
     print('STATUS: \t CHECK Head2Tail: \t\t ', Check_BSplineLst_Head2Tail(BSplineLst))
     print('STATUS: \t CHECK Counterclockwise: \t ', BSplineLst_Orientation(BSplineLst,11))
     
-#    display.DisplayShape(wire)
-#    plt.figure(1)
-#    plt.clf()         
-#    plt.plot(*npArray.T, color='black', marker='.')
-#    plt.axis('equal')  
-#    plt.show()    
     return BSplineLst
 
  
-   
-
-def BSplineLst_from_intersect_shape(aResShape,R,scale_factor,Theta):
+def BSplineLst_from_intersect_shape(aResShape, R, scale_factor, Theta):
     wire = stp3d_to_wire(aResShape,R)
-
+    
     wire = translate_wire(wire,gp_Pnt(R,0,0),gp_Pnt(0,0,0))
     wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,1,0)),math.pi/2)
     wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,0,1)),math.pi/2)
     
-    #TODO: jobs/MSmialy/Testblade
-    print()
     print('STATUS:\t CHECK ClosedWire: \t\t ', str(wire.Closed()))
-    npArray = discretize_wire_TangentialDeflection(wire,80,0.013)
+    
+    #display.DisplayShape(wire)
+    
+    npArray = discretize_wire(wire)
     npArray = np.multiply(npArray,scale_factor)
-    BSplineLst = BSplineLst_from_dct(npArray,2)
+    BSplineLst = BSplineLst_from_dct(npArray, angular_deflection=4)
     BSplineLst = set_BSplineLst_to_Origin(BSplineLst,Theta) 
        
-        
     if BSplineLst_Orientation(BSplineLst,11) == False:
         BSplineLst = reverse_BSplineLst(BSplineLst)  
     
@@ -341,22 +344,32 @@ def BSplineLst_from_intersect_shape(aResShape,R,scale_factor,Theta):
     
 #    display.DisplayShape(wire)
     
-#    plt.figure(1)
-#    plt.clf()         
-#    plt.plot(*npArray.T, color='black', marker='.')
-#    plt.axis('equal')  
-#    plt.show()   
+    # plt.figure(1)
+    # plt.clf()         
+    # plt.plot(*npArray.T, color='black', marker='.')
+    # plt.axis('equal')  
+    # plt.show()   
     
     return BSplineLst
 
 
 
-def import_3d_stp(filename,R,scale_factor,Theta=0):
+def import_3d_stp(fname, R, scale_factor=1, Theta=0):
     '''
-    The 3D Shape must given in Rotorblade Coordinates!
+    Imports a 3D Surface in *.step format and intersects it at the given 
+    radial Station R.
+    
+    Parameters:
+        - fname (string): filename
+        - R (float): radial station
+        - scale_factor (float): scaling factor
+        - Theta (float):  Angle to determine Origin
+            
+    Returns: 
+        List of B-Splines
     '''
     print('STATUS:\t IMPORT_3d_STP')
-    aResShape = load_3D(filename) 
+    aResShape = load_3D(fname) 
     return BSplineLst_from_intersect_shape(aResShape,R,scale_factor,Theta)
 
 
@@ -372,9 +385,7 @@ def order_BSplineLst_Head2Tail(BSplineLst,rel_tol=1e-06):
     return BSplineLst    
 
 
-
 def Check_BSplineLst_Head2Tail(BSplineLst):
-    
     
     Head2Tail = True
     lin_tol=1e-07
@@ -407,70 +418,37 @@ def Check_BSplineLst_Head2Tail(BSplineLst):
     return Head2Tail
 
     
-
-
-# =============================================================================
-#            IF __MAIN__
-# =============================================================================  
+#%%==========IF __MAIN__===================================================================  
 if __name__ == '__main__': 
-    display, start_display, add_menu, add_function_to_menu = init_display('wx')
-    display.Context.SetDeviationAngle(0.0001)       # 0.001 default. Be careful to scale it to the problem.
-    display.Context.SetDeviationCoefficient(0.0001) # 0.001 default. Be careful to scale it to the problem. 
+    from SONATA.cbm.display.display_utils import show_coordinate_system
+    
+    #======IMPORT 2D Step File===============
+    fname = 'examples/AREA/AREA_R230.stp'
+    BSplineLst = import_2d_stp(fname, scale_factor=1, Theta=0)
+    
+    #======IMPORT 3D Step File and Slice it a Radial Station===============
+    # fname = 'examples/AREA/AREA_Blatt_L.stp'
+    # #fname = 'jobs/MSmialy/Testblade/surface.stp'
+    
+    # Theta=6.4/float(180)*np.pi
+    # BSplineLst = import_3d_stp(fname,R=220,Theta=Theta)
+        
+    #==========PLOT==================
+    display, start_display, add_menu, add_function_to_menu = init_display()
+    display.Context.SetDeviationAngle(1e-5)       # 0.001 default. Be careful to scale it to the problem.
+    display.Context.SetDeviationCoefficient(1e-5) # 0.001 default. Be careful to scale it to the problem. 
     display.set_bg_gradient_color(20,6,111,200,200,200)
-    
-    '''CREATE AXIS SYSTEM for Visualization'''
-    length = 10
-    O  = gp_Pnt(0., 0., 0.)
-    p1 = gp_Pnt(length,0.,0.)
-    p2 = gp_Pnt(0.,length,0.)
-    p3 = gp_Pnt(0.,0.,length)
-    
-    h1 = BRepBuilderAPI_MakeEdge(O,p1).Shape()
-    h2 = BRepBuilderAPI_MakeEdge(O,p2).Shape()
-    h3 = BRepBuilderAPI_MakeEdge(O,p3).Shape()
-
-    display.DisplayShape(O,color='BLACK')
-    display.DisplayShape(h1,color='RED')
-    display.DisplayShape(h2,color='GREEN')
-    display.DisplayShape(h3,color='BLUE')
-
-    #=====================
-    #IMPORT 2D Step File
-    #=====================
-#    Theta=0
-#    BSplineLst = import_2d_stp('AREA_R230.stp',Theta)
-#    
-#    display.DisplayShape(BSplineLst[0].StartPoint())
-#    for item in BSplineLst:
-#        display.DisplayShape(item,color="GREEN")
-
-    #=====================
-    #IMPORT 3D Step File and Slice it a Radial Station
-    #=====================
-    Theta=6.4/float(180)*np.pi
-    BSplineLst = import_3d_stp('AREA_Blatt_L.stp',220,Theta)
-    
+    show_coordinate_system(display, length=25)
+       
     display.DisplayShape(BSplineLst[0].StartPoint())
-    for item in BSplineLst:
-        display.DisplayShape(item,color="GREEN")
+    c = ['red','yellow','black','orange','green','blue']
+        
+    for i,s in enumerate(BSplineLst):
+        display.DisplayShape(s,color=c[i%6])
+        
+    # aResShape = load_3D(fname)
+    # display.DisplayShape(aResShape, color=None, transparency=0.7, update=True)
 
-    P = gp_Pnt(121,0,0)
-    factor = 0.5
-    aResShape = load_3D('AREA_Blatt_L.stp')
-    aTrsf = gp_Trsf()
-    aTrsf.SetScale(P,factor)
-    aBRespTrsf = BRepBuilderAPI_Transform(aResShape, aTrsf)
-    aScaledShape = aBRespTrsf.Shape()
-    
-    display.DisplayShape(aResShape, color=None, transparency=0.7, update=True)
-    display.DisplayShape(aScaledShape, color=None, transparency=0.7, update=True)
-    
-
-# DISPLAY
-# =============================================================================
-
-    f = display.View.View().GetObject()
-    
     display.View_Top()
     #display.View_Iso()
     display.FitAll()
