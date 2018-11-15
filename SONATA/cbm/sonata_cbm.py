@@ -402,46 +402,44 @@ class CBM(object):
     
     def cbm_run_vabs(self, jobid=str(uuid.uuid4())[:8], rm_vabfiles=True):
         '''CBM method to run the solver VABS (Variational Asymptotic Beam 
-        Sectional Analysis).
-        
+        Sectional Analysis). Note that this method is designed to work if 
+        VABSIII is set in the PATH variable. For Users at the TUM-HT please load 
+        the vabs module beforehand.
+                
         Args:
             jobid: assign a unique ID for the job.
             rm_vabfiles: removes VABS files after the calculation is completed 
             and the results are stored.
+            
         '''
         self.mesh,nodes = sort_and_reassignID(self.mesh)
         fstring = '_'+jobid+'.vab'
         #TODO: BE CAREFUL TO USE THE RIGHT COORDINATE SYSTEM FOR THE CALCULATIONS!!!!  
         vabs_filename = self.config.filename.replace('.yml', fstring)
         print('STATUS:\t Running VABS for Constitutive modeling:')
-        
-        #Copy licensefile to 
-        src = os.getcwd()+'/SONATA/vabs/licenses/license.'+platform.node().lower()
-        dst = os.getcwd()+'/license'
-        if os.path.isfile(src):
-            shutil.copyfile(src, dst)
-        else:
-            print('no license file found at',src)
-        
+               
         if platform.system() == 'Linux':
-            executable = 'SONATA/vabs/bin/VABSIII'
+            #executable = 'SONATA/vabs/bin/VABSIII'
+            #check if module vabs is loaded, if not load it!
+            vabs_cmd = 'VABSIII '+vabs_filename
+            cmd = ['/bin/bash', '-i', '-c', vabs_cmd]
+            
         elif platform.system == 'Windows':
-            executable = 'SONATA/vabs/bin/VABSIII.exe'
+            cmd = ['SONATA/vabs/bin/VABSIII.exe', vabs_filename]
             
         #EXECUTE VABS:
         if self.config.vabs_cfg.recover_flag == 1:
             self.config.vabs_cfg.recover_flag=0
             export_cells_for_VABS(self.mesh,nodes, vabs_filename, self.config.vabs_cfg, self.MaterialLst)
-            
-            stdout = subprocess.run([executable,vabs_filename], stdout=subprocess.PIPE).stdout.decode('utf-8')
+            stdout = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
             self.config.vabs_cfg.recover_flag=1
             export_cells_for_VABS(self.mesh,nodes,vabs_filename, self.config.vabs_cfg, self.MaterialLst)
             print('STATUS:\t Running VABS for 3D Recovery:')
-            stdout = subprocess.run([executable,vabs_filename], stdout=subprocess.PIPE).stdout.decode('utf-8')
+            stdout = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
             
         else:
             export_cells_for_VABS(self.mesh, nodes ,vabs_filename, self.config.vabs_cfg, self.MaterialLst)
-            stdout = subprocess.run([executable,vabs_filename], stdout=subprocess.PIPE).stdout.decode('utf-8')
+            stdout = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
         
         stdout = stdout.replace('\r\n\r\n','\n\t   -')
         stdout = stdout.replace('\r\n','\n\t   -')
