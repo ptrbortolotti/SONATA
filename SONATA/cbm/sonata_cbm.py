@@ -189,22 +189,7 @@ class CBM(object):
             for layer in seg.LayerLst:
                 layer.build_wire()
         return None
-        
-    
-    def cbm_stpexport_topo(self, export_filename=None):
-        if export_filename is None:
-            export_filename = self.config.filename
-            export_filename = export_filename.replace('.yml', '.stp')
-        
-        self.exportLst.append(self.SegmentLst[0].wire)
-        for seg in self.SegmentLst:
-            for layer in seg.LayerLst:
-                self.exportLst.append(layer.wire)            
-            
-        print('STATUS:\t Exporting Topology to: ', export_filename)   
-        export_to_step(self.exportLst, export_filename)
-        return None
-    
+          
     
     def cbm_save_mesh(self, output_filename=None):
         '''saves the mesh (self.mesh) as pickle 
@@ -229,6 +214,42 @@ class CBM(object):
         with open(input_filename, 'rb') as handle:
             mesh = pkl.load(handle)   
         (self.mesh, nodes) = sort_and_reassignID(mesh)
+        return None
+
+
+    def cbm_save_res(self, output_filename=None): 
+        '''loads the configuration and the VABS results as pickle''' 
+        if output_filename is None: 
+            output_filename = self.config.filename 
+            output_filename = output_filename.replace('.yml', '_res.pkl') 
+          
+        with open(output_filename, 'wb') as output: 
+            pkl.dump((self.config, self.BeamProperties), output, protocol=pkl.HIGHEST_PROTOCOL) 
+     
+        
+     
+    def cbm_load_res(self, input_filename=None): 
+        '''saves the configuration and the VABS results as pickle''' 
+        if input_filename is None: 
+            input_filename = self.config.filename 
+            input_filename = input_filename.replace('.yml', '_res.pkl') 
+         
+        with open(input_filename, 'rb') as handle: 
+            (self.config, self.BeamProperties) = pkl.load(handle)
+
+
+    def cbm_stpexport_topo(self, export_filename=None):
+        if export_filename is None:
+            export_filename = self.config.filename
+            export_filename = export_filename.replace('.yml', '.stp')
+        
+        self.exportLst.append(self.SegmentLst[0].wire)
+        for seg in self.SegmentLst:
+            for layer in seg.LayerLst:
+                self.exportLst.append(layer.wire)            
+            
+        print('STATUS:\t Exporting Topology to: ', export_filename)   
+        export_to_step(self.exportLst, export_filename)
         return None
 
 
@@ -400,7 +421,7 @@ class CBM(object):
         return None
 
     
-    def cbm_run_vabs(self, jobid=str(uuid.uuid4())[:8], rm_vabfiles=True):
+    def cbm_run_vabs(self, jobid=None, rm_vabfiles=True):
         '''CBM method to run the solver VABS (Variational Asymptotic Beam 
         Sectional Analysis). Note that this method is designed to work if 
         VABSIII is set in the PATH variable. For Users at the TUM-HT please load 
@@ -412,6 +433,10 @@ class CBM(object):
             and the results are stored.
             
         '''
+        if jobid == None:
+            s = datetime.now().isoformat(sep='_',timespec='milliseconds')
+            jobid =  s.replace(':','').replace('.','')
+        
         self.mesh,nodes = sort_and_reassignID(self.mesh)
         fstring = '_'+jobid+'.vab'
         #TODO: BE CAREFUL TO USE THE RIGHT COORDINATE SYSTEM FOR THE CALCULATIONS!!!!  
@@ -452,7 +477,7 @@ class CBM(object):
             stdout = 'ERROR:\t VABS Calculations Incomplete!: \n\t   -' + stdout
        
         print(stdout) 
-        print('STATUS:\t Total Elapsed Time: %s' % (datetime.now() - self.startTime))
+        #print('STATUS:\t Total Elapsed Time: %s' % (datetime.now() - self.startTime))
         
         #VABS Postprocessing:
         self.BeamProperties = XSectionalProperties(vabs_filename+'.K')
@@ -617,7 +642,7 @@ class CBM(object):
         '''
         MM = self.BeamProperties.MM_convert_units()
         MASS = np.array([MM[0,0], MM[2,3], MM[0,4], MM[5,5], MM[4,5], MM[4,4]])
-        #rint '@MASS_TERMS: {m00, mEta2, mEta3, m33, m23, m22}'
+        #print '@MASS_TERMS: {m00, mEta2, mEta3, m33, m23, m22}'
         #print MASS
         TS_u = np.triu(self.BeamProperties.TS_convert_units())
         TS_f = TS_u.flatten('F')
