@@ -83,9 +83,10 @@ if recalc:
         else:
             Omega = (Psi[i]-Psi[i-1]) / tim[4]
             
+        #print(Omega, tim[4], Psi[i], Col[i])
         job.analysis.dyn_timeStep(Omega, tim[4], Psi[i], Col[i], 0.0, 0.0, np.zeros(3))
         T, Q, P, f, x, v = job.analysis.dyn_get_hubloads(job)
-        
+        print(T)
         # STORE DYMORE MODEL OUTPUT
         u_stack = np.vstack((u_stack, np.array([tim[4],Col[i],Psi[i],Omega])))
         y_stack = np.vstack((y_stack, np.array([T,Q,P])))

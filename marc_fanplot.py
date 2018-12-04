@@ -2,10 +2,10 @@ import numpy as np
 
 from SONATA.Pymore.marc.marc import MARC
 import SONATA.Pymore.utl.coef as coef
-from SONATA.Pymore.utl.plot import plot_fandiagram
+from SONATA.utl.plot import plot_fandiagram
 
 
-def calc_fanplot(Omega = 4.3*2*np.pi, beamProp = None, RPM_vec = None, dir_root = None, dym_file = 'rotor_assembly.dym', ):
+def calc_fandiagram(Omega = 4.3*2*np.pi, beamProp = None, RPM_vec = None, dir_root = None, dym_file = 'rotor_assembly.dym', ):
     '''    
     Omega = 4.3*2*np.pi  # [rad/sec] 
     '''
@@ -21,10 +21,13 @@ def calc_fanplot(Omega = 4.3*2*np.pi, beamProp = None, RPM_vec = None, dir_root 
         RPM_vec = np.linspace(0.2*Omega, 1.2*Omega, 11)
         
     # in case of more than one blade but only one table of beam properties all blades are updated simultaneously! 
+#    if not isinstance(beamProp, (np.ndarray)):
+#        beamProp = coef.refBeamProp()
+    
     if not isinstance(beamProp, (np.ndarray)):
         beamProp = coef.refBeamProp()
-
-    job.marc_set_beamProp('BLADE_BP_CG01', beamProp)
+    
+    job.marc_set_beamProp('BLADE_BP_CD01', beamProp)
 
     #-----------Calculate Fanplot---------------------------------    
     for i, rpm in enumerate(RPM_vec):
@@ -42,7 +45,7 @@ def calc_fanplot(Omega = 4.3*2*np.pi, beamProp = None, RPM_vec = None, dir_root 
     job.analysis.freq = freq
     job.analysis.eigv = eigv
     Kmat = job.analysis.sta_get_Kmat()
-    return(job.analysis.freq, Omega, RPM_vec, beamProp, Kmat)
+    return(freq, Omega, RPM_vec, beamProp, Kmat)
 
 
 
@@ -53,9 +56,10 @@ if __name__ == "__main__":
     result_dir = 'SONATA/Pymore/rlt/'
     Omega = 4.3*2*np.pi  # [rad/sec]
     
+    BeamProp = coef.refBeamProp()
+    
     if recalc:
-
-        (freq, Omega, RPM_vec, beamProp, Kmat) = calc_fanplot(Omega)
+        (freq, Omega, RPM_vec, beamProp, Kmat) = calc_fandiagram(Omega, BeamProp)
 
         #-----------Plot--------------------------------
         ref_fname = 'jobs/VariSpeed/uh60a_data_blade/fanplot_uh60a_bowen-davies-PhD.txt'
