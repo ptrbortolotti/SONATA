@@ -20,7 +20,6 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
     '''
     
     '''
-    
      
     #KWARGS:
     if kwargs.get('display') !=  None:

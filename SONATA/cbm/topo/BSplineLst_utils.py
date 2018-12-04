@@ -736,8 +736,10 @@ def set_BSplineLst_to_Origin(BSplineLst,Theta=0):
                 IntPnts.append([i,u,vres])
                 
     #Determine Origin as point                 
-    IntPntsarray = np.asarray(IntPnts)  #idx,W,XValue
-    OriEdgePnt = IntPntsarray[np.argmax(IntPntsarray[:,2]),:]                    
+    IntPntsarray = unique_rows(np.asarray(IntPnts)) #idx,W,XValue
+    OriEdgePnt = IntPntsarray[np.argmax(IntPntsarray[:,2]),:]    
+    #print(IntPntsarray,OriEdgePnt)   
+             
     #Reorder Sequence of BSplines of BSplinesLst
     OBSplineLst =  []
     CorrectOrigin = False
@@ -777,7 +779,7 @@ def set_BSplineLst_to_Origin(BSplineLst,Theta=0):
     if CorrectOrigin == False:
         OBSplineLst.append(BSplineCurve2)    
     else: None
-    
+
     return OBSplineLst
 
 
