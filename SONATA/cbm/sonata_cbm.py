@@ -15,6 +15,7 @@ import numpy as np
 import uuid
 import platform
 import shutil
+import time
 
 #PythonOCC Modules
 from OCC.Display.SimpleGui import init_display
@@ -453,36 +454,50 @@ class CBM(object):
             
         elif platform.system == 'Windows':
             cmd = ['SONATA/vabs/bin/VABSIII.exe', vabs_filename]
-            
-        #EXECUTE VABS:
-        if self.config.vabs_cfg.recover_flag == 1:
-            self.config.vabs_cfg.recover_flag=0
-            export_cells_for_VABS(self.mesh,nodes, vabs_filename, self.config.vabs_cfg, self.MaterialLst)
-            stdout = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
-            self.config.vabs_cfg.recover_flag=1
-            export_cells_for_VABS(self.mesh,nodes,vabs_filename, self.config.vabs_cfg, self.MaterialLst)
-            print('STATUS:\t Running VABS for 3D Recovery:')
-            stdout = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
-            
-        else:
-            export_cells_for_VABS(self.mesh, nodes ,vabs_filename, self.config.vabs_cfg, self.MaterialLst)
-            stdout = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
-        
-        stdout = stdout.replace('\r\n\r\n','\n\t   -')
-        stdout = stdout.replace('\r\n','\n\t   -')
-        stdout = stdout.replace('\n\n','\n\t   -')
-        stdout = stdout[:-2]
+    
+        result = None
+        counter = 0
+        while result is None and counter<1000:
+            try:
+                #EXECUTE VABS:
+                if self.config.vabs_cfg.recover_flag == 1:
+                    self.config.vabs_cfg.recover_flag=0
+                    export_cells_for_VABS(self.mesh,nodes, vabs_filename, self.config.vabs_cfg, self.MaterialLst)
+                    stdout = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
+                    self.config.vabs_cfg.recover_flag=1
+                    export_cells_for_VABS(self.mesh,nodes,vabs_filename, self.config.vabs_cfg, self.MaterialLst)
+                    print('STATUS:\t Running VABS for 3D Recovery:')
+                    stdout = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
+                    
+                else:
+                    export_cells_for_VABS(self.mesh, nodes ,vabs_filename, self.config.vabs_cfg, self.MaterialLst)
+                    stdout = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
                 
-        if ' VABS finished successfully' in stdout:
-            stdout = 'STATUS:\t VABS Calculations Completed: \n\t   -' + stdout
-        else:
-            stdout = 'ERROR:\t VABS Calculations Incomplete!: \n\t   -' + stdout
-       
-        print(stdout) 
-        #print('STATUS:\t Total Elapsed Time: %s' % (datetime.now() - self.startTime))
+                stdout = stdout.replace('\r\n\r\n','\n\t   -')
+                stdout = stdout.replace('\r\n','\n\t   -')
+                stdout = stdout.replace('\n\n','\n\t   -')
+                stdout = stdout[:-2]
+                        
+                if ' VABS finished successfully' in stdout:
+                    stdout = 'STATUS:\t VABS Calculations Completed: \n\t   -' + stdout
+                else:
+                    stdout = 'ERROR:\t VABS Calculations Incomplete!: \n\t   -' + stdout
+               
+                print(stdout) 
+                #print('STATUS:\t Total Elapsed Time: %s' % (datetime.now() - self.startTime))
+                
+                #VABS Postprocessing:
+                result = XSectionalProperties(vabs_filename+'.K')
+            
+            except Exception as e: 
+                print(e)
+                time.sleep(0.01)
+                counter += 1
         
-        #VABS Postprocessing:
-        self.BeamProperties = XSectionalProperties(vabs_filename+'.K')
+        self.BeamProperties = result
+        
+
+        
         if self.config.vabs_cfg.recover_flag == 1:
             self.BeamProperties.read_all_VABS_Results()
             #ASSIGN Stress and strains to elements:
