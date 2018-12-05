@@ -14,38 +14,40 @@ def calc_fandiagram(Omega = 4.3*2*np.pi, beamProp = None, RPM_vec = None, dir_ro
 #    dir_root = '/work/WGarre/02_Projects/01_pymore/11_dymore/00_mdl/03_rotormodel/03_UH60_rotor_hover/05_UH60_rotor_fourblade_3Dinfl_baseline/'
     if dir_root == None:
         dir_root = 'SONATA/Pymore/dym/mdl/03_rotormodel/05_UH60_rotor_optimization/01_UH60_rotor_snglblade_static/'
-    job = MARC(dir_root, dym_file)
-
-    #-----------prepare permutations---------------------------------
-    if not isinstance(RPM_vec, (np.ndarray)):
-        RPM_vec = np.linspace(0.2*Omega, 1.2*Omega, 11)
         
-    # in case of more than one blade but only one table of beam properties all blades are updated simultaneously! 
-#    if not isinstance(beamProp, (np.ndarray)):
-#        beamProp = coef.refBeamProp()
-    
-    if not isinstance(beamProp, (np.ndarray)):
-        beamProp = coef.refBeamProp()
-    
-    job.marc_set_beamProp('BLADE_BP_CD01', beamProp)
-
-    #-----------Calculate Fanplot---------------------------------    
-    for i, rpm in enumerate(RPM_vec):
-        job.analysis.sta_iterate(rpm)
-        eigFreq, eigVec = job.analysis.sta_get_eigenSol()
-
-        if i == 0:
-            freq = eigFreq/(2*np.pi) #in [Hz]
-            eigv = eigVec
+    with MARC(dir_root, dym_file) as job:
+        #-----------prepare permutations---------------------------------
+        if not isinstance(RPM_vec, (np.ndarray)):
+            RPM_vec = np.linspace(0.2*Omega, 1.2*Omega, 11)
+            
+        # in case of more than one blade but only one table of beam properties all blades are updated simultaneously! 
+    #    if not isinstance(beamProp, (np.ndarray)):
+    #        beamProp = coef.refBeamProp()
         
-        else:
-            freq = np.vstack((freq, eigFreq/(2*np.pi)))   
-            eigv = np.concatenate((eigv, eigVec), axis=2)
-
-    job.analysis.freq = freq
-    job.analysis.eigv = eigv
-    Kmat = job.analysis.sta_get_Kmat()
-    return(freq, Omega, RPM_vec, beamProp, Kmat)
+        if not isinstance(beamProp, (np.ndarray)):
+            beamProp = coef.refBeamProp()
+        
+        job.marc_set_beamProp('BLADE_BP_CD01', beamProp)
+    
+        #-----------Calculate Fanplot---------------------------------    
+        for i, rpm in enumerate(RPM_vec):
+            job.analysis.sta_iterate(rpm)
+            eigFreq, eigVec = job.analysis.sta_get_eigenSol()
+    
+            eigFreq = np.real(eigFreq)
+    
+            if i == 0:
+                freq = eigFreq/(2*np.pi) #in [Hz]
+                eigv = eigVec
+            
+            else:
+                freq = np.vstack((freq, eigFreq/(2*np.pi)))   
+                eigv = np.concatenate((eigv, eigVec), axis=2)
+    
+        job.analysis.freq = freq
+        job.analysis.eigv = eigv
+    
+    return(freq, Omega, RPM_vec)
 
 
 
@@ -59,7 +61,7 @@ if __name__ == "__main__":
     BeamProp = coef.refBeamProp()
     
     if recalc:
-        (freq, Omega, RPM_vec, beamProp, Kmat) = calc_fandiagram(Omega, BeamProp)
+        (freq, Omega, RPM_vec) = calc_fandiagram(Omega, BeamProp)
 
         #-----------Plot--------------------------------
         ref_fname = 'jobs/VariSpeed/uh60a_data_blade/fanplot_uh60a_bowen-davies-PhD.txt'
