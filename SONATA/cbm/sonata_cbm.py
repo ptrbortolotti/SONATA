@@ -309,7 +309,8 @@ class CBM(object):
         self.__cbm_generate_SegmentLst()
         #Build Segment 0:
         self.SegmentLst[0].build_wire()
-        self.SegmentLst[0].build_layers()
+        l0 = get_BSplineLst_length(self.SegmentLst[0].BSplineLst)
+        self.SegmentLst[0].build_layers(l0 = l0)
         self.SegmentLst[0].determine_final_boundary()
         
         #Build Webs:    
@@ -326,7 +327,7 @@ class CBM(object):
                 seg.Segment0 = self.SegmentLst[0]
                 seg.WebLst = self.WebLst
                 seg.build_segment_boundary_from_WebLst(self.WebLst,self.SegmentLst[0])            
-                seg.build_layers(self.WebLst,self.SegmentLst[0])
+                seg.build_layers(self.WebLst,self.SegmentLst[0], l0 = l0)
                 seg.determine_final_boundary(self.WebLst,self.SegmentLst[0])
                 seg.build_wire()
               
@@ -434,7 +435,7 @@ class CBM(object):
             
         '''
         if jobid == None:
-            s = datetime.now().isoformat(sep='_',timespec='milliseconds')
+            s = datetime.now().isoformat(sep='_',timespec='microseconds')
             jobid =  s.replace(':','').replace('.','')
         
         self.mesh,nodes = sort_and_reassignID(self.mesh)
@@ -446,8 +447,9 @@ class CBM(object):
         if platform.system() == 'Linux':
             #executable = 'SONATA/vabs/bin/VABSIII'
             #check if module vabs is loaded, if not load it!
-            vabs_cmd = 'VABSIII '+vabs_filename
-            cmd = ['/bin/bash', '-i', '-c', vabs_cmd]
+            #vabs_cmd = 'VABSIII '+vabs_filename
+            #cmd = ['/bin/bash', '-i', '-c', vabs_cmd]
+            cmd = ['VABSIII', vabs_filename]
             
         elif platform.system == 'Windows':
             cmd = ['SONATA/vabs/bin/VABSIII.exe', vabs_filename]
