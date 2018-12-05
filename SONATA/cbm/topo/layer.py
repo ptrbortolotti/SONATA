@@ -152,8 +152,8 @@ class Layer(object):
         return self.BSplineLst
             
     
-    def build_layer(self):
-        deflection = 1e-3
+    def build_layer(self,l0 = 1):
+        deflection = 1e-6*l0
         npArray = discretize_BSplineLst(self.Boundary_BSplineLst, deflection) 
         offlinepts = shp_parallel_offset(npArray,self.thickness,self.join_style)
         OffsetBSplineLst = BSplineLst_from_dct(offlinepts)

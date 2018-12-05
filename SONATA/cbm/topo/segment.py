@@ -198,7 +198,7 @@ class Segment(object):
         return get_BSplineLst_Pnt2d(BSplineLst, S, start, end)
         
     
-    def build_layers(self, WebLst = None, Segment0 = None, display = None):
+    def build_layers(self, WebLst = None, Segment0 = None, display = None, l0 = None):
         '''The build_layers member function of the class Segment generates all Layer objects and it's associated wires
         and return the relevant_boundary_BSplineLst'''
         #plot_layup_projection(self.Layup)
@@ -221,7 +221,7 @@ class Segment(object):
                                   self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],
                                   self.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
                 
-                tmp_Layer.build_layer() 
+                tmp_Layer.build_layer(l0) 
                 
                 if tmp_Layer.IsClosed:
                     tmp_Layer.BSplineLst = set_BSplineLst_to_Origin(tmp_Layer.BSplineLst, self.Theta)
