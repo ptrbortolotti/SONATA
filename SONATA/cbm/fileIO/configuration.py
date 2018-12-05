@@ -41,15 +41,23 @@ class Configuration(object):
         if 'Webs' in yDict.keys():
             D = {int(k.split()[-1]):v for (k, v) in yDict['Webs'].items()}    
             self.webs =  OrderedDict(sorted(D.items()))
-         
-        self.bw = yDict['BalanceWeight']
+        
+        #print(self.setup['BalanceWeight'])
+        if self.setup['BalanceWeight'] == True:
+            self.bw = yDict['BalanceWeight']
+        
         
         #read segments:
         D = {int(k.split()[-1]):v for (k, v) in yDict['Segments'].items()}
 
         for k in D:
-            D[k]['Layup_names'] = np.asarray(D[k]['Layup'])[:,5].tolist()
-            D[k]['Layup'] = np.asarray(D[k]['Layup'])[:,:5].astype(np.float)
+            if D[k]['Layup'] != None:
+                D[k]['Layup_names'] = np.asarray(D[k]['Layup'])[:,5].tolist()
+                D[k]['Layup'] = np.asarray(D[k]['Layup'])[:,:5].astype(np.float)
+            else:
+                D[k]['Layup'] = np.empty((0,0))
+                D[k]['Layup_names'] = np.empty((0,0))
+                
         self.segments =  OrderedDict(sorted(D.items()))
         
         
