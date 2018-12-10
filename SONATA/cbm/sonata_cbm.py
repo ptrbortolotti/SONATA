@@ -16,6 +16,7 @@ import uuid
 import platform
 import shutil
 import time
+import logging
 
 #PythonOCC Modules
 from OCC.Display.SimpleGui import init_display
@@ -435,6 +436,7 @@ class CBM(object):
             and the results are stored.
             
         '''
+        
         if jobid == None:
             s = datetime.now().isoformat(sep='_',timespec='microseconds')
             jobid =  s.replace(':','').replace('.','')
@@ -457,6 +459,7 @@ class CBM(object):
     
         result = None
         counter = 0
+        stdout = ''
         while result is None and counter<1000:
             try:
                 #EXECUTE VABS:
@@ -483,20 +486,20 @@ class CBM(object):
                 else:
                     stdout = 'ERROR:\t VABS Calculations Incomplete!: \n\t   -' + stdout
                
-                print(stdout) 
                 #print('STATUS:\t Total Elapsed Time: %s' % (datetime.now() - self.startTime))
                 
                 #VABS Postprocessing:
                 result = XSectionalProperties(vabs_filename+'.K')
             
-            except Exception as e: 
-                print(e)
-                time.sleep(0.01)
-                counter += 1
-        
+            except Exception as e:
+                    if 'All "vabsiii" licenses in us' in stdout:
+                        time.sleep(0.01)
+                        counter += 1
+                    else:
+                        print(e)
+
         self.BeamProperties = result
         
-
         
         if self.config.vabs_cfg.recover_flag == 1:
             self.BeamProperties.read_all_VABS_Results()

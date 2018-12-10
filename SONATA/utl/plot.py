@@ -13,14 +13,45 @@ import matplotlib.lines as mlines
 from matplotlib2tikz import save as tikz_save
 import SONATA.Pymore.utl.read as read
 
-def plot_histogram_2Ddata(data, ref = None, upper_tri = True, title='No Title'):
+def plot_histogram_2Ddata(data, **kwargs):
     '''
-    data: array.shape = (sample, i, j)
+    data: array.shape = (sample Nb, i, j)
     '''
-
+    
+    #Define function Args and Defaults for kwargs
     shape = data.shape[1:]
-    fig, ax = plt.subplots(shape[0],shape[1], sharex=True)
+    ref  = None
+    upper_tri = True
+    title='No Title'
+    ylabel = [[('k%s%s' % (i+1,j+1)) for j in range(shape[0])] for i in range(shape[1])]
+    
+    if 'ref' in kwargs:
+        if isinstance(kwargs['ref'], (np.ndarray)) and kwargs['ref'].shape == data.shape[1:]:
+            ref = kwargs['ref']
+        else:
+            print ('ref must provide a ndarray with shape %s' % str(data.shape[1:]))
+        
+    if 'upper_tri' in kwargs:
+        if type(kwargs['upper_tri']) == bool:
+            upper_tri = kwargs['upper_tri']
+        else:
+            print('upper_tri must provide a bool value')
+        
+    if 'title' in kwargs:
+        if type(kwargs['title']) == str:
+            title = kwargs['title']
+        else:
+            print('title must provide as string')
+            
+    if 'ylabel' in kwargs:
+        #list of strings
+        ylabel = kwargs['ylabel']
+        
+    #init figure
+    shape = data.shape[1:]
+    fig, ax = plt.subplots(shape[0],shape[1], sharex=False)
     fig.suptitle(title, fontsize=14)
+    fig.subplots_adjust(wspace=0.3, hspace=0.3)
     
     #upper triangle 
     if upper_tri:
@@ -37,10 +68,14 @@ def plot_histogram_2Ddata(data, ref = None, upper_tri = True, title='No Title'):
                 if isinstance(ref, (np.ndarray)): 
                     if ref[i,j] != 0:
                         arr = ( data[:,i,j] - ref[i,j] ) / ref[i,j] * 100
-                    
-                    else:
+                        sigma = arr.std()
                         mu = arr.mean()
-                        arr = ( data[:,i,j] - mu ) / mu * 100
+                        string = '$\sigma$ = %.2f %%' % sigma
+                        ax[i][j].text(mu,0,string)
+                        ax[i][j].set_xlim(-20,20)
+
+                    else:
+                        arr = data[:,i,j]
 
                     count, bins, ignored = ax[i][j].hist(arr, 30, density=True, alpha=0.5, label='histogram')
                     #print(count,bins,ignored)
@@ -49,16 +84,11 @@ def plot_histogram_2Ddata(data, ref = None, upper_tri = True, title='No Title'):
                     if sigma > 0:
                         ax[i][j].plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) *
                                        np.exp( - (bins - mu)**2 / (2 * sigma**2) ),
-                                 linewidth=2, color='r', linestyle='--', alpha=0.5, label='ML approx.')
-                                   
+                                 linewidth=2, color='r', linestyle='--', alpha=0.5, label='ML approx.')                
                 else:
                     arr = data[:,i,j]   
                     count, bins, ignored = ax[i][j].hist(arr, 30, density=True, alpha=0.5, label='histogram')
-
-                
-                string = '$\sigma$ = %.2f %%' % sigma
-                ax[i][j].text(mu,0,string)
-                #ax[i][j].set_xlim(-30,30)
+  
                 
             elif ut[i,j] == 0:
                 fig.delaxes(ax[i][j])
@@ -68,8 +98,7 @@ def plot_histogram_2Ddata(data, ref = None, upper_tri = True, title='No Title'):
                 if j==shape[1]-1:
                     ax[i][j].legend()
             
-            if j==0:
-                ax[i][j].set_ylabel('p(x)')
+            ax[i][j].set_ylabel(ylabel[i][j])
         
     return None
 
@@ -137,7 +166,7 @@ def plot_beam_properties(data, sigma, ref, x_offset = 0.8178698):
 
 
 
-def plot_fandiagram(res,  Omega, RPM_vec, sigma = None, ref_fname=None, ref_str = ['x1','x1','x1','x1','x1','x1','x1']):
+def plot_fandiagram(res, Omega, RPM_vec, **kwargs):
     '''Plotting routine to generate a Fan-Diagram (rotor eigenfrequencies over
     rotor rotational speed). Re
     
@@ -154,9 +183,24 @@ def plot_fandiagram(res,  Omega, RPM_vec, sigma = None, ref_fname=None, ref_str 
         None
     
     '''
-    res = np.real(res)
     
-    #plt.close('all')
+    #Define function Args and Defaults for kwargs
+    sigma  = None
+    ref_fname = None
+    ref_str = ['x1','x1','x1','x1','x1','x1','x1']
+    title='Fan Diagram'
+    
+    if 'sigma' in kwargs:
+        sigma = kwargs['sigma']
+    if 'ref_fname' in kwargs:
+        ref_fname = kwargs['ref_fname']
+    if 'ref_str' in kwargs:
+        ref_str = kwargs['ref_str']
+    if 'title' in kwargs:
+        title = kwargs['title']
+
+
+    #init figure
     plt.figure()
     plt.grid(True)
     legend_lines = []
@@ -190,14 +234,15 @@ def plot_fandiagram(res,  Omega, RPM_vec, sigma = None, ref_fname=None, ref_str 
                 plt.plot(x,d,':',color=colorhex)
         legend_lines.append(mlines.Line2D([], [], color='black', linestyle=':', label='Reference')) 
     
-        
+
     #plot standart deviation and fill between -sigma and +sigma
+    res = np.real(res)
     x = RPM_vec/Omega
     if isinstance(sigma, (np.ndarray)):
         for i,d in enumerate(res[:,:len(ref_str)].T):
             #print(d.shape, sigma[:,i].shape)
             plt.fill_between(x, d-sigma[:,i], d+sigma[:,i], alpha=0.25, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
-        legend_lines.append(mlines.Line2D([], [], color='red', linestyle=':', label='Standard Deviation'))    
+        legend_lines.append(mlines.Line2D([], [], color='red', linestyle=':', label=r'standard deviation $\pm \sigma$'))    
          
         
     #plot dymore frequencies:
@@ -229,12 +274,12 @@ def plot_fandiagram(res,  Omega, RPM_vec, sigma = None, ref_fname=None, ref_str 
             colorhex = 'black'
             plt.plot(x, d, 'o-', color=colorhex, marker=m, markersize = ms)
             
-    legend_lines.append(mlines.Line2D([], [], color='black', linestyle='-', marker='o', label='Eigenfrequencies'))
+    legend_lines.append(mlines.Line2D([], [], color='black', linestyle='-', marker='o', label='mean eigenfrequencies'))
 
 
     plt.ylim((0,45))
     plt.xlim((0,1.2))
-    plt.title('Fan Diagram')
+    plt.title(title)
     plt.xlabel(r'Rotor Rotational Speed, $\Omega / \Omega_{ref}$')
     plt.ylabel(r'Eigenfrequencies, $\omega$ [Hz]')
     plt.legend(handles=legend_lines)
