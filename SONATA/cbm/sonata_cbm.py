@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import subprocess
 import os 
+import getpass 
 import math
 import numpy as np
 import uuid
@@ -386,7 +387,7 @@ class CBM(object):
         #===================consolidate mesh on web interface         
         for web in self.WebLst:
             #print web.ID,  'Left:', SegmentLst[web.ID].ID, 'Right:', SegmentLst[web.ID+1].ID,
-            print('STATUS:\t Consolidate Mesh on Web Interface ', web.ID)  
+            print('STATUS:\t Consolidate Mesh on Web Interface', web.ID)  
             (web.wl_nodes, web.wl_cells) = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID].cells, web.BSplineLst)            
             (web.wr_nodes, web.wr_cells) = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID+1].cells, web.BSplineLst)
                        
@@ -395,6 +396,7 @@ class CBM(object):
         
         #=====================split quad cells into trias:
         if split_quads == True:
+            print('STATUS:\t Splitting Quads into Trias', web.ID) 
             tmp = []
             for c in self.mesh:
                 tmp.extend(c.split_quads())   
@@ -417,9 +419,6 @@ class CBM(object):
             
             self.mesh.extend(bw_cells)
        
-        
-        
-        
         
         (self.mesh, nodes) = sort_and_reassignID(self.mesh)
         return None
@@ -445,7 +444,7 @@ class CBM(object):
         return None
 
     
-    def cbm_run_vabs(self, jobid=None, rm_vabfiles=True):
+    def cbm_run_vabs(self, jobid=None, rm_vabfiles=True, ramdisk=True):
         '''CBM method to run the solver VABS (Variational Asymptotic Beam 
         Sectional Analysis). Note that this method is designed to work if 
         VABSIII is set in the PATH variable. For Users at the TUM-HT please load 
@@ -457,17 +456,31 @@ class CBM(object):
             and the results are stored.
             
         '''
+        self.mesh,nodes = sort_and_reassignID(self.mesh)
         
         if jobid == None:
             s = datetime.now().isoformat(sep='_',timespec='microseconds')
             jobid =  s.replace(':','').replace('.','')
-        
-        self.mesh,nodes = sort_and_reassignID(self.mesh)
         fstring = '_'+jobid+'.vab'
-        #TODO: BE CAREFUL TO USE THE RIGHT COORDINATE SYSTEM FOR THE CALCULATIONS!!!!  
-        vabs_filename = self.config.filename.replace('.yml', fstring)
+        
+        if ramdisk == True:
+            if os.path.exists('/tmpfs'):
+                user = getpass.getuser()
+                path = '/tmpfs/'+user
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                tmp = path+'/'+self.config.filename.split('/')[-1]
+                vabs_filename = tmp.replace('.yml', fstring)
+                    
+            else:
+                print('ERROR: ramdisk directory "/tmpfs" does not exist!')
+
+        else:
+            vabs_filename = self.config.filename.replace('.yml', fstring)
+        
+        
         print('STATUS:\t Running VABS for Constitutive modeling:')
-               
+        
         if platform.system() == 'Linux':
             #executable = 'SONATA/vabs/bin/VABSIII'
             #check if module vabs is loaded, if not load it!
@@ -501,14 +514,14 @@ class CBM(object):
                 stdout = stdout.replace('\r\n','\n\t   -')
                 stdout = stdout.replace('\n\n','\n\t   -')
                 stdout = stdout[:-2]
-                        
+                                
                 if ' VABS finished successfully' in stdout:
                     stdout = 'STATUS:\t VABS Calculations Completed: \n\t   -' + stdout
                 else:
-                    stdout = 'ERROR:\t VABS Calculations Incomplete!: \n\t   -' + stdout
+                    stdout = 'ERROR:\t VABS Calculations Incomplete: \n\t   -' + stdout
                
                 #print('STATUS:\t Total Elapsed Time: %s' % (datetime.now() - self.startTime))
-                
+                print(stdout)
                 #VABS Postprocessing:
                 result = XSectionalProperties(vabs_filename+'.K')
             
@@ -541,7 +554,7 @@ class CBM(object):
             #print(vabs_filename)
             for file in os.listdir(folder):
                 if fstring in file:
-                    #print('removing: '+folder+'/'+file)
+                    print('removing: '+folder+'/'+file)
                     os.remove(folder+'/'+file)
         
            
