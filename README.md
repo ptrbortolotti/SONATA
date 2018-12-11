@@ -172,13 +172,12 @@ The final result is displayed in the magnified cutout of the leading edge region
 
 To verify the resulting stiffness properties, simple benchmark testcases for isotropic and anisotropic box-beam cross-sections have been set up and compared to results from [31]. Moreover, the rotor blades of the institute's high altitude synchropter UAV (AREA) [32, 33] have been reengineered with SONATA-CBM and compared to experimental results from Suesse [34].
 
+## Developers - Guide
 
-## Resources
+please read the [developers-guide](docs/developer-guide.md)
+
 * [PythonOCC](http://www.pythonocc.org/)
-
 * [openMDAO](http://openmdao.org/)
-
-  Documentation for Developers:
 
 * [OpenCascadeTechnology Documentation](https://www.opencascade.com/doc/occt-6.9.1/refman/html/index.html)
 * [PythonOCC API Documentation](http://api.pythonocc.org/)
