@@ -342,13 +342,22 @@ class CBM(object):
         return None
 
 
-    def cbm_gen_mesh(self):
+    def cbm_gen_mesh(self, **kwargs):
         '''
         CBM Method that generates the dicretization of topology and stores the 
         cells and nodes in both the <Layer> instances, the <Segment> instances 
         and the attribute self.mesh that is a list of <Cell> instances
 
         '''
+        
+        split_quads  = False
+        if 'split_quads' in kwargs:
+            if type(kwargs['split_quads']) == bool:
+                split_quads = kwargs['split_quads']
+            else:
+                print ('split_quads must provide a boolean value')
+        
+                
         self.mesh = []
         Node.class_counter = 1
         Cell.class_counter = 1
@@ -383,6 +392,14 @@ class CBM(object):
                        
             newcells = consolidate_mesh_on_web(web, web_consolidate_tol, self.display)
             self.mesh.extend(newcells)
+        
+        #=====================split quad cells into trias:
+        if split_quads == True:
+            tmp = []
+            for c in self.mesh:
+                tmp.extend(c.split_quads())   
+            self.mesh = tmp
+            
             
         #============= BALANCE WEIGHT - CUTTING HOLE ALGORITHM
         if self.config.setup['BalanceWeight'] == True:
@@ -400,6 +417,10 @@ class CBM(object):
             
             self.mesh.extend(bw_cells)
        
+        
+        
+        
+        
         (self.mesh, nodes) = sort_and_reassignID(self.mesh)
         return None
     
@@ -539,9 +560,10 @@ class CBM(object):
             
             title (string): to be placed over the plot
             **kw: the keyword arguments are passed to the lower plot_cells function
-        
+            such options are: VABSProperties=None, title='None', 
+            plotTheta11=False, plotDisplacement=False,
+            
         '''
-        
         mesh,nodes = sort_and_reassignID(self.mesh)
         fig,ax = plot_cells(self.mesh, nodes, attribute, self.BeamProperties, title, **kw)
         return fig,ax

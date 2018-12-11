@@ -97,6 +97,21 @@ class Cell(object):
         self.id, self.nodes, self.theta_3, self.MatID, self.theta_1, self.structured, self.interior_nodes = state
         #self.wire = self.build_wire()
     
+    def split_quads(self):
+        '''method that splits quad cells into triangles and returns the list of
+        cells [originalcell, newcell]'''
+            
+        if len(self.nodes) == 3:
+            return [self]
+        elif len(self.nodes) == 4:
+            newcell = Cell([self.nodes[0],self.nodes[2],self.nodes[3]])
+            newcell.theta_1 = self.theta_1
+            newcell.theta_3 = self.theta_3
+            newcell.MatID = self.MatID
+            self.nodes = [self.nodes[0],self.nodes[1],self.nodes[2]]
+            return [self,newcell]    
+        else: return []
+        
     
     def calc_theta_1(self):
         '''This method calculates the theta_1 vector. theta_1[0] represents the 
