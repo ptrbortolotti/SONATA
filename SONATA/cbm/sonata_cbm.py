@@ -464,6 +464,7 @@ class CBM(object):
         fstring = '_'+jobid+'.vab'
         
         if ramdisk == True:
+            rm_vabfiles = True
             if os.path.exists('/tmpfs'):
                 user = getpass.getuser()
                 path = '/tmpfs/'+user
