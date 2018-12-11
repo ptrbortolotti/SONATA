@@ -47,7 +47,7 @@ license
 *.zip
 
 #ignored folders
-jobs/PBortolotti
+#jobs/PBortolotti
 jobs/AAbdelmoula
 jobs/Epiet
 jobs/JBlaut
