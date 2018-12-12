@@ -52,6 +52,9 @@ def run_MC_sample(fname, sample, hide=True):
             x3 = coef.refBeamProp()[-1]
             bp = np.vstack((x0,x1,x2,x3))
             (freq, Omega, RPM_vec) = calc_fandiagram(beamProp = bp)
+            # (bladetip_displacement) = calc_hover(bp1)
+            # (calc_forwardflight)
+            
             
         print('Sample finished:', sample)
         print(x1[6:9])      
@@ -123,8 +126,7 @@ if __name__ == '__main__':
     samples = np.random.normal(mu_E9, cv*mu_E9, (N,3))
     #sample2 = np.random.normal(mu_E0, cv*mu_E0, (N,3))
     #sample3 = np.random.normal(mu_rho, cv*mu_rho, (N,1))
-    #samples = np.hstack((ID,sample1))
-    
+    #samples = np.hstack((ID,sample1))                                        
 
     t0 = time()
 #    #Multiprocessing 
@@ -148,7 +150,6 @@ if __name__ == '__main__':
     print('MP Time: %f' % t)
     
     
-    [jobid, configs, res]
     
     
 
