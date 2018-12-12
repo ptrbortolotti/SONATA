@@ -75,12 +75,12 @@ class Cell(object):
         return np.amax(calc_cell_angles(self))  
     
     def __repr__(self): 
-        '''
+        """
         tells Python how to represent an the Cell object (when using a print 
         statement) for a general purposes we use  def __repr__(self):
             
         Returns: String
-        '''
+        """
         STR = ''
         STR += str('Cell %s w. nodes:\t' % (self.id))
         for n in self.nodes:
@@ -98,8 +98,8 @@ class Cell(object):
         #self.wire = self.build_wire()
     
     def split_quads(self):
-        '''method that splits quad cells into triangles and returns the list of
-        cells [originalcell, newcell]'''
+        """method that splits quad cells into triangles and returns the list of
+        cells [originalcell, newcell]"""
             
         if len(self.nodes) == 3:
             return [self]
@@ -114,7 +114,7 @@ class Cell(object):
         
     
     def calc_theta_1(self):
-        '''This method calculates the theta_1 vector. theta_1[0] represents the 
+        """This method calculates the theta_1 vector. theta_1[0] represents the 
         ply coordinate system, which is formed by roating the global coordinate 
         system in the right-hand sense about x1 by the amount theta_1[0] 
         (theta_11). Afterwards the ply coordinate system us ritated avizt y3 in 
@@ -127,7 +127,7 @@ class Cell(object):
         
         Returns:
            None, but stores the theta_1 definition      
-        '''       
+        """     
         theta_1 = [0] * 9
         if self.structured:
             v0 = gp_Vec2d(gp_Pnt2d(0,0),gp_Pnt2d(1,0))

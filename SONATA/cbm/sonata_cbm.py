@@ -2,6 +2,10 @@
 """Defines the Composite Beam Model (CBM) class
 Created on Wed Jan 03 13:56:37 2018
 @author: TPflumm
+
+
+https://numpydoc.readthedocs.io/en/latest/format.html
+
  """
 
 #Basic PYTHON Modules:
@@ -13,11 +17,8 @@ import os
 import getpass 
 import math
 import numpy as np
-import uuid
 import platform
-import shutil
 import time
-import logging
 
 #PythonOCC Modules
 from OCC.Display.SimpleGui import init_display
@@ -56,26 +57,56 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
 
 
 class CBM(object):
-    ''' This Class includes the SONATA Dicipline Module for Structural 
+    ''' 
+    This Class includes the SONATA Dicipline Module for Structural 
     Composite Beam Modelling (CBM). 
     Design Variables are passed in form of the configuration Object or a 
     configuration file.          
 
     Attributes
     ----------
-    config : <Configuration>
+    config : configuration
         Pointer to the <Configuration> object.
         
-    MaterialLst: list of <Materials> object instances.
+    MaterialLst: list
+        List of <Materials> object instances.
     
-    SegmentLst: list of <Segment> object instances
+    SegmentLst: list
+        list of <Segment> object instances
+        
+   
+    Methods
+    -------
+    cbm_save : saves the complete cbm instance as pickle
+    
+    cbm_load : loads the complete cbm instance as pickle
+    
+    cbm_save_topo :
+        
+    cbm_load_topo : 
+        
+    cbm_save_mesh : 
+        
+    cbm_load_mesh :
+        
+    cbm_save_res :
+    cbm_load_res :
+    cbm_stpexport_topo :
+    cbm_gen_topo :
+    cbm_review_mesh :
+    cbm_run_vabs :
+    cbm_post_2dmesh :
+    cbm_display_config :
+    cbm_post_3dtopo : 
+    cbm_post_3dmesh :
+    cbm_set_DymoreMK :       
+        
     
     Notes
     ----------
-    -For computational efficiency it is sometimes not suitable to 
-     recalculate the topology or the crosssection every iteration, 
-     maybe design flags to account for that.
-    -make it possible to construct an instance by passing the 
+    1 : For computational efficiency it is sometimes not suitable to recalculate 
+    the topology or the crosssection every iteration, maybe design flags to account for that.
+    2 : make it possible to construct an instance by passing the 
      topology and/or mesh
 
     '''
@@ -131,10 +162,15 @@ class CBM(object):
             self.blade =  Blade(self.config.setup['datasource'])
             self.surface3d = self.blade.surface
     
+    
     def cbm_save(self, output_filename=None):
-        '''saves the complete <CBM> object as pickle
-        Args:
-            filename: <string> of the configuration file with path.        
+        ''' saves the complete CBM instance as pickle
+        
+        Parameters
+        ----------
+        output_filename : string, optional 
+            path/filename to save to.
+            The Default uses the config.filename and replaces .yml with .pkl
         '''
         if output_filename is None:
             output_filename = self.config.filename
@@ -146,9 +182,13 @@ class CBM(object):
 
 
     def cbm_load(self, input_filename=None):
-        '''loads the complete <CBM> object as pickle
-        Args:
-            filename: <string> of the configuration file with path.    
+        ''' loads the complete CBM instance from pickled file
+        
+        Parameters
+        ----------
+        input_filename : string, optional 
+            path/filename of the .pkl file
+            The Default uses the config.filename and replaces .yml with .pkl
         '''
         if input_filename is None:
             input_filename = self.config.filename
@@ -162,8 +202,12 @@ class CBM(object):
 
     def cbm_save_topo(self, output_filename=None):
         '''saves the topology (SegmentLst, WebLst, and BW) as pickle
-        Args:
-            filename: <string> of the configuration file with path.        
+        
+        Parameters
+        ----------
+        output_filename : string, optional 
+            path/filename, 
+            The Default uses the config.filename and replaces .yml with .pkl
         '''
         if output_filename is None:
             output_filename = self.config.filename
@@ -176,8 +220,12 @@ class CBM(object):
 
     def cbm_load_topo(self, input_filename=None):
         '''loads the topology (SegmentLst, WebLst, and BW) as pickle
-        Args:
-            filename: <string> of the configuration file with path.        
+       
+        Parameters
+        ----------
+        input_filename : string, optional 
+            path/filename of the .pkl file
+            The Default uses the config.filename and replaces .yml with .pkl
         '''
         if input_filename is None:
             input_filename = self.config.filename
@@ -196,6 +244,13 @@ class CBM(object):
     
     def cbm_save_mesh(self, output_filename=None):
         '''saves the mesh (self.mesh) as pickle 
+        
+        Parameters
+        ----------
+        output_filename : string, optional 
+            path/filename, 
+            The default uses the config.filename and replaces .yml with 
+            _mesh.pkl
         '''
         if output_filename is None:
             output_filename = self.config.filename
@@ -209,7 +264,15 @@ class CBM(object):
     
     def cbm_load_mesh(self, input_filename=None):
         '''loads the mesh (self.mesh) as pickle
+        
+        Parameters
+        ----------
+        input_filename : string, optional 
+            path/filename of the .pkl file
+            The default uses the config.filename and replaces .yml with 
+            _mesh.pkl
         '''
+
         if input_filename is None:
             input_filename = self.config.filename
             input_filename = input_filename.replace('.yml', '_mesh.pkl')
@@ -220,8 +283,17 @@ class CBM(object):
         return None
 
 
-    def cbm_save_res(self, output_filename=None): 
-        '''loads the configuration and the VABS results as pickle''' 
+    def cbm_save_res(self, output_filename=None):
+        '''saves the configuration and the VABS BeamProperties results as 
+        pickle
+        
+        Parameters
+        ----------
+        output_filename : string, optional 
+            The default uses the config.filename and replaces .yml with 
+            _res.pkl
+        '''
+        
         if output_filename is None: 
             output_filename = self.config.filename 
             output_filename = output_filename.replace('.yml', '_res.pkl') 
@@ -232,7 +304,16 @@ class CBM(object):
         
      
     def cbm_load_res(self, input_filename=None): 
-        '''saves the configuration and the VABS results as pickle''' 
+        '''saves the configuration and the VABS BeamProperties results from 
+        pickle
+        
+        Parameters
+        ----------
+        input_filename : string, optional 
+            The default uses the config.filename and replaces .yml with 
+            _res.pkl
+        '''
+        
         if input_filename is None: 
             input_filename = self.config.filename 
             input_filename = input_filename.replace('.yml', '_res.pkl') 
@@ -242,6 +323,20 @@ class CBM(object):
 
 
     def cbm_stpexport_topo(self, export_filename=None):
+        '''exports all Layer wires and the Segment0 Boundary Wire as .step
+        
+        Parameters
+        ----------
+        export_filename : string, optional 
+            The default uses the config.filename and replaces .yml with 
+            .stp
+            
+        Notes
+        ----------
+        If the results are imported into CATIA or a similar CAD software they 
+        are not smooth. Future improvements are needed.
+        '''
+        
         if export_filename is None:
             export_filename = self.config.filename
             export_filename = export_filename.replace('.yml', '.stp')
@@ -259,7 +354,8 @@ class CBM(object):
     def __cbm_generate_SegmentLst(self):
         '''
         psydo private method of the cbm class to generate the list of 
-        Segments
+        Segments in the instance. 
+        
         '''
         self.SegmentLst = []   #List of Segment Objects
         
@@ -349,6 +445,22 @@ class CBM(object):
         cells and nodes in both the <Layer> instances, the <Segment> instances 
         and the attribute self.mesh that is a list of <Cell> instances
 
+
+        Parameters:
+        ----------
+        split_quads : bool, optional
+            This option can be passed as keyword argument and splits the quads 
+            (4 node cells) in mesh into two cells of 3 nodes      
+        
+        
+        Notes:
+        ----------  
+        More option keyword arguments shall be possible in the future      
+        
+        Examples:
+        ----------  
+        >>> job.cbm_gen_mesh(splitquads=True)
+        
         '''
         
         split_quads  = False
@@ -396,7 +508,7 @@ class CBM(object):
         
         #=====================split quad cells into trias:
         if split_quads == True:
-            print('STATUS:\t Splitting Quads into Trias', web.ID) 
+            print('STATUS:\t Splitting Quads into Trias') 
             tmp = []
             for c in self.mesh:
                 tmp.extend(c.split_quads())   
@@ -444,17 +556,35 @@ class CBM(object):
         return None
 
     
-    def cbm_run_vabs(self, jobid=None, rm_vabfiles=True, ramdisk=True):
+    def cbm_run_vabs(self, jobid=None, rm_vabfiles=True, ramdisk=False):
         '''CBM method to run the solver VABS (Variational Asymptotic Beam 
         Sectional Analysis). Note that this method is designed to work if 
         VABSIII is set in the PATH variable. For Users at the TUM-HT please load 
         the vabs module beforehand.
                 
-        Args:
-            jobid: assign a unique ID for the job.
-            rm_vabfiles: removes VABS files after the calculation is completed 
-            and the results are stored.
+        Parameters
+        ----------
+        jobid : string, optional
+                assign a unique ID for the job. If no jobid is assigned the 
+                isoformat of datetime with microseconds is used
+        rm_vabfiles : bool, optional
+                removes VABS files after the calculation is completed and 
+                the results are stored.
+        ramdisk : bool, optional, 
+            Instead of storing the writing and reading the vabs job directory, 
+            the ramdisk "/tmpfs/username" is used. This options is currently 
+            designed for linux users make sure to mount it beforehand with to 
+            assign 200MB of Memory to the virtual drive.
+            >>> sudo mount -t tmpfs -o size=200M none /tmpfs/username
             
+        Returns
+        ----------
+        None : everything is stored within the CBM instance
+        
+        Examples
+        ----------
+        >>> job.cbm_run_vabs(rm_vabfiles=True, ramdisk=True)
+
         '''
         self.mesh,nodes = sort_and_reassignID(self.mesh)
         
@@ -555,28 +685,39 @@ class CBM(object):
             #print(vabs_filename)
             for file in os.listdir(folder):
                 if fstring in file:
-                    print('removing: '+folder+'/'+file)
+                    #print('removing: '+folder+'/'+file)
                     os.remove(folder+'/'+file)
         
-           
+        return None
             
     def cbm_post_2dmesh(self, attribute='MatID', title='NOTITLE', **kw):
         '''
         CBM Postprocessing method that displays the mesh with matplotlib.
-        The a
         
-        Args:
-            attribute (string): Uses the string to look for the cell attributes. 
+        Parameters
+        ----------
+        attribute : string, optional
+            Uses the string to look for the cell attributes. 
             The default attribute is MatID. Possible other attributes can be 
-            fiber orientation (Theta3) or strains and stresses. 
+            fiber orientation (theta_3) or strains and stresses. 
             If BeamProperties are allready calculated by VABS or something 
-            simila Elastic Axis, Center of Gravity... are displayed.
+            similar, elastic-axis, center-of-gravity... are displayed.
+        title : string, optional
+            Title to be placed over the plot.
+        **kw : keyword arguments, optional
+            are passed to the lower "plot_cells" function. Such options are: 
+            VABSProperties=None, title='None', plotTheta11=False, 
+            plotDisplacement=False
             
-            title (string): to be placed over the plot
-            **kw: the keyword arguments are passed to the lower plot_cells function
-            such options are: VABSProperties=None, title='None', 
-            plotTheta11=False, plotDisplacement=False,
-            
+        Returns
+        ----------
+        (fig, ax) : tuple
+            figure and axis handler are returned by the method
+        
+        Examples
+        ----------
+        >>> job.cbm_post_2dmesh(title='Hello World!', attribute='theta_3', plotTheta11=True)
+
         '''
         mesh,nodes = sort_and_reassignID(self.mesh)
         fig,ax = plot_cells(self.mesh, nodes, attribute, self.BeamProperties, title, **kw)
@@ -588,19 +729,32 @@ class CBM(object):
         CBM method that initializes and configures the pythonOcc 3D Viewer 
         and adds Menues to the toolbar. 
         
-        Args: 
-            DeviationAngle:
-            DeviationCoefficient:
-            bg_c: Background Gradient Color ((RBG Tuple),(RBG Tuple)) the default values are
-            a CATIA style gradient for better 3D visualization. 
+        Parameters
+        ----------
+        DeviationAngle : float, optional 
+            default = 1e-5
+        DeviationCoefficient : float, optional
+            default = 1e-5 
+        bg_c : tuple, optional
+            Background Gradient Color ((RBG Tuple),(RBG Tuple)) the default 
+            values are a CATIA style gradient for better 3D visualization. 
             for a white background use: ((255,255,255,255,255,255))
-            cs_size: coordinate system size in [mm]
+        cs_size : float 
+            coordinate system size in [mm]
             
-        Returns: Tuple of:
+        Returns
+        ----------
+        tuple :
             (self.display: the display handler for the pythonOcc 3D Viewer
             self.start_display: function handle
             self.add_menu: function handle
             self.add_function_to_menu: function handle)
+        
+        
+        See Also
+        ----------
+        OCC.Display.SimpleGui : PyhtonOcc wrapper provides more details on this 
+            method
         '''
         
         def export_png(): return export_to_PNG(self.display)
@@ -641,12 +795,13 @@ class CBM(object):
         CBM Postprocessing method that displays the topology with the pythonocc
         3D viewer. If the input_type is 3 (3d *.stp + radial station) or 4 
         (generic blade definiton) the 3D Surface is displayed, 
-        else only the 2D Topoloty is shown.
-        
-        Notes:
-            Be careful to set the DeviationAngle/Coeficient and scale it to the
-            prolem or else it might crash. Remeber that is is in absolute 
-            values (mm).
+        else only the 2D topology is shown.
+                
+        Notes
+        ----------
+        Be careful to set the DeviationAngle/Coeficient and scale it to the
+        prolem or else it might crash. Remeber that is is in absolute 
+        values (mm).
         
         '''
         
@@ -654,7 +809,7 @@ class CBM(object):
         #display_custome_shape(display,SegmentLst[0].wire,2,0,[0,0,0])
 
         if self.config.setup['input_type'] == 3 or self.config.setup['input_type'] == 4:
-            self.display.Context.SetDeviationAngle(1e-6)       # 0.001 default. Be careful to scale it to the problem, or else it will crash :) 
+            self.display.Context.SetDeviationAngle(1e-6)       
             self.display.Context.SetDeviationCoefficient(1e-6) 
             
             display_SONATA_SegmentLst(self.display,self.SegmentLst,self.config.setup['radial_station'],-math.pi/2,-math.pi/2)
@@ -693,26 +848,38 @@ class CBM(object):
     
     def cbm_set_DymoreMK(self, x_offset = 0):
         '''
-        Returns the tablerow with the Massterms(6), Stiffness(21), damping(1) 
-        and coordinate(1) stacked horizontally for the use in DYMORE/PYMORE/MARC        
+        Converts the Units of CBM to DYMORE/PYMORE/MARC units and returns the 
+        array of the beamproperties with Massterms(6), Stiffness(21), 
+        damping(1) and curvilinear coordinate(1)
+
+        Parameters
+        ----------
+        x_offset : float, optional
+            the x_offset parameter can be used if the DYMORE coordinate system 
+            is different to the SONATA coordinate system of the rotor blade. 
+            For example for the UH-60A Rotor model it is x_offset = 0.81786984, 
+            because the curvilinear_coordinates "eta" are starting at the blade 
+            root attachment, and not at the center of rotation.
+
+        Returns
+        ----------
+        arr : ndarray
+            [Massterms(6) (m00, mEta2, mEta3, m33, m23, m22) 
+            Stiffness(21) (k11, k12, k22, k13, k23, k33,... k16, k26, ...k66)
+            Viscous Damping(1) mu, Curvilinear coordinate(1) eta]
+        
         '''
         MM = self.BeamProperties.MM_convert_units()
         MASS = np.array([MM[0,0], MM[2,3], MM[0,4], MM[5,5], MM[4,5], MM[4,4]])
-        #print '@MASS_TERMS: {m00, mEta2, mEta3, m33, m23, m22}'
-        #print MASS
         TS_u = np.triu(self.BeamProperties.TS_convert_units())
         TS_f = TS_u.flatten('F')
         STIFF = TS_f[TS_f != 0]
-        #print '@STIFFNESS_MATRIX {k11, k12, k22, k13, k23, k33,... k16, k26, ...k66}: '
-        #print STIFF
         mu = 0.0
-        #print '@VISCOUS DAMPING:', mu
         eta = self.config.setup['radial_station']/1000 - x_offset 
-        #print'@CURVILINEAR_COORDINATE:', eta
         return np.hstack((MASS,STIFF,mu,eta))
         
 #%%############################################################################
 #                           M    A    I    N                                  #
 ###############################################################################    
 if __name__ == '__main__':   
-    plt.close('all')    
+    plt.close('all')
