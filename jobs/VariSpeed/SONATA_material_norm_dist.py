@@ -29,31 +29,78 @@ from SONATA.utl.plot import plot_fandiagram, plot_histogram_2Ddata, plot_beam_pr
 
 from marc_fanplot import calc_fandiagram
 
-def run_monte_carle_sample(job, sample, hide=True):
+def run_MC_sample(fname, sample, hide=True):
     if hide==True:
+
         with HiddenPrints():
+            #create job instance!
+            config = Configuration(fname)
+            job = CBM(config)
+            job.cbm_gen_topo()
+            job.cbm_gen_mesh()
+            
             job.MaterialLst[8].E = sample
-            job.cbm_run_vabs()
+
+            job.cbm_run_vabs(ramdisk=True)
             
             x_offset = 0.81786984
             x0 = coef.refBeamProp()[0]
             job.config.setup['radial_station']=2000
-            x1 = job.cbm_set_DymoreMK(x_offset) 
+            x1 = job.cbm_set_DymoreMK(x_offset)
             job.config.setup['radial_station']=7500
             x2 = job.cbm_set_DymoreMK(x_offset)
             x3 = coef.refBeamProp()[-1]
             bp = np.vstack((x0,x1,x2,x3))
-            (freq, Omega, RPM_vec, beamProp, Kmat) = calc_fandiagram(beamProp = bp)
+            (freq, Omega, RPM_vec) = calc_fandiagram(beamProp = bp)
+            
+        print('Sample finished:', sample)
+        print(x1[6:9])      
 
     #RUN DYMORE CRUISE FLIGHT
-       
-    return (job.BeamProperties, freq, Omega, RPM_vec, beamProp)
+    return (job.BeamProperties, freq, Omega, RPM_vec, bp)
 
+
+#def CBMsampler(fname, nsamples=1000, style='latin_hypercube'):
+#    from pyDOE import lhs
+#    from scipy.stats.distributions import norm
+#    
+#    '''[('MaterialLst[0].E', distr = 'normal', mu='ref', cv=0.05), 
+#        ('config.webs[1].Pos1', distr = 'normal', mu='ref', cv=0.05),
+#        ('config.webs[2].Pos2', distr = 'exp', mu=0.23, cv=0.05)]'''
+#    
+#    
+#    design = lhs(4, samples=10)
+#    from scipy.stats.distributions import norm
+#    means = [1, 2, 3, 4]
+#    stdvs = [0.1, 0.5, 1, 0.25]
+#    for i in xrange(4):
+#        design[:, i] = norm(loc=means[i], scale=stdvs[i]).ppf(design[:, i])
+#    
+#    
+#    
+#    #identify value for P and run function to sample it.
+#    for pTup in pLst:        
+#           
+##    cbmLst = []
+##    if 'MaterialLst' in pstr:
+##        getattr(cbm, 'MaterialLst')
+##        #Select 
+##    
+##    if 'config' in pstr:
+##        getattr(config, 'MaterialLst')
+##      
+#    #Sampling
+#    return cbmLst 
 
 if __name__ == '__main__':    
     
-    filename = 'jobs/VariSpeed/uh60a_cbm_advanced/sec_config.yml'
-    config = Configuration(filename)
+
+    #Define a Sampling Function that Generates a Sampling list of CBM instances. That can be passed to the Monte Carlo Simulation!
+    
+    
+    fname = 'jobs/VariSpeed/uh60a_cbm_advanced/sec_config.yml'
+    #fname = 'jobs/VariSpeed/uh60a_cbm_simple/sec_config.yml'
+    config = Configuration(fname)
     job = CBM(config)
     job.cbm_gen_topo()
     job.cbm_gen_mesh()
@@ -62,23 +109,31 @@ if __name__ == '__main__':
     ref_cs = copy.copy(job.BeamProperties)
     #job.cbm_post_2dmesh(title='NoTitle')
     #job.cbm_post_3dtopo()
-        
+    
+    
     #VARIATE THE Modulus of Material 1.
-    N = 150 #number of Samples
+    N = 100   #number of Samples
     n = np.linspace(0,N-1,N)
     cv = 0.05 #coefficient of variation
-    mu_E9 = np.array([165012,   8798,   8798])
-    sigma = cv*mu_E9 # mean and standard deviation
-    samples = np.random.normal(mu_E9, sigma, (N,3))
+    mu_E9 = job.MaterialLst[8].E
+    #mu_E1 = job.MaterialLst[1].E
+    #mu_rho = job.MaterialLst[11].rho
     
+    ID = np.array([np.linspace(0,N-1,N)]).T
+    samples = np.random.normal(mu_E9, cv*mu_E9, (N,3))
+    #sample2 = np.random.normal(mu_E0, cv*mu_E0, (N,3))
+    #sample3 = np.random.normal(mu_rho, cv*mu_rho, (N,1))
+    #samples = np.hstack((ID,sample1))
+    
+
     t0 = time()
-    #Multiprocessing 
+#    #Multiprocessing 
     with Pool(processes=7) as pool:
-        temp = [tup for tup in tqdm(pool.imap(functools.partial(run_monte_carle_sample, job), samples), total=len(samples))]
+        temp = [tup for tup in pool.imap(functools.partial(run_MC_sample, fname), samples)]
         
     #ThreadPoolExecutor
-#    with futures.ThreadPoolExecutor(max_workers=7) as e:
-#        BeamPropLst = [bp for bp in tqdm(e.map(functools.partial(foo, job), samples), total=len(samples))]
+#    with futures.ThreadPoolExecutor(max_workers=8) as e:
+#        temp = [tup for tup in tqdm(e.map(functools.partial(run_monte_carle_sample, config), samples), total=len(samples))]
     
     #Single-Core
 #    temp = [tup for tup in map(functools.partial(foo, job), samples)]
@@ -92,10 +147,15 @@ if __name__ == '__main__':
     t = t1-t0
     print('MP Time: %f' % t)
     
+    
+    [jobid, configs, res]
+    
+    
 
 #%% ================= P O S T  -  P R O C E S S I N G =========================  
     plt.close('all')
     
+    job.cbm_post_2dmesh(title='UH-60A Simple Config')
     #%FAN PLOT POSTPROCESSING
     f_mean = np.mean(FreqArr.real, axis=0)
     f_std = np.std(FreqArr.real, axis=0)
@@ -103,17 +163,17 @@ if __name__ == '__main__':
     
     #PLOT 2D Histogram
     tmp = np.asarray([b.CS for b in BeamPropLst])
-    plot_histogram_2Ddata(tmp, ref_cs.CS, title='4x4 Stiffness Matrix')
+    plot_histogram_2Ddata(tmp, ref = ref_cs.CS, title='4x4 Stiffness Matrix')
     
-    tmp = np.asarray([b.TS for b in BeamPropLst])
-    plot_histogram_2Ddata(tmp, ref_cs.TS, title='6x6 Stiffness Matrix')
-
-    tmp = np.asarray([b.MM for b in BeamPropLst])
-    plot_histogram_2Ddata(tmp, ref_cs.MM, title='6x6 Mass Matrix')
+#    tmp = np.asarray([b.TS for b in BeamPropLst])
+#    plot_histogram_2Ddata(tmp, ref = ref_cs.TS, title='6x6 Stiffness Matrix')
+#
+#    tmp = np.asarray([b.MM for b in BeamPropLst])
+#    plot_histogram_2Ddata(tmp, ref = ref_cs.MM, title='6x6 Mass Matrix')
 
     #PLOT Beam Properties
-    data = np.mean(bp, axis=0) #Dymore 29, Beam Properties! to standartdize the procedure! 
-    sigma = np.std(bp, axis=0)
-    ref = coef.refBeamProp()
-    
-    plot_beam_properties(data, sigma, ref)
+#    data = np.mean(bp, axis=0) #Dymore 29, Beam Properties! to standartdize the procedure! 
+#    sigma = np.std(bp, axis=0)
+#    ref = coef.refBeamProp()
+#    
+#    plot_beam_properties(data, sigma, ref)
