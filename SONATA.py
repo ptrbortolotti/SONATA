@@ -22,7 +22,8 @@ config = Configuration(filename)
 
 job = CBM(config)
 job.cbm_gen_topo()
-job.cbm_gen_mesh()
+job.cbm_gen_mesh(split_quads=True)
+
 job.cbm_review_mesh()
 
 job.cbm_run_vabs()
