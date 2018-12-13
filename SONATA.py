@@ -34,4 +34,6 @@ job.cbm_review_mesh()
 job.cbm_post_2dmesh(title='Hello World!', plotTheta11=True)
 
 job.cbm_run_vabs()
+job.cbm_run_anbax()
+
 #job.cbm_post_3dtopo()
