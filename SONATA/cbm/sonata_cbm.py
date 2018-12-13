@@ -47,14 +47,14 @@ from SONATA.vabs.VABS_interface import VABS_config, export_cells_for_VABS, XSect
 from SONATA.vabs.strain import Strain
 from SONATA.vabs.stress import Stress
 
+from SONATA.anbax.anbax_utl import build_dolfin_mesh
+
 from SONATA.cbm.display.display_mesh import plot_cells
 from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
                                         export_to_SVG, export_to_PS, export_to_EnhPS, \
                                         export_to_TEX, export_to_BMP,export_to_TIFF, \
                                         show_coordinate_system, display_SONATA_SegmentLst,\
                                         display_custome_shape, transform_wire_2to3d  
-                                        
-
 
 class CBM(object):
     ''' 
@@ -555,6 +555,25 @@ class CBM(object):
         
         return None
 
+
+    def cbm_run_anbax(self):
+        """interface method to run the solver anbax from marco.morandini 
+        
+        Notes:
+            To be defined.
+        
+        """
+        self.mesh, nodes = sort_and_reassignID(self.mesh)
+        dolfin_mesh = build_dolfin_mesh(self.mesh, nodes)
+        #TBD: pass it to anbax and run it!
+        
+        
+        
+        
+        
+        return None
+        
+    
     
     def cbm_run_vabs(self, jobid=None, rm_vabfiles=True, ramdisk=False):
         '''CBM method to run the solver VABS (Variational Asymptotic Beam 
@@ -661,6 +680,7 @@ class CBM(object):
                         time.sleep(0.01)
                         counter += 1
                     else:
+                        break
                         print(e)
 
         self.BeamProperties = result
