@@ -1,3 +1,28 @@
+# Developer Guide
+
+This document provides information for developers working on SONATA.
+
+
+
+## Git Best Practices
+
+### Commit early and often
+
+Git only takes full responsibility for your data when you commit. If you fail to commit and then do something poorly thought out, you can run into trouble. Additionally, having periodic checkpoints means that you can understand how you broke something.
+
+### Do make useful commit messages
+
+Creating insightful and descriptive commit messages is one of the best things you can do for others who use the repository. It lets people quickly understand changes without having to read code. When doing history archeology to answer some question, good commit messages likewise become very important.
+
+The normal git rule of using the first line to provide a short (50-72 character) summary of the change is also very good.
+
+### Use issue tracking
+
+Issues are a great way to keep track of tasks, enhancements, and bugs for our project. They’re kind of like email—except they can be shared and discussed with the rest of your team.
+
+If you create an Issue make sure, one can reproduce your bug/feature/findings by adding at least your input files /configuration and a screenshot.
+
+
 ## Code Documentation
 
 Our SONATA project uses the Syntax and best practices for docstrings to be used with the numpydoc extension for [Sphinx](http://sphinx-doc.org/). Allowing our tool to produce well-formatted reference guides. Our docstring standard uses [re-structured text (reST)](http://docutils.sourceforge.net/rst.html) syntax and is rendered using [Sphinx](http://sphinx.pocoo.org/) (a pre-processor that understands the particular documentation style we are using). Keep in mind that the length of docstring lines should be kept to 75 characters to facilitate reading the docstrings in text terminals.
