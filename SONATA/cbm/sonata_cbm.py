@@ -56,6 +56,8 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
                                         show_coordinate_system, display_SONATA_SegmentLst,\
                                         display_custome_shape, transform_wire_2to3d  
 
+from anbax import anbax
+
 class CBM(object):
     ''' 
     This Class includes the SONATA Dicipline Module for Structural 
@@ -564,12 +566,12 @@ class CBM(object):
         
         """
         self.mesh, nodes = sort_and_reassignID(self.mesh)
-        dolfin_mesh = build_dolfin_mesh(self.mesh, nodes)
+        (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = \
+            build_dolfin_mesh(self.mesh, nodes, self.MaterialLst)
         #TBD: pass it to anbax and run it!
-        
-        
-        
-        
+        anba = anbax(mesh, 1, matLibrary, materials, plane_orientations, fiber_orientations, maxE)
+        stiff = anba.compute()
+        stiff.view()
         
         return None
         
