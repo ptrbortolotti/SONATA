@@ -57,7 +57,6 @@ class Blade(object):
                     foildata[i,1] = x.id
     
         airfoil = np.asarray(foildata,dtype=float)
-    
         f_chord = interp1d(chord[:,0], chord[:,1],bounds_error=False,fill_value='extrapolate')
         f_twist = interp1d(twist[:,0], twist[:,1],bounds_error=False,fill_value='extrapolate')
         f_quarterline_y = interp1d(quarterline[:,0], quarterline[:,1],bounds_error=False,fill_value='extrapolate')
@@ -148,7 +147,7 @@ if __name__ == '__main__':
     UH60A_blade.display(display)
     TopoDS_Shape = UH60A_blade.surface
     
-    #display.DisplayMessage(gp_Pnt(100,0,0),'UH-60A Main Rotor Blade')
+    display.DisplayMessage(gp_Pnt(100,0,0),'UH-60A Main Rotor Blade')
             
     display.FitAll()
     start_display()   

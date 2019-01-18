@@ -11,11 +11,11 @@ from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
 from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection,GCPnts_UniformDeflection, GCPnts_TangentialDeflection, GCPnts_QuasiUniformAbscissa
 from OCC.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve, Geom2dAPI_ProjectPointOnCurve, Geom2dAPI_PointsToBSpline
 from OCC.Geom2d import Handle_Geom2d_BSplineCurve_DownCast, Geom2d_Line
-
+from OCC.GeomAPI import GeomAPI_Interpolate
 #Own Libraries:
 from SONATA.cbm.topo.utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_to_npArray, \
                     discrete_stepsize, curvature_of_curve, isclose, unique_rows, \
-                    P2Pdistance, PolygonArea, TColgp_Array1OfPnt2d_from_nparray
+                    P2Pdistance, PolygonArea, TColgp_Array1OfPnt2d_from_nparray, TColgp_HArray1OfPnt_from_nparray
 
 from SONATA.cbm.topo.para_Geom2d_BsplineCurve import Para_Geom2d_BSplineCurve
 
@@ -564,13 +564,15 @@ def trim_BSplineLst_by_Pnt2d(BSplineLst,Pos1_Pnt2d,Pos2_Pnt2d):
 
     
 def seg_boundary_from_dct(DCT_data,angular_deflection = 30):
+    #OUTDATED!!!
     #Check if DCT_Definition is closed, if not: close it
     if not np.allclose(DCT_data[0],DCT_data[-1]):
         print('INFO:\t Closing open discrete boundary definition')
         DCT_data = np.concatenate((DCT_data,DCT_data[0:1,:]),axis=0)
-        
+    
     #Find corners and edges of data
     DCT_angles = calc_DCT_angles(DCT_data)
+    print(DCT_data.shape, DCT_angles.shape)
     corners = []
     for i in range(0,DCT_angles.shape[0]):
         if DCT_angles[i] < (180 - angular_deflection) or DCT_angles[i] > (180 + angular_deflection): 
@@ -578,15 +580,17 @@ def seg_boundary_from_dct(DCT_data,angular_deflection = 30):
     NbCorners = np.size(corners)
     
     #Segment by Corners    
+    print('NbCorners = ', NbCorners)
     DCT_Segments = []
     if NbCorners == 0:
         DCT_Segments.append(DCT_data)
     if NbCorners > 0:
+        DCT_Segments.append(DCT_data[0:corners[0]+1])
         for i in range(0,NbCorners-1):
-            #print i,corners[i]
+            print('i, corners = ', i,corners[i])
             DCT_Segments.append(DCT_data[corners[i]:corners[i+1]+1])
-                           
-                  
+        DCT_Segments.append(DCT_data[corners[-1]:-1])
+    
     list_of_bsplines = []
     for i,item in enumerate(DCT_Segments):
         data = item.T
@@ -632,9 +636,16 @@ def discretize_BSplineLst(BSplineLst, Deflection = 2e-4, AngularDeflection=0.02,
     return npArray
              
     
-def BSplineLst_from_dct(DCT_data,angular_deflection=15):
+def BSplineLst_from_dct(DCT_data,angular_deflection=15, closed=False, tol_interp = 1e-6, twoD = True):
+    #Close DCT_date if closed == True
+    if closed and not np.allclose(DCT_data[0],DCT_data[-1]):
+        print('INFO:\t Closing open discrete definition')
+        DCT_data = np.concatenate((DCT_data,DCT_data[0:1,:]),axis=0)   
+    
     #Find corners and edges of data
+    #print(DCT_data)
     DCT_angles = calc_DCT_angles(DCT_data)
+    #print(DCT_angles)
     corners = []
     for i in range(0,DCT_angles.shape[0]):
         if DCT_angles[i] < (180 - angular_deflection) or DCT_angles[i] > (180 + angular_deflection): 
@@ -683,22 +694,27 @@ def BSplineLst_from_dct(DCT_data,angular_deflection=15):
 
     
     list_of_bsplines = []
+    
 #    plt.figure(2)
 #    plt.clf()
 #    plt.axis('equal')  
     for i,item in enumerate(DCT_Segments):
-            
         data = item.T
-
-        #plt.plot(*item.T, marker='.')
-    
-        tmp_harray = TColgp_HArray1OfPnt2d_from_nparray(data)
-        try: tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 1e-06)             #Interpolate datapoints to bspline
-        except: #RAISED ERROR
-            plt.plot(*item.T,color='purple', marker='.')
-            for i, it in enumerate(item):
-                plt.annotate(i, (it[0],it[1]), color='black')
+        if twoD:
+            tmp_harray = TColgp_HArray1OfPnt2d_from_nparray(data)
+        else:
+            tmp_harray = TColgp_HArray1OfPnt_from_nparray(data)
         
+        try: 
+            if twoD:      
+                tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, tol_interp)             #Interpolate datapoints to bspline
+            else:
+                 tmp_interpolation = GeomAPI_Interpolate(tmp_harray.GetHandle(), False, tol_interp)
+        except: 
+            print('Raised ERROR')#RAISED ERROR
+            #plt.plot(*item.T,color='purple', marker='.')
+            #for i, it in enumerate(item):
+                #plt.annotate(i, (it[0],it[1]), color='black')   
 #        plt.show()                                      
         tmp_interpolation.Perform()                              
         tmp_bspline = tmp_interpolation.Curve().GetObject()

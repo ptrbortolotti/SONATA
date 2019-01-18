@@ -213,10 +213,10 @@ def angle_between(v1, v2):
 
 #Neccesary functions:
 def calc_angle_between(v1, v2):
-    dot = np.dot(v1,v2)
-    det = np.linalg.det([v1,v2])
-    angle = -np.degrees(math.atan2(det, dot)) 
-    
+#    dot = np.dot(v1,v2)
+#    det = np.linalg.det([v1,v2])
+#    angle = -np.degrees(math.atan2(det, dot)) 
+    angle = np.degrees(np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))))
     if angle < 0:
         angle = 360 + angle
 
@@ -237,6 +237,7 @@ def calc_DCT_angles(DCT_data):
             else:
                 v1 = DCT_data[i-1]-DCT_data[i]
                 v2 = DCT_data[i+1]-DCT_data[i]
+            #print(v1,v2)
             temp.append(calc_angle_between(v1,v2))
     
     else:  #open
@@ -250,6 +251,7 @@ def calc_DCT_angles(DCT_data):
             else:
                 v1 = DCT_data[i-1]-DCT_data[i]
                 v2 = DCT_data[i+1]-DCT_data[i]
+            #print(v1,v2)
             temp.append(calc_angle_between(v1,v2))
             
     return np.array(temp)
@@ -289,7 +291,11 @@ def Pnt2dLst_to_npArray(Pnt2dLst):
     for i,item in enumerate(Pnt2dLst):
         lst_tmp.append([item.X(),item.Y()])
     return np.asarray(lst_tmp)
-    
+
+def PntLst_to_npArray(PntLst):
+    lst_tmp = [p.Coord() for p in PntLst]
+    return np.asarray(lst_tmp)
+
 def gp_Pnt2d_to_npArray(Ptn2d):
         vector = np.array([Ptn2d.X(),Ptn2d.Y()])
         return vector

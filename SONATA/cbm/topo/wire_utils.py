@@ -92,7 +92,18 @@ def get_wire_Pnt(TopoDS_wire, S):     #gp_Pnt2d P= get_wire_point(TopoDS_Wire, s
     P = AdaptorComp.Value(S*length)
     return P 
     
-
+def equidistant_Points_on_wire(wire,NbPoints):
+    AdaptorComp = BRepAdaptor_CompCurve(wire, True)
+    discretization = GCPnts_QuasiUniformAbscissa(AdaptorComp,NbPoints)
+    
+    PntLst = []
+    for j in range(1, NbPoints+1):
+        para = discretization.Parameter(j)
+        Pnt = gp_Pnt()
+        AdaptorComp.D0(para,Pnt)
+        PntLst.append(Pnt)
+    return PntLst
+    
 def rotate_wire(wire,ax1,angle):    #for top
     aTrsf = gp_Trsf()    
     aTrsf.SetRotation(ax1,angle)
@@ -114,6 +125,7 @@ def scale_wire(wire,gp_Pnt1,factor):
     aTrsf = gp_Trsf()
     aTrsf.SetScale(gp_Pnt1,factor)
     aBRespTrsf = BRepBuilderAPI_Transform(wire,aTrsf)
+    aBRespTrsf.Build()
     aScaledShape = aBRespTrsf.Shape()
     scaledWire = topods.Wire(aScaledShape)
     return scaledWire
@@ -277,25 +289,32 @@ def trim_wire(TopoDS_wire, S1, S2):
     return twire.Wire()
 
     
-#def build_wire_from_BSplineLst(BSplineLst): #Builds TopoDS_Wire from connecting BSplineSegments and returns it        
-#    tmp_wire = 	BRepBuilderAPI_MakeWire()
-#    for i,item in enumerate(BSplineLst):
-#        P = gp_Pnt(0,0,0)
-#        V = gp_Dir(gp_Vec(0,0,1))
-#        Plane = Geom_Plane(P, V)
-#        tmp_edge = BRepBuilderAPI_MakeEdge(item.GetHandle(),Plane.GetHandle())
-#        tmp_wire.Add(tmp_edge.Edge())
-#    return tmp_wire.Wire()
 
 
-def build_wire_from_BSplineLst(BSplineLst): #Builds TopoDS_Wire from connecting BSplineSegments and returns it        
+
+def build_wire_from_BSplineLst2(BSplineLst): #Builds TopoDS_Wire from connecting BSplineSegments and returns it        
+    tmp_wire = 	BRepBuilderAPI_MakeWire()
+    for i,item in enumerate(BSplineLst):
+        P = gp_Pnt(0,0,0)
+        V = gp_Dir(gp_Vec(0,0,1))
+        Plane = Geom_Plane(P, V)
+        tmp_edge = BRepBuilderAPI_MakeEdge(item.GetHandle(),Plane.GetHandle())
+        #print(tmp_edge.IsDone())
+        tmp_wire.Add(tmp_edge.Edge())
+    return tmp_wire.Wire()
+
+
+def build_wire_from_BSplineLst(BSplineLst, twoD=True): #Builds TopoDS_Wire from connecting BSplineSegments and returns it        
     P = gp_Pnt(0,0,0)
     V = gp_Dir(gp_Vec(0,0,1))
     Plane = Geom_Plane(P, V)          
     TopTools_EdgeLst = TopTools_ListOfShape()
     for i,item in enumerate(BSplineLst):
-        tmp_edge = BRepBuilderAPI_MakeEdge(item.GetHandle(),Plane.GetHandle())
-        #print tmp_edge.IsDone()
+        if twoD:        
+            tmp_edge = BRepBuilderAPI_MakeEdge(item.GetHandle(),Plane.GetHandle())
+        else:
+            tmp_edge = BRepBuilderAPI_MakeEdge(item.GetHandle())
+        #print(tmp_edge.IsDone())
         TopTools_EdgeLst.Append(tmp_edge.Edge())
         
     wire = BRepBuilderAPI_MakeWire()
