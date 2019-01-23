@@ -351,6 +351,9 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
                  BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
                  if isclose(para1[1],Last):
                      pass 
+                 elif isclose(para1[1],First):
+                     BSplineCopy.Segment(First,Last)
+                     trimmed_BSplineLst.append(BSplineCopy)
                  else:                    
                      BSplineCopy.Segment(para1[1],Last)
                      trimmed_BSplineLst.append(BSplineCopy)
@@ -398,6 +401,7 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
     
     elif S2 > S1:
         trimmed_BSplineLst = []
+        #check if para1 and para2 is out of bounds!
         para1 =  find_BSplineLst_coordinate(BSplineLst, S1, start, end)
         para2 =  find_BSplineLst_coordinate(BSplineLst, S2, start, end)
         for i,item in enumerate(BSplineLst):       
@@ -407,7 +411,10 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
                  BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
                  if isclose(para1[1],Last):
                      pass 
-                 else:                    
+                 elif isclose(para1[1],First):
+                     BSplineCopy.Segment(First,Last)
+                     trimmed_BSplineLst.append(BSplineCopy)
+                 else: 
                      BSplineCopy.Segment(para1[1],Last)
                      trimmed_BSplineLst.append(BSplineCopy)
                  
@@ -636,11 +643,16 @@ def discretize_BSplineLst(BSplineLst, Deflection = 2e-4, AngularDeflection=0.02,
     return npArray
              
     
-def BSplineLst_from_dct(DCT_data,angular_deflection=15, closed=False, tol_interp = 1e-6, twoD = True):
+def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_interp = 1e-6, twoD = True):
     #Close DCT_date if closed == True
     if closed and not np.allclose(DCT_data[0],DCT_data[-1]):
         print('INFO:\t Closing open discrete definition')
         DCT_data = np.concatenate((DCT_data,DCT_data[0:1,:]),axis=0)   
+    
+    
+    #TODP: check all datapoints and merge if allclose is true 
+    
+
     
     #Find corners and edges of data
     #print(DCT_data)
@@ -694,12 +706,9 @@ def BSplineLst_from_dct(DCT_data,angular_deflection=15, closed=False, tol_interp
 
     
     list_of_bsplines = []
-    
-#    plt.figure(2)
-#    plt.clf()
-#    plt.axis('equal')  
     for i,item in enumerate(DCT_Segments):
         data = item.T
+
         if twoD:
             tmp_harray = TColgp_HArray1OfPnt2d_from_nparray(data)
         else:
@@ -709,19 +718,22 @@ def BSplineLst_from_dct(DCT_data,angular_deflection=15, closed=False, tol_interp
             if twoD:      
                 tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, tol_interp)             #Interpolate datapoints to bspline
             else:
-                 tmp_interpolation = GeomAPI_Interpolate(tmp_harray.GetHandle(), False, tol_interp)
+                tmp_interpolation = GeomAPI_Interpolate(tmp_harray.GetHandle(), False, tol_interp)
         except: 
             print('Raised ERROR')#RAISED ERROR
-            #plt.plot(*item.T,color='purple', marker='.')
-            #for i, it in enumerate(item):
-                #plt.annotate(i, (it[0],it[1]), color='black')   
-#        plt.show()                                      
+#            plt.figure()
+#            plt.clf()
+#            plt.axis('equal')  
+#            plt.plot(*item.T, marker='.')
+#            for i, it in enumerate(item):
+#                plt.annotate(i, (it[0],it[1]), color='black')   
+#            plt.show()                   
+                   
         tmp_interpolation.Perform()                              
         tmp_bspline = tmp_interpolation.Curve().GetObject()
         list_of_bsplines.append(tmp_bspline)
         
     return list_of_bsplines
-    
     
     
     
