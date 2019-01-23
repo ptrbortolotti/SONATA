@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Defines the Composite Beam Model (CBM) class
+"""Defines the Crosssectional Beam Model (CBM) class
 Created on Wed Jan 03 13:56:37 2018
 @author: TPflumm
 
-
 https://numpydoc.readthedocs.io/en/latest/format.html
-
  """
 
 #Basic PYTHON Modules:
@@ -22,11 +20,12 @@ import time
 
 #PythonOCC Modules
 from OCC.Display.SimpleGui import init_display
+from OCC.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1
 
 #SONATA modules:
 from SONATA.cbm.fileIO.CADoutput import export_to_step
 from SONATA.cbm.fileIO.CADinput import load_3D, import_2d_stp, import_3d_stp
-from SONATA.cbm.fileIO.read_yaml_input import read_yaml_materialdb
+from SONATA.classMaterial import read_yml_materials
 
 from SONATA.cbm.bladegen.blade import Blade
 
@@ -34,7 +33,8 @@ from SONATA.cbm.topo.segment import Segment
 from SONATA.cbm.topo.web import Web
 from SONATA.cbm.topo.utils import  getID
 from SONATA.cbm.topo.weight import Weight
-from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length
+from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length, BSplineLst_from_dct, set_BSplineLst_to_Origin
+from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire, discretize_wire
 
 from SONATA.cbm.mesh.node import Node
 from SONATA.cbm.mesh.cell import Cell
@@ -47,7 +47,7 @@ from SONATA.vabs.VABS_interface import VABS_config, export_cells_for_VABS, XSect
 from SONATA.vabs.strain import Strain
 from SONATA.vabs.stress import Stress
 
-from SONATA.anbax.anbax_utl import build_dolfin_mesh
+
 
 from SONATA.cbm.display.display_mesh import plot_cells
 from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
@@ -56,7 +56,8 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
                                         show_coordinate_system, display_SONATA_SegmentLst,\
                                         display_custome_shape, transform_wire_2to3d  
 
-from anbax import anbax
+#from SONATA.anbax.anbax_utl import build_dolfin_mesh
+#from anbax import anbax
 
 class CBM(object):
     ''' 
@@ -115,7 +116,7 @@ class CBM(object):
 
         
     #__slots__ = ('config' , 'MaterialLst' , 'SegmentLst' , 'WebLst' , 'BW' , 'mesh', 'BeamProperties', 'display', )
-    def __init__(self, Configuration):
+    def __init__(self, Configuration, materials = None, **kwargs):
         """
         Initialize attributes.
 
@@ -123,12 +124,14 @@ class CBM(object):
         ----------
         Configuration : <Configuration>
             Pointer to the <Configuration> object.
-        MaterialLst : <MaterialLst>
-        Pointer to the  <MaterialLst> object.
+        materials : dict(id, Materials)
         """
         
         self.config = Configuration
-        self.MaterialLst = read_yaml_materialdb(self.config.setup['material_db'])
+        if isinstance(materials, dict):
+            self.materials = materials
+        else:
+            self.materials = read_yml_materials(self.config.setup['material_db'])
         
         self.SegmentLst = []
         self.WebLst = []    
@@ -140,16 +143,30 @@ class CBM(object):
               
         self.startTime = datetime.now()
         self.exportLst = [] #list that contains all objects to be exported as step   
-        self.surface3d = None
-        self.Blade = None
+        self.surface3d = None #TODO: Remove definition and set it up in classBlade
+        self.Blade = None #TODO: Remove definition and set it up in classBlade
         
         if self.config.setup['input_type'] == 3:
             self.surface3d = load_3D(self.config.setup['datasource'])
+            
         elif self.config.setup['input_type'] == 4:
             self.blade =  Blade(self.config.setup['datasource'])
             self.surface3d = self.blade.surface
-    
-
+      
+        elif self.config.setup['input_type'] == 5:
+            bm = kwargs.get('blade_matrix')
+            af = kwargs.get('airfoil')
+            self.Theta = np.degrees(bm[5])
+            wire = af.gen_OCCtopo()
+            
+            wire = translate_wire(wire, gp_Pnt(0,0,0), gp_Pnt(-0.25,0,0))
+            wire = scale_wire(wire, gp_Pnt(0,0,0), bm[4])
+            wire = rotate_wire(wire, gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,0,1)), bm[5])  
+            npArray = discretize_wire(wire, Deflection = 1e-4)
+            BSplineLst = BSplineLst_from_dct(npArray, angular_deflection = 20, tol_interp=1e-4)
+            self.BoundaryBSplineLst = set_BSplineLst_to_Origin(BSplineLst,self.Theta) 
+            
+            
     def __getstate__(self):
         """Return state values to be pickled."""
         return (self.config, self.MaterialLst, self.SegmentLst, self.WebLst, self.BW, self.mesh, self.BeamProperties)   
@@ -353,7 +370,7 @@ class CBM(object):
         return None
 
 
-    def __cbm_generate_SegmentLst(self):
+    def __cbm_generate_SegmentLst(self, **kwargs):
         '''
         psydo private method of the cbm class to generate the list of 
         Segments in the instance. 
@@ -382,6 +399,13 @@ class CBM(object):
                 elif self.config.setup['input_type'] == 4: #4)generate 3D-Shape from twist,taper,1/4-line and airfoils, --- examples/UH-60A, R=4089, theta is given from twist distribution
                     BSplineLst = self.blade.get_crosssection(self.config.setup['radial_station'], self.config.setup['scale_factor'])
                     self.SegmentLst.append(Segment(k, **seg, Theta = self.blade.get_Theta(self.config.setup['radial_station']), OCC=True, Boundary = BSplineLst))  
+                
+                elif self.config.setup['input_type'] == 5: #5) IEA37 Formulation, everything is passed internally!
+                    self.SegmentLst.append(Segment(k, **seg, Theta = self.Theta, OCC=True, Boundary = self.BoundaryBSplineLst))
+                        
+                    #BSplineLst get BSplineLst from IAE37 definition of blade. By generating the crosssection in the blade class and passing the BSplineLst to the section!
+                    #Get Theta from the IAE37 definition of the blade !
+                    #self.SegmentLst.append()
                     
                 else:
                     print('ERROR:\t WRONG input_type')
@@ -397,7 +421,7 @@ class CBM(object):
         return None
 
 
-    def cbm_gen_topo(self):
+    def cbm_gen_topo(self, **kwargs):
         '''
         CBM Method that generates the topology. It starts by generating the 
         list of Segments. It continous to gen all layers for Segment 0. 
@@ -407,7 +431,7 @@ class CBM(object):
         '''               
         #Generate SegmentLst from config:
         self.SegmentLst = []
-        self.__cbm_generate_SegmentLst()
+        self.__cbm_generate_SegmentLst(**kwargs)
         #Build Segment 0:
         self.SegmentLst[0].build_wire()
         l0 = get_BSplineLst_length(self.SegmentLst[0].BSplineLst)
@@ -558,25 +582,24 @@ class CBM(object):
         return None
 
 
-    def cbm_run_anbax(self):
-        """interface method to run the solver anbax from marco.morandini 
+#    def cbm_run_anbax(self):
+#        """interface method to run the solver anbax from marco.morandini 
+#        
+#        Notes:
+#            To be defined.
+#        
+#        """
+#        self.mesh, nodes = sort_and_reassignID(self.mesh)
+#        (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = \
+#            build_dolfin_mesh(self.mesh, nodes, self.MaterialLst)
+#        #TBD: pass it to anbax and run it!
+#        anba = anbax(mesh, 1, matLibrary, materials, plane_orientations, fiber_orientations, maxE)
+#        stiff = anba.compute()
+#        stiff.view()
+#        
+#        return None
         
-        Notes:
-            To be defined.
-        
-        """
-        self.mesh, nodes = sort_and_reassignID(self.mesh)
-        (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = \
-            build_dolfin_mesh(self.mesh, nodes, self.MaterialLst)
-        #TBD: pass it to anbax and run it!
-        anba = anbax(mesh, 1, matLibrary, materials, plane_orientations, fiber_orientations, maxE)
-        stiff = anba.compute()
-        stiff.view()
-        
-        return None
-        
-    
-    
+   
     def cbm_run_vabs(self, jobid=None, rm_vabfiles=True, ramdisk=False):
         '''CBM method to run the solver VABS (Variational Asymptotic Beam 
         Sectional Analysis). Note that this method is designed to work if 
