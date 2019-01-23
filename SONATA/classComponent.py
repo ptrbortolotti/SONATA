@@ -7,15 +7,17 @@ Created on Tue Jan 15 16:10:35 2019
 """
 from OCC.gp import gp_Ax2, gp_Pnt, gp_Dir
 
-class Component(gp_Ax2):
+class Component(object):
     '''Describes a right-handed coordinate system in 3D space. 
     Ax2 is an instance from the opencascade gp_Ax2 class.'''
     
-    __slots__ = ('name')    
+    __slots__ = ('name', 'cosy')    
     def __init__(self, *args, **kwargs):
-        super().__init__(*args)
         self.name = kwargs.get('name')
-    
+        self.cosy = gp_Ax2(*args)
+        #self.units = {'mass': 'g', 'length': 'mm', 'force' : 'N'}
+        #TODO: How to define Units in the global SONATA context
+        
     def __repr__(self):
         """__repr__ is the built-in function used to compute the "official" 
         string reputation of an object, """
