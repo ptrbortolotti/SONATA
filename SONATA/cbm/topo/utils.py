@@ -35,7 +35,7 @@ def unique_rows(a):
     unique_a = unique_a[np.argsort(idx)]
     return unique_a.view(a.dtype).reshape((unique_a.shape[0], a.shape[1]))
 
-def isclose(a, b, rel_tol=1e-09, abs_tol=1e-09):
+def isclose(a, b, rel_tol=2e-09, abs_tol=2e-09):
     """
     rel_tol: is the relative tolerance -- it is the amount of error allowed, relative to the larger absolute value of a or b. For
     example, to set a tolerance of 5%, pass tol=0.05. The default tolerance is 1e-9, which assures that the two values are the same
@@ -205,24 +205,27 @@ def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
     return vector / np.linalg.norm(vector)
 
-def angle_between(v1, v2):
-    '''Returns the angle in radians between vectors 'v1' and 'v2'::'''
+def calc_angle_between(v1, v2):
+    '''Returns the angle in degrees between vectors 'v1' and 'v2'::'''
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
-    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
-
-#Neccesary functions:
-def calc_angle_between(v1, v2):
-#    dot = np.dot(v1,v2)
-#    det = np.linalg.det([v1,v2])
-#    angle = -np.degrees(math.atan2(det, dot)) 
-    angle = np.degrees(np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))))
+    angle = np.degrees(np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0)))
     if angle < 0:
         angle = 360 + angle
-
-    '''Returns the angle in degree between vectors 'v1' and 'v2'''
-    #return np.degrees(math.atan2(np.linalg.norm(np.cross(v1,v2)), np.dot(v1,v2)))
     return angle
+
+##Neccesary functions:
+#def calc_angle_between(v1, v2):
+##    dot = np.dot(v1,v2)
+##    det = np.linalg.det([v1,v2])
+##    angle = -np.degrees(math.atan2(det, dot)) 
+#    angle = np.degrees(np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))))
+#    if angle < 0:
+#        angle = 360 + angle
+#
+#    '''Returns the angle in degree between vectors 'v1' and 'v2'''
+#    #return np.degrees(math.atan2(np.linalg.norm(np.cross(v1,v2)), np.dot(v1,v2)))
+#    return angle
     
 def calc_DCT_angles(DCT_data):
     temp = []
@@ -257,7 +260,6 @@ def calc_DCT_angles(DCT_data):
     return np.array(temp)
     
 
-    
 def radius_of_curve(curve,u):
     p = gp_Pnt2d()
     v1 = gp_Vec2d()

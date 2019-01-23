@@ -153,10 +153,10 @@ class Layer(object):
             
     
     def build_layer(self,l0 = 1):
-        deflection = 1e-6*l0
+        deflection = 5e-8*l0
         npArray = discretize_BSplineLst(self.Boundary_BSplineLst, deflection) 
         offlinepts = shp_parallel_offset(npArray,self.thickness,self.join_style)
-        OffsetBSplineLst = BSplineLst_from_dct(offlinepts)
+        OffsetBSplineLst = BSplineLst_from_dct(offlinepts, angular_deflection=30, tol_interp = deflection)
         OffsetBSplineLst = cutoff_layer(self.Boundary_BSplineLst,OffsetBSplineLst,self.S1,self.S2,self.cutoff_style)
         self.BSplineLst = OffsetBSplineLst
          
