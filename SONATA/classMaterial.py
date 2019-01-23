@@ -5,9 +5,14 @@ Created on Wed Dec 19 09:38:33 2018
 
 @author: Tobias Pflumm
 """
-
+import os
+import yaml
 import numpy as np
+from collections import OrderedDict
 
+if __name__ == '__main__':
+    os.chdir('..')
+from SONATA.cbm.fileIO.read_yaml_input import clean_filestring
 
 class Material(object):
     __slots__ = ( 'id', 'name', 'orth', 'rho') 
@@ -76,37 +81,48 @@ class AnisotropicMaterial(Material):
         
         #TODO: Set Strenght Characteristics according for Anisotropic Material
 
+
 def read_IAE37_materials(yml):
-    MaterialLst = []
+    materials = OrderedDict()
     for i,mat in enumerate(yml):
         ID = i+1
         if mat.get('orth') == 0:
-            MaterialLst.append(IsotropicMaterial(ID = ID, **mat))
+            materials[ID] = IsotropicMaterial(ID = ID, **mat)
         elif mat.get('orth') == 1:
-            MaterialLst.append(OrthotropicMaterial(ID = ID, **mat))
+            materials[ID] = OrthotropicMaterial(ID = ID, **mat)
         elif mat.get('orth') == 2:
-            MaterialLst.append(AnisotropicMaterial(ID = ID, **mat))
-    return MaterialLst
+             materials[ID] =AnisotropicMaterial(ID = ID, **mat)
+    return materials
 
+
+def read_yml_materials(fname):
+    b_string = clean_filestring(fname,comments='#')
+    mdb =  yaml.load(b_string)['Materials']
+    
+    materials = OrderedDict()
+    for k,v in mdb.items():
+        ID = int(k.split()[-1])
+        if v['orth'] == 0:
+            materials[ID] = IsotropicMaterial(ID = ID, **v)
+        elif mdb[k]['orth'] == 1:
+            materials[ID] = OrthotropicMaterial(ID = ID, **v)
+        elif mdb[k]['orth'] == 2:
+            materials[ID] = AnisotropicMaterial(ID = ID, **v)
+    return materials
+        
+
+def find_material(materials, attr, value):
+    return next((x for x in materials.values() if getattr(x,attr) == value), None)
+    
 
 if __name__ == '__main__':
     a = IsotropicMaterial(ID=1, name='iso_mat', rho=0.4, )
     b = OrthotropicMaterial(ID=2, name='orth_mat', rho=0.5)
     c = AnisotropicMaterial(ID=3, name='aniso_mat', rho=0.6)
-    
-    import os
-    os.chdir('..')
-    from jsonschema import validate
-    import yaml
-    
+
     with open('jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
         inputs  = myfile.read()
-    with open('jobs/PBortolotti/IEAturbine_schema.yaml', 'r') as myfile:
-        schema  = myfile.read()
-    validate(yaml.load(inputs), yaml.load(schema))
     wt_data     = yaml.load(inputs)    
+    materials1 = read_IAE37_materials(wt_data['materials'])
     
-    MaterialLst = read_IAE37(wt_data['materials'])
-    print(MaterialLst)
-
-    
+    materials2 = read_yml_materials('examples/mat_db.yml')

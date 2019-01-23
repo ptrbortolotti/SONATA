@@ -72,7 +72,7 @@ class VABS_config(object):
         self.ddkapp1 = 0                #Vlasov_flag == 1:
         
     
-def export_cells_for_VABS(cells,nodes,filename,VABSsetup,MaterialLst):
+def export_cells_for_VABS(cells, nodes, filename, VABSsetup, materials):
     f = open(filename,'w+')
     
     try:
@@ -88,7 +88,7 @@ def export_cells_for_VABS(cells,nodes,filename,VABSsetup,MaterialLst):
         
        
         #Number of Nodes,Cells and Materials
-        f.write('%i\t%i\t%i\n' % (len(nodes),len(cells),len(MaterialLst)))
+        f.write('%i\t%i\t%i\n' % (len(nodes),len(cells),len(materials)))
         f.write('\n')
         #Node number, coordinates x_2, coordinatex x_3
         for n in nodes:
@@ -112,7 +112,7 @@ def export_cells_for_VABS(cells,nodes,filename,VABSsetup,MaterialLst):
             f.write('\n')  
         f.write('\n')
         #Materials 
-        for m in MaterialLst:
+        for m in materials.values():
             f.write('%i, %i\n' % (m.id,m.orth))
             if m.orth == 0:
                 f.write('%.2f %.2f\n' % (m.E,m.nu))    
