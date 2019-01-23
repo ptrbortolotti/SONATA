@@ -6,102 +6,169 @@ Created on Wed Dec 19 09:38:19 2018
 @author: Tobias Pflumm
 """
 import os
-from OCC.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1
+
 import numpy as np
-import math
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
+
+from OCC.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1
+from OCC.Display.SimpleGui import init_display
 
 if __name__ == '__main__':
     os.chdir('..')
     
 from SONATA.classComponent import Component
 from SONATA.classAirfoil import Airfoil
-from SONATA.cbm.topo.wire_utils import rotate_wire, mirror_wire_pnt_dir, translate_wire, scale_wire
-from SONATA.cbm.bladegen.bladegen_utils import make_loft
+from SONATA.classMaterial import read_IAE37_materials
+
+from SONATA.cbm.classCBM import CBM
+from SONATA.cbm.classCBMConfig import CBMConfig
+
+from SONATA.blade_utl import interp_airfoil_position, make_loft
+from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire
+
+from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
+                                        export_to_SVG, export_to_PS, export_to_EnhPS, \
+                                        export_to_TEX, export_to_BMP,export_to_TIFF, \
+                                        show_coordinate_system, display_SONATA_SegmentLst,\
+                                        display_custome_shape, transform_wire_2to3d  
+
+
+
 
 class Blade(Component):
 
-    __slots__ = ('coordinates', 'chord', 'twist', 'airfoil_position', 'blade_matrix', 'airfoilLst')
+    __slots__ = ('coordinates', 'chord', 'twist', 'blade_matrix', 'airfoilLst', 'sections')
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
-
+    
+    
     def __repr__(self):
         """__repr__ is the built-in function used to compute the "official" 
         string reputation of an object, """
         return 'Blade: '+ self.name
     
-    def read_IAE37(self, yml):
+    
+    def read_IAE37(self, yml, airfoils, materials):
         """
-        reads the IAE Wind Task 37 style Blade dictionary and assigsn them to
-        the class attribute      
+        reads the IAE Wind Task 37 style Blade dictionary 
+        generates the blade matrix and airfoilLst to represent all given 
+        information at every grid point by interpolating the input data 
+        and assigsn them to the class attribute twist, choord, coordinates 
+        and airfoil_positions with the first column representing the 
+        non-dimensional x-location  
+
+        Parameters
+        ----------
+        airfoils : list
+            Is the database of airfoils
+        
+        Returns
+        ----------
+        blade_matrix : np.ndarray
+            The blade_matrix with the follwowing colloums 
+            (1: non-dimensionalized x-station, 2:chord, 3:twist, x-coordinate, 
+            y-coordinate, z-coordinate)
+        
+        airfoilLst : list
+            list of airfoils at every grid point (row of blade_matrix) with 
+            lin. interpolated airfoils. 
+        
         """
-        self.coordinates = {}
+        #Read information from DataDictionary
+        tmp_coords = {}
         tmp = byml.get('bem_aero')
-        self.coordinates['x'] = np.asarray((tmp.get('coordinates').get('x').get('grid'),tmp.get('coordinates').get('x').get('values'))).T
-        self.coordinates['y'] = np.asarray((tmp.get('coordinates').get('y').get('grid'),tmp.get('coordinates').get('y').get('values'))).T
-        self.coordinates['z'] = np.asarray((tmp.get('coordinates').get('z').get('grid'),tmp.get('coordinates').get('z').get('values'))).T
-        self.twist = np.asarray((tmp.get('twist').get('grid'),tmp.get('twist').get('values'))).T
-        self.chord = np.asarray((tmp.get('chord').get('grid'),tmp.get('chord').get('values'))).T
-        self.airfoil_position = (tmp.get('airfoil_position').get('grid'),tmp.get('airfoil_position').get('labels'))
+        tmp_coords['x'] = np.asarray((tmp.get('coordinates').get('x').get('grid'),tmp.get('coordinates').get('x').get('values'))).T
+        tmp_coords['y'] = np.asarray((tmp.get('coordinates').get('y').get('grid'),tmp.get('coordinates').get('y').get('values'))).T
+        tmp_coords['z'] = np.asarray((tmp.get('coordinates').get('z').get('grid'),tmp.get('coordinates').get('z').get('values'))).T
+        tmp_tw = np.asarray((tmp.get('twist').get('grid'),tmp.get('twist').get('values'))).T
+        tmp_chord = np.asarray((tmp.get('chord').get('grid'),tmp.get('chord').get('values'))).T
+        airfoil_position = (tmp.get('airfoil_position').get('grid'),tmp.get('airfoil_position').get('labels'))
         
-    def gen_blade_matrix(self, airfoils):
+        #Generate Blade Matrix 
         tmp = []
-        for an in self.airfoil_position[1]: 
+        for an in airfoil_position[1]: 
             tmp.append(next((x for x in airfoils if x.name == an), None).id)
-        arr = np.asarray([self.airfoil_position[0],tmp]).T
+        arr = np.asarray([airfoil_position[0],tmp]).T
             
-        f_chord = interp1d(self.chord[:,0], self.chord[:,1],bounds_error=False,fill_value='extrapolate')
-        f_twist = interp1d(self.twist[:,0], self.twist[:,1],bounds_error=False,fill_value='extrapolate')
-        f_coordinates_x = interp1d(self.coordinates['x'][:,0], self.coordinates['x'][:,1],bounds_error=False,fill_value='extrapolate')
-        f_coordinates_y = interp1d(self.coordinates['y'][:,0], self.coordinates['y'][:,1],bounds_error=False,fill_value='extrapolate')
-        f_coordinates_z = interp1d(self.coordinates['z'][:,0], self.coordinates['z'][:,1],bounds_error=False,fill_value='extrapolate')
-        #f_airfoil = interp1d(arr[:,0], arr[:,1],bounds_error=False,fill_value='extrapolate')
+        f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1], bounds_error=False, fill_value='extrapolate')
+        f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
+        f_coordinates_x = interp1d(tmp_coords['x'][:,0], tmp_coords['x'][:,1], bounds_error=False, fill_value='extrapolate')
+        f_coordinates_y = interp1d(tmp_coords['y'][:,0], tmp_coords['y'][:,1], bounds_error=False, fill_value='extrapolate')
+        f_coordinates_z = interp1d(tmp_coords['z'][:,0], tmp_coords['z'][:,1], bounds_error=False, fill_value='extrapolate')
         
-        x = np.unique(np.sort(np.hstack((self.chord[:,0],self.twist[:,0],self.coordinates['x'][:,0],self.coordinates['y'][:,0],self.coordinates['z'][:,0], arr[:,0]))))
-        self.blade_matrix = np.transpose(np.unique(np.array([x,f_chord(x),f_twist(x),f_coordinates_x(x),f_coordinates_y(x),f_coordinates_z(x)]), axis=1))
-        self.airfoilLst = [interp_airfoil_position(self.airfoil_position, airfoils, x) for x in x]
-        return self.blade_matrix, self.airfoilLst
+    
+        cs_pos = np.asarray([cs.get('position') for cs in byml.get('2d_fem').get('sections')])
+        x = np.unique(np.sort(np.hstack((tmp_chord[:,0], tmp_tw[:,0], tmp_coords['x'][:,0], tmp_coords['y'][:,0], tmp_coords['z'][:,0], arr[:,0], cs_pos))))
         
-    def plot_blade_matrix(self, airfoils):
-        plt.close("all")   
-        plt.figure()
-        plt.subplot(321)
-        plt.plot(self.blade_matrix[:,0], self.blade_matrix[:,1], 'r.-')
-        plt.ylabel('chord [mm]')
+        self.blade_matrix = np.transpose(np.unique(np.array([x, f_coordinates_x(x), f_coordinates_y(x), f_coordinates_z(x), f_chord(x), f_twist(x)]), axis=1))
+        self.airfoilLst = [interp_airfoil_position(airfoil_position, airfoils, x) for x in x]
+        self.coordinates = self.blade_matrix[:,0:4]
+        self.chord = self.blade_matrix[:,[0,4]]
+        self.twist = self.blade_matrix[:,[0,5]]
+                
+        #get sections information and init the CBM instances.
+        tmp = byml.get('2d_fem').get('sections')
+        self.sections = {}
+        for cs in tmp:
+            cbm_config = CBMConfig(cs, materials, iae37=True)
+            x = cs.get('position')
+            bm = np.array([x, f_coordinates_x(x), f_coordinates_y(x), f_coordinates_z(x), f_chord(x), f_twist(x)])
+            af = interp_airfoil_position(airfoil_position, airfoils, x)
+            self.sections[x] = CBM(cbm_config, materials = materials, blade_matrix = bm, airfoil=af)
+            #get blade_matrix and airfoil at position and pass to CBM init instance!
+            
+        return (self.blade_matrix, self.airfoilLst)
+
+
+    def plot_blade_matrix(self):
+        """
+        illustrates the coordinates, chord, twist of the blade
+        """
         
-        plt.subplot(323)
-        plt.plot(self.blade_matrix[:,0], self.blade_matrix[:,2], 'g.-')
-        plt.ylabel('twist [deg]')
+        fig, ax = plt.subplots(3,2)
+        fig.suptitle(self.name, fontsize=16)
+        fig.subplots_adjust(wspace=0.25, hspace=0.25)
         
-        plt.subplot(325)
-        plt.plot(self.blade_matrix[:,0], self.blade_matrix[:,6], 'b.-')
-        plt.ylabel('airfoil')
-        strLst = []
-        idLst = []
-        for af in airfoils:
-            idLst.append(af.id)
-            strLst.append(af.name)
-        plt.yticks(idLst, strLst)
+        ax[0][0].plot(self.blade_matrix[:,0], self.blade_matrix[:,1], 'k.-')
+        ax[0][0].set_ylabel('x-coordinate [m]')
         
-        plt.subplot(322)
-        plt.plot(self.blade_matrix[:,0], self.blade_matrix[:,3], 'k.-')
-        plt.ylabel('x of 1/4-line [mm]')
+        ax[1][0].plot(self.blade_matrix[:,0], self.blade_matrix[:,2], 'k.-')
+        ax[1][0].set_ylabel('y-coordinate [m]')
         
-        plt.subplot(324)
-        plt.plot(self.blade_matrix[:,0], self.blade_matrix[:,4], 'k.-')
-        plt.ylabel('y of 1/4-line [mm]')
+        ax[2][0].plot(self.blade_matrix[:,0], self.blade_matrix[:,3], 'k.-')
+        ax[2][0].set_ylabel('z-coordinate [m]')
         
-        plt.subplot(326)
-        plt.plot(self.blade_matrix[:,0], self.blade_matrix[:,5], 'k.-')
-        plt.ylabel('z of 1/4-line [mm]')
+        ax[0][1].plot(self.blade_matrix[:,0], self.blade_matrix[:,4], 'k.-')
+        ax[0][1].set_ylabel('chord [m]')
         
+        ax[1][1].plot(self.blade_matrix[:,0], self.blade_matrix[:,5], 'k.-')
+        ax[1][1].set_ylabel('twist [rad]')
+        
+#        ax3d = fig.add_subplot(326, projection='3d')
+#        for bm, af in zip(self.blade_matrix, self.airfoilLst):
+#            tmp_shape = af.coordinates[:,0].shape
+#            arr = af.coordinates*bm[4]
+#            ax3d.plot(np.ones(tmp_shape)*bm[1],arr[:,0],arr[:,1])
         plt.show()
     
+    
     def gen_surface(self):
-        wireLst = []
-        for bm,afl in zip(self.blade_matrix, self.airfoilLst):
+        """
+        generates the wireframe and the loft surface of the blade
+
+        Returns
+        ----------
+        loft : OCC.TopoDS_surface
+            the 3D surface of the blade
+        
+        wireframe : list
+            list of every airfoil_wire scaled and rotated at every grid point
+        """
+        
+        wireframe = []
+        for bm, afl in zip(self.blade_matrix, self.airfoilLst):
             if afl.wire == None:
                 afl.gen_OCCtopo()
             
@@ -109,56 +176,17 @@ class Blade(Component):
             wire = rotate_wire(wire, gp_Ax1(gp_Pnt(0,0,0), gp_Dir(1,0,0)), np.pi/2)
             wire = rotate_wire(wire, gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,0,1)), -np.pi/2)
             wire = translate_wire(wire, gp_Pnt(0,0,0), gp_Pnt(0,0.25,0))
-            wire = scale_wire(wire, gp_Pnt(0,0,0), bm[1])
-
-            wire = rotate_wire(wire, gp_Ax1(gp_Pnt(0,0,0), gp_Dir(1,0,0)), bm[2])  
-            wire = translate_wire(wire, gp_Pnt(0,0,0), gp_Pnt(bm[3],bm[4],bm[5]))
+            wire = scale_wire(wire, gp_Pnt(0,0,0), bm[4])
+            wire = rotate_wire(wire, gp_Ax1(gp_Pnt(0,0,0), gp_Dir(1,0,0)), bm[5])  
+            wire = translate_wire(wire, gp_Pnt(0,0,0), gp_Pnt(bm[1],bm[2],bm[3]))
+            wireframe.append(wire)
             display.DisplayShape(wire, color='BLACK')
-            wireLst.append(wire)
-            
-        return make_loft(wireLst[:12], ruled=False, tolerance=1e-5, continuity=4, check_compatibility=True)
-    
-def interp_airfoil_position(airfoil_position, airfoils, grid_loc):
-    #TBD: Extrapolation
-    if grid_loc in airfoil_position[0]:
-        afname = airfoil_position[1][airfoil_position[0].index(grid_loc)]
-        return next((x for x in airfoils if x.name == afname), None)
+            #loft = make_loft(wireframe[:12], ruled=False, tolerance=1e-3, continuity=1, check_compatibility=True)
+        return wireframe         
+        
 
-    #find closest value:
-    min_idx = np.argmin([abs(x-grid_loc) for x in airfoil_position[0]])
-    min_val = airfoil_position[0][min_idx]
-    
-    if grid_loc > min_val:
-        iv_idx = (min_idx,min_idx+1)
-    else:
-        iv_idx = (min_idx-1, min_idx)
-    
-    iv_val = tuple(airfoil_position[0][iv_idx[0]:iv_idx[1]+1])
-    iv_af = tuple(airfoil_position[1][iv_idx[0]:iv_idx[1]+1])
-    k = (grid_loc-iv_val[0]) / (iv_val[1]-iv_val[0])
-    
-    #select af from airfoils
-    af1 = next((x for x in airfoils if x.name == iv_af[0]), None)
-    af2 = next((x for x in airfoils if x.name == iv_af[1]), None)
-    
-    if af1 == af2:
-        return af1
-    
-    #return transformed airfoil
-    return af1.transformed(af2,k,200)
-    
 if __name__ == '__main__':
-
-    import yaml
-    from OCC.Display.SimpleGui import init_display
-    from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge, BRepBuilderAPI_Transform
-    from OCC.gp import gp_Vec, gp_Trsf2d, gp_Pnt2d
-    from OCC.Geom import Geom_Plane
-    from SONATA.cbm.display.display_utils import show_coordinate_system
-    
-    display, start_display, add_menu, add_function_to_menu = init_display('qt-pyqt5')
-    display.Context.SetDeviationAngle(1e-5)       # 0.001 default. Be careful to scale it to the problem.
-    display.Context.SetDeviationCoefficient(1e-5) #
+    import yaml  
         
     with open('jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
         inputs  = myfile.read()
@@ -169,16 +197,23 @@ if __name__ == '__main__':
     yml_schema = yaml.load(schema)
     
     airfoils = [Airfoil(af) for af in yml.get('airfoils')]
+    materials = read_IAE37_materials(yml.get('materials'))
     
     byml = yml.get('components').get('blade')
-    B = Blade(gp_Pnt(0,10,0), gp_Dir(0,0,1), name='TestBlade')
-    B.read_IAE37(byml)
-    bm,afl = B.gen_blade_matrix(airfoils)
-    loft = B.gen_surface()
+    B = Blade(name='TestBlade')
+    B.read_IAE37(byml, airfoils, materials)
 
-    display.DisplayShape(loft)
-    show_coordinate_system(display,1)
+    for cs in B.sections.values():
+        cs.cbm_gen_topo()
+        cs.cbm_gen_mesh()
+        cs.cbm_post_2dmesh()
 
+    # ====== DISPLAY ==============
+    display, start_display, add_menu, add_function_to_menu = init_display()
+    p = gp_Pnt(0,0,0)
+    display.DisplayShape(p)
+    show_coordinate_system(display,3)
+    B.gen_surface()
+    display.View_Iso()
     display.FitAll()
     start_display()   
-    
