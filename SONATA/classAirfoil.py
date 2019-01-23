@@ -103,7 +103,63 @@ class Airfoil(object):
         self.coordinates = np.asarray([yml['coordinates']['x'],yml['coordinates']['y']]).T
         self.polars = [Polar(p) for p in yml['polars']]
         
+
+    def gen_OCCtopo(self):
+        """
+        generates a Opencascade TopoDS_Wire and BSplineLst from the airfoil coordinates.
+        This can be used for interpolation and surface generation
+        """
+        data = np.hstack((self.coordinates,np.zeros((self.coordinates.shape[0],1))))
+        self.BSplineLst = BSplineLst_from_dct(data, angular_deflection = 30, closed=True, tol_interp=1e-6, twoD = False)
+        #print(self.BSplineLst)
+        self.wire = build_wire_from_BSplineLst(self.BSplineLst, twoD=False)
+        return self.wire
         
+    
+    def transformed(self, airfoil2, k=0.5, n=500):
+        """
+        Performs and linear interpolation of the airfoil with another airfoil 
+        by translating equidistant points in the direction of vector v. 
+        The magnitude of the translation is the vector's magnitude multiplied 
+        by factor k.
+    
+        Parameters
+        ----------
+        airfoil2 : Airfoil
+            The airfoil the user whats the current airfoil to be transformed to
+        k : float
+            the vectors magnitude factor. k=0: the transformed airfoil remains 
+            the airfoil. k=1: the transformed airfoil will become airfoil2
+        n : int
+            number of discretization points.
+        
+        Returns:
+        ----------
+        trf_af : Airfoil
+            with the name = TRF_airfoil1_airfoil2_k
+            
+        """
+        #check if wire exists, else create it
+        if self.wire == None:
+            self.gen_OCCtopo()
+        if airfoil2.wire == None:
+            airfoil2.gen_OCCtopo()
+        
+        p1_lst = equidistant_Points_on_wire(self.wire, n)       
+        p2_lst = equidistant_Points_on_wire(airfoil2.wire, n)
+        v_lst = [gp_Vec(p1,p2) for p1,p2 in zip(p1_lst, p2_lst)]
+        
+        pres = []
+        for i,p in enumerate(p1_lst):
+            pres.append(p.Translated(v_lst[i].Multiplied(k)))
+        
+        trf_af = Airfoil()
+        str_k = '%.3f' % k
+        trf_af.name = 'TRF_'+self.name+'_'+airfoil2.name+'_'+str_k.replace('.','')
+        trf_af.coordinates = PntLst_to_npArray(pres)[:,:2]      
+        return trf_af
+    
+    
     def plot_polars(self, xlim = (-24,32), markercycle='.>^+*',):
         """
         plots the airfoil coordinates and the stored polars. 
@@ -150,86 +206,8 @@ class Airfoil(object):
                     ax[i][j].axhline(xmin=xlim[0],xmax=xlim[1], color='k', linestyle='-', linewidth=1.5)
                     ax[i][j].axvline(ymin=0,ymax=1, color='k', linestyle='-', linewidth=1.5)
                     ax[i][j].legend()
-           
+       
     
-    def gen_wire(self):
-        data = np.hstack((self.coordinates,np.zeros((self.coordinates.shape[0],1)))).T
-        harray = TColgp_HArray1OfPnt_from_nparray(data)
-        
-        #2D        
-        #harray = TColgp_HArray1OfPnt2d_from_nparray(self.coordinates.T)
-         
-        anInterpolation = GeomAPI_Interpolate(harray.GetHandle(), False, 1e-5)
-        anInterpolation.Perform()
-        bspline = anInterpolation.Curve().GetObject()
-        
-        #2D
-        #P = gp_Pnt(0,0,0)
-        #V = gp_Dir(gp_Vec(0,0,1))
-        #Plane = Geom_Plane(P, V)
-        #edge = BRepBuilderAPI_MakeEdge(bspline.GetHandle(),Plane.GetHandle())
-        
-        edge = BRepBuilderAPI_MakeEdge(bspline.GetHandle())
-        wire = BRepBuilderAPI_MakeWire(edge.Edge()).Wire()
-    
-        return wire
-    
-    
-    
-    def gen_OCCtopo(self):
-        """
-        generates a Opencascade TopoDS_Wire and BSplineLst from the airfoil coordinates.
-        This can be used for interpolation and surface generation
-        """
-        data = np.hstack((self.coordinates,np.zeros((self.coordinates.shape[0],1))))
-        self.BSplineLst = BSplineLst_from_dct(data, angular_deflection = 40, closed=True, tol_interp=1e-4, twoD = False)
-        #print(self.BSplineLst)
-        self.wire = build_wire_from_BSplineLst(self.BSplineLst, twoD=False)
-        return self.wire
-        
-    def transformed(self, airfoil2, k=0.5, n=1000):
-        """
-        Performs and linear interpolation of the airfoil with another airfoil 
-        by translating equidistant points in the direction of vector v. 
-        The magnitude of the translation is the vector's magnitude multiplied 
-        by factor k.
-    
-        Parameters
-        ----------
-        airfoil2 : Airfoil
-            The airfoil the user whats the current airfoil to be transformed to
-        k : float
-            the vectors magnitude factor. k=0: the transformed airfoil remains 
-            the airfoil. k=1: the transformed airfoil will become airfoil2
-        n : int
-            number of discretization points.
-        
-        Returns:
-        ----------
-        trf_af : Airfoil
-            with the name = TRF_airfoil1_airfoil2_k
-            
-        """
-        #check if wire exists, else create it
-        if self.wire == None:
-            self.gen_OCCtopo()
-        if airfoil2.wire == None:
-            airfoil2.gen_OCCtopo()
-        
-        p1_lst = equidistant_Points_on_wire(self.wire, n)       
-        p2_lst = equidistant_Points_on_wire(airfoil2.wire, n)
-        v_lst = [gp_Vec(p1,p2) for p1,p2 in zip(p1_lst, p2_lst)]
-        
-        pres = []
-        for i,p in enumerate(p1_lst):
-            pres.append(p.Translated(v_lst[i].Multiplied(k)))
-        
-        trf_af = Airfoil()
-        str_k = '%.3f' % k
-        trf_af.name = 'TRF_'+self.name+'_'+airfoil2.name+'_'+str_k.replace('.','')
-        trf_af.coordinates = PntLst_to_npArray(pres)[:,:2]      
-        return trf_af
-        
     def run_mses(self,re,ma):
         """
         run mses to calculate the polars.
