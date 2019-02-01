@@ -652,8 +652,6 @@ def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_inter
     
     #TODP: check all datapoints and merge if allclose is true 
     
-
-    
     #Find corners and edges of data
     #print(DCT_data)
     DCT_angles = calc_DCT_angles(DCT_data)
@@ -720,7 +718,7 @@ def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_inter
             else:
                 tmp_interpolation = GeomAPI_Interpolate(tmp_harray.GetHandle(), False, tol_interp)
         except: 
-            print('Raised ERROR')#RAISED ERROR
+            print('ERROR: BSplineLst_from_dct did not perform the Interpolation with tol_interp', tol_interp)#RAISED ERROR
 #            plt.figure()
 #            plt.clf()
 #            plt.axis('equal')  
@@ -731,6 +729,7 @@ def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_inter
                    
         tmp_interpolation.Perform()                              
         tmp_bspline = tmp_interpolation.Curve().GetObject()
+        #print(tmp_bspline.Degree(), tmp_bspline.NbKnots())
         list_of_bsplines.append(tmp_bspline)
         
     return list_of_bsplines

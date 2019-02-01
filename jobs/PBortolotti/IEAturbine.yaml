@@ -427,8 +427,7 @@ materials:
       orth:   0
       rho:    1100
       E:      4560
-      G:      1450
-      nu:     0.5
+      nu:     0.33
       alpha:  0.0
     - name:   triax
       orth:   1

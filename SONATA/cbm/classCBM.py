@@ -22,10 +22,14 @@ import time
 from OCC.Display.SimpleGui import init_display
 from OCC.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1
 
+if __name__ == '__main__':
+    os.chdir('../..')
+
 #SONATA modules:
 from SONATA.cbm.fileIO.CADoutput import export_to_step
 from SONATA.cbm.fileIO.CADinput import load_3D, import_2d_stp, import_3d_stp
 from SONATA.classMaterial import read_yml_materials
+from SONATA.cbm.classCBMConfig import CBMConfig
 
 from SONATA.cbm.bladegen.blade import Blade
 
@@ -57,7 +61,7 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
                                         display_custome_shape, transform_wire_2to3d  
 
 #from SONATA.anbax.anbax_utl import build_dolfin_mesh
-#from anbax import anbax
+#from SONATA.anbax.anba_v4 import anbax
 
 class CBM(object):
     ''' 
@@ -71,7 +75,7 @@ class CBM(object):
     config : configuration
         Pointer to the <Configuration> object.
         
-    MaterialLst: list
+    materials: list
         List of <Materials> object instances.
     
     SegmentLst: list
@@ -115,7 +119,7 @@ class CBM(object):
     '''
 
         
-    #__slots__ = ('config' , 'MaterialLst' , 'SegmentLst' , 'WebLst' , 'BW' , 'mesh', 'BeamProperties', 'display', )
+    #__slots__ = ('config' , 'materials' , 'SegmentLst' , 'WebLst' , 'BW' , 'mesh', 'BeamProperties', 'display', )
     def __init__(self, Configuration, materials = None, **kwargs):
         """
         Initialize attributes.
@@ -132,6 +136,10 @@ class CBM(object):
             self.materials = materials
         else:
             self.materials = read_yml_materials(self.config.setup['material_db'])
+        
+        self.name = 'cbm_noname'
+        if kwargs.get('name'):
+            self.name = kwargs.get('name')
         
         self.SegmentLst = []
         self.WebLst = []    
@@ -159,22 +167,23 @@ class CBM(object):
             self.Theta = np.degrees(bm[5])
             wire = af.gen_OCCtopo()
             
-            wire = translate_wire(wire, gp_Pnt(0,0,0), gp_Pnt(-0.25,0,0))
+            wire = rotate_wire(wire, gp_Ax1(gp_Pnt(bm[6],0,0), gp_Dir(0,0,1)), -bm[5], copy=True)
+            wire = translate_wire(wire, gp_Pnt(bm[6],0,0), gp_Pnt(0,0,0))
             wire = scale_wire(wire, gp_Pnt(0,0,0), bm[4])
-            wire = rotate_wire(wire, gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,0,1)), bm[5])  
+            #wire = translate_wire(wire, gp_Pnt(0,0,0), gp_Pnt(bm[1],bm[2],bm[3]))
+            
             npArray = discretize_wire(wire, Deflection = 1e-4)
             BSplineLst = BSplineLst_from_dct(npArray, angular_deflection = 20, tol_interp=1e-4)
             self.BoundaryBSplineLst = set_BSplineLst_to_Origin(BSplineLst,self.Theta) 
             
-            
     def __getstate__(self):
         """Return state values to be pickled."""
-        return (self.config, self.MaterialLst, self.SegmentLst, self.WebLst, self.BW, self.mesh, self.BeamProperties)   
+        return (self.config, self.materials, self.SegmentLst, self.WebLst, self.BW, self.mesh, self.BeamProperties)   
     
     
     def __setstate__(self, state):
         """Restore state from the unpickled state values."""
-        (self.config, self.MaterialLst, self.SegmentLst, self.WebLst, self.BW, self.mesh, self.BeamProperties)  = state
+        (self.config, self.materials, self.SegmentLst, self.WebLst, self.BW, self.mesh, self.BeamProperties)  = state
         if self.config.setup['input_type'] == 3:
             self.surface3d = load_3D(self.config.setup['datasource'])
         elif self.config.setup['input_type']  == 4:
@@ -435,6 +444,7 @@ class CBM(object):
         #Build Segment 0:
         self.SegmentLst[0].build_wire()
         l0 = get_BSplineLst_length(self.SegmentLst[0].BSplineLst)
+        #l0 = 300
         self.SegmentLst[0].build_layers(l0 = l0)
         self.SegmentLst[0].determine_final_boundary()
         
@@ -503,6 +513,7 @@ class CBM(object):
         #meshing parameters:  
         Resolution = self.config.setup['mesh_resolution'] # Nb of Points on Segment0
         length = get_BSplineLst_length(self.SegmentLst[0].BSplineLst)
+        #length = 300
         global_minLen = round(length/Resolution,5)
             
         core_cell_area = 1.25*global_minLen**2
@@ -582,22 +593,22 @@ class CBM(object):
         return None
 
 
-#    def cbm_run_anbax(self):
-#        """interface method to run the solver anbax from marco.morandini 
-#        
-#        Notes:
-#            To be defined.
-#        
-#        """
-#        self.mesh, nodes = sort_and_reassignID(self.mesh)
-#        (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = \
-#            build_dolfin_mesh(self.mesh, nodes, self.MaterialLst)
-#        #TBD: pass it to anbax and run it!
-#        anba = anbax(mesh, 1, matLibrary, materials, plane_orientations, fiber_orientations, maxE)
-#        stiff = anba.compute()
-#        stiff.view()
-#        
-#        return None
+    def cbm_run_anbax(self):
+        """interface method to run the solver anbax from marco.morandini 
+        
+        Notes:
+            To be defined.
+        
+        """
+        self.mesh, nodes = sort_and_reassignID(self.mesh)
+        (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = \
+            build_dolfin_mesh(self.mesh, nodes, self.materials)
+        #TBD: pass it to anbax and run it!
+        anba = anbax(mesh, 1, matLibrary, materials, plane_orientations, fiber_orientations, maxE)
+        stiff = anba.compute()
+        stiff.view()
+        
+        return None
         
    
     def cbm_run_vabs(self, jobid=None, rm_vabfiles=True, ramdisk=False):
@@ -630,7 +641,7 @@ class CBM(object):
         >>> job.cbm_run_vabs(rm_vabfiles=True, ramdisk=True)
 
         '''
-        self.mesh,nodes = sort_and_reassignID(self.mesh)
+        (self.mesh, nodes) = sort_and_reassignID(self.mesh)
         
         if jobid == None:
             s = datetime.now().isoformat(sep='_',timespec='microseconds')
@@ -650,9 +661,12 @@ class CBM(object):
             else:
                 print('ERROR: ramdisk directory "/tmpfs" does not exist!')
 
+        elif self.config.filename == '':
+            vabs_filename = self.name+fstring
+            
         else:
+            print('config_filename')
             vabs_filename = self.config.filename.replace('.yml', fstring)
-        
         
         print('STATUS:\t Running VABS for Constitutive modeling:')
         
@@ -665,24 +679,25 @@ class CBM(object):
             
         elif platform.system == 'Windows':
             cmd = ['SONATA/vabs/bin/VABSIII.exe', vabs_filename]
-    
+            
+        print('vabs_fname',vabs_filename)
         result = None
         counter = 0
         stdout = ''
         while result is None and counter<1000:
+            #EXECUTE VABS:
             try:
-                #EXECUTE VABS:
                 if self.config.vabs_cfg.recover_flag == 1:
                     self.config.vabs_cfg.recover_flag=0
-                    export_cells_for_VABS(self.mesh,nodes, vabs_filename, self.config.vabs_cfg, self.MaterialLst)
+                    export_cells_for_VABS(self.mesh, nodes, vabs_filename, self.config.vabs_cfg, self.materials)
                     stdout = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
                     self.config.vabs_cfg.recover_flag=1
-                    export_cells_for_VABS(self.mesh,nodes,vabs_filename, self.config.vabs_cfg, self.MaterialLst)
+                    export_cells_for_VABS(self.mesh, nodes, vabs_filename, self.config.vabs_cfg, self.materials)
                     print('STATUS:\t Running VABS for 3D Recovery:')
                     stdout = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
                     
                 else:
-                    export_cells_for_VABS(self.mesh, nodes ,vabs_filename, self.config.vabs_cfg, self.MaterialLst)
+                    export_cells_for_VABS(self.mesh, nodes, vabs_filename, self.config.vabs_cfg, self.materials)
                     stdout = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
                 
                 stdout = stdout.replace('\r\n\r\n','\n\t   -')
@@ -705,8 +720,8 @@ class CBM(object):
                         time.sleep(0.01)
                         counter += 1
                     else:
-                        break
                         print(e)
+                        break
 
         self.BeamProperties = result
         
@@ -728,10 +743,13 @@ class CBM(object):
             folder = '/'.join(vabs_filename.split('/')[:-1])
             fstring = vabs_filename.split('/')[-1]
             #print(vabs_filename)
-            for file in os.listdir(folder):
-                if fstring in file:
-                    #print('removing: '+folder+'/'+file)
-                    os.remove(folder+'/'+file)
+            if folder != '':
+                for file in os.listdir(folder):
+                    if fstring in file:
+                        #print('removing: '+folder+'/'+file)
+                        os.remove(folder+'/'+file)
+            else:
+                print(folder)
         
         return None
             
@@ -851,17 +869,17 @@ class CBM(object):
         '''
         
         self.cbm_display_config()
-        #display_custome_shape(display,SegmentLst[0].wire,2,0,[0,0,0])
+        #display_custome_shape(display,seöf.SegmentLst[0].wire,2,0,[0,0,0])
 
         if self.config.setup['input_type'] == 3 or self.config.setup['input_type'] == 4:
             self.display.Context.SetDeviationAngle(1e-6)       
             self.display.Context.SetDeviationCoefficient(1e-6) 
             
-            display_SONATA_SegmentLst(self.display,self.SegmentLst,self.config.setup['radial_station'],-math.pi/2,-math.pi/2)
+            display_SONATA_SegmentLst(self.display,self.SegmentLst,(self.config.setup['radial_station'],0,0),-math.pi/2,-math.pi/2)
             self.display.DisplayShape(self.surface3d, color=None, transparency=0.7, update=True)
             
             if self.config.setup['BalanceWeight']:
-                transform_wire_2to3d(self.display,self.BW.wire,self.config.setup['radial_station'],-math.pi/2,-math.pi/2)
+                transform_wire_2to3d(self.display,self.BW.wire,(self.config.setup['radial_station'],0,0),-math.pi/2,-math.pi/2)
 
         else:
             display_SONATA_SegmentLst(self.display,self.SegmentLst)
@@ -928,3 +946,21 @@ class CBM(object):
 ###############################################################################    
 if __name__ == '__main__':   
     plt.close('all')
+    fname = 'jobs/VariSpeed/uh60a_cbm_advanced/sec_config.yml'
+    #fname = 'jobs/VariSpeed/uh60a_cbm_simple/sec_config.yml'
+    #fname = 'jobs/AREA/R250/sec_config.yml'
+    #fname = 'jobs/PBortolotti/sec_config.yml'
+    config = CBMConfig(fname)
+    
+    job = CBM(config)
+    
+    job.cbm_gen_topo()
+    job.cbm_gen_mesh()
+    
+    job.cbm_review_mesh()
+    job.cbm_run_vabs()
+    job.cbm_post_2dmesh(title='Hello World!')
+#    #job.cbm_post_3dtopo()
+#    job.config.vabs_cfg.recover_flag = 1
+#    job.config.vabs_cfg.M = [0,2000e4,0]
+

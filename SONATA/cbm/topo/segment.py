@@ -57,7 +57,8 @@ class Segment(object):
         self.inv_cumivLst = []
         self.final_Boundary_ivLst = []
         self.Projection = relevant_cummulated_layup_boundaries(self.Layup)
-
+        self.wire = None
+        
         if self.OCC == True:
             self.BSplineLst = kwargs.get('Boundary')
             #self.BSplineLst = set_BSplineLst_to_Origin(BSplineLst_tmp)
@@ -69,7 +70,6 @@ class Segment(object):
             elif kwargs.get('filename') != None:
                 BSplineLst_tmp = self.BSplineLst_from_file(kwargs.get('filename'), 30, self.scale_factor)  
             self.BSplineLst = set_BSplineLst_to_Origin(BSplineLst_tmp)
-
 
     
     def __repr__(self):

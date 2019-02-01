@@ -125,6 +125,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
         #==================DETECT CORNERS====================================== 
         if len(pPnts) == 0: 
             print('ERROR:\t No Projection found for node,', node.id)
+            
         elif len(pPnts) == 1: 
             b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))      
 

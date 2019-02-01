@@ -175,27 +175,27 @@ def display_custome_shape(display,shape,linewidth=1.0,transparency=0.0,RGB=[0,0,
     return None
 
 
-def transform_wire_2to3d(display,wire,Dx=0,alpha=0,beta=0,color='BLACK',show=True):
+def transform_wire_2to3d(display,wire,coord=(0,0,0),alpha=0,beta=0,color='BLACK',show=True):
     wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,0,1)),alpha)
     wire = rotate_wire(wire,gp_Ax1(gp_Pnt(0,0,0),gp_Dir(0,1,0)),beta)
-    wire = translate_wire(wire,gp_Pnt(0,0,0),gp_Pnt(Dx,0,0))
+    wire = translate_wire(wire,gp_Pnt(0,0,0),gp_Pnt(float(coord[0]),float(coord[1]),float(coord[2])))
     if show:
         display.DisplayShape(wire, color=color)
     return wire
 
 #=======================SONATA DISPLAY FUCTIONS===================================
-def display_SONATA_SegmentLst(display,SegmentLst,Dx=0,alpha=0,beta=0):
+def display_SONATA_SegmentLst(display,SegmentLst,coord=(0,0,0),alpha=0,beta=0):
     # transfer shapes and display them in the viewer   
-    transform_wire_2to3d(display,SegmentLst[0].wire,Dx,alpha,beta,color='BLACK')
+    transform_wire_2to3d(display,SegmentLst[0].wire,coord,alpha,beta,color='BLACK')
     
     for i,seg in enumerate(SegmentLst):
-        wire = transform_wire_2to3d(display,seg.wire,Dx,alpha,beta,)
+        wire = transform_wire_2to3d(display,seg.wire,coord,alpha,beta,)
     
         k = 0
         for j,layer in enumerate(seg.LayerLst):
             [R,G,B,T] =  plt.cm.jet(k*50)
             
-            wire = transform_wire_2to3d(display,layer.wire,Dx,alpha,beta,show=False)
+            wire = transform_wire_2to3d(display,layer.wire, coord, alpha, beta, show=False)
             display.DisplayColoredShape(wire, Quantity_Color(R, G, B, 0),update=True)
 #            #display Start Point
 #            string = 'Layer:'+str(layer.ID)+'(S1='+str(layer.S1)+')'

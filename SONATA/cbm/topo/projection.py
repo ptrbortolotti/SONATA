@@ -238,12 +238,13 @@ def sort_layup_projection(Projection):
                   [ 0.   0.3  2. ]
                   [ 0.3  0.5  3. ]])               
     '''
+    #print(Projection)
     sorted_Projection=[]
     for i,proj in enumerate(Projection):
         a =  proj[:,:2].flatten()
         unique, counts = np.unique(a, return_counts=True)
         iv_boundaries = np.sort(unique[np.where(counts == 1)])
-        #print(iv_boundaries)
+        #print(a, unique, counts, iv_boundaries)
         b = proj[proj[:,0].argsort()]
         #regular interval:
         if np.all(a>=iv_boundaries[0]) and np.all(a<=iv_boundaries[1]):
