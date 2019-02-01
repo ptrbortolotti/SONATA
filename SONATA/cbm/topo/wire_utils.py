@@ -104,7 +104,7 @@ def equidistant_Points_on_wire(wire,NbPoints):
         PntLst.append(Pnt)
     return PntLst
     
-def rotate_wire(wire,ax1,angle):    #for top
+def rotate_wire(wire, ax1, angle, copy=False):    #for top
     aTrsf = gp_Trsf()    
     aTrsf.SetRotation(ax1,angle)
     aBRespTrsf = BRepBuilderAPI_Transform(wire, aTrsf)
@@ -113,18 +113,18 @@ def rotate_wire(wire,ax1,angle):    #for top
     return rotWire
 
 
-def translate_wire(wire,gp_Pnt1,gp_Pnt2):
+def translate_wire(wire,gp_Pnt1,gp_Pnt2, copy=False):
     aTrsf = gp_Trsf()
     aTrsf.SetTranslation(gp_Pnt1,gp_Pnt2)
-    aBRespTrsf = BRepBuilderAPI_Transform(wire, aTrsf)
+    aBRespTrsf = BRepBuilderAPI_Transform(wire, aTrsf, copy)
     atraslatedShape = aBRespTrsf.Shape()
-    translateWire = topods.Wire(atraslatedShape)
-    return translateWire
+    translatedWire = topods.Wire(atraslatedShape)
+    return translatedWire
 
-def scale_wire(wire,gp_Pnt1,factor):
+def scale_wire(wire,gp_Pnt1,factor, copy=False):
     aTrsf = gp_Trsf()
     aTrsf.SetScale(gp_Pnt1,factor)
-    aBRespTrsf = BRepBuilderAPI_Transform(wire,aTrsf)
+    aBRespTrsf = BRepBuilderAPI_Transform(wire, aTrsf, copy)
     aBRespTrsf.Build()
     aScaledShape = aBRespTrsf.Shape()
     scaledWire = topods.Wire(aScaledShape)
