@@ -13,7 +13,7 @@ if __name__ == '__main__':
     os.chdir('/media/gu32kij/work/TPflumm/SONATA')
 from SONATA.cbm.fileIO.read_yaml_input import clean_filestring
 from SONATA.vabs.VABS_interface import VABS_config
-from SONATA.classMaterial import read_IAE37_materials, find_material
+from SONATA.classMaterial import read_IEA37_materials, find_material
 
 class CBMConfig(object):
     """
@@ -45,30 +45,30 @@ class CBMConfig(object):
     
     """
     __slots__ = ( 'filename', 'setup', 'webs', 'segments', 'bw', 'flags', 'vabs_cfg') 
-    def __init__(self, inputdata=None, materials = None, iae37 = False):
+    def __init__(self, inputdata=None, materials = None, iea37 = False):
         self.setup, self.webs, self.segments, self.bw = {},{},{},{}
         self.filename = ''
         
-        if isinstance(inputdata, str) and iae37 == False:
+        if isinstance(inputdata, str) and iea37 == False:
             self.filename = inputdata
             self._read_yaml_config(self.filename)
         
-        elif isinstance(inputdata, dict) and iae37 == True:
+        elif isinstance(inputdata, dict) and iea37 == True:
             yml = inputdata
-            self._read_IAE37(yml, materials)
+            self._read_IEA37(yml, materials)
             
         self.vabs_cfg = VABS_config()
         self.flags = {'mesh_core': True}
 
 
-    def _read_IAE37(self, yml, materials):
-        """ read the IAE37 style yml dictionary of a section and assign class 
+    def _read_IEA37(self, yml, materials):
+        """ read the IEA37 style yml dictionary of a section and assign class 
         attributes to this configuration object
         
         Parameters:
         ----------
         yml : dict
-           dictionary of the yaml style IAE37 section input    
+           dictionary of the yaml style IEA37 section input    
         """
         #Setup:
         self.setup = {}
@@ -153,11 +153,11 @@ if __name__ == '__main__':
     fname = 'examples/sec_config.yml'
     cfg = CBMConfig(fname)
 
-    #IAE37 Style configuration:
+    #IEA37 Style configuration:
     with open('jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
         inputs  = myfile.read()
     
     yml = yaml.load(inputs)
-    materials = read_IAE37_materials(yml.get('materials'))
+    materials = read_IEA37_materials(yml.get('materials'))
     yml = yml.get('components').get('blade').get('2d_fem').get('sections')[1]
-    wt_cfg = CBMConfig(yml, materials, iae37=True)       
+    wt_cfg = CBMConfig(yml, materials, iea37=True)       

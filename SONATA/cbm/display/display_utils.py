@@ -186,31 +186,32 @@ def transform_wire_2to3d(display,wire,coord=(0,0,0),alpha=0,beta=0,color='BLACK'
 #=======================SONATA DISPLAY FUCTIONS===================================
 def display_SONATA_SegmentLst(display,SegmentLst,coord=(0,0,0),alpha=0,beta=0):
     # transfer shapes and display them in the viewer   
-    transform_wire_2to3d(display,SegmentLst[0].wire,coord,alpha,beta,color='BLACK')
-    
-    for i,seg in enumerate(SegmentLst):
-        wire = transform_wire_2to3d(display,seg.wire,coord,alpha,beta,)
-    
-        k = 0
-        for j,layer in enumerate(seg.LayerLst):
-            [R,G,B,T] =  plt.cm.jet(k*50)
-            
-            wire = transform_wire_2to3d(display,layer.wire, coord, alpha, beta, show=False)
-            display.DisplayColoredShape(wire, Quantity_Color(R, G, B, 0),update=True)
-#            #display Start Point
-#            string = 'Layer:'+str(layer.ID)+'(S1='+str(layer.S1)+')'
-#            P = gp_Pnt(layer.StartPoint.X(),layer.StartPoint.Y(),0)
-#            display.DisplayShape(P,color="BLUE")
-#            display.DisplayMessage(P,string,message_color=(0.0,0.0,0.0))
-#            
-#            #display End Point
-#            string = 'Layer:'+str(layer.ID)+'(S1='+str(layer.S2)+')'
-#            P = gp_Pnt(layer.EndPoint.X(),layer.EndPoint.Y(),0)
-#            display.DisplayShape(P,color="RED")
-#            display.DisplayMessage(P,string,message_color=(0.0,0.0,0.0))
-            k = k+1;
-            if k>5:
-                k = 0
+    if SegmentLst:
+        transform_wire_2to3d(display,SegmentLst[0].wire,coord,alpha,beta,color='BLACK')
+        
+        for i,seg in enumerate(SegmentLst):
+            wire = transform_wire_2to3d(display,seg.wire,coord,alpha,beta,)
+        
+            k = 0
+            for j,layer in enumerate(seg.LayerLst):
+                [R,G,B,T] =  plt.cm.jet(k*50)
+                
+                wire = transform_wire_2to3d(display,layer.wire, coord, alpha, beta, show=False)
+                display.DisplayColoredShape(wire, Quantity_Color(R, G, B, 0),update=True)
+    #            #display Start Point
+    #            string = 'Layer:'+str(layer.ID)+'(S1='+str(layer.S1)+')'
+    #            P = gp_Pnt(layer.StartPoint.X(),layer.StartPoint.Y(),0)
+    #            display.DisplayShape(P,color="BLUE")
+    #            display.DisplayMessage(P,string,message_color=(0.0,0.0,0.0))
+    #            
+    #            #display End Point
+    #            string = 'Layer:'+str(layer.ID)+'(S1='+str(layer.S2)+')'
+    #            P = gp_Pnt(layer.EndPoint.X(),layer.EndPoint.Y(),0)
+    #            display.DisplayShape(P,color="RED")
+    #            display.DisplayMessage(P,string,message_color=(0.0,0.0,0.0))
+                k = k+1;
+                if k>5:
+                    k = 0
     return None
 
 

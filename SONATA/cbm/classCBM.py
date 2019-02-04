@@ -412,8 +412,8 @@ class CBM(object):
                 elif self.config.setup['input_type'] == 5: #5) IEA37 Formulation, everything is passed internally!
                     self.SegmentLst.append(Segment(k, **seg, Theta = self.Theta, OCC=True, Boundary = self.BoundaryBSplineLst))
                         
-                    #BSplineLst get BSplineLst from IAE37 definition of blade. By generating the crosssection in the blade class and passing the BSplineLst to the section!
-                    #Get Theta from the IAE37 definition of the blade !
+                    #BSplineLst get BSplineLst from IEA37 definition of blade. By generating the crosssection in the blade class and passing the BSplineLst to the section!
+                    #Get Theta from the IEA37 definition of the blade !
                     #self.SegmentLst.append()
                     
                 else:
@@ -960,6 +960,8 @@ if __name__ == '__main__':
     job.cbm_review_mesh()
     job.cbm_run_vabs()
     job.cbm_post_2dmesh(title='Hello World!')
+    
+    
 #    #job.cbm_post_3dtopo()
 #    job.config.vabs_cfg.recover_flag = 1
 #    job.config.vabs_cfg.M = [0,2000e4,0]
