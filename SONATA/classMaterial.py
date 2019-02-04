@@ -82,7 +82,7 @@ class AnisotropicMaterial(Material):
         #TODO: Set Strenght Characteristics according for Anisotropic Material
 
 
-def read_IAE37_materials(yml):
+def read_IEA37_materials(yml):
     materials = OrderedDict()
     for i,mat in enumerate(yml):
         ID = i+1
@@ -123,6 +123,6 @@ if __name__ == '__main__':
     with open('jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
         inputs  = myfile.read()
     wt_data     = yaml.load(inputs)    
-    materials1 = read_IAE37_materials(wt_data['materials'])
+    materials1 = read_IEA37_materials(wt_data['materials'])
     
     materials2 = read_yml_materials('examples/mat_db.yml')

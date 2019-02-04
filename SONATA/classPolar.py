@@ -53,7 +53,7 @@ class Polar(object):
         self.configuration = ''
             
         if isinstance(yml, dict): 
-            self.read_IAE37(yml)
+            self.read_IEA37(yml)
 
         if self._check_coefficients(c_l): 
             self.c_l = c_l
@@ -74,18 +74,28 @@ class Polar(object):
             self.configuration = configuration
 
 
-    def read_IAE37(self, yml):
+    def read_IEA37(self, yml):
         """
-        procedure that reads the IAE Wind Task 37 style Polar dictionary and assigns them to
+        procedure that reads the IEA Wind Task 37 style Polar dictionary and assigns them to
         the class attributes
         """
-        self.configuration = yml['configuration']
-        self.re = yml['re']
-        self.ma = None #TBD
+        self.configuration = yml.get('configuration')
+        self.re = yml.get('re')
+        self.ma = yml.get('ma')
         self.c_l = np.asarray([yml['c_l']['grid'],yml['c_l']['values']]).T
         self.c_d = np.asarray([yml['c_d']['grid'],yml['c_d']['values']]).T
         self.c_m = np.asarray([yml['c_m']['grid'],yml['c_m']['values']]).T
+    
+    def write_IEA37(self):
+        tmp = {}
+        tmp['configuration'] = self.configuration
+        tmp['re'] = self.re
+        tmp['ma'] = self.ma
+        tmp['c_l'] = dict(zip(('grid','values'), self.c_l.T.tolist()))
+        tmp['c_d'] = dict(zip(('grid','values'), self.c_d.T.tolist()))
+        tmp['c_m'] = dict(zip(('grid','values'), self.c_m.T.tolist()))
         
+        return tmp
         
     def _check_coefficients(self, x):
         """checks the aerodynamic coefficients for correctness"""
@@ -124,7 +134,3 @@ if __name__ == '__main__':
     af = wt_data['airfoils'][0]
     polars = [Polar(p) for p in af['polars']]
     
-    
-
-    
-

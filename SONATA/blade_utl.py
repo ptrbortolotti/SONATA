@@ -12,7 +12,7 @@ from OCC.TopoDS import TopoDS_Wire,  TopoDS_Vertex
 from OCC.BRepOffsetAPI import BRepOffsetAPI_ThruSections
 
 def interp_airfoil_position(airfoil_position, airfoils, grid_loc):
-    #TBD: Extrapolation
+        #TBD: Extrapolation
     if grid_loc in airfoil_position[0]:
         afname = airfoil_position[1][airfoil_position[0].index(grid_loc)]
         return next((x for x in airfoils if x.name == afname), None)

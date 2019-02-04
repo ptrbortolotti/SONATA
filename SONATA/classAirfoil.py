@@ -10,6 +10,8 @@ import numbers
 import matplotlib.pyplot as plt
 import itertools
 import os
+from urllib.request import urlopen
+from collections import OrderedDict
 
 #PythonOCC Libraries
 from OCC.gp import gp_Pnt, gp_Vec,gp_Dir
@@ -72,7 +74,7 @@ class Airfoil(object):
         self.BSplineLst = None
         
         if isinstance(yml, dict): 
-            self.read_IAE37(yml)
+            self.read_IEA37(yml)
             
         if isinstance(name, str) and not 'NONAME': 
             self.name = name
@@ -93,17 +95,48 @@ class Airfoil(object):
         return 'Airfoil: '+ self.name
     
     
-    def read_IAE37(self, yml):
+    def read_IEA37(self, yml):
         """
-        reads the IAE Wind Task 37 style Airfoil dictionary and assigsn them to
+        reads the IEA Wind Task 37 style Airfoil dictionary and assigns them to
         the class attributes
         """
         self.name = yml['name']
         self.relative_thickness = yml['relative_thickness']
-        self.coordinates = np.asarray([yml['coordinates']['x'],yml['coordinates']['y']]).T
-        self.polars = [Polar(p) for p in yml['polars']]
         
-
+        if yml['coordinates']:
+            self.coordinates = np.asarray([yml['coordinates']['x'],yml['coordinates']['y']]).T
+        else:
+            self.get_UIUCCoordinates()        
+        
+        if self.polars:
+            self.polars = [Polar(p) for p in yml['polars']]
+        else:
+            self.polars = None
+        
+    def get_UIUCCoordinates(self):   
+        url = 'http://m-selig.ae.illinois.edu/ads/coord_seligFmt/%s.dat' % self.name
+        try:
+            with urlopen(url) as f:
+                self.coordinates = np.loadtxt(f, skiprows=1)
+        except:
+            print('HTTPError: Not Found')
+    
+    def write_IEA37(self):
+        """
+        writes the class attributes to a dictionary conform with the IEA Wind 
+        Task 37 style
+        """ 
+        tmp = {}
+        tmp['name'] = self.name
+        tmp['coordinates'] = dict(zip(('x','y'), self.coordinates.T.tolist()))
+        tmp['relative_thickness'] = self.relative_thickness
+        if self.polars != None:
+            tmp['polars'] = [p.write_IEA37() for p in self.polars]
+        else:
+            tmp ['polars'] = None
+        return tmp
+        
+    
     def gen_OCCtopo(self):
         """
         generates a Opencascade TopoDS_Wire and BSplineLst from the airfoil coordinates.
@@ -111,7 +144,6 @@ class Airfoil(object):
         """
         data = np.hstack((self.coordinates,np.zeros((self.coordinates.shape[0],1))))
         self.BSplineLst = BSplineLst_from_dct(data, angular_deflection = 30, closed=True, tol_interp=1e-6, twoD = False)
-        #print(self.BSplineLst)
         self.wire = build_wire_from_BSplineLst(self.BSplineLst, twoD=False)
         return self.wire
         
@@ -160,6 +192,9 @@ class Airfoil(object):
         return trf_af
     
     
+
+                
+            
     def plot_polars(self, xlim = (-24,32), markercycle='.>^+*',):
         """
         plots the airfoil coordinates and the stored polars. 
@@ -218,6 +253,7 @@ class Airfoil(object):
         """
         pass
     
+    
     def run_xfoil(self,re,ma):
         """
         run xfoil to calculate the polars.
@@ -234,8 +270,6 @@ if __name__ == '__main__':
     from jsonschema import validate
     import yaml
 
-
-    
     with open('jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
         inputs  = myfile.read()
     with open('jobs/PBortolotti/IEAturbine_schema.yaml', 'r') as myfile:
@@ -252,4 +286,3 @@ if __name__ == '__main__':
     af2 = airfoils[6]
     res = af1.transformed(af2, 0.5)
     res.gen_OCCtopo()
-
