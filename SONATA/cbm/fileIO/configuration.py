@@ -13,7 +13,7 @@ if __name__ == '__main__':
     os.chdir('/media/gu32kij/work/TPflumm/SONATA')
 from SONATA.cbm.fileIO.read_yaml_input import clean_filestring
 from SONATA.vabs.VABS_interface import VABS_config
-from SONATA.classMaterial import read_IAE37_materials
+from SONATA.classMaterial import read_IEA37_materials
 
 class Configuration(object):
     '''
@@ -30,7 +30,7 @@ class Configuration(object):
         
         elif isinstance(inputdata, dict) and iae37 == True:
             yml = inputdata
-            self._read_IAE37(yml, materials)
+            self._read_IEA37(yml, materials)
             
         self.vabs_cfg = VABS_config()
         self.flags = {'mesh_core': True}
