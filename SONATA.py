@@ -17,14 +17,26 @@ Please Use the following Docstring styleguide:
 https://numpydoc.readthedocs.io/en/latest/format.html
 
 """
+import yaml
 
+from SONATA.classBlade import Blade
+from SONATA.classAirfoil import Airfoil
+from SONATA.classMaterial import read_IEA37_materials
 
-    with open('jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
-        inputs  = myfile.read()
-    with open('jobs/PBortolotti/IEAturbine_schema.yaml', 'r') as myfile:
-        schema  = myfile.read()
-    validate(yaml.load(inputs), yaml.load(schema))
-    wt_data     = yaml.load(inputs)
-    
-    
-    Windturbine = Windturbine(readIAE37)
+with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as f:
+     yml = yaml.load(f.read())
+
+airfoils = [Airfoil(af) for af in yml.get('airfoils')]
+materials = read_IEA37_materials(yml.get('materials'))
+
+byml = yml.get('components').get('blade')
+B2 = Blade(name='UH-60A_adv')
+B2.read_IEA37(byml, airfoils, materials)     
+B2.post_3dtopo()
+
+#for key, cs in B2.sections.items():
+#    print('STATUS:\t Building Section at grid location %s' % (key))
+#    cs.cbm_gen_topo()
+#    cs.cbm_gen_mesh()
+#    cs.cbm_run_vabs()
+#    cs.cbm_post_2dmesh()

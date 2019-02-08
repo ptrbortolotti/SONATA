@@ -25,7 +25,7 @@ from SONATA.classMaterial import read_IEA37_materials
 from SONATA.cbm.classCBM import CBM
 from SONATA.cbm.classCBMConfig import CBMConfig
 
-from SONATA.blade_utl import interp_airfoil_position, make_loft
+from SONATA.utl.blade_utl import interp_airfoil_position, make_loft
 from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire
 
 from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
@@ -136,14 +136,13 @@ class Blade(Component):
         print('STATUS:\t Reading IAE37 Definition for Blade: %s' % (self.name))
         #Read information from DataDictionary
         tmp_coords = {}
-        tmp = byml
-        tmp_coords['x'] = np.asarray((tmp.get('coordinates').get('x').get('grid'),tmp.get('coordinates').get('x').get('values'))).T
-        tmp_coords['y'] = np.asarray((tmp.get('coordinates').get('y').get('grid'),tmp.get('coordinates').get('y').get('values'))).T
-        tmp_coords['z'] = np.asarray((tmp.get('coordinates').get('z').get('grid'),tmp.get('coordinates').get('z').get('values'))).T
-        tmp_tw = np.asarray((tmp.get('twist').get('grid'),tmp.get('twist').get('values'))).T
-        tmp_chord = np.asarray((tmp.get('chord').get('grid'),tmp.get('chord').get('values'))).T
-        tmp_pa = np.asarray((tmp.get('pitch_axis').get('grid'),tmp.get('pitch_axis').get('values'))).T
-        airfoil_position = (tmp.get('airfoil_position').get('grid'),tmp.get('airfoil_position').get('labels'))
+        tmp_coords['x'] = np.asarray((yml.get('coordinates').get('x').get('grid'),yml.get('coordinates').get('x').get('values'))).T
+        tmp_coords['y'] = np.asarray((yml.get('coordinates').get('y').get('grid'),yml.get('coordinates').get('y').get('values'))).T
+        tmp_coords['z'] = np.asarray((yml.get('coordinates').get('z').get('grid'),yml.get('coordinates').get('z').get('values'))).T
+        tmp_tw = np.asarray((yml.get('twist').get('grid'),yml.get('twist').get('values'))).T
+        tmp_chord = np.asarray((yml.get('chord').get('grid'),yml.get('chord').get('values'))).T
+        tmp_pa = np.asarray((yml.get('pitch_axis').get('grid'),yml.get('pitch_axis').get('values'))).T
+        airfoil_position = (yml.get('airfoil_position').get('grid'),yml.get('airfoil_position').get('labels'))
         
         #Generate Blade Matrix 
         tmp = []
@@ -158,7 +157,7 @@ class Blade(Component):
         self.f_coordinates_z = interp1d(tmp_coords['z'][:,0], tmp_coords['z'][:,1], bounds_error=False, fill_value='extrapolate')
         self.f_pa = interp1d(tmp_pa[:,0], tmp_pa[:,1], bounds_error=False, fill_value='extrapolate')
         
-        cs_pos = np.asarray([cs.get('position') for cs in byml.get('2d_fem').get('sections')])
+        cs_pos = np.asarray([cs.get('position') for cs in yml.get('2d_fem').get('sections')])
         x = np.unique(np.sort(np.hstack((tmp_chord[:,0], tmp_tw[:,0], tmp_coords['x'][:,0], tmp_coords['y'][:,0], tmp_coords['z'][:,0], tmp_pa[:,0], arr[:,0], cs_pos))))
         
         self.blade_matrix = np.transpose(np.unique(np.array([x, self.f_coordinates_x(x), self.f_coordinates_y(x), self.f_coordinates_z(x), self.f_chord(x), self.f_twist(x), self.f_pa(x)]), axis=1))
@@ -169,7 +168,7 @@ class Blade(Component):
         self.pitch_axis = self.blade_matrix[:,[0,6]]
         
         #get sections information and init the CBM instances.
-        tmp = byml.get('2d_fem').get('sections')
+        tmp = yml.get('2d_fem').get('sections')
         self.sections = {}
         for cs in tmp:            
             cbm_config = CBMConfig(cs, materials, iea37=True)
