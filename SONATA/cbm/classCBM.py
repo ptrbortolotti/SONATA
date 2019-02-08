@@ -64,7 +64,7 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
 #from SONATA.anbax.anba_v4 import anbax
 
 class CBM(object):
-    ''' 
+    """ 
     This Class includes the SONATA Dicipline Module for Structural 
     Composite Beam Modelling (CBM). 
     Design Variables are passed in form of the configuration Object or a 
@@ -73,50 +73,104 @@ class CBM(object):
     Attributes
     ----------
     config : configuration
-        Pointer to the <Configuration> object.
+        Pointer to the Configuration object.
         
     materials: list
-        List of <Materials> object instances.
+        List of Materials object instances.
     
     SegmentLst: list
-        list of <Segment> object instances
+        list of Segment object instances
         
-   
+
     Methods
     -------
-    cbm_save : saves the complete cbm instance as pickle
+    cbm_save(output_filename=None)
+         saves the complete cbm instance as pickle
     
-    cbm_load : loads the complete cbm instance as pickle
+    cbm_load(input_filename=None)
+        loads the complete cbm instance from pickle
     
-    cbm_save_topo :
+    cbm_save_topo(output_filename=None)
+        saves the topology (SegmentLst, WebLst, and BW) as pickle
         
-    cbm_load_topo : 
+    cbm_load_topo(input_filename=None)
+        loads the topology (SegmentLst, WebLst, and BW) from pickle
         
-    cbm_save_mesh : 
+    cbm_save_mesh(output_filename=None)
+        saves the mesh (self.mesh) as pickle
         
-    cbm_load_mesh :
+    cbm_load_mesh(input_filename=None)
+        loads the mesh (self.mesh) as pickle
         
-    cbm_save_res :
-    cbm_load_res :
-    cbm_stpexport_topo :
-    cbm_gen_topo :
-    cbm_review_mesh :
-    cbm_run_vabs :
-    cbm_post_2dmesh :
-    cbm_display_config :
-    cbm_post_3dtopo : 
-    cbm_post_3dmesh :
-    cbm_set_DymoreMK :       
+    cbm_save_res(output_filename=None)
+        saves the configuration and the VABS BeamProperties results as pickle
+    
+    cbm_load_res(input_filename=None)
+        saves the configuration and the VABS BeamProperties results from pickle
         
+    cbm_stpexport_topo(export_filename=None)
+        exports all Layer wires and the Segment0 Boundary Wire as .step
+       
+    __cbm_generate_SegmentLst(**kwargs)
+        psydo private method of the cbm class to generate the list of 
+        Segments in the instance. 
+        
+    cbm_gen_topo(**kwargs)
+        generates the topology.
+         
+    cbm_gen_mesh(**kwargs)
+        generates the dicretization of topology 
+        
+    cbm_review_mesh()
+        prints a summary of the mesh properties to the screen 
+        
+    cbm_run_vabs()
+        runs the solver VABS (Variational Asymptotic Beam Sectional Analysis)
+    
+    cbm_run_anbax()
+        runs the solver anbax from macro morandini
+        
+
+    cbm_post_2dmesh(attribute='MatID', title='NOTITLE', **kw)
+        displays the mesh with specified attributes with matplotlib
+        
+    cbm_display_config(DeviationAngle = 1e-5, DeviationCoefficient = 1e-5, bg_c = ((20,6,111),(200,200,200)), cs_size = 25)
+        initializes and configures the pythonOcc 3D Viewer
+  
+    cbm_post_3dtopo()
+        displays the topology with the pythonocc 3D viewer
+    
+    cbm_post_3dmesh()
+        displays the 2D mesh with the pythonocc 3D viewer
+        
+    cbm_set_DymoreMK(x_offset=0)
+        Converts the Units of CBM to DYMORE/PYMORE/MARC units and returns the 
+        array of the beamproperties with Massterms(6), Stiffness(21), 
+        damping(1) and curvilinear coordinate(1)
+    
     
     Notes
     ----------
-    1 : For computational efficiency it is sometimes not suitable to recalculate 
-    the topology or the crosssection every iteration, maybe design flags to account for that.
-    2 : make it possible to construct an instance by passing the 
-     topology and/or mesh
+    1 
+        For computational efficiency it is sometimes not suitable to recalculate 
+        the topology or the crosssection every iteration, maybe design flags 
+        to account for that.
+    2 
+        make it possible to construct an instance by passing the topology 
+        and/or mesh
 
-    '''
+
+    Examples
+    --------
+    >>> config = CBMConfig(fname)
+    >>> job = CBM(config)
+    >>> job.cbm_gen_topo()
+    >>> job.cbm_gen_mesh()
+    >>> job.cbm_review_mesh()
+    >>> job.cbm_run_vabs()
+    >>> job.cbm_post_2dmesh(title='Hello World!')
+
+    """
 
         
     #__slots__ = ('config' , 'materials' , 'SegmentLst' , 'WebLst' , 'BW' , 'mesh', 'BeamProperties', 'display', )
@@ -593,22 +647,6 @@ class CBM(object):
         return None
 
 
-    def cbm_run_anbax(self):
-        """interface method to run the solver anbax from marco.morandini 
-        
-        Notes:
-            To be defined.
-        
-        """
-        self.mesh, nodes = sort_and_reassignID(self.mesh)
-        (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = \
-            build_dolfin_mesh(self.mesh, nodes, self.materials)
-        #TBD: pass it to anbax and run it!
-        anba = anbax(mesh, 1, matLibrary, materials, plane_orientations, fiber_orientations, maxE)
-        stiff = anba.compute()
-        stiff.view()
-        
-        return None
         
    
     def cbm_run_vabs(self, jobid=None, rm_vabfiles=True, ramdisk=False):
@@ -753,6 +791,26 @@ class CBM(object):
         
         return None
             
+    
+    
+    def cbm_run_anbax(self):
+        """interface method to run the solver anbax from marco.morandini 
+        
+        Notes:
+            To be defined.
+        
+        """
+        self.mesh, nodes = sort_and_reassignID(self.mesh)
+        (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = \
+            build_dolfin_mesh(self.mesh, nodes, self.materials)
+        #TBD: pass it to anbax and run it!
+        anba = anbax(mesh, 1, matLibrary, materials, plane_orientations, fiber_orientations, maxE)
+        stiff = anba.compute()
+        stiff.view()
+        
+        return None
+    
+    
     def cbm_post_2dmesh(self, attribute='MatID', title='NOTITLE', **kw):
         '''
         CBM Postprocessing method that displays the mesh with matplotlib.

@@ -35,6 +35,63 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
                                         display_custome_shape, transform_wire_2to3d  
 
 class Blade(Component):
+    """
+    SONATA Blade component object.
+    
+    Attributes
+    ----------
+    name : str
+        name of the parent class 'Component'   
+        
+    cosy : gp_Ax2
+        Describes a right-handed coordinate system in 3D space. It is part of 
+        gp_Ax2 class.
+                
+    coordinates :  ndarray
+        Describes the axis LE coordinates in meters along the span.
+        nparray([[grid, x, y, z]]).
+        The grid represents the nondimensional x position along the Blade
+    
+    chord : ndarray
+        Describes the blades chord lenght in meters in spanwise direction. 
+        nparray([[grid, chord]]) 
+
+    twist : ndarray
+        Describes the blades twist angles in !radians! in spanwise direction. 
+        nparray([[grid, twist]]) 
+
+    pitch_axis : ndarray
+        Describes the blades pitch-axis location in 1/chord lengths from the 
+        leading edge. nparray([[grid, pitch_axis]]) 
+
+    blade_matrix : ndarray
+    
+    airfoilLst : list
+        list of airfoil instances at every grid location. 
+    
+    sections : dict
+        {location : CBM} dictionary of CBM cross-sections 
+              
+    Methods
+    -------
+
+    See Also
+    --------
+    Component,
+    
+
+    Notes:
+    -----
+    - Redundancy between coordinates,chord... and blade_matrix, - this is not ideal!
+    
+
+    Examples
+    --------
+    >>> x = np.arange(6).reshape(2,3)
+
+
+    """ 
+    
 
     __slots__ = ('coordinates', 'chord', 'twist', 'pitch_axis', 'blade_matrix', 'airfoilLst',  \
                  'sections', 'f_chord', 'f_twist', 'f_coordinates_x',  \
@@ -109,7 +166,7 @@ class Blade(Component):
         self.coordinates = self.blade_matrix[:,0:4]
         self.chord = self.blade_matrix[:,[0,4]]
         self.twist = self.blade_matrix[:,[0,5]]
-        self.pitch_axis = self.blade_matrix[:,[0,6]]         
+        self.pitch_axis = self.blade_matrix[:,[0,6]]
         
         #get sections information and init the CBM instances.
         tmp = byml.get('2d_fem').get('sections')
@@ -196,14 +253,14 @@ class Blade(Component):
                 wire = translate_wire(wire, gp_Pnt(0,0,0), gp_Pnt(bm[1],bm[2],bm[3]))
                 
                 wireframe.append(wire)
-                display.DisplayShape(wire, color='WHITE', transparency=0.3)
+                display.DisplayShape(wire, color='BLACK')
             
         if flag_lft:
             loft = make_loft(wireframe, ruled=False, tolerance=1e-3, continuity=1, check_compatibility=True)
             display.DisplayShape(loft)
         
         if flag_topo:
-            for k,cs in B.sections.items():
+            for k,cs in self.sections.items():
                 coord = self.f_coordinates_x(k), self.f_coordinates_y(k), self.f_coordinates_z(k)
                 display_SONATA_SegmentLst(display, cs.SegmentLst, coord, -np.pi/2, -np.pi/2)
         
@@ -216,7 +273,7 @@ class Blade(Component):
 
 if __name__ == '__main__':
     
-    #%% ====== Windturbine IEA 37 Blade  ==============
+#   %% ====== Windturbine IEA 37 Blade  ==============
 #    with open('jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as f:
 #        yml = yaml.load(f.read())
 #    
@@ -237,7 +294,6 @@ if __name__ == '__main__':
 #    #B.sections[0].cbm_gen_topo()
 #    B.post_3dtopo(flag_topo = False, flag_lft = False)
     
-    
     #%% ====== UH-60A HELICOPTER Blade ==============
     with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as f:
          yml = yaml.load(f.read())
@@ -248,5 +304,14 @@ if __name__ == '__main__':
     byml = yml.get('components').get('blade')
     B2 = Blade(name='UH-60A_adv')
     B2.read_IEA37(byml, airfoils, materials)     
-    B2.post_3dtopo(flag_topo = False, flag_lft = True)
-    B2.plot_blade_matrix()
+
+    for key, cs in B2.sections.items():
+        print('STATUS:\t Building Section at grid location %s' % (key))
+        cs.cbm_gen_topo()
+        cs.cbm_gen_mesh()
+        cs.cbm_run_vabs()
+        cs.cbm_post_2dmesh()
+    
+    
+    #B2.post_3dtopo(flag_topo = False, flag_lft = False)
+    #B2.plot_blade_matrix()
