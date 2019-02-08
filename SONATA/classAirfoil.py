@@ -51,9 +51,6 @@ class Airfoil(object):
         
     Notes
     ----------
-    - The  __slots__ magic method  tells Python not to use a dict to store an 
-    objects instance attributes, and only allocate space for a fixed set of 
-    attributes.
     - A very brief parameter check is only performed at __init__ and is not 
     implemented via a getter and setter functionality to save function calls 
     and to preserve simplicity
@@ -88,7 +85,6 @@ class Airfoil(object):
         if isinstance(relative_thickness, numbers.Real) and relative_thickness>=0:
             self.relative_thickness = relative_thickness
 
-
     def __repr__(self):
         """__repr__ is the built-in function used to compute the "official" 
         string reputation of an object, """
@@ -101,7 +97,7 @@ class Airfoil(object):
         the class attributes
         """
         self.name = yml['name']
-        self.relative_thickness = yml['relative_thickness']
+        self.relative_thickness = yml.get('relative_thickness')
         
         if yml['coordinates']:
             self.coordinates = np.asarray([yml['coordinates']['x'],yml['coordinates']['y']]).T

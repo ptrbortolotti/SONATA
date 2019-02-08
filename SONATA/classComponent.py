@@ -8,9 +8,20 @@ Created on Tue Jan 15 16:10:35 2019
 from OCC.gp import gp_Ax2, gp_Pnt, gp_Dir
 
 class Component(object):
-    '''Describes a right-handed coordinate system in 3D space. 
-    Ax2 is an instance from the opencascade gp_Ax2 class.'''
+    """Describes a Sonata Component Object
     
+    Attributes
+    ----------
+    name : str
+        name of the component
+        
+    cosy : gp_Ax2
+        Describes a right-handed coordinate system in 3D space. It is part of 
+        the parent class 'Component'. It is an instance from the opencascade 
+        gp_Ax2 class
+        
+    """
+
     __slots__ = ('name', 'cosy')    
     def __init__(self, *args, **kwargs):
         self.name = kwargs.get('name')
