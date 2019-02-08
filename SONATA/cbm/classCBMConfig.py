@@ -95,14 +95,23 @@ class CBMConfig(object):
         for i,s in enumerate(yml.get('segments')):
             d = {}
             key = s.get('id')
-            if s.get('filler') == 'none': 
+            if s.get('filler') == None: 
                 d['CoreMaterial'] = 0
+            
+            elif isinstance(s.get('filler'), int):
+                d['CoreMaterial'] = materials[s.get('filler')]
+                
             else: 
                 d['CoreMaterial'] = find_material(materials, 'name', s.get('filler')).id
                 
             layerlst = s.get('layup')
-            d['Layup'] = np.asarray([[l.get('start'), l.get('end'), l.get('thickness'), l.get('orientation'), find_material(materials, 'name', l.get('material_name')).id] for l in layerlst])
-            d['Layup_names'] = [l.get('name') for l in layerlst]
+            
+            d['Layup_names'] = np.asarray(layerlst)[:,5].tolist()
+            d['Layup'] = np.asarray(layerlst)[:,:5].astype(np.float)
+            
+            #print(d['Layup_names'])
+#            d['Layup'] = np.asarray([[l.get('start'), l.get('end'), l.get('thickness'), l.get('orientation'), find_material(materials, 'name', l.get('material_name')).id] for l in layerlst])
+#            d['Layup_names'] = [l.get('name') for l in layerlst]
             self.segments[key] = d
             
         #BalanceWeight
@@ -156,8 +165,11 @@ if __name__ == '__main__':
     #IEA37 Style configuration:
     with open('jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
         inputs  = myfile.read()
+        
+    with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as myfile:
+        inputs  = myfile.read()
     
     yml = yaml.load(inputs)
     materials = read_IEA37_materials(yml.get('materials'))
-    yml = yml.get('components').get('blade').get('2d_fem').get('sections')[1]
+    yml = yml.get('components').get('blade').get('2d_fem').get('sections')[0]
     wt_cfg = CBMConfig(yml, materials, iea37=True)       
