@@ -174,9 +174,5 @@ def puck_2d(mat, stressM, strainM):
 
 
 if __name__ == '__main__':
-    
-    
-    
-    
-    
+    pass
     

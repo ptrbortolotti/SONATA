@@ -8,9 +8,9 @@ import os
 import numpy as np
 
 if __name__ == '__main__':
-    os.chdir('C://TPflumm_local/work/SONATA')
+    os.chdir('../..')
     
-from SONATA.vabs.tensorexception import TensorException
+from SONATA.vabs.classTensorException import TensorException
 
 class Strain(object):
     '''object to represent the strain tensor'''   
@@ -72,4 +72,4 @@ class Strain(object):
     
 if __name__ == '__main__':
     s = Strain([11,12,13,22,23,33])
-    s.tensor = np.array([[11,3,2,1],[23,23,2],[2,1,2]])
+    s.tensor = np.array([[11,3,2],[23,23,2],[2,1,2]])

@@ -6,6 +6,7 @@ Created on Wed Mar 22 15:31:45 2017
 """
 
 class Displacement(object):
+    pass
     #Object to represent the STRAIN Tensor within an Element    
 
     def __init__(self,Vec):

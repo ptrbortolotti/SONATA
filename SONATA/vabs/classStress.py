@@ -9,9 +9,9 @@ import math
 import numpy as np
 
 if __name__ == '__main__':
-    os.chdir('C://TPflumm_local/work/SONATA')
+    os.chdir('../..')
     
-from SONATA.vabs.tensorexception import TensorException
+from SONATA.vabs.classTensorException import TensorException
 
 class Stress(object):
     '''Object to represent the stress tensor'''
