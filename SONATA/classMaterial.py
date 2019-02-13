@@ -40,7 +40,8 @@ class Material(object):
         Manual for Users (2011)
         
     rho : float 
-        density in g/cm**3
+        density in kg/m**3
+    
     """
     
     __slots__ = ( 'id', 'name', 'description', 'source', 'orth', 'rho') 
@@ -51,7 +52,7 @@ class Material(object):
         self.description = description
         self.source = source
         self.orth = orth
-        self.rho = rho
+        self.rho = float(rho)
        
     def __repr__(self): 
         if self.orth==0:
@@ -81,9 +82,9 @@ class IsotropicMaterial(Material):
         in 1/K; coefficient of thermal expansion in direction
   
     YS :  float
-        in MPa; Yield Strenth (Streckgrenze)
+        in N/m**2; Yield Strenth (Streckgrenze)
     UTS : float
-        in MPa; Ultimate Tensile Strenght (Zugfestigkeit)
+        in N/m**2; Ultimate Tensile Strenght (Zugfestigkeit)
     """
     
     __slots__ = ( 'E', 'nu', 'alpha', 'YS', 'UTS') 
@@ -91,15 +92,27 @@ class IsotropicMaterial(Material):
     def __init__(self, **kw):
         kw['orth'] = 0
         Material.__init__(self, **kw)
+        self.E = None
+        self.nu = None
+        self.alpha = None
+        self.YS = None
+        self.UTS = None
         
-        self.E = kw.get('E')
-        self.nu = kw.get('nu')
-        self.alpha = kw.get('alpha')
+        if not kw.get('E') is None:
+            self.E = float(kw.get('E'))
         
-        self.YS = kw.get('YS')    
-        self.UTS = kw.get('UTS')  
+        if not kw.get('nu') is None:
+            self.nu = float(kw.get('nu'))
+        
+        if not kw.get('alpha') is None:  
+            self.alpha = float(kw.get('alpha'))
+        
+        if not kw.get('Ys') is None:  
+            self.YS = float(kw.get('YS'))
             
-        
+        if not kw.get('UTS') is None:  
+            self.UTS = float(kw.get('UTS'))
+
 class OrthotropicMaterial(Material):
     """
     Orthotropic Material
@@ -126,15 +139,15 @@ class OrthotropicMaterial(Material):
         thermal expansion in direction ii
   
     Xt :  float
-        in MPa; 0° tensile strenght
+        in N/m**2; 0° tensile strenght
     Xc : float
-        in MPa; 0° compressive strenght
+        in N/m**2; 0° compressive strenght
     Yt : float
-        in MPa; 90° tensile strenght
+        in N/m**2; 90° tensile strenght
     Yc : float
-        in MPa; 90° compressive strenght
+        in N/m**2; 90° compressive strenght
     S21 :
-        in MPa; in-/out of plane shear strength 
+        in N/m**2; in-/out of plane shear strength 
 
     """
     
@@ -142,30 +155,56 @@ class OrthotropicMaterial(Material):
     def __init__(self, **kw):
         kw['orth'] = 1
         Material.__init__(self, **kw)
+        self.E = None
+        self.G = None
+        self.nu = None
+        self.alpha = None
+        self.Xt = None
+        self.Xc = None
+        self.Yt = None
+        self.Yc = None
+        self.S21 = None
         
-        self.E = np.asarray(kw.get('E'))
-        self.G = np.asarray(kw.get('G')) 
-        self.nu = np.asarray(kw.get('nu'))  
-        self.alpha = kw.get('alpha')  
+        if not kw.get('E') is None:
+            self.E = np.asarray(kw.get('E')).astype(float)
+        
+        if not kw.get('G') is None:
+            self.G = np.asarray(kw.get('G')).astype(float)
+            
+        if not kw.get('nu') is None: 
+            self.nu = np.asarray(kw.get('nu')).astype(float)
+        
+        if not kw.get('alpha') is None:
+            self.alpha = np.asarray(kw.get('alpha')).astype(float)  
         
         if all (k in kw for k in ('E_1','E_2','E_3')):
-            self.E = np.array([kw.get('E_1'), kw.get('E_2'), kw.get('E_3')])
+            self.E = np.array([kw.get('E_1'), kw.get('E_2'), kw.get('E_3')]).astype(float)
              
         if all (k in kw for k in ('G_12','G_13','G_23')):
-            self.G = np.array([kw.get('G_12'), kw.get('G_13'), kw.get('G_23')])
+            self.G = np.array([kw.get('G_12'), kw.get('G_13'), kw.get('G_23')]).astype(float)
             
         if all (k in kw for k in ('nu_12','nu_13','nu_23')):
-            self.nu = np.array([kw.get('nu_12'), kw.get('nu_13'), kw.get('nu_23')])
+            self.nu = np.array([kw.get('nu_12'), kw.get('nu_13'), kw.get('nu_23')]).astype(float)
             
         if all (k in kw for k in ('alpha_11','alpha_22','alpha_33')):
-            self.alpha = np.array([kw.get('alpha_11'), kw.get('alpha_22'), kw.get('alpha_33')])
+            self.alpha = np.array([kw.get('alpha_11'), kw.get('alpha_22'), kw.get('alpha_33')]).astype(float)
 
-        self.Xt = kw.get('Xt')   #Axial Tensile Strength in [MPa]
-        self.Xc = kw.get('Xc')   #Axial Compression Strength  [MPa]
-        self.Yt = kw.get('Xc')   #Transverse Tensile strenght  [MPa]
-        self.Yc = kw.get('Yc')   #Transverse  Compression strenght  [Mpa]
-        self.S21 = kw.get('S21') #in-/out of plane shear strength [MPa]
-        self.S23 = kw.get('S23') 
+        if not kw.get('Xt') is None:
+            self.Xt = float(kw.get('Xt'))   #Axial Tensile Strength in [MPa]
+        
+        if not kw.get('Xc') is None:
+            self.Xc = float(kw.get('Xc'))   #Axial Compression Strength  [MPa]
+        
+        if not kw.get('Yt') is None:
+            self.Yt = float(kw.get('Yt'))   #Transverse Tensile strenght  [MPa]
+        
+        if not kw.get('Yc') is None:
+            self.Yc = float(kw.get('Yc'))   #Transverse  Compression strenght  [Mpa]
+            
+        if not kw.get('Yc') is None:
+            self.S21 = float(kw.get('S21')) #in-/out of plane shear strength [MPa]
+            
+        #self.S23 = float(kw.get('S23')) 
 
 
 class AnisotropicMaterial(Material):
@@ -175,11 +214,12 @@ class AnisotropicMaterial(Material):
         kw['orth'] = 2
         Material.__init__(self, **kw)
         
-        self.C = np.asarray(kw.get('C'))  
-        self.alpha = np.asarray(kw.get('alpha'))  
+        self.C = np.asarray(kw.get('C')).astype(float)  
+        self.alpha = np.asarray(kw.get('alpha')).astype(float) 
         
         #TODO: Set Strenght Characteristics according for Anisotropic Material 
         #as second and forth order Strength Tensor Fij, and F
+
 
 def read_IEA37_materials(yml):
     materials = OrderedDict()
