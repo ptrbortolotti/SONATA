@@ -85,7 +85,7 @@ def find_node(nodeLst,ID):
     return tmp
 
 
-def gen_core_cells(a_nodes,area=1.0,**kwargs):
+def gen_core_cells(a_nodes, area=1.0,**kwargs):
     '''The gen_core_cells function generates the triagular mesh within the 
     a_nodes polygon.        
     
@@ -110,13 +110,13 @@ def gen_core_cells(a_nodes,area=1.0,**kwargs):
     if kwargs.get('options') !=  None:
         options = kwargs.get('options')
     else:
-        if area<1.0:
-            area = 1.0              #Somehow the triangle module crashes now for the area constraint a0.5
-        options = 'pa%s' % (area)   #Somehow crashing!?
-        
-        #options = 'pq'
-    
-    mesh = triangle_mesh(a_nodes,options)  
+        if area<1.0:  
+            options = 'pq'    
+        else:
+             options = 'pa%f' % (area)   #Somehow crashing!?
+             
+
+    mesh = triangle_mesh(a_nodes, options)  
   
     tmp = []
     for n in a_nodes:
