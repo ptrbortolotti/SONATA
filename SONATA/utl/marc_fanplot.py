@@ -20,13 +20,11 @@ def calc_fandiagram(Omega = 4.3*2*np.pi, beamProp = None, RPM_vec = None, dir_ro
         if not isinstance(RPM_vec, (np.ndarray)):
             RPM_vec = np.linspace(0.2*Omega, 1.2*Omega, 11)
             
-        # in case of more than one blade but only one table of beam properties all blades are updated simultaneously! 
-    #    if not isinstance(beamProp, (np.ndarray)):
-    #        beamProp = coef.refBeamProp()
-        
+        # in case of more than one blade but only one table of beam properties all blades are updated simultaneously!         
         if not isinstance(beamProp, (np.ndarray)):
             beamProp = coef.refBeamProp()
         
+        print(beamProp)
         job.marc_set_beamProp('BLADE_BP_CD01', beamProp)
     
         #-----------Calculate Fanplot---------------------------------    
