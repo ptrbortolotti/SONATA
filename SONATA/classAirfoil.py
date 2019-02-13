@@ -19,6 +19,7 @@ from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire
 from OCC.GeomAPI import GeomAPI_Interpolate
 from OCC.Geom2dAPI import Geom2dAPI_Interpolate
 from OCC.Geom import Geom_BezierCurve, Geom_Plane
+from OCC.Display.SimpleGui import init_display
 
 #SONATA modules:
 if __name__ == '__main__':
@@ -27,7 +28,12 @@ from SONATA.classPolar import Polar
 from SONATA.cbm.topo.utils import TColgp_HArray1OfPnt_from_nparray, point_list_to_TColgp_Array1OfPnt, PntLst_to_npArray, TColgp_HArray1OfPnt2d_from_nparray
 from SONATA.cbm.topo.BSplineLst_utils import BSplineLst_from_dct
 from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst, build_wire_from_BSplineLst2, get_wire_length, equidistant_Points_on_wire
-    
+
+from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
+                                        export_to_SVG, export_to_PS, export_to_EnhPS, \
+                                        export_to_TEX, export_to_BMP,export_to_TIFF, \
+                                        show_coordinate_system, display_SONATA_SegmentLst,\
+                                        display_custome_shape, transform_wire_2to3d, display_config
 
 class Airfoil(object):
     """
@@ -57,7 +63,8 @@ class Airfoil(object):
      
     """
     class_counter= 1    #class attribute
-    __slots__ = ( 'name', 'id', 'coordinates', 'polars', 'relative_thickness', 'wire', 'BSplineLst')
+    __slots__ = ( 'name', 'id', 'coordinates', 'polars', 'relative_thickness', 'wire', 'BSplineLst', 
+                 'display', 'start_display', 'add_menu', 'add_function_to_menu')
     
     def __init__(self, yml=None, name = 'NONAME', coordinates = None, polars = None, relative_thickness = None):
         self.name = 'NONAME'
@@ -139,7 +146,7 @@ class Airfoil(object):
         This can be used for interpolation and surface generation
         """
         data = np.hstack((self.coordinates,np.zeros((self.coordinates.shape[0],1))))
-        self.BSplineLst = BSplineLst_from_dct(data, angular_deflection = 30, closed=True, tol_interp=1e-6, twoD = False)
+        self.BSplineLst = BSplineLst_from_dct(data, angular_deflection = 30, closed=True, tol_interp=1e-5, twoD = False)
         self.wire = build_wire_from_BSplineLst(self.BSplineLst, twoD=False)
         return self.wire
         
@@ -237,7 +244,21 @@ class Airfoil(object):
                     ax[i][j].axhline(xmin=xlim[0],xmax=xlim[1], color='k', linestyle='-', linewidth=1.5)
                     ax[i][j].axvline(ymin=0,ymax=1, color='k', linestyle='-', linewidth=1.5)
                     ax[i][j].legend()
-       
+     
+
+    def post_3dviewer(self):
+        (self.display, self.start_display, self.add_menu, self.add_function_to_menu) = display_config(cs_size = 0.3, DeviationAngle = 1e-7,  DeviationCoefficient = 1e-7)
+        if self.wire == None:
+            self.gen_OCCtopo()
+            
+        for s in self.BSplineLst:
+            self.display.DisplayShape(s)
+            
+        #self.display.DisplayShape(self.wire)
+        self.display.View_Top()
+        self.display.FitAll()
+        self.start_display()  
+    
     
     def run_mses(self,re,ma):
         """
@@ -263,22 +284,24 @@ class Airfoil(object):
     
 if __name__ == '__main__':
     plt.close('all')
-    from jsonschema import validate
     import yaml
 
-    with open('jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
-        inputs  = myfile.read()
-    with open('jobs/PBortolotti/IEAturbine_schema.yaml', 'r') as myfile:
-        schema  = myfile.read()
-    validate(yaml.load(inputs), yaml.load(schema))
-    wt_data     = yaml.load(inputs)    
+    #with open('jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as f:
+    with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as f:
+        data = yaml.load(f.read())    
     
-    airfoils = [Airfoil(af) for af in wt_data['airfoils']]
+    airfoils = [Airfoil(af) for af in data['airfoils']]
                         
     for af in airfoils:
         af.gen_OCCtopo()
 
     af1 = airfoils[0]
-    af2 = airfoils[6]
-    res = af1.transformed(af2, 0.5)
+    af2 = airfoils[1]
+    res = af1.transformed(af2, 1.0)
     res.gen_OCCtopo()
+    
+    with open('data1.yml', 'w') as outfile:
+        yaml.dump(af1.write_IEA37(), outfile)
+        
+    with open('data2.yml', 'w') as outfile:
+        yaml.dump(af2.write_IEA37(), outfile)
