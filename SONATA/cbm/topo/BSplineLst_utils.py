@@ -736,10 +736,11 @@ def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_inter
     
     
     
-def set_BSplineLst_to_Origin(BSplineLst,Theta=0):
+def set_BSplineLst_to_Origin(BSplineLst, Theta=0):
     '''
     The Origin is determined by the most right Intersection Point of the X-Axis with the segment boundary, the axis is rotated backwards by Theta (in degree). 
     '''
+    
     Theta=Theta/float(180)*np.pi
     x = math.cos(Theta)
     y = -math.sin(Theta)

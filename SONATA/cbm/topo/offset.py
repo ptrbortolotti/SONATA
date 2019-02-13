@@ -114,7 +114,7 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
 #            print 'non unique elements found',len(data)
 
 
-#    fig = plt.figure(1)
+#    fig = plt.figure()
 #    ax = fig.add_subplot(111)
 #    plt.clf()         
 #    plt.plot(*arrPts.T, color='black', marker='.')

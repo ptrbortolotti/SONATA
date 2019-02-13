@@ -244,7 +244,7 @@ class Segment(object):
             return relevant_boundary_BSplineLst
     
     
-    def mesh_layers(self, SegmentLst, global_minLen, WebLst = None, display = None):
+    def mesh_layers(self, SegmentLst, global_minLen, WebLst = None, display = None, l0 = None):
         '''
         More Commenting!!!!
         '''
@@ -283,7 +283,7 @@ class Segment(object):
     
                 layer.inverse_ivLst = chop_interval_from_layup(self.inv_cumivLst,layer.S1,layer.S2)
                 layer.inverse_ivLst =  sort_layup_projection([layer.inverse_ivLst])[0]
-                layer.mesh_layer(SegmentLst, global_minLen, display=display) 
+                layer.mesh_layer(SegmentLst, global_minLen, display=display, l0=l0) 
                 self.inv_cumivLst = insert_interval_in_layup(self.inv_cumivLst,layer.S1,layer.S2,value=layer.ID)
                 self.l_cells.extend(layer.cells)   
             
@@ -339,13 +339,12 @@ class Segment(object):
                 c.theta_3 = 0
                 c.MatID = int(self.CoreMaterial)
                 c.calc_theta_1()
-                if c.area<1e-7:
+                if c.area<1e-10:
                     print(c.nodes)
-                    display.DisplayShape(c.nodes[0].Pnt2d)
-                    display.DisplayShape(c.nodes[1].Pnt2d, color='RED')
-                    display.DisplayShape(c.nodes[2].Pnt2d, color='GREEN')
-                    
-                    display.DisplayShape(c.wire,color='WHITE')
+#                    display.DisplayShape(c.nodes[0].Pnt2d)
+#                    display.DisplayShape(c.nodes[1].Pnt2d, color='RED')
+#                    display.DisplayShape(c.nodes[2].Pnt2d, color='GREEN')
+#                    display.DisplayShape(c.wire,color='WHITE')
             
             self.c_cells.extend(c_cells)
             self.cells.extend(self.c_cells)

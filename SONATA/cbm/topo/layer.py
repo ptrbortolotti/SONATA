@@ -223,7 +223,7 @@ class Layer(object):
         
     def mesh_layer(self, SegmentLst, global_minLen, proj_tol_1=8e-2, 
                    proj_tol_2= 3e-1, crit_angle_1 = 110, alpha_crit_2 = 60, 
-                   growing_factor=1.8, shrinking_factor=0.01, display=None):
+                   growing_factor=1.8, shrinking_factor=0.01, display=None, l0=None):
         '''
         The mesh layer function discretizes the layer, which is composed of a 
         a_BsplineLst and a b_BsplineLst. Between the a_BsplineLst and the 
@@ -256,9 +256,8 @@ class Layer(object):
             
         returns: self.cells: (list of cells) 
         '''
-        
         self.determine_a_nodes(SegmentLst,global_minLen,display)
-        self.a_nodes, self.b_nodes, self.cells = mesh_by_projecting_nodes_on_BSplineLst(self.a_BSplineLst,self.a_nodes,self.b_BSplineLst,self.thickness, proj_tol_1,crit_angle_1, LayerID = self.ID, display=display) 
+        self.a_nodes, self.b_nodes, self.cells = mesh_by_projecting_nodes_on_BSplineLst(self.a_BSplineLst,self.a_nodes,self.b_BSplineLst,self.thickness, proj_tol_1, crit_angle_1, LayerID = self.ID, refL = l0, display=display) 
         #enhanced_cells = modify_cornerstyle_one(cells,self.b_BSplineLst)
         self.cells, nb_nodes = modify_sharp_corners(self.cells, self.b_BSplineLst, global_minLen, self.thickness, self.ID, proj_tol_2, alpha_crit_2, display=display)
         self.b_nodes.extend(nb_nodes)

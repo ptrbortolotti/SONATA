@@ -22,7 +22,7 @@ from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length, find_BSpline
 from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
 
 
-def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, layer_thickness, tol=1e-2, crit_angle = 95, LayerID = 0, **kw):
+def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, layer_thickness, tol=1e-2, crit_angle = 95, LayerID = 0, refL = 1.0, **kw):
     """
     *function to mesh the SONATA topologies by projecting nodes onto the 
     generated BSplineLists.   
@@ -80,7 +80,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
         for idx,item in enumerate(b_BSplineLst):
             first =  item.FirstParameter()
             last = item.LastParameter()
-            tol = 1e-4
+            tol = 1e-7*refL
             Umin = first-(last-first)*tol
             Umax = last+(last-first)*tol
             projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item.GetHandle(),Umin,Umax)
@@ -97,7 +97,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
         
         #==================making sure the pPnts are unique:
         '''It happend that somehow the same points were found multiple times'''
-        unique_tol= 5e-2
+        unique_tol= 5e-5*refL
         rm_idx=[]
         for a, b in itertools.combinations(enumerate(pPnts), 2):
             if a[1].IsEqual(b[1],unique_tol):
@@ -230,7 +230,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                     b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
                 
                 else:
-                    if pPnts[0].IsEqual(pPnts[1],1e-4):
+                    if pPnts[0].IsEqual(pPnts[1],1e-7*refL):
                         b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
                     else:
                         print('ERROR: cornerstyle 0: this possibility has not been implemented yet. pIdx[0] != pIdx[0]. Create Bisector and intersect with bsplinelist!')                     
@@ -372,8 +372,8 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
         new_b_node = None
         new_a_node = None
         aglTol = 5.0
-        linTol = 1e-6
-        prjTol = 1e-2
+        linTol = 1e-9*refL
+        prjTol = 1e-5*refL
         new_b_node = None
         insert_idx = None
         leftover_exterior_corners = []
