@@ -8,11 +8,7 @@ from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax3,gp_
 
 from OCC.STEPControl import STEPControl_Reader
 from OCC.IGESControl import IGESControl_Reader
-from OCC.Graphic3d import (Graphic3d_EF_PDF,
-                           Graphic3d_EF_SVG,
-                           Graphic3d_EF_TEX,
-                           Graphic3d_EF_PostScript,
-                           Graphic3d_EF_EnhPostScript)
+
 from OCC.StlAPI import StlAPI_Reader
 from OCC.TopoDS import TopoDS_Shape
 from OCC.BRepTools import breptools_Read

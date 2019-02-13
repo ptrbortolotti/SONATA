@@ -13,7 +13,6 @@ from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
 from OCC.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
 from OCC.Display.SimpleGui import init_display
 from OCC.Quantity import Quantity_Color
-from OCC.Graphic3d import Graphic3d_EF_PDF, Graphic3d_EF_SVG, Graphic3d_EF_TEX, Graphic3d_EF_PostScript, Graphic3d_EF_EnhPostScript
 from OCC.BRepLib import breplib_BuildCurves3d
 from OCC.TopoDS import TopoDS_Compound, topods_Face, topods_Edge
 
