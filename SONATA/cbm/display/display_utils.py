@@ -21,28 +21,73 @@ from OCC.AIS import AIS_Shape
 
 from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire
 
-#===========================================================================
-# MENU FUNCTIONALITIES
-#===========================================================================
 
-
-#===========================================================================
-# DISPLAY
-#===========================================================================
-def init_viewer():
-    display, start_display, add_menu, add_function_to_menu = init_display('wx')
-    display.Context.SetDeviationAngle(0.000001)       # 0.001 default. Be careful to scale it to the problem.
-    display.Context.SetDeviationCoefficient(0.000001) # 0.001 default. Be careful to scale it to the problem. 
-
-    add_menu('screencapture')
-    add_function_to_menu('screencapture', export_to_BMP)
-    add_function_to_menu('screencapture', export_to_PNG)
-    add_function_to_menu('screencapture', export_to_JPEG)
-    add_function_to_menu('screencapture', export_to_TIFF)
-    add_function_to_menu('screencapture', exit)              
-    return display    
-
+def display_config(DeviationAngle = 1e-5, DeviationCoefficient = 1e-5, bg_c = ((20,6,111),(200,200,200)), cs_size = 25):
+    '''
+    CBM method that initializes and configures the pythonOcc 3D Viewer 
+    and adds Menues to the toolbar. 
     
+    Parameters
+    ----------
+    DeviationAngle : float, optional 
+        default = 1e-5
+    DeviationCoefficient : float, optional
+        default = 1e-5 
+    bg_c : tuple, optional
+        Background Gradient Color ((RBG Tuple),(RBG Tuple)) the default 
+        values are a CATIA style gradient for better 3D visualization. 
+        for a white background use: ((255,255,255,255,255,255))
+    cs_size : float 
+        coordinate system size in [mm]
+        
+    Returns
+    ----------
+    tuple :
+        (self.display: the display handler for the pythonOcc 3D Viewer
+        self.start_display: function handle
+        self.add_menu: function handle
+        self.add_function_to_menu: function handle)
+    
+    
+    See Also
+    ----------
+    OCC.Display.SimpleGui : PyhtonOcc wrapper provides more details on this 
+        method
+    '''
+
+    def export_png(): return export_to_PNG(display)
+    def export_jpg():return export_to_JPEG(display)
+    def export_pdf(): return export_to_PDF(display)
+    def export_svg(): return export_to_SVG(display)
+    def export_ps(): return export_to_PS(display)
+    
+    #===========DISPLAY CONFIG:===============
+    display, start_display, add_menu, add_function_to_menu = init_display()
+    display.Context.SetDeviationAngle(DeviationAngle) # 0.001 default. Be careful to scale it to the problem.
+    display.Context.SetDeviationCoefficient(DeviationCoefficient) # 0.001 default. Be careful to scale it to the problem. 
+    display.set_bg_gradient_color(bg_c[0][0],bg_c[0][1],bg_c[0][2],bg_c[1][0],bg_c[1][1],bg_c[1][2])
+    show_coordinate_system(display,cs_size)
+    
+    add_menu('View')
+    add_function_to_menu('View', display.FitAll)
+    add_function_to_menu('View', display.View_Bottom)
+    add_function_to_menu('View', display.View_Top)
+    add_function_to_menu('View', display.View_Left)
+    add_function_to_menu('View', display.View_Right)
+    add_function_to_menu('View', display.View_Front)
+    add_function_to_menu('View', display.View_Rear)
+    add_function_to_menu('View', display.View_Iso)
+    
+    add_menu('Screencapture')
+    add_function_to_menu('Screencapture', export_png)
+    add_function_to_menu('Screencapture', export_jpg)
+    add_function_to_menu('Screencapture', export_pdf)
+    add_function_to_menu('Screencapture', export_svg)
+    add_function_to_menu('Screencapture', export_ps)
+   
+    return (display, start_display, add_menu, add_function_to_menu)
+    
+
 def export_to_PDF(display,event=None):
     f = display.View.View().GetObject()
     #display.set_bg_gradient_color(255,255,255,255,255,255)
@@ -52,6 +97,7 @@ def export_to_PDF(display,event=None):
     f.Export('img/capture_pdf%s.pdf' % i, Graphic3d_EF_PDF)
     print("EXPORT: \t Screencapture exported to img/capture_pdf%s.pdf" % i)
     #display.set_bg_gradient_color(20,6,111,200,200,200)
+    
     
 def export_to_SVG(display,event=None):
     f = display.View.View().GetObject()
@@ -63,6 +109,7 @@ def export_to_SVG(display,event=None):
     print("EXPORT: \t Screencapture exported to img/capture_svg%s.svg" % i)
     #display.set_bg_gradient_color(20,6,111,200,200,200)
     
+    
 def export_to_PS(display,event=None):
     f = display.View.View().GetObject()
     #display.set_bg_gradient_color(255,255,255,255,255,255)
@@ -72,6 +119,7 @@ def export_to_PS(display,event=None):
     f.Export('img/capture_ps%s.ps' % i, Graphic3d_EF_PostScript)
     print("EXPORT: \t Screencapture exported to img/capture_ps%s.ps" % i)
     #display.set_bg_gradient_color(20,6,111,200,200,200)
+
 
 def export_to_EnhPS(display,event=None):
     f = display.View.View().GetObject()
@@ -83,6 +131,7 @@ def export_to_EnhPS(display,event=None):
     print("EXPORT: \t Screencapture exported to img/capture_Enh_ps%s.ps" % i)
     #display.set_bg_gradient_color(20,6,111,200,200,200)
     
+    
 def export_to_TEX(display,event=None):
     f = display.View.View().GetObject()
     display.set_bg_gradient_color(255,255,255,255,255,255)
@@ -93,6 +142,7 @@ def export_to_TEX(display,event=None):
     print("EXPORT: \t Screencapture exported to img/capture_tex%s.tex" % i)
     display.set_bg_gradient_color(20,6,111,200,200,200)
     
+    
 def export_to_BMP(display,event=None):
     display.set_bg_gradient_color(255,255,255,255,255,255)
     i = 0
@@ -101,6 +151,7 @@ def export_to_BMP(display,event=None):
     display.View.Dump('img/capture_bmp%s.bmp' % i)
     print("EXPORT: \t Screencapture exported to img/capture_bmp%s.bmp" % i)
     display.set_bg_gradient_color(20,6,111,200,200,200)
+
 
 def export_to_PNG(display,event=None):
     display.set_bg_gradient_color(255,255,255,255,255,255)
@@ -111,6 +162,7 @@ def export_to_PNG(display,event=None):
     print("EXPORT: \t Screencapture exported to img/capture_png%s.bmp" % i)
     display.set_bg_gradient_color(20,6,111,200,200,200)
 
+
 def export_to_JPEG(display,event=None):
     display.set_bg_gradient_color(255,255,255,255,255,255)
     i = 0
@@ -119,6 +171,7 @@ def export_to_JPEG(display,event=None):
     display.View.Dump('img/capture_jpeg%s.jpeg' % i)
     print("EXPORT: \t Screencapture exported to img/capture_jpeg%s.jpeg" % i)
     display.set_bg_gradient_color(20,6,111,200,200,200)
+
 
 def export_to_TIFF(display,event=None):
     display.set_bg_gradient_color(255,255,255,255,255,255)
@@ -137,6 +190,7 @@ def print_xy_click(SHP, *kwargs):
 
 def exit():
     sys.exit()
+    
     
 def show_coordinate_system(display,length,event=None):
     '''CREATE AXIS SYSTEM for Visualization'''
@@ -198,23 +252,21 @@ def display_SONATA_SegmentLst(display,SegmentLst,coord=(0,0,0),alpha=0,beta=0):
                 
                 wire = transform_wire_2to3d(display,layer.wire, coord, alpha, beta, show=False)
                 display.DisplayColoredShape(wire, Quantity_Color(R, G, B, 0),update=True)
-    #            #display Start Point
-    #            string = 'Layer:'+str(layer.ID)+'(S1='+str(layer.S1)+')'
-    #            P = gp_Pnt(layer.StartPoint.X(),layer.StartPoint.Y(),0)
-    #            display.DisplayShape(P,color="BLUE")
-    #            display.DisplayMessage(P,string,message_color=(0.0,0.0,0.0))
-    #            
-    #            #display End Point
-    #            string = 'Layer:'+str(layer.ID)+'(S1='+str(layer.S2)+')'
-    #            P = gp_Pnt(layer.EndPoint.X(),layer.EndPoint.Y(),0)
-    #            display.DisplayShape(P,color="RED")
-    #            display.DisplayMessage(P,string,message_color=(0.0,0.0,0.0))
+                #display Start Point
+#                string = 'Layer:'+str(layer.ID)+'(S1='+str(layer.S1)+')'
+#                P = gp_Pnt(layer.StartPoint.X(),layer.StartPoint.Y(),0)
+#                display.DisplayShape(P,color="BLUE")
+#                display.DisplayMessage(P,string,message_color=(0.0,0.0,0.0))
+#                
+#                #display End Point
+#                string = 'Layer:'+str(layer.ID)+'(S1='+str(layer.S2)+')'
+#                P = gp_Pnt(layer.EndPoint.X(),layer.EndPoint.Y(),0)
+#                display.DisplayShape(P,color="RED")
+#                display.DisplayMessage(P,string,message_color=(0.0,0.0,0.0))
                 k = k+1;
                 if k>5:
                     k = 0
     return None
-
-
 
 
 if __name__ == '__main__':   

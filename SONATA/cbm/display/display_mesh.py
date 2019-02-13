@@ -64,8 +64,8 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
     plt.axis('equal')
     if title!=None:
         ax.set_title(title)
-    ax.set_xlabel('x [mm]')
-    ax.set_ylabel('y [mm]')
+    ax.set_xlabel('x [m]')
+    ax.set_ylabel('y [m]')
     
     ##display element number
     if show_element_number == True:

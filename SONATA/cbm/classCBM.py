@@ -38,7 +38,7 @@ from SONATA.cbm.topo.web import Web
 from SONATA.cbm.topo.utils import  getID
 from SONATA.cbm.topo.weight import Weight
 from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length, BSplineLst_from_dct, set_BSplineLst_to_Origin
-from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire, discretize_wire
+from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire, discretize_wire, get_wire_length
 
 from SONATA.cbm.mesh.node import Node
 from SONATA.cbm.mesh.cell import Cell
@@ -47,9 +47,11 @@ from SONATA.cbm.mesh.consolidate_mesh import consolidate_mesh_on_web
 from SONATA.cbm.mesh.mesh_intersect import map_mesh_by_intersect_curve2d
 from SONATA.cbm.mesh.mesh_core import gen_core_cells
 
-from SONATA.vabs.VABS_interface import VABS_config, export_cells_for_VABS, XSectionalProperties
-from SONATA.vabs.strain import Strain
-from SONATA.vabs.stress import Stress
+from SONATA.vabs.classVABSConfig import VABSConfig
+from SONATA.vabs.vabs_utl import export_cells_for_VABS
+from SONATA.vabs.classVABSSectionalProps import VABSSectionalProps
+from SONATA.vabs.classStrain import Strain
+from SONATA.vabs.classStress import Stress
 
 
 
@@ -58,7 +60,7 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
                                         export_to_SVG, export_to_PS, export_to_EnhPS, \
                                         export_to_TEX, export_to_BMP,export_to_TIFF, \
                                         show_coordinate_system, display_SONATA_SegmentLst,\
-                                        display_custome_shape, transform_wire_2to3d  
+                                        display_custome_shape, transform_wire_2to3d, display_config
 
 #from SONATA.anbax.anbax_utl import build_dolfin_mesh
 #from SONATA.anbax.anba_v4 import anbax
@@ -80,7 +82,11 @@ class CBM(object):
     
     SegmentLst: list
         list of Segment object instances
-        
+    
+    refL : float, default: 1.0
+        reference length to account for different dimensions and sizes in the 
+        cross-section. This length is approximately the circumference of the 
+        outer curve.  
 
     Methods
     -------
@@ -130,13 +136,9 @@ class CBM(object):
     cbm_run_anbax()
         runs the solver anbax from macro morandini
         
-
     cbm_post_2dmesh(attribute='MatID', title='NOTITLE', **kw)
         displays the mesh with specified attributes with matplotlib
-        
-    cbm_display_config(DeviationAngle = 1e-5, DeviationCoefficient = 1e-5, bg_c = ((20,6,111),(200,200,200)), cs_size = 25)
-        initializes and configures the pythonOcc 3D Viewer
-  
+      
     cbm_post_3dtopo()
         displays the topology with the pythonocc 3D viewer
     
@@ -202,7 +204,9 @@ class CBM(object):
         self.mesh = []
         self.BeamProperties = None
         self.display = None
-              
+
+        self.refL = 1.0       
+        
         self.startTime = datetime.now()
         self.exportLst = [] #list that contains all objects to be exported as step   
         self.surface3d = None #TODO: Remove definition and set it up in classBlade
@@ -225,9 +229,10 @@ class CBM(object):
             wire = translate_wire(wire, gp_Pnt(bm[6],0,0), gp_Pnt(0,0,0))
             wire = scale_wire(wire, gp_Pnt(0,0,0), bm[4])
             #wire = translate_wire(wire, gp_Pnt(0,0,0), gp_Pnt(bm[1],bm[2],bm[3]))
+            self.refL = get_wire_length(wire)
             
-            npArray = discretize_wire(wire, Deflection = 1e-4)
-            BSplineLst = BSplineLst_from_dct(npArray, angular_deflection = 20, tol_interp=1e-4)
+            npArray = discretize_wire(wire, Deflection = self.refL*1e-6)
+            BSplineLst = BSplineLst_from_dct(npArray, angular_deflection = 20, tol_interp=self.refL*1e-5)
             self.BoundaryBSplineLst = set_BSplineLst_to_Origin(BSplineLst,self.Theta) 
             
     def __getstate__(self):
@@ -442,7 +447,6 @@ class CBM(object):
         self.SegmentLst = []   #List of Segment Objects
         
         #TODO cleanup this mess!
-
         for k, seg in self.config.segments.items():
             if k == 0:        
                 if self.config.setup['input_type'] == 0:   #0) Airfoil from UIUC Database  --- naca23012
@@ -477,10 +481,14 @@ class CBM(object):
                 if self.config.setup['input_type'] == 4:
                     self.SegmentLst.append(Segment(k, **seg, Theta = self.blade.get_Theta(self.config.setup['radial_station'])))
                 
+                elif self.config.setup['input_type'] == 5:
+                    self.SegmentLst.append(Segment(k, **seg, Theta = self.Theta))
+                
                 else:
                     self.SegmentLst.append(Segment(k, **seg, **self.config.setup))
         
-        sorted(self.SegmentLst, key=getID)  
+        sorted(self.SegmentLst, key=getID)
+        self.refL = get_BSplineLst_length(self.SegmentLst[0].BSplineLst)
         return None
 
 
@@ -497,9 +505,7 @@ class CBM(object):
         self.__cbm_generate_SegmentLst(**kwargs)
         #Build Segment 0:
         self.SegmentLst[0].build_wire()
-        l0 = get_BSplineLst_length(self.SegmentLst[0].BSplineLst)
-        #l0 = 300
-        self.SegmentLst[0].build_layers(l0 = l0)
+        self.SegmentLst[0].build_layers(l0 = self.refL)
         self.SegmentLst[0].determine_final_boundary()
         
         #Build Webs:    
@@ -516,7 +522,7 @@ class CBM(object):
                 seg.Segment0 = self.SegmentLst[0]
                 seg.WebLst = self.WebLst
                 seg.build_segment_boundary_from_WebLst(self.WebLst,self.SegmentLst[0])            
-                seg.build_layers(self.WebLst,self.SegmentLst[0], l0 = l0)
+                seg.build_layers(self.WebLst,self.SegmentLst[0], l0 = self.refL)
                 seg.determine_final_boundary(self.WebLst,self.SegmentLst[0])
                 seg.build_wire()
               
@@ -566,9 +572,7 @@ class CBM(object):
         Cell.class_counter = 1
         #meshing parameters:  
         Resolution = self.config.setup['mesh_resolution'] # Nb of Points on Segment0
-        length = get_BSplineLst_length(self.SegmentLst[0].BSplineLst)
-        #length = 300
-        global_minLen = round(length/Resolution,5)
+        global_minLen = round(self.refL/Resolution,5)
             
         core_cell_area = 1.25*global_minLen**2
         bw_cell_area = 0.25*global_minLen**2
@@ -576,7 +580,7 @@ class CBM(object):
 
         #===================MESH SEGMENT
         for j,seg in enumerate(reversed(self.SegmentLst)):
-            self.mesh.extend(seg.mesh_layers(self.SegmentLst, global_minLen, self.WebLst, display=self.display))
+            self.mesh.extend(seg.mesh_layers(self.SegmentLst, global_minLen, self.WebLst, display=self.display, l0=self.refL))
             #mesh,nodes = sort_and_reassignID(mesh)
             
         #===================MESH CORE  
@@ -751,7 +755,7 @@ class CBM(object):
                 #print('STATUS:\t Total Elapsed Time: %s' % (datetime.now() - self.startTime))
                 print(stdout)
                 #VABS Postprocessing:
-                result = XSectionalProperties(vabs_filename+'.K')
+                result = VABSSectionalProps(vabs_filename+'.K')
             
             except Exception as e:
                     if 'All "vabsiii" licenses in us' in stdout:
@@ -762,7 +766,6 @@ class CBM(object):
                         break
 
         self.BeamProperties = result
-        
         
         if self.config.vabs_cfg.recover_flag == 1:
             self.BeamProperties.read_all_VABS_Results()
@@ -843,73 +846,6 @@ class CBM(object):
         mesh,nodes = sort_and_reassignID(self.mesh)
         fig,ax = plot_cells(self.mesh, nodes, attribute, self.BeamProperties, title, **kw)
         return fig,ax
-                
-    
-    def cbm_display_config(self, DeviationAngle = 1e-5, DeviationCoefficient = 1e-5, bg_c = ((20,6,111),(200,200,200)), cs_size = 25):
-        '''
-        CBM method that initializes and configures the pythonOcc 3D Viewer 
-        and adds Menues to the toolbar. 
-        
-        Parameters
-        ----------
-        DeviationAngle : float, optional 
-            default = 1e-5
-        DeviationCoefficient : float, optional
-            default = 1e-5 
-        bg_c : tuple, optional
-            Background Gradient Color ((RBG Tuple),(RBG Tuple)) the default 
-            values are a CATIA style gradient for better 3D visualization. 
-            for a white background use: ((255,255,255,255,255,255))
-        cs_size : float 
-            coordinate system size in [mm]
-            
-        Returns
-        ----------
-        tuple :
-            (self.display: the display handler for the pythonOcc 3D Viewer
-            self.start_display: function handle
-            self.add_menu: function handle
-            self.add_function_to_menu: function handle)
-        
-        
-        See Also
-        ----------
-        OCC.Display.SimpleGui : PyhtonOcc wrapper provides more details on this 
-            method
-        '''
-        
-        def export_png(): return export_to_PNG(self.display)
-        def export_jpg():return export_to_JPEG(self.display)
-        def export_pdf(): return export_to_PDF(self.display)
-        def export_svg(): return export_to_SVG(self.display)
-        def export_ps(): return export_to_PS(self.display)
-        
-        #===========DISPLAY CONFIG:===============
-        self.display, self.start_display, self.add_menu, self.add_function_to_menu = init_display()
-        self.display.Context.SetDeviationAngle(DeviationAngle) # 0.001 default. Be careful to scale it to the problem.
-        self.display.Context.SetDeviationCoefficient(DeviationCoefficient) # 0.001 default. Be careful to scale it to the problem. 
-        self.display.set_bg_gradient_color(bg_c[0][0],bg_c[0][1],bg_c[0][2],bg_c[1][0],bg_c[1][1],bg_c[1][2])
-        show_coordinate_system(self.display,cs_size)
-        
-        self.add_menu('View')
-        self.add_function_to_menu('View', self.display.FitAll)
-        self.add_function_to_menu('View', self.display.View_Bottom)
-        self.add_function_to_menu('View', self.display.View_Top)
-        self.add_function_to_menu('View', self.display.View_Left)
-        self.add_function_to_menu('View', self.display.View_Right)
-        self.add_function_to_menu('View', self.display.View_Front)
-        self.add_function_to_menu('View', self.display.View_Rear)
-        self.add_function_to_menu('View', self.display.View_Iso)
-        
-        self.add_menu('Screencapture')
-        self.add_function_to_menu('Screencapture', export_png)
-        self.add_function_to_menu('Screencapture', export_jpg)
-        self.add_function_to_menu('Screencapture', export_pdf)
-        self.add_function_to_menu('Screencapture', export_svg)
-        self.add_function_to_menu('Screencapture', export_ps)
-       
-        return (self.display, self.start_display, self.add_menu, self.add_function_to_menu)
-        
     
     def cbm_post_3dtopo(self):
         '''
@@ -925,13 +861,13 @@ class CBM(object):
         values (mm).
         
         '''
-        
-        self.cbm_display_config()
-        #display_custome_shape(display,seöf.SegmentLst[0].wire,2,0,[0,0,0])
+        (self.display, self.start_display, self.add_menu, self.add_function_to_menu) = display_config(DeviationAngle = 1e-6, DeviationCoefficient=1e-6, cs_size = self.refL/5)
+
+        #display_custome_shape(self.display,self.SegmentLst[0].wire,2,0,[0,0,0])
 
         if self.config.setup['input_type'] == 3 or self.config.setup['input_type'] == 4:
-            self.display.Context.SetDeviationAngle(1e-6)       
-            self.display.Context.SetDeviationCoefficient(1e-6) 
+            #self.display.Context.SetDeviationAngle(1e-6)       
+            #self.display.Context.SetDeviationCoefficient(1e-6) 
             
             display_SONATA_SegmentLst(self.display,self.SegmentLst,(self.config.setup['radial_station'],0,0),-math.pi/2,-math.pi/2)
             self.display.DisplayShape(self.surface3d, color=None, transparency=0.7, update=True)
@@ -958,9 +894,9 @@ class CBM(object):
         meshing routines. 
         '''
                 
-        self.cbm_display_config()
+        (self.display, self.start_display, self.add_menu, self.add_function_to_menu) = display_config(DeviationAngle = 1e-6, DeviationCoefficient=1e-6, cs_size = self.refL/5)
         for c in self.mesh:
-            self.display.DisplayColoredShape(c.wire, 'BLACK')    
+            self.display.DisplayShape(c.wire, color='BLACK', transparency=0.7)    
         self.display.View_Top()
         self.display.FitAll()
         self.start_display()   
@@ -1016,11 +952,11 @@ if __name__ == '__main__':
     job.cbm_gen_mesh()
     
     job.cbm_review_mesh()
-    job.cbm_run_vabs()
+    job.cbm_run_vabs(rm_vabfiles=False)
     job.cbm_post_2dmesh(title='Hello World!')
     
     
-#    #job.cbm_post_3dtopo()
+    job.cbm_post_3dtopo()
 #    job.config.vabs_cfg.recover_flag = 1
 #    job.config.vabs_cfg.M = [0,2000e4,0]
 

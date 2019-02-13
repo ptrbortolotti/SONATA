@@ -12,7 +12,7 @@ import yaml
 if __name__ == '__main__':
     os.chdir('/media/gu32kij/work/TPflumm/SONATA')
 from SONATA.cbm.fileIO.read_yaml_input import clean_filestring
-from SONATA.vabs.VABS_interface import VABS_config
+from SONATA.vabs.classVABSConfig import VABSConfig
 from SONATA.classMaterial import read_IEA37_materials, find_material
 
 class CBMConfig(object):
@@ -40,7 +40,7 @@ class CBMConfig(object):
     
     flags: dict
 
-    vabs_cfg: VABS_config
+    vabs_cfg: VABSConfig
 
     
     """
@@ -57,7 +57,7 @@ class CBMConfig(object):
             yml = inputdata
             self._read_IEA37(yml, materials)
             
-        self.vabs_cfg = VABS_config()
+        self.vabs_cfg = VABSConfig()
         self.flags = {'mesh_core': True}
 
 
@@ -82,14 +82,16 @@ class CBMConfig(object):
         self.setup['mesh_resolution'] = 280 #GET FROM function
        
         #Webs:
-        self.webs = OrderedDict()
-        if yml.get('webs_positions') != None:
-            for i,p1 in enumerate(sorted(yml.get('webs_positions'))):
-                w = {}
-                w['Pos1'] = p1
-                w['Pos2'] = 1-p1
-                self.webs[i+1] = w
-        
+        foo = {}
+        for item in yml.get('webs'):
+            
+            w = {}
+            w['id'] = item.get('id')
+            w['Pos1'] = item['position'][0]
+            w['Pos2'] = item['position'][1]
+            w['curvature'] = item.get('curvature')
+            foo[item.get('id')] = w
+        self.webs = OrderedDict(sorted(foo.items(), key=lambda x: x[1]['id']))
         #Segments
         self.segments = OrderedDict()
         for i,s in enumerate(yml.get('segments')):
@@ -99,7 +101,7 @@ class CBMConfig(object):
                 d['CoreMaterial'] = 0
             
             elif isinstance(s.get('filler'), int):
-                d['CoreMaterial'] = materials[s.get('filler')]
+                d['CoreMaterial'] = materials[s.get('filler')].id
                 
             else: 
                 d['CoreMaterial'] = find_material(materials, 'name', s.get('filler')).id
@@ -133,7 +135,7 @@ class CBMConfig(object):
         self.setup = yDict['Setup']
         
         if 'Webs' in yDict.keys():
-            D = {int(k.split()[-1]):v for (k, v) in yDict['Webs'].items()}    
+            D = {int(k.split()[-1]):v for (k, v) in yDict['Webs'].items()}
             self.webs =  OrderedDict(sorted(D.items()))
         
         #print(self.setup['BalanceWeight'])
