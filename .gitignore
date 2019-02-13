@@ -58,6 +58,7 @@ jobs/Statistics
 jobs/VHeuschneider
 jobs/VariSpeed/**/*.png
 /img/
+/scratch/
 /docs/source/
 /docs/build/
 SONATA/sectionbuilder/PatranMesh_example/
