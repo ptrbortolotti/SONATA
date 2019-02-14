@@ -70,6 +70,8 @@ class CBMConfig(object):
         yml : dict
            dictionary of the yaml style IEA37 section input    
         """
+        
+        
         #Setup:
         self.setup = {}
         self.setup['input_type'] = 5
@@ -105,15 +107,16 @@ class CBMConfig(object):
                 
             else: 
                 d['CoreMaterial'] = find_material(materials, 'name', s.get('filler')).id
-                
+            
             layerlst = s.get('layup')
+            if all(isinstance(l, list) for l in layerlst):    
+                layerlst = s.get('layup')
+                d['Layup_names'] = np.asarray(layerlst)[:,5].tolist()
+                d['Layup'] = np.asarray(layerlst)[:,:5].astype(np.float)
             
-            d['Layup_names'] = np.asarray(layerlst)[:,5].tolist()
-            d['Layup'] = np.asarray(layerlst)[:,:5].astype(np.float)
-            
-            #print(d['Layup_names'])
-#            d['Layup'] = np.asarray([[l.get('start'), l.get('end'), l.get('thickness'), l.get('orientation'), find_material(materials, 'name', l.get('material_name')).id] for l in layerlst])
-#            d['Layup_names'] = [l.get('name') for l in layerlst]
+            elif all(isinstance(l, dict) for l in layerlst):    
+                d['Layup'] = np.asarray([[l.get('start'), l.get('end'), l.get('thickness'), l.get('orientation'), find_material(materials, 'name', l.get('material_name')).id] for l in layerlst])
+                d['Layup_names'] = [l.get('name') for l in layerlst]
             self.segments[key] = d
             
         #BalanceWeight
