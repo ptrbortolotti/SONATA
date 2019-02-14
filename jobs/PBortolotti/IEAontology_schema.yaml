@@ -29,7 +29,7 @@ properties:
             blade: 
                 type: object
                 properties: 
-                    bem_aero:                    
+                    outer_shape_bem:                    
                         type: object
                         required:
                             - airfoil_position
@@ -92,7 +92,7 @@ properties:
                                     values: 
                                         $ref: "#/definitions/distributed_data/grid_nd"
         
-                    multi_body:
+                    elastic_properties:
                         type: object
                         properties:
                             timoschenko_hawc:
@@ -101,7 +101,7 @@ properties:
                                 $ref: "#/definitions/beam/cp_lambda_beam"
                             six_x_six:
                                 $ref: "#/definitions/beam/six_x_six"
-                    2d_fem:
+                    internal_structure_2d_fem:
                         type: object
                         required:
                             - coordinates
@@ -112,7 +112,7 @@ properties:
                             webs:
                                 $ref: "#/definitions/webs_definition"
                             layers:
-                                $ref: "#/definitions/struct_components"
+                                $ref: "#/definitions/layers_definition"
                     # cfd_geometry:
                         # type: object
                         # TODO
@@ -857,7 +857,7 @@ definitions:
                                 maxItems: 21
                                 uniqueItems: false               
                         
-    struct_components:
+    layers_definition:
         type: array
         description: ...
         items:
