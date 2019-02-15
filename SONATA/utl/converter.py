@@ -112,6 +112,8 @@ def iea37_converter(blade, cs_pos, byml, materials):
     
     # Composite stacking sequences
     thick_web = np.zeros([len(x),n_webs])
+    id_layer_web_le= np.zeros(len(x), dtype=int)
+    id_layer_web_te = np.zeros(len(x), dtype=int)
     for i in range(len(x)):
         profile         = blade.airfoils[i,1].coordinates
         id_le           = np.argmin(profile[:,0])
@@ -121,8 +123,10 @@ def iea37_converter(blade, cs_pos, byml, materials):
 
         profile_curve   = arc_length(profile[:,0], profile[:,1]) / arc_length(profile[:,0], profile[:,1])[-1]
         
-        id_layer = 0
+        id_layer     = 0
+        
         for idx_sec, sec in enumerate(tmp1):
+            
             if x[i] >= sec['thickness']['grid'][0] and x[i] <= sec['thickness']['grid'][-1]:
                 if 'web' not in sec.keys():
                     if idx_sec>0:
@@ -164,7 +168,6 @@ def iea37_converter(blade, cs_pos, byml, materials):
                     id_layer = id_layer + 1
                 else:
                     id_web          = id_webs[i][(sec['web'])]['id']
-                    id_layer_web    = 0
                     for id_mat in range(1,len(materials)):
                         if sec['material'] == materials[id_mat].name:
                         
@@ -182,35 +185,51 @@ def iea37_converter(blade, cs_pos, byml, materials):
                                 thick_web[i,int(id_web/2-1)] = thick_web[i,int(id_web/2-1)] + set_interp(x[i])
                                                               
                             else:
-                                tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web]['name'] = 'web_' + str(int(id_web/2)) + '_' + sec['material']  + '_' + str(x[i])
-                                tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web]['name'] = 'web_' + str(int(id_web/2)) + '_' + sec['material']  + '_' + str(x[i])
                                 
-                                tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web]['material_name'] = sec['material']
-                                tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web]['material_name'] = sec['material']
+                                
+                                if tmp2[i]['segments'][id_web - 1]['layup'] != [{}]:
+                                    tmp2[i]['segments'][id_web - 1]['layup'].append({})
+                                    id_layer_web_le[i] = id_layer_web_le[i] + 1   
+                                    
+                                if tmp2[i]['segments'][id_web + 1]['layup'] != [{}]:    
+                                    tmp2[i]['segments'][id_web + 1]['layup'].append({})
+                                    id_layer_web_te[i] = id_layer_web_te[i] + 1       
+
+                                    
+                                tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web_le[i]]['name'] = 'web_' + str(int(id_web/2)) + '_' + sec['material']  + '_' + str(x[i])
+                                tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web_te[i]]['name'] = 'web_' + str(int(id_web/2)) + '_' + sec['material']  + '_' + str(x[i])
+                                
+                                tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web_le[i]]['material_name'] = sec['material']
+                                tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web_te[i]]['material_name'] = sec['material']
                                 
                                 set_interp = PchipInterpolator(sec['thickness']['grid'], sec['thickness']['values'])
-                                tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web]['thickness'] = set_interp(x[i]) * 0.5
-                                tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web]['thickness'] = set_interp(x[i]) * 0.5
+                                tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web_le[i]]['thickness'] = set_interp(x[i]) * 0.5
+                                tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web_te[i]]['thickness'] = set_interp(x[i]) * 0.5
                                 
-                                #flange = 1e-3
+                                flange = 0.01
                                 
-                                tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web]['start'] = 0.0#id_webs[i][(sec['web'])]['start'] + flange
-                                tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web]['end']   = 1.0 #id_webs[i][(sec['web'])]['end'] - flange
-                                
-                                tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web]['start'] = 0.0 #id_webs[i][(sec['web'])]['start'] - flange
-                                tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web]['end']   = 1.0 #id_webs[i][(sec['web'])]['end'] + flange
+                                tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web_le[i]]['start'] = id_webs[i][(sec['web'])]['end'] - flange
+                                tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web_le[i]]['end']   = id_webs[i][(sec['web'])]['start'] + flange
+
+                                                     
+                                tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web_te[i]]['start'] = id_webs[i][(sec['web'])]['start'] - flange
+                                tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web_te[i]]['end']   = id_webs[i][(sec['web'])]['end'] + flange
                                 
                                 if 'fiber_orientation' in sec.keys():
                                     set_interp = PchipInterpolator(sec['fiber_orientation']['grid'], sec['fiber_orientation']['values'])
-                                    tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web]['orientation'] = set_interp(x[i])
-                                    tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web]['orientation'] = set_interp(x[i])
+                                    tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web_le[i]]['orientation'] = set_interp(x[i])
+                                    tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web_te[i]]['orientation'] = set_interp(x[i])
                                 else:
-                                    tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web]['orientation'] = 0.
-                                    tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web]['orientation'] = 0.
+                                    tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web_le[i]]['orientation'] = 0.
+                                    tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web_te[i]]['orientation'] = 0.
                                 
-                                id_layer_web = id_layer_web + 1
+               
+                                
                             
-
+    
+    # print(tmp2[i]['segments'])
+    # exit()
+    
     webs    = [OrderedDict() for n in range(len(x))]
     for i in range(len(x)):    
         for i_web,web in enumerate(tmp0):                
