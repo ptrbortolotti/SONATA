@@ -168,9 +168,9 @@ class Blade(Component):
         
         tmp_coords = {}
 
-        tmp_coords['x'] = np.asarray((yml.get('outer_shape_bem').get('coordinates').get('x').get('grid'),yml.get('outer_shape_bem').get('coordinates').get('x').get('values'))).T
-        tmp_coords['y'] = np.asarray((yml.get('outer_shape_bem').get('coordinates').get('y').get('grid'),yml.get('outer_shape_bem').get('coordinates').get('y').get('values'))).T
-        tmp_coords['z'] = np.asarray((yml.get('outer_shape_bem').get('coordinates').get('z').get('grid'),yml.get('outer_shape_bem').get('coordinates').get('z').get('values'))).T
+        tmp_coords['x'] = np.asarray((yml.get('outer_shape_bem').get('reference_axis').get('x').get('grid'),yml.get('outer_shape_bem').get('reference_axis').get('x').get('values'))).T
+        tmp_coords['y'] = np.asarray((yml.get('outer_shape_bem').get('reference_axis').get('y').get('grid'),yml.get('outer_shape_bem').get('reference_axis').get('y').get('values'))).T
+        tmp_coords['z'] = np.asarray((yml.get('outer_shape_bem').get('reference_axis').get('z').get('grid'),yml.get('outer_shape_bem').get('reference_axis').get('z').get('values'))).T
         tmp_tw = np.asarray((yml.get('outer_shape_bem').get('twist').get('grid'),yml.get('outer_shape_bem').get('twist').get('values'))).T
         tmp_chord = np.asarray((yml.get('outer_shape_bem').get('chord').get('grid'),yml.get('outer_shape_bem').get('chord').get('values'))).T
         tmp_pa = np.asarray((yml.get('outer_shape_bem').get('pitch_axis').get('grid'),yml.get('outer_shape_bem').get('pitch_axis').get('values'))).T

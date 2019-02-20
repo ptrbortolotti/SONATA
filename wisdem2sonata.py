@@ -19,7 +19,7 @@ materials = read_IEA37_materials(yml.get('materials'))
 
 byml = yml.get('components').get('blade')
 B = Blade(name='TestBlade')
-B.read_IEA37(byml, airfoils, materials, stations = [0.4], wt_flag = True)     
+B.read_IEA37(byml, airfoils, materials, stations = [0.0, 0.1, 0.4], wt_flag = True)     
 
 # B.iea37_converter(byml, airfoils, materials)
 
