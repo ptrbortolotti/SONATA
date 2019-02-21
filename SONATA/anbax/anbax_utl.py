@@ -1,7 +1,7 @@
 import dolfin
 import numpy as np
 
-from material import material
+from anba4 import material
 
 def build_mat_library(cbm_materials):
 
@@ -10,11 +10,10 @@ def build_mat_library(cbm_materials):
     maxE = 0.
     matid = 0
     matdict = {}
-    for m in cbm_materials:
+    for m in cbm_materials.values():
         if m.orth == 0:
             maxE = max(m.E, maxE)
             matMechanicProp = [m.E, m.nu]
-            print(matMechanicProp)
             mat = material.IsotropicMaterial(matMechanicProp)
         elif m.orth == 1:
             matMechanicProp = np.zeros((3,3))
@@ -30,7 +29,6 @@ def build_mat_library(cbm_materials):
             matMechanicProp[2,0] = m.nu[1] #nu_zy
             matMechanicProp[2,1] = m.nu[0] #nu_zx
             matMechanicProp[2,2] = m.nu[2] #nu_xy
-            print(matMechanicProp)
             mat = material.OrthotropicMaterial(matMechanicProp)
         elif m.orth == 2:
             raise ValueError('material type 2 (anysotropic) not supported by Anba')
