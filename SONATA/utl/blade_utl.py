@@ -6,13 +6,64 @@ Created on Mon Jan 21 10:20:51 2019
 @author: gu32kij
 """
 import numpy as np
+from scipy.interpolate import interp1d
 
 #PythonOCC Libraries
 from OCC.TopoDS import TopoDS_Wire,  TopoDS_Vertex
 from OCC.BRepOffsetAPI import BRepOffsetAPI_ThruSections
 
+
+
+def interp_loads(loads, grid_loc):
+    """
+    Interpolates the loads at the given radial station (grid location)
+    
+    Parameters
+    ----------
+    loads : dict
+        dictionary of the following keys and values, (default=None)
+        for detailed information see the VABSConfig documentation or the 
+        VABS user manual
+        F : nparray([[grid, F1, F2, F3]]) 
+        M : nparray([[grid, M1, M2, M3]]) 
+        f : nparray([[grid, f1, f2, f2]])
+        df : nparray([[grid, f1', f2', f3']])
+        dm :  nparray([[grid, m1', m2', m3']])
+        ddf : nparray([[grid, f1'', f2'', f3'']])
+        ddm : nparray([[grid, m1'', m2'', m3'']])
+        
+    grid_loc : float
+        location of interpolation
+        
+    Returns
+    ----------
+    sectional_load : dict
+    dictionary of the following keys and values, (default=None)
+        for detailed information see the VABSConfig documentation or the 
+        VABS user manual
+        F : nparray([F1, F2, F3]) 
+        M : nparray([M1, M2, M3]) 
+        f : nparray([f1, f2, f2])
+        df : nparray([f1', f2', f3'])
+        dm :  nparray([m1', m2', m3'])
+        ddf : nparray([f1'', f2'', f3''])
+        ddm : nparray([m1'', m2'', m3''])
+        
+    """
+    
+    d = {}
+    for k,item in loads.items():
+        fit = interp1d(item[:,0], item[:,1:], axis=0)
+        d[k] = fit(grid_loc)
+    return d
+
 def interp_airfoil_position(airfoil_position, airfoils, grid_loc):
-        #TBD: Extrapolation
+    """
+    TBD:Docstring
+    
+    """
+    
+    #TBD: Extrapolation
     if grid_loc in airfoil_position[0]:
         afname = airfoil_position[1][airfoil_position[0].index(grid_loc)]
         return next((x for x in airfoils if x.name == afname), None)

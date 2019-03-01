@@ -62,9 +62,7 @@ class VABSSectionalProps(object):
         
         splitpoints = [i_MM,i_MC,i_MMatMC,i_MP,i_GC,i_CS,i_CF,i_NA,i_TS,i_TF,i_GSC,i_VS,i_VF,i_Ag,i_Bk,i_Ck,i_Dk]
         splitpoints.sort()
-        
-
-            
+                
         MM = grab_str_segment(STR,i_MM,splitpoints)
         MC = grab_str_segment(STR,i_MC,splitpoints)
         MMatMC = grab_str_segment(STR,i_MMatMC,splitpoints)
@@ -157,11 +155,31 @@ class VABSSectionalProps(object):
             
 
     def read_all_VABS_Results(self):
+        """
+        reads the strains, stresses and displacements from VABS result files
+        """
         self.ELE = read_VABS_Results(self.filename.replace('.K','.ELE'))
         self.U = read_VABS_Results(self.filename.replace('.K','.U'))
 
     
     def MM_convert_units(self,in_dct = {'mass': 'g', 'length': 'mm'},out_dct = {'mass':'kg', 'length':'m'}):
+        """
+        method to convert units of the 6x6 Mass Matrix
+        
+        Parameters
+        ----------
+        in_dct : dict, 
+            input units, default = {'mass': 'g', 'length': 'mm'}
+            
+        out_dct : dict,
+            output units,  default = {'mass':'kg', 'length':'m'}
+            
+        Returns
+        ----------
+        MM : np.array
+            the converted 6x6 Mass Matrix
+        """
+        
         MMunits = np.array([['mass/length','','','','mass','mass'],
                            ['','mass/length','', 'mass','',''],
                            ['','','mass/length', 'mass','',''],
@@ -173,6 +191,24 @@ class VABSSectionalProps(object):
         
     
     def TS_convert_units(self,in_dct = {'force': 'N', 'length': 'mm'}, out_dct = {'force': 'N', 'length': 'm'}):
+        """
+        method to convert units of the 6x6 Timoshenko Stiffness Matrix
+        
+        Parameters
+        ----------
+        in_dct : dict, 
+            input units, default = {'force': 'N', 'length': 'mm'}
+            
+        out_dct : dict,
+            output units,  default = {'force': 'N', 'length': 'm'}
+            
+        Returns
+        ----------
+        TS : np.array
+            the converted 6x6 Timoshenko Stiffness Matrix
+        
+        """
+        
         TSunits = np.array([['force','force','force','force*length','force*length','force*length'],
                            ['force','force','force','force*length','force*length','force*length'],
                            ['force','force','force','force*length','force*length','force*length'],
@@ -184,6 +220,31 @@ class VABSSectionalProps(object):
         return np.multiply(self.TS, TS_TM)
 
 
+    def rotated(self, theta):
+        """
+        rotates the VabsSectionalProps by angle theta. 
+        
+        Parameters
+        ----------
+        theta : float
+            angle of rotation in radians
+
+        Returns
+        ----------
+        RotSecProp : VABSSectionalProps
+            copy and rotated VABSSectionalProps of self
+        """
+        
+        T = np.array([[0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0],])
+        #TODO: finish it!
+        
+        pass
+    
 #======================================================
 #       MAIN
 #======================================================       

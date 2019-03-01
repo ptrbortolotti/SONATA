@@ -16,35 +16,51 @@ stressM
 strainM
 
 
-OUTPUTS:
+Returns
+----------
 (sf, mode) -- safety factors(float), failure mode(string)
+    
 
 """
-import math
+
+def von_Mises(mat, stressM, strainM):
+    """calculates the safety factor for the von Mises yield criterion with the
+    material ultimate strenght"
+    """
+    sf = mat.UTS/stressM.sigma_vM
+    mode = 'von_Mises'
+    return (sf, mode)
 
 
 def tsaiwu_2D(mat, stressM, strainM):
     """ Calculates SF and mode according to Tsai-Wu criterion (layer-wise). """
-    if mat.orth !=1:
-        #print('WARNING: tsaiwu_2D criterion is not plausible for non orthotropic materials')
-        pass
 
-    f11 = 1/(mat.Xt*mat.Xc)
-    f22 = 1/(mat.Yt*mat.Yc)
-    f1 = 1/mat.Xt - 1/mat.Xc
-    f2 = 1/mat.Yt - 1/mat.Yc
-    f12 = -1/2*math.sqrt(f11*f22)
-    f66 = 1/(mat.S21**2)
+    Xt = mat.Xt
+    Xc = mat.Xc
+    Yt = mat.Yt
+    Yc = mat.Yc
+    S21 = mat.S21
+    
+    sig1 = stressM.sigma11
+    sig2 = stressM.sigma22
+    tau = stressM.sigma12
 
-    a = f11*stressM.sigma11**2 + f22*stressM.sigma22**2 + f66*stressM.sigma12**2 + 2*f12*stressM.sigma11*stressM.sigma22
-    b = f1*stressM.sigma11 + f2*stressM.sigma22;
+    f11 = 1/(Xt*Xc)
+    f22 = 1/(Yt*Yc)
+    f12 = -1/(2*(Xt*Xc*Yt*Yc)**(1/2))
+    f66 = 1/(S21**2)
+    f1 = 1/Xt - 1/Xc
+    f2 = 1/Yt - 1/Yc
+
+    a = f11*sig1**2 + f22*sig2**2 + f66*tau**2 + 2*f12*sig1*sig2
+    b = f1*sig1 + f2*sig2;
 
     sf = (-b + (b**2 + 4*a)**(1/2))/(2*a)
 
     # Failure mode calculations  
-    H1 = abs(f1*stressM.sigma11 + f11*stressM.sigma11**2)
-    H2 = abs(f2*stressM.sigma22 + f22*stressM.sigma22**2)
-    H6 = abs(f66*stressM.sigma12**2)
+    H1 = abs(f1*sig1 + f11*sig1**2)
+    H2 = abs(f2*sig2 + f22*sig2**2)
+    H6 = abs(f66*tau**2)
  
     if max(H1,H2,H6) == H1:
         mode = "fiber"        # fiber failure
@@ -52,18 +68,23 @@ def tsaiwu_2D(mat, stressM, strainM):
         mode = "matrix"        # matrix failure
     else:
         mode = "shear"        # shear failure
-        
-    return (sf, mode)       # Returns SF & mode    
+    
+    # Returns SF & mode    
+    return (sf, mode)
 
 
 def maxstress_2D(mat, stressM, strainM):
     """ Calc. SF and mode according to Max. Stress criterion (layer-wise). """
-
-    Xt = mat_prop["Xt"]
-    Xc = mat_prop["Xc"]
-    Yt = mat_prop["Yt"]
-    Yc = mat_prop["Yc"]
-    S21 = mat_prop["S12"]
+    
+    Xt = mat.Xt
+    Xc = mat.Xc
+    Yt = mat.Yt
+    Yc = mat.Yc
+    S21 = mat.S21
+    
+    sig1 = stressM.sigma11
+    sig2 = stressM.sigma22
+    tau = stressM.sigma12
 
     # Verify for sig1
     if sig1 > 0:
@@ -93,17 +114,21 @@ def maxstress_2D(mat, stressM, strainM):
     sf = 1/f_max
 
     # Result FS (1 / maximum of the 3 above)
-    return [sf, mode]
+    return (sf, mode)
 
 
 def maxstrain_2D(mat, stressM, strainM):
     """ Calc. SF and mode according to Max. Strain criterion (layer-wise). """
 
-    strainXt = mat_prop["Xt"] / mat_prop["E1"]
-    strainXc = mat_prop["Xc"] / mat_prop["E1"]
-    strainYt = mat_prop["Yt"] / mat_prop["E2"]
-    strainYc = mat_prop["Yc"] / mat_prop["E2"]
-    strainS21 = mat_prop["S12"] / mat_prop["G12"]
+    strainXt = mat.Xt / mat.E[0]
+    strainXc = mat.Xc / mat.E[0]
+    strainYt = mat.Yt / mat.E[1]
+    strainYc = mat.Yc / mat.E[1]
+    strainS21 = mat.S21 / mat.G[0]
+    
+    eps1 = strainM.epsilon11
+    eps2 = strainM.epsilon22
+    gamma = strainM.gamma12
 
     # Verify for eps1
     if eps1 > 0:
@@ -119,7 +144,6 @@ def maxstrain_2D(mat, stressM, strainM):
 
     # Verify for gamma
     f_s = abs(gamma)/strainS21
-
     f_max = max(f_1, f_2, f_s)
 
     # Find failure mode
@@ -133,17 +157,21 @@ def maxstrain_2D(mat, stressM, strainM):
     sf = 1/f_max
 
     # Result FS (1 / maximum of the 3 above)
-    return [sf, mode]
+    return (sf, mode)
 
 
 def hashin_2D(mat, stressM, strainM):
     """ Calc. SF and mode according to Hashin criterion (layer-wise). """
 
-    Xt = mat_prop["Xt"]
-    Xc = mat_prop["Xc"]
-    Yt = mat_prop["Yt"]
-    Yc = mat_prop["Yc"]
-    S21 = mat_prop["S12"]
+    Xt = mat.Xt
+    Xc = mat.Xc
+    Yt = mat.Yt
+    Yc = mat.Yc
+    S21 = mat.S21
+    
+    sig1 = stressM.sigma11
+    sig2 = stressM.sigma22
+    tau = stressM.sigma12
 
     # Verify for sig1
     if sig1 >= 0:
@@ -167,10 +195,7 @@ def hashin_2D(mat, stressM, strainM):
     sf = 1/f_max
 
     # Result FS (1 / maximum of the 3 above)
-    return [sf, mode]
-
-def puck_2d(mat, stressM, strainM):
-    pass
+    return (sf, mode)
 
 
 if __name__ == '__main__':

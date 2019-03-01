@@ -70,7 +70,7 @@ def plot_histogram_2Ddata(data, **kwargs):
                         arr = ( data[:,i,j] - ref[i,j] ) / ref[i,j] * 100
                         sigma = arr.std()
                         mu = arr.mean()
-                        string = '$\sigma$ = %.2f %%' % sigma
+                        string = r'$\sigma$ = %.2f $\%%$' % sigma
                         ax[i][j].text(mu,0,string)
                         ax[i][j].set_xlim(-20,20)
 
@@ -94,7 +94,7 @@ def plot_histogram_2Ddata(data, **kwargs):
                 fig.delaxes(ax[i][j])
                 
             if i==j:
-                ax[i][j].set_xlabel('% deviation from baseline value')
+                ax[i][j].set_xlabel(r'$\%%$ deviation from baseline value')
                 if j==shape[1]-1:
                     ax[i][j].legend()
             

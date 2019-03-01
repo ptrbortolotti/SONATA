@@ -27,7 +27,9 @@ from SONATA.classMaterial import read_IEA37_materials
 from SONATA.cbm.classCBM import CBM
 from SONATA.cbm.classCBMConfig import CBMConfig
 
-from SONATA.utl.blade_utl import interp_airfoil_position, make_loft
+from SONATA.vabs.classVABSConfig import VABSConfig
+
+from SONATA.utl.blade_utl import interp_airfoil_position, make_loft, interp_loads
 from SONATA.utl.converter import iae37_converter
 from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire
 
@@ -129,7 +131,7 @@ class Blade(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
         self.beam_properties = None
-    
+        
     def __repr__(self):
         """__repr__ is the built-in function used to compute the "official" 
         string reputation of an object, """
@@ -150,22 +152,12 @@ class Blade(Component):
         airfoils : list
             Is the database of airfoils
         
-        Returns
-        ----------
-        blade_matrix : np.ndarray
-            The blade_matrix with the follwowing colloums 
-            (1: non-dimensionalized x-station, 2:chord, 3:twist, x-coordinate, 
-            y-coordinate, z-coordinate)
-        
-        airfoils : ndarray
-            array of grid location and airfoil instance 
-            nparray([[grid, airfoil instance]],dtype = object)
         
         """
+        self.name = yml.get('name')
         print('STATUS:\t Reading IAE37 Definition for Blade: %s' % (self.name))
         #Read information from DataDictionary
-        
-        
+
         tmp_coords = {}
         tmp_coords['x'] = np.asarray((yml.get('coordinates').get('x').get('grid'),yml.get('coordinates').get('x').get('values'))).T
         tmp_coords['y'] = np.asarray((yml.get('coordinates').get('y').get('grid'),yml.get('coordinates').get('y').get('values'))).T
@@ -248,12 +240,37 @@ class Blade(Component):
         return None
                
 
-    def blade_run_vabs(self, **kwargs):
+    def blade_run_vabs(self, loads = None, **kwargs):
         """
         runs vabs for every section
+        
+        Parameters
+        ----------
+        loads : dict, optional
+            dictionary of the following keys and values, (default=None)
+            for detailed information see the VABSConfig documentation or the 
+            VABS user manual
+            F : nparray([[grid, F1, F2, F3]]) 
+            M : nparray([[grid, M1, M2, M3]]) 
+            f : nparray([[grid, f1, f2, f2]])
+            df : nparray([[grid, f1', f2', f3']])
+            dm :  nparray([[grid, m1', m2', m3']])
+            ddf : nparray([[grid, f1'', f2'', f3'']])
+            ddm : nparray([[grid, m1'', m2'', m3'']])
+            dddf : nparray([[grid, f1''', f2''', f3''']])
+            dddm : nparray([[grid, m1''', m2''', m3''']])
+            
         """
+        vc = VABSConfig()
         lst = []
         for (x, cs) in self.sections:
+            if loads:
+                vc.recover_flag = 1
+                load = interp_loads(loads, x)
+                for k,v in load.items():
+                    setattr(vc,k,v)
+            cs.config.vabs_cfg = vc
+            
             print('STATUS:\t Running VABS at grid location %s' % (x))
             cs.cbm_run_vabs(**kwargs)
             lst.append([x, cs.BeamProperties])
@@ -363,35 +380,48 @@ class Blade(Component):
 if __name__ == '__main__':
     plt.close('all')
     
-    #%% ====== WindTurbine ============== 
-    with open('./jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
-        inputs  = myfile.read()
-    with open('jobs/PBortolotti/IEAontology_schema.yaml', 'r') as myfile:
-        schema  = myfile.read()
-    validate(yaml.load(inputs), yaml.load(schema))    
-    yml = yaml.load(inputs)
-    
-    airfoils = [Airfoil(af) for af in yml.get('airfoils')]
-    materials = read_IEA37_materials(yml.get('materials'))
-    
-    job = Blade(name='IEAonshoreWT')
-    job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=True)     
-    job.blade_gen_section(mesh_flag = False)
-    #job.blade_run_vabs()
-    #job.blade_plot_sections()
-    job.blade_post_3dtopo(flag_lft = False, flag_topo = True)
-    
-    
-##   %% ====== Helicopter ============== 
-#    with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as f:
-#         yml = yaml.load(f.read())
+#    #%% ====== WindTurbine ============== 
+#    with open('./jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
+#        inputs  = myfile.read()
+#    with open('jobs/PBortolotti/IEAontology_schema.yaml', 'r') as myfile:
+#        schema  = myfile.read()
+#    validate(yaml.load(inputs), yaml.load(schema))    
+#    yml = yaml.load(inputs)
 #    
 #    airfoils = [Airfoil(af) for af in yml.get('airfoils')]
 #    materials = read_IEA37_materials(yml.get('materials'))
 #    
-#    job = Blade(name='UH-60A_adv')
-#    job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=False)     
-#    job.blade_gen_section()
-#    job.blade_run_vabs()
-#    job.blade_plot_sections()
-#    job.blade_post_3dtopo(flag_lft = True, flag_topo = True)
+#    job = Blade(name='IEAonshoreWT')
+#    job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=True)     
+#    job.blade_gen_section(mesh_flag = False)
+#    #job.blade_run_vabs()
+#    #job.blade_plot_sections()
+#    job.blade_post_3dtopo(flag_lft = False, flag_topo = True)
+    
+    
+#   %% ====== Helicopter ============== 
+    #with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as f:
+    with open('jobs/VHeuschneider/blade_config.yml', 'r') as f:
+         yml = yaml.load(f.read())
+        
+    airfoils = [Airfoil(af) for af in yml.get('airfoils')]
+    materials = read_IEA37_materials(yml.get('materials'))
+    
+    job = Blade()
+    job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=False)     
+    job.blade_gen_section()
+    
+    loads = {}
+    loads['F'] = np.array([[0.3, 10000, 0, 0],
+                          [1.0, 0, 0, 0]])
+    loads['M'] = np.array([[0.3, 500, 200, 0],
+                          [1.0, 0, 200, 0]])
+    
+    job.blade_run_vabs(loads)  
+    job.blade_plot_sections(attribute='stressM.sigma11')
+    job.blade_plot_sections(attribute='sf', vmin=0, vmax=4)
+    #job.blade_post_3dtopo(flag_lft = True, flag_topo = True)
+    #print((job.sections[0,1].BeamProperties.Xm2/0.130)*100, '%')
+
+    
+    

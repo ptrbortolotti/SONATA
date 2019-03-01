@@ -85,15 +85,16 @@ class CBMConfig(object):
        
         #Webs:
         foo = {}
-        for item in yml.get('webs'):
-            
-            w = {}
-            w['id'] = item.get('id')
-            w['Pos1'] = item['position'][0]
-            w['Pos2'] = item['position'][1]
-            w['curvature'] = item.get('curvature')
-            foo[item.get('id')] = w
-        self.webs = OrderedDict(sorted(foo.items(), key=lambda x: x[1]['id']))
+        if yml.get('webs'):
+            for item in yml.get('webs'):
+                w = {}
+                w['id'] = item.get('id')
+                w['Pos1'] = item['position'][0]
+                w['Pos2'] = item['position'][1]
+                w['curvature'] = item.get('curvature')
+                foo[item.get('id')] = w
+            self.webs = OrderedDict(sorted(foo.items(), key=lambda x: x[1]['id']))
+
         #Segments
         self.segments = OrderedDict()
         for i,s in enumerate(yml.get('segments')):
@@ -109,20 +110,27 @@ class CBMConfig(object):
                 d['CoreMaterial'] = find_material(materials, 'name', s.get('filler')).id
             
             layerlst = s.get('layup')
-            if all(isinstance(l, list) for l in layerlst):    
+            if layerlst and all(isinstance(l, list) for l in layerlst):    
                 layerlst = s.get('layup')
                 d['Layup_names'] = np.asarray(layerlst)[:,5].tolist()
                 d['Layup'] = np.asarray(layerlst)[:,:5].astype(np.float)
             
-            elif all(isinstance(l, dict) for l in layerlst):    
+            elif layerlst and all(isinstance(l, dict) for l in layerlst):    
                 d['Layup'] = np.asarray([[l.get('start'), l.get('end'), l.get('thickness'), l.get('orientation'), find_material(materials, 'name', l.get('material_name')).id] for l in layerlst])
                 d['Layup_names'] = [l.get('name') for l in layerlst]
+            
+            else:
+                d['Layup'] = np.empty((0,0))
+                d['Layup_names'] = np.empty((0,0))
+            
             self.segments[key] = d
             
+            
         #BalanceWeight
-        if self.setup['BalanceWeight']:
-            pass #TBD: Not yet needed!  
-        
+        if yml.get('trim_mass'):
+            self.bw =  yml.get('trim_mass')#
+            self.setup['BalanceWeight'] = True
+
         
     def _read_yaml_config(self, fname):
         """ read the CBM config file and assign class attributes
