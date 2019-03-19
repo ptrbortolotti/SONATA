@@ -44,14 +44,7 @@ class Blade(Component):
     SONATA Blade component object.
     
     Attributes
-    ----------
-    name : str
-        name of the parent class 'Component'   
-        
-    cosy : gp_Ax2
-        Describes a right-handed coordinate system in 3D space. It is part of 
-        gp_Ax2 class.
-                
+    ----------                      
     coordinates :  ndarray
         Describes the axis LE coordinates in meters along the span.
         nparray([[grid, x, y, z]]).
@@ -392,13 +385,13 @@ if __name__ == '__main__':
 #    materials = read_IEA37_materials(yml.get('materials'))
 #    
 #    job = Blade(name='IEAonshoreWT')
-#    job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=True)     
+#    job.read_IEAjob.blade_post_3dtopo(flag_lft = True, flag_topo = True)37(yml.get('components').get('blade'), airfoils, materials, wt_flag=True)     
 #    job.blade_gen_section(mesh_flag = False)
 #    #job.blade_run_vabs()
 #    #job.blade_plot_sections()
 #    job.blade_post_3dtopo(flag_lft = False, flag_topo = True)
     
-    
+
 #   %% ====== Helicopter ============== 
     #with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as f:
     with open('jobs/VHeuschneider/blade_config.yml', 'r') as f:
@@ -412,16 +405,15 @@ if __name__ == '__main__':
     job.blade_gen_section()
     
     loads = {}
-    loads['F'] = np.array([[0.3, 10000, 0, 0],
+    loads['F'] = np.array([[0.3, 88500, 0, 0],
                           [1.0, 0, 0, 0]])
-    loads['M'] = np.array([[0.3, 500, 200, 0],
-                          [1.0, 0, 200, 0]])
+    loads['M'] = np.array([[0.3, -12, 640, -150],
+                          [1.0, 0, 0, 0]])
     
     job.blade_run_vabs(loads)  
     job.blade_plot_sections(attribute='stressM.sigma11')
-    job.blade_plot_sections(attribute='sf', vmin=0, vmax=4)
+    job.blade_plot_sections(attribute='sf', vmin=0, vmax=3)
+    job.beam_properties[0,1].MpUS
     #job.blade_post_3dtopo(flag_lft = True, flag_topo = True)
-    #print((job.sections[0,1].BeamProperties.Xm2/0.130)*100, '%')
-
-    
-    
+    print((job.sections[0,1].BeamProperties.Xm2/0.130)*100, '%')
+    #job.blade_plot_sections(attribute='sf', vmin=0, vmax=3)
