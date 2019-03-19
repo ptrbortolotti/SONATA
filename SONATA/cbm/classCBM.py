@@ -63,8 +63,11 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
                                         show_coordinate_system, display_SONATA_SegmentLst,\
                                         display_custome_shape, transform_wire_2to3d, display_config
 
-#from SONATA.anbax.anbax_utl import build_dolfin_mesh
-#from SONATA.anbax.anba_v4 import anbax
+try:
+    from SONATA.anbax.anbax_utl import build_dolfin_mesh
+    from anba4 import anbax
+except:
+    pass
 
 class CBM(object):
     """ 
@@ -808,8 +811,15 @@ class CBM(object):
         
         """
         self.mesh, nodes = sort_and_reassignID(self.mesh)
-        (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = \
-            build_dolfin_mesh(self.mesh, nodes, self.materials)
+        try:
+            (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = \
+                build_dolfin_mesh(self.mesh, nodes, self.materials)
+        except:
+            print('\n')
+            print('==========================================\n\n')
+            print('Error, Anba4 wrapper called, but ')
+            print('Anba4 _or_ Dolfin are not installed\n\n')
+            print('==========================================\n\n')
         #TBD: pass it to anbax and run it!
         anba = anbax(mesh, 1, matLibrary, materials, plane_orientations, fiber_orientations, maxE)
         stiff = anba.compute()
