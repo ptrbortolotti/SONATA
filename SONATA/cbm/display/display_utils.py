@@ -85,6 +85,8 @@ def display_config(DeviationAngle = 1e-5, DeviationCoefficient = 1e-5, bg_c = ((
     add_function_to_menu('Screencapture', export_svg)
     add_function_to_menu('Screencapture', export_ps)
    
+    add_menu('Export')
+    
     return (display, start_display, add_menu, add_function_to_menu)
     
 

@@ -53,10 +53,10 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
         cmap = plt.cm.get_cmap(kw['cmap'])
     
     elif data_name == 'sf':
-        colors = [(1, 0, 0), (1, 1, 0), (0, 0.5, 0)]  # R -> G -> B
+        colors = [(0.6, 0, 0), (1, 1, 0), (0, 0.5, 0)]  # R -> G -> B
         cmap_name = 'my_list'
         cmap = LinearSegmentedColormap.from_list(
-        cmap_name, colors, N=4)
+        cmap_name, colors, N=6)
         #cmap.set_over(color='white')
         #cmap.set_under(color='k')
         
