@@ -44,6 +44,68 @@ components:
         2d_fem:
             sections:
               - position: 0.4
+                mesh_resolution: 280
+                
+                #........... w e b s ...........
+                webs:
+                    - id: 1
+                      position: [0.43, 0.57]
+                      curvature: Null
+                      
+                    - id: 2
+                      position: [0.3, 0.7]
+                      curvature: Null
+                      
+                #........... trim_mass ...........
+                trim_mass: 
+                        XPos: -124              #	X Position	[-]						[float]
+                        YPos: 0.5               #	Y Position	[-]						[float]
+                        Diameter: 10.0          #	Diameter of Balance Weight [mm]	[float]
+                        Material: 6             #   Material ID							[int]
+
+                #........... s e g m e n t s ...........
+                segments:
+                    - id: 0
+                      filler: 3
+                      layup: 
+                          #-[Start[-], End[-], thickness[m], Orientation [deg], MatID[int], 'name'[str]]
+                          - [0.44, 0.56, 0.82e-3,   0, 7, 'Erosion_Strip']
+                          - [0.00, 1.00, 0.25e-3,  0, 8, 'Overwrap_Ply_1']
+                          - [0.0, 1.00, 0.25e-3,   45, 8, 'Overwrap_Ply_2']
+                          - [0.0, 1.00, 0.25e-3,   45, 8, 'Overwrap_Ply_3']
+                          - [0.0, 1.00, 0.25e-3,   0, 8, 'Overwrap_Ply_4']
+                          - [0.45, 0.55, 1.0e-3, 0, 2, 'Spar1']
+                          - [0.46, 0.54, 1.0e-3, 0, 2, 'Spar2']
+                          - [0.465, 0.535, 1.0e-3, 0, 2, 'Spar3']
+                          - [0.4725, 0.5275, 1.0e-3, 0, 2, 'Spar3']
+                          - [0.475, 0.525, 1.0e-3, 0, 2, 'Spar4']
+                          - [0.4775, 0.5225, 1.0e-3, 0, 2, 'Spar3']
+                          - [0.48, 0.52, 1.0e-3, 0, 2, 'Spar5']
+                            
+                    - id: 1
+                      filler: 3
+                      layup: 
+                          #-[Start[-],End[-],thickness[mm],Orientation [deg],MatID[int],'name'[str]]	
+                          - [0.0, 1.00, 0.8e-3, 45, 2, 'Spar1']
+                          - [0.0, 1.00, 0.8e-3, -45, 2, 'Spar2']
+
+                    - id: 2
+                      filler: Null
+                      layup: 
+                          #Start[-],End[-],thickness[mm],Orientation [deg],MatID[int],name[str]	
+                          - [0.0, 1.0, 1.35e-3, 0, 9, 'Spar_Cap_Ply_1']
+                          - [0.0, 1.0, 1.35e-3, 45, 9, 'Spar_Cap_Ply_2']
+                          - [0.0, 1.0, 1.45e-3, -45, 9, 'Spar_Cap_Ply_3']
+                          - [0.0, 1.0, 0.5e-3, 90, 9, 'Spar_Cap_Ply_4']
+
+                    - id: 3
+                      filler: 11
+                      layup: 
+                          #Start[-],End[-],thickness[mm],Orientation [deg],MatID[int],name[str]	
+                          - [0.96, 0.04, 3.1e-3, 45, 1, 'TE_Filler']
+                          
+                          
+              - position: 0.7
                 trim_mass: True
                 mesh_resolution: 280
                 
@@ -104,6 +166,7 @@ components:
                       layup: 
                           #Start[-],End[-],thickness[mm],Orientation [deg],MatID[int],name[str]	
                           - [0.96, 0.04, 3.1e-3, 45, 1, 'TE_Filler'] 
+
 
 
 #==================== A I R F O I L S ==================================

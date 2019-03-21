@@ -14,9 +14,21 @@ from matplotlib2tikz import save as tikz_save
 import SONATA.Pymore.utl.read as read
 
 def plot_histogram_2Ddata(data, **kwargs):
-    '''
-    data: array.shape = (sample Nb, i, j)
-    '''
+    """
+    simple plotting procedure to illustrate multiple datasets of a 2D array in 
+    in a histogram.
+    
+    Parameters
+    ----------
+    data : ndarray
+        array.shape = (sample Nb, i, j)
+        
+    ref : ndarray, optional
+    upper_tri : bool
+    title : str
+    ylabel : list of str
+        
+    """ 
     
     #Define function Args and Defaults for kwargs
     shape = data.shape[1:]
@@ -70,7 +82,7 @@ def plot_histogram_2Ddata(data, **kwargs):
                         arr = ( data[:,i,j] - ref[i,j] ) / ref[i,j] * 100
                         sigma = arr.std()
                         mu = arr.mean()
-                        string = '$\sigma$ = %.2f %%' % sigma
+                        string = r'$\sigma$ = %.2f $\%%$' % sigma
                         ax[i][j].text(mu,0,string)
                         ax[i][j].set_xlim(-20,20)
 
@@ -94,7 +106,7 @@ def plot_histogram_2Ddata(data, **kwargs):
                 fig.delaxes(ax[i][j])
                 
             if i==j:
-                ax[i][j].set_xlabel('% deviation from baseline value')
+                ax[i][j].set_xlabel(r'$\%%$ deviation from baseline value')
                 if j==shape[1]-1:
                     ax[i][j].legend()
             
@@ -105,15 +117,22 @@ def plot_histogram_2Ddata(data, **kwargs):
 
 def plot_beam_properties(data, sigma, ref, x_offset = 0.8178698):
     '''
-    Args: 
-            Data: np.ndarray Massterms(6), Stiffness(21), damping(1), and coordinate(1) 
-            stacked horizontally for the use in DYMORE/PYMORE/MARC  
-            sigma: standart deviation of Data
-            ref: np.ndarray of reference to 
-            select = 'all', 'Massterms', 'Stiffness'
-            x_offset = 0.8178698
-    kwargs: 
-            usetex
+    generates a plot of the beamproperties using the 
+    
+    Parameters
+    ----------
+    Data : np.ndarray 
+        Massterms(6), Stiffness(21), damping(1), and coordinate(1) stacked 
+        horizontally for the use in DYMORE/PYMORE/MARC  
+    sigma: np.ndarray
+        standart deviation of Data
+    
+    ref: np.ndarray
+        of reference to select = 'all', 'Massterms', 'Stiffness'
+    
+    x_offset : float 
+        x offset if curvilinear coordinate doen't start at the rotational 
+        center of the rotordefault UH-60A value = 0.8178698
             
     '''
       
@@ -167,22 +186,25 @@ def plot_beam_properties(data, sigma, ref, x_offset = 0.8178698):
 
 
 def plot_fandiagram(res, Omega, RPM_vec, **kwargs):
-    '''Plotting routine to generate a Fan-Diagram (rotor eigenfrequencies over
-    rotor rotational speed). Re
+    """
+    plotting procedure to generate a Fan-Diagram (rotor eigenfrequencies vs.
+    rotor rotational speed).
     
-    Args:
-        res: np.array for 
-        Omega: reference Rotational Speed to normalize frequencies
-        RPM_Vec: np.ndarray, of 
-        sigma: np.ndarray of the standart deviation corresponding to the fanplot.
-        ref_fname: filename of the reference data.
-        ref_str: list of strings to indentify the eigenmodes 
+    Parameters
+    ----------
+    res : np.ndarray 
+        result
+    
+    Omega : float
+        reference Rotational Speed to normalize frequencies in rad/sec
+    
+    RPM_Vec : np.ndarray, of 
+    sigma : np.ndarray of the standart deviation corresponding to the fanplot.
+    ref_fname : filename of the reference data.
+    ref_str : list of strings to indentify the eigenmodes 
                 (f1= first flap, l2= second lag, t1=first torsion)
-                
-    Returns:
-        None
-    
-    '''
+
+    """
     
     #Define function Args and Defaults for kwargs
     sigma  = None

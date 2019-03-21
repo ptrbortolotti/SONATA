@@ -16,7 +16,8 @@ from SONATA.cbm.mesh.cell_utils import calc_cell_angles
 
 
 class Cell(object):
-    __slots__ = ( 'id', 'nodes', 'theta_1', 'theta_3', 'MatID', 'structured', 'interior_nodes', 'strain', 'strainM', 'stress', 'stressM') 
+    __slots__ = ( 'id', 'nodes', 'theta_1', 'theta_3', 'MatID', 'structured', 
+                 'interior_nodes', 'strain', 'strainM', 'stress', 'stressM', 'sf', 'failure_mode') 
     class_counter= 1
     def __init__(self,nodeLst):                  #int
         self.id = self.__class__.class_counter

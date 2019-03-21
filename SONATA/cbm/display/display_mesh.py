@@ -12,7 +12,8 @@ import datetime
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 import matplotlib.pyplot as plt
-
+from matplotlib import cm
+from matplotlib.colors import LinearSegmentedColormap
 
 
 def centroid(points):
@@ -32,7 +33,46 @@ def plot_nodes(nodes):
     plt.show()
 
 
-def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=None,show_element_number=False,show_node_number=False,**kw):
+def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProperties=None, 
+              show_element_number=False, show_node_number=False, **kw):
+    
+    """
+    To be continued...
+    
+    Parameters
+    ----------
+    nodes : list
+    elements : list
+    data : 
+    data_name : string
+    
+    """
+    
+    alpha = 0.7
+    if 'cmap' in kw:
+        cmap = plt.cm.get_cmap(kw['cmap'])
+    
+    elif data_name == 'sf':
+        colors = [(0.6, 0, 0), (1, 1, 0), (0, 0.5, 0)]  # R -> G -> B
+        cmap_name = 'my_list'
+        cmap = LinearSegmentedColormap.from_list(
+        cmap_name, colors, N=6)
+        #cmap.set_over(color='white')
+        #cmap.set_under(color='k')
+        
+    else:
+        cmap = plt.cm.get_cmap()
+        
+    if 'vmin' in kw:
+        vmin = kw['vmin']
+    else:
+        vmin = None
+        
+    if 'vmax' in kw:
+        vmax = kw['vmax']
+    else:
+        vmax = None
+        
     fig, ax = plt.subplots()
     patches = []
     centroids = []
@@ -47,9 +87,11 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
         polygon = Polygon(array, True, edgecolor='k')
         patches.append(polygon)
     
-    p = PatchCollection(patches, alpha=0.5, edgecolors = 'k')
+    p = PatchCollection(patches, alpha=alpha, cmap=cmap, edgecolors = 'k')
     p.set_array(data)
+    p.set_clim(vmin, vmax)
     ax.add_collection(p)
+    
     cbar = fig.colorbar(p, ax=ax)
     cbar = cbar.ax.set_ylabel(data_name)
     
@@ -109,7 +151,7 @@ def plot_mesh(nodes,elements,theta_11,data,data_name,title=None,VABSProperties=N
             plt.legend(handles=[CG,GC,NA,SC])
 
     
-            
+
     plt.show()
     return (fig,ax)
     
@@ -152,7 +194,7 @@ def plot_cells(cells,nodes,attr1, VABSProperties=None, title='None', plotTheta11
         theta_11 = np.asarray(theta_11)
     
     
-    fig,ax = plot_mesh(nodes_array,element_array,theta_11,data,data_name,title,VABSProperties,False,False)    
+    fig,ax = plot_mesh(nodes_array,element_array,theta_11,data,data_name,title, VABSProperties, False, False, **kw)    
    
     if 'savepath' in kw:
         #savepath = 'jobs/VHeuschneider/figures/R90_config.svg'

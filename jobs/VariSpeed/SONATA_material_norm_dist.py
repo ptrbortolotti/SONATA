@@ -19,27 +19,27 @@ from tqdm import tqdm
 
 if __name__ == '__main__':  
     os.chdir('../..')
-from SONATA.cbm.fileIO.configuration import Configuration
-from SONATA.cbm.sonata_cbm import CBM
+from SONATA.cbm.classCBM import CBM#
+from SONATA.cbm.classCBMConfig import CBMConfig
 from SONATA.cbm.fileIO.hiddenprints import HiddenPrints
 
 from SONATA.cbm.fileIO.dymore_utils import read_dymore_beam_properties, interp1d_dymore_beam_properties
 import SONATA.Pymore.utl.coef as coef
 from SONATA.utl.plot import plot_fandiagram, plot_histogram_2Ddata, plot_beam_properties
 
-from marc_fanplot import calc_fandiagram
+from SONATA.utl.marc_fanplot import calc_fandiagram
 
 def run_MC_sample(fname, sample, hide=True):
     if hide==True:
 
         with HiddenPrints():
             #create job instance!
-            config = Configuration(fname)
+            config = CBMConfig(fname)
             job = CBM(config)
             job.cbm_gen_topo()
             job.cbm_gen_mesh()
             
-            job.MaterialLst[8].E = sample
+            job.materials[9].E = sample
 
             job.cbm_run_vabs(ramdisk=True)
             
@@ -55,7 +55,7 @@ def run_MC_sample(fname, sample, hide=True):
             # (bladetip_displacement) = calc_hover(bp1)
             # (calc_forwardflight)
             
-            
+
         print('Sample finished:', sample)
         print(x1[6:9])      
 
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     
     fname = 'jobs/VariSpeed/uh60a_cbm_advanced/sec_config.yml'
     #fname = 'jobs/VariSpeed/uh60a_cbm_simple/sec_config.yml'
-    config = Configuration(fname)
+    config = CBMConfig(fname)
     job = CBM(config)
     job.cbm_gen_topo()
     job.cbm_gen_mesh()
@@ -115,10 +115,10 @@ if __name__ == '__main__':
     
     
     #VARIATE THE Modulus of Material 1.
-    N = 100   #number of Samples
+    N = 250   #number of Samples
     n = np.linspace(0,N-1,N)
     cv = 0.05 #coefficient of variation
-    mu_E9 = job.MaterialLst[8].E
+    mu_E9 = job.materials[9].E
     #mu_E1 = job.MaterialLst[1].E
     #mu_rho = job.MaterialLst[11].rho
     
@@ -151,21 +151,21 @@ if __name__ == '__main__':
     
     
     
-    
 
-#%% ================= P O S T  -  P R O C E S S I N G =========================  
+#%% ================= P O S T  -  P R O C E S S I N G ========================= 
+    from matplotlib2tikz import save as tikz_save
     plt.close('all')
     
     job.cbm_post_2dmesh(title='UH-60A Simple Config')
     #%FAN PLOT POSTPROCESSING
     f_mean = np.mean(FreqArr.real, axis=0)
     f_std = np.std(FreqArr.real, axis=0)
-    plot_fandiagram(f_mean,  OmegaArr[0], RPM_vec[0], sigma = f_std)
-    
+    plot_fandiagram(f_mean,  OmegaArr[0], RPM_vec[0], sigma = f_std, ), #ref_str = ['l1','f1','f2','f3','l2','t1','f4']
+    tikz_save('/media/gu32kij/HTMWTUM/Oeffentlich/Publikationen/ERF/2019/TPflumm, WGarre/abstract/img/fanplot.tikz', figureheight='\\figureheight', figurewidth='\\figurewidth' )
     #PLOT 2D Histogram
     tmp = np.asarray([b.CS for b in BeamPropLst])
     plot_histogram_2Ddata(tmp, ref = ref_cs.CS, title='4x4 Stiffness Matrix')
-    
+#    tikz_save('/media/gu32kij/HTMWTUM/Oeffentlich/Publikationen/ERF/2019/TPflumm, WGarre/abstract/img/CS.tikz', figureheight='\\figureheight', figurewidth='\\figurewidth' )
 #    tmp = np.asarray([b.TS for b in BeamPropLst])
 #    plot_histogram_2Ddata(tmp, ref = ref_cs.TS, title='6x6 Stiffness Matrix')
 #
@@ -173,8 +173,8 @@ if __name__ == '__main__':
 #    plot_histogram_2Ddata(tmp, ref = ref_cs.MM, title='6x6 Mass Matrix')
 
     #PLOT Beam Properties
-#    data = np.mean(bp, axis=0) #Dymore 29, Beam Properties! to standartdize the procedure! 
-#    sigma = np.std(bp, axis=0)
-#    ref = coef.refBeamProp()
-#    
-#    plot_beam_properties(data, sigma, ref)
+    data = np.mean(bp, axis=0) #Dymore 29, Beam Properties! to standartdize the procedure! 
+    sigma = np.std(bp, axis=0)
+    ref = coef.refBeamProp()
+    
+    plot_beam_properties(data, sigma, ref)

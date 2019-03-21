@@ -107,7 +107,7 @@ class IsotropicMaterial(Material):
         if not kw.get('alpha') is None:  
             self.alpha = float(kw.get('alpha'))
         
-        if not kw.get('Ys') is None:  
+        if not kw.get('YS') is None:  
             self.YS = float(kw.get('YS'))
             
         if not kw.get('UTS') is None:  

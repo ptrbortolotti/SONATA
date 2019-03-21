@@ -1,6 +1,3 @@
 [submodule "SONATA/Pymore"]
 	path = SONATA/Pymore
 	url = https://gitlab.lrz.de/wgarre/Pymore.git
-[submodule "SONATA/anbax/anba_v4"]
-	path = SONATA/anbax/anba_v4
-	url = https://bitbucket.org/anba_code/anba_v4.git
