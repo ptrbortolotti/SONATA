@@ -30,7 +30,7 @@ from SONATA.cbm.classCBMConfig import CBMConfig
 from SONATA.vabs.classVABSConfig import VABSConfig
 
 from SONATA.utl.blade_utl import interp_airfoil_position, make_loft, interp_loads
-from SONATA.utl.converter import iae37_converter
+from SONATA.utl.converter import iea37_converter
 from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire
 
 from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
@@ -378,47 +378,49 @@ class Blade(Component):
 if __name__ == '__main__':
     plt.close('all')
     
-#    #%% ====== WindTurbine ============== 
-#    with open('./jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
-#        inputs  = myfile.read()
-#    with open('jobs/PBortolotti/IEAontology_schema.yaml', 'r') as myfile:
-#        schema  = myfile.read()
-#    validate(yaml.load(inputs), yaml.load(schema))    
-#    yml = yaml.load(inputs)
-#    
-#    airfoils = [Airfoil(af) for af in yml.get('airfoils')]
-#    materials = read_IEA37_materials(yml.get('materials'))
-#    
-#    job = Blade(name='IEAonshoreWT')
-#    job.read_IEAjob.blade_post_3dtopo(flag_lft = True, flag_topo = True)37(yml.get('components').get('blade'), airfoils, materials, wt_flag=True)     
-#    job.blade_gen_section(mesh_flag = False)
-#    #job.blade_run_vabs()
-#    #job.blade_plot_sections()
-#    job.blade_post_3dtopo(flag_lft = False, flag_topo = True)
+    #%% ====== WindTurbine ============== 
+    with open('./jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
+        inputs  = myfile.read()
+    with open('jobs/PBortolotti/IEAontology_schema.yaml', 'r') as myfile:
+        schema  = myfile.read()
+    validate(yaml.load(inputs), yaml.load(schema))    
+    yml = yaml.load(inputs)
     
-
-#   %% ====== Helicopter ============== 
-    #with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as f:
-    with open('jobs/VHeuschneider/blade_config.yml', 'r') as f:
-         yml = yaml.load(f.read())
-        
     airfoils = [Airfoil(af) for af in yml.get('airfoils')]
     materials = read_IEA37_materials(yml.get('materials'))
     
-    job = Blade()
-    job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=False)     
-    job.blade_gen_section()
+    job = Blade(name='IEAonshoreWT')
+    job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=True)
+
+    job.blade_gen_section(mesh_flag = False)
     
-    loads = {}
-    loads['F'] = np.array([[0.3, 88500, 0, 0],
-                          [1.0, 0, 0, 0]])
-    loads['M'] = np.array([[0.3, -12, 640, -150],
-                          [1.0, 0, 0, 0]])
-    
-    job.blade_run_vabs(loads)  
-    job.blade_plot_sections(attribute='stressM.sigma11')
-    job.blade_plot_sections(attribute='sf', vmin=0, vmax=3)
-    job.beam_properties[0,1].MpUS
-    #job.blade_post_3dtopo(flag_lft = True, flag_topo = True)
-    print((job.sections[0,1].BeamProperties.Xm2/0.130)*100, '%')
-    #job.blade_plot_sections(attribute='sf', vmin=0, vmax=3)
+    #job.blade_run_vabs()
+    #job.blade_plot_sections()
+
+    job.blade_post_3dtopo(flag_lft = False, flag_topo = False)
+
+#   %% ====== Helicopter ============== 
+#    #with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as f:
+#    with open('jobs/VHeuschneider/blade_config.yml', 'r') as f:
+#         yml = yaml.load(f.read())
+#        
+#    airfoils = [Airfoil(af) for af in yml.get('airfoils')]
+#    materials = read_IEA37_materials(yml.get('materials'))
+#    
+#    job = Blade()
+#    job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=False)     
+#    job.blade_gen_section()
+#    
+#    loads = {}
+#    loads['F'] = np.array([[0.3, 88500, 0, 0],
+#                          [1.0, 0, 0, 0]])
+#    loads['M'] = np.array([[0.3, -12, 640, -150],
+#                          [1.0, 0, 0, 0]])
+#    
+#    job.blade_run_vabs(loads)  
+#    job.blade_plot_sections(attribute='stressM.sigma11')
+#    job.blade_plot_sections(attribute='sf', vmin=0, vmax=3)
+#    job.beam_properties[0,1].MpUS
+#    #job.blade_post_3dtopo(flag_lft = True, flag_topo = True)
+#    print((job.sections[0,1].BeamProperties.Xm2/0.130)*100, '%')
+#    #job.blade_plot_sections(attribute='sf', vmin=0, vmax=3)
