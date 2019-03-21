@@ -318,19 +318,30 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
     ''' the trim_BSplineLst function trims the BSplineLst that is defined on 
     the interval between start and end to the interval defined by S1 and S2.
     
-    Args:
-        BSplineLst: (list of geom2d_bsplines) is the object to be modified.
-        S1: (float) start of the interval to which the object is trimmed.
-        S2: (float) end of the interval to which the object is trimmed.
-        start: (float) start of the interval where the BSplineLst is defined
-        end: (float) end of the interval where the BSplineLst is defined
+    Parameters
+    ----------
+    BSplineLst: list of geom2d_bsplines
+        is the object to be modified.
+    S1: float
+        start of the interval to which the object is trimmed.
+    S2: float
+        end of the interval to which the object is trimmed.
+    start: float
+        start of the interval where the BSplineLst is defined
+    end: float
+        end of the interval where the BSplineLst is defined
             
-    Returns: 
-        trimmed_BSplineLst: (list of geom2d_bsplines) is the modified object.
+    Returns
+    ----------
+    trimmed_BSplineLst: list of geom2d_bsplines
+        is the modified object.
             
-    Example: a BSplineLst is defined between 0.0 and 1.0 and shall be trimmed 
-            to a interval S1=0.3 and S2=0.7
+    Example
+    ----------
+    a BSplineLst is defined between 0.0 and 1.0 and shall be trimmed 
+    to a interval S1=0.3 and S2=0.7
     '''
+    
     if start>end: #transfrom the interval if start>end to a basic interval [0..]
         D = 1-start
         S1 = (S1+D)%1
@@ -344,6 +355,13 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
         rear_BSplineLst = []
         para1 =  find_BSplineLst_coordinate(BSplineLst, S1, start, end)
         para2 =  find_BSplineLst_coordinate(BSplineLst, S2, start, end)
+        
+        #check if para1 and para2 is out of bounds!
+        if isclose(para1[1],BSplineLst[para1[0]].FirstParameter()):
+            para1[1]=BSplineLst[para1[0]].FirstParameter()
+        if isclose(para2[1],BSplineLst[para2[0]].LastParameter()):
+            para2[1]=BSplineLst[para2[0]].LastParameter()
+        
         for i,item in enumerate(BSplineLst):
             First = item.FirstParameter() 
             Last =  item.LastParameter()
@@ -401,9 +419,17 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
     
     elif S2 > S1:
         trimmed_BSplineLst = []
-        #check if para1 and para2 is out of bounds!
+
         para1 =  find_BSplineLst_coordinate(BSplineLst, S1, start, end)
         para2 =  find_BSplineLst_coordinate(BSplineLst, S2, start, end)
+        
+        #check if para1 and para2 is out of bounds!
+        if isclose(para1[1],BSplineLst[para1[0]].FirstParameter()):
+            para1[1]=BSplineLst[para1[0]].FirstParameter()
+        if isclose(para2[1],BSplineLst[para2[0]].LastParameter()):
+            para2[1]=BSplineLst[para2[0]].LastParameter()
+        
+        
         for i,item in enumerate(BSplineLst):       
              First = item.FirstParameter() 
              Last =  item.LastParameter() 
