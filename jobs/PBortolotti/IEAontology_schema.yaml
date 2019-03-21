@@ -29,14 +29,14 @@ properties:
             blade: 
                 type: object
                 properties: 
-                    bem_aero:                    
+                    outer_shape_bem:                    
                         type: object
                         required:
                             - airfoil_position
                             - chord
                             - twist
                             - pitch_axis
-                            - coordinates
+                            - reference_axis
                         properties:                              
                             airfoil_position:
                                 type: object
@@ -92,7 +92,7 @@ properties:
                                     values: 
                                         $ref: "#/definitions/distributed_data/grid_nd"
         
-                    multi_body:
+                    elastic_properties_mb:
                         type: object
                         properties:
                             timoschenko_hawc:
@@ -101,18 +101,19 @@ properties:
                                 $ref: "#/definitions/beam/cp_lambda_beam"
                             six_x_six:
                                 $ref: "#/definitions/beam/six_x_six"
-                    2d_fem:
+                    
+                    internal_structure_2d_fem:
                         type: object
                         required:
-                            - coordinates
+                            - reference_axis
                             - layers
                         properties: 
-                            coordinates:
-                                $ref: "#/definitions/distributed_data/coordinates"
+                            reference_axis:
+                                $ref: "#/definitions/distributed_data/axis_coordinates"
                             webs:
                                 $ref: "#/definitions/webs_definition"
                             layers:
-                                $ref: "#/definitions/struct_components"
+                                $ref: "#/definitions/layers_definition"
                     # cfd_geometry:
                         # type: object
                         # TODO
@@ -386,9 +387,51 @@ definitions:
                 unit: N/m2
                 minItems: 2
                 uniqueItems: false
+        nd_arc_position:
+            type: object
+            description: non-dimensional location of the point along the non-dimensional arc length
+            properties: 
+                grid: 
+                    $ref: "#/definitions/distributed_data/grid_nd"
+                values: 
+                    $ref: "#/definitions/distributed_data/grid_al"
+                fixed: 
+                    type: string
+                    description: Name of the layer to lock the edge
         
         
-        coordinates:
+        point_x_local_defined:
+            type: object
+            description: dimensional offset in respect to the pitch axis along the x axis, which is the chord line rotated by a user-defined angle. Negative values move the midpoint towards the leading edge, positive towards the trailing edge
+            required:
+                - grid
+                - values
+            properties: 
+                grid: 
+                    $ref: "#/definitions/distributed_data/grid_nd"
+                values: 
+                    $ref: "#/definitions/distributed_data/length"
+                rotation:
+                    $ref: "#/definitions/distributed_data/angle"
+        
+        point_x_abs_defined:
+            type: object
+            description: dimensional offset in respect to an arbitrary coordinate system (e.g. the blade root c.s.)
+            required:
+                - grid
+                - values
+            properties: 
+                grid: 
+                    $ref: "#/definitions/distributed_data/grid_nd"
+                values: 
+                    $ref: "#/definitions/distributed_data/length"
+                reference_frame: 
+                    type: string
+                    description: corresponding reference frame
+        
+        
+        
+        axis_coordinates:
             type: object
             required:
                 - x
@@ -434,7 +477,7 @@ definitions:
             type: object
             description: Timoschenko beam as in HAWC2
             required:
-                - coordinates
+                - reference_axis
                 - A
                 - E
                 - G
@@ -454,8 +497,8 @@ definitions:
                 - y_e
                 - y_sh
             properties:
-                coordinates:
-                    $ref: "#/definitions/distributed_data/coordinates"
+                reference_axis:
+                    $ref: "#/definitions/distributed_data/axis_coordinates"
                 A:
                     type: object
                     required:
@@ -640,7 +683,7 @@ definitions:
             type: object
             description: Geometrically exact beams with simplified properties
             required:
-                - coordinates
+                - reference_axis
                 - T11
                 - T22
                 - EA
@@ -659,8 +702,8 @@ definitions:
                 - x_cg
                 - y_cg
             properties:
-                coordinates:
-                    $ref: "#/definitions/distributed_data/coordinates"
+                reference_axis:
+                    $ref: "#/definitions/distributed_data/axis_coordinates"
                 T11:
                     type: object
                     required:
@@ -835,11 +878,11 @@ definitions:
         six_x_six:
             type: object
             required:
-                - coordinates
+                - reference_axis
                 - stiff_matrix
             properties:
-                coordinates:
-                    $ref: "#/definitions/distributed_data/coordinates"
+                reference_axis:
+                    $ref: "#/definitions/distributed_data/axis_coordinates"
                 stiff_matrix:
                     type: object
                     required:
@@ -857,7 +900,7 @@ definitions:
                                 maxItems: 21
                                 uniqueItems: false               
                         
-    struct_components:
+    layers_definition:
         type: array
         description: ...
         items:
@@ -873,9 +916,9 @@ definitions:
                 material:
                     type: string
                     description: material identifier
-                web_flag:
-                    type: boolean
-                    description: web flag
+                web:
+                    type: string
+                    description: web to which the layer is associated to, only to be defined for web layers
                 thickness:
                     type: object
                     description: thickness of the laminate
@@ -909,17 +952,18 @@ definitions:
                             $ref: "#/definitions/distributed_data/grid_nd"
                         values: 
                             $ref: "#/definitions/distributed_data/angle"
-                midpoint:
-                    type: object
-                    description: non-dimensional location of the center line of the component along the non-dimensional arc length
-                    required:
-                        - grid
-                        - values
-                    properties: 
-                        grid: 
-                            $ref: "#/definitions/distributed_data/grid_nd"
-                        values: 
-                            $ref: "#/definitions/distributed_data/grid_al"
+                start_nd_arc:
+                    $ref: "#/definitions/distributed_data/nd_arc_position"
+                end_nd_arc:
+                    $ref: "#/definitions/distributed_data/nd_arc_position"
+                
+                
+                point_x_local:
+                    $ref: "#/definitions/distributed_data/point_x_local_defined"
+                
+                point_x_abs:
+                    $ref: "#/definitions/distributed_data/point_x_abs_defined"
+                
                 width:
                     type: object
                     description: dimensional width of the component along the arc
@@ -931,28 +975,7 @@ definitions:
                             $ref: "#/definitions/distributed_data/grid_nd"
                         values: 
                             $ref: "#/definitions/distributed_data/length"
-                start:
-                    type: object
-                    description: non-dimensional location of the point along the non-dimensional arc length
-                    properties: 
-                        grid: 
-                            $ref: "#/definitions/distributed_data/grid_nd"
-                        values: 
-                            $ref: "#/definitions/distributed_data/grid_al"
-                        fixed: 
-                            type: string
-                            description: Name of the layer to lock the edge
-                end:
-                    type: object
-                    description: non-dimensional location of the point along the non-dimensional arc length
-                    properties: 
-                        grid: 
-                            $ref: "#/definitions/distributed_data/grid_nd"
-                        values: 
-                            $ref: "#/definitions/distributed_data/grid_al"
-                        fixed: 
-                            type: string
-                            description: Name of the layer to lock the edge
+                
                 
                 
                                             
@@ -964,34 +987,28 @@ definitions:
             type: object
             required:
                 - name
-                - start
-                - end
+                - start_nd_arc
+                - end_nd_arc
             properties:
                 name:
                     type: string
                     description: structural component identifier
-                start:
-                    type: object
-                    description: non-dimensional location of the point along the non-dimensional arc length
-                    properties: 
-                        grid: 
-                            $ref: "#/definitions/distributed_data/grid_nd"
-                        values: 
-                            $ref: "#/definitions/distributed_data/grid_al"
-                        # fixed: 
-                            # type: string
-                            # description: Name of the layer to lock the edge
-                end:
-                    type: object
-                    description: non-dimensional location of the point along the non-dimensional arc length
-                    properties: 
-                        grid: 
-                            $ref: "#/definitions/distributed_data/grid_nd"
-                        values: 
-                            $ref: "#/definitions/distributed_data/grid_al"
-                        # fixed: 
-                            # type: string
-                            # description: Name of the layer to lock the edge
+                start_nd_arc:
+                    $ref: "#/definitions/distributed_data/nd_arc_position"
+                end_nd_arc:
+                    $ref: "#/definitions/distributed_data/nd_arc_position"
+                point_x_local:
+                    $ref: "#/definitions/distributed_data/point_x_local_defined"
+                point_x_abs:
+                    $ref: "#/definitions/distributed_data/point_x_abs_defined"
+                
+                
+                
+                
+    
+        
+        
+    
     
     materials:
         type: array

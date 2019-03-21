@@ -2,7 +2,7 @@ import numpy as np
 import math
 import itertools
 
-from OCC.AIS import AIS_Shape
+# from OCC.AIS import AIS_Shape
 from OCC.BRep import BRep_Builder, BRep_Tool
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeFace
 from OCC.BRepAdaptor import BRepAdaptor_CompCurve

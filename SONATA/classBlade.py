@@ -30,7 +30,7 @@ from SONATA.cbm.classCBMConfig import CBMConfig
 from SONATA.vabs.classVABSConfig import VABSConfig
 
 from SONATA.utl.blade_utl import interp_airfoil_position, make_loft, interp_loads
-from SONATA.utl.converter import iae37_converter
+from SONATA.utl.converter import iea37_converter
 from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire
 
 from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
@@ -131,7 +131,7 @@ class Blade(Component):
         return 'Blade: '+ self.name
     
     
-    def read_IEA37(self, yml, airfoils, materials, wt_flag=False):
+    def read_IEA37(self, yml, airfoils, materials, stations = [], npts = 11, wt_flag=False):
         """
         reads the IEA Wind Task 37 style Blade dictionary 
         generates the blade matrix and airfoil to represent all given 
@@ -152,13 +152,14 @@ class Blade(Component):
         #Read information from DataDictionary
 
         tmp_coords = {}
-        tmp_coords['x'] = np.asarray((yml.get('coordinates').get('x').get('grid'),yml.get('coordinates').get('x').get('values'))).T
-        tmp_coords['y'] = np.asarray((yml.get('coordinates').get('y').get('grid'),yml.get('coordinates').get('y').get('values'))).T
-        tmp_coords['z'] = np.asarray((yml.get('coordinates').get('z').get('grid'),yml.get('coordinates').get('z').get('values'))).T
-        tmp_tw = np.asarray((yml.get('twist').get('grid'),yml.get('twist').get('values'))).T
-        tmp_chord = np.asarray((yml.get('chord').get('grid'),yml.get('chord').get('values'))).T
-        tmp_pa = np.asarray((yml.get('pitch_axis').get('grid'),yml.get('pitch_axis').get('values'))).T
-        airfoil_position = (yml.get('airfoil_position').get('grid'),yml.get('airfoil_position').get('labels'))
+
+        tmp_coords['x'] = np.asarray((yml.get('outer_shape_bem').get('reference_axis').get('x').get('grid'),yml.get('outer_shape_bem').get('reference_axis').get('x').get('values'))).T
+        tmp_coords['y'] = np.asarray((yml.get('outer_shape_bem').get('reference_axis').get('y').get('grid'),yml.get('outer_shape_bem').get('reference_axis').get('y').get('values'))).T
+        tmp_coords['z'] = np.asarray((yml.get('outer_shape_bem').get('reference_axis').get('z').get('grid'),yml.get('outer_shape_bem').get('reference_axis').get('z').get('values'))).T
+        tmp_tw = np.asarray((yml.get('outer_shape_bem').get('twist').get('grid'),yml.get('outer_shape_bem').get('twist').get('values'))).T
+        tmp_chord = np.asarray((yml.get('outer_shape_bem').get('chord').get('grid'),yml.get('outer_shape_bem').get('chord').get('values'))).T
+        tmp_pa = np.asarray((yml.get('outer_shape_bem').get('pitch_axis').get('grid'),yml.get('outer_shape_bem').get('pitch_axis').get('values'))).T
+        airfoil_position = (yml.get('outer_shape_bem').get('airfoil_position').get('grid'),yml.get('outer_shape_bem').get('airfoil_position').get('labels'))
         
         #Generate Blade Matrix 
         tmp = []
@@ -174,10 +175,12 @@ class Blade(Component):
         self.f_pa = interp1d(tmp_pa[:,0], tmp_pa[:,1], bounds_error=False, fill_value='extrapolate')
         
         if wt_flag:
-            cs_pos = np.asarray(yml.get('2d_fem').get('positions'))
-
+            if stations == []:
+                cs_pos = np.linspace(0.0, 1.0, npts)
+            else:
+                cs_pos = stations
         else:
-            cs_pos = np.asarray([cs.get('position') for cs in yml.get('2d_fem').get('sections')])
+            cs_pos = np.asarray([cs.get('position') for cs in yml.get('internal_structure_2d_fem').get('sections')])
             
         x = np.unique(np.sort(np.hstack((tmp_chord[:,0], tmp_tw[:,0], tmp_coords['x'][:,0], tmp_coords['y'][:,0], tmp_coords['z'][:,0], tmp_pa[:,0], arr[:,0], cs_pos))))
         
@@ -190,10 +193,10 @@ class Blade(Component):
         
         #Generate CBMConfigs
         if wt_flag:
-            cbmconfigs = iae37_converter(self, yml, materials)
+            cbmconfigs = iea37_converter(self, cs_pos, yml, materials)
             
         else:
-            lst = [[cs.get('position'), CBMConfig(cs, materials, iea37=True)] for cs in yml.get('2d_fem').get('sections')]
+            lst = [[cs.get('position'), CBMConfig(cs, materials, iea37=True)] for cs in yml.get('internal_structure_2d_fem').get('sections')]
             cbmconfigs = np.asarray(lst)
  
         #Generate CBMs
@@ -203,7 +206,9 @@ class Blade(Component):
             af = interp_airfoil_position(airfoil_position, airfoils, x)
             tmp.append([x, CBM(cfg, materials = materials, blade_matrix = bm, airfoil=af)])
         self.sections = np.asarray(tmp)
-            
+        
+
+        
         return None
     
     
@@ -373,47 +378,49 @@ class Blade(Component):
 if __name__ == '__main__':
     plt.close('all')
     
-#    #%% ====== WindTurbine ============== 
-#    with open('./jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
-#        inputs  = myfile.read()
-#    with open('jobs/PBortolotti/IEAontology_schema.yaml', 'r') as myfile:
-#        schema  = myfile.read()
-#    validate(yaml.load(inputs), yaml.load(schema))    
-#    yml = yaml.load(inputs)
-#    
-#    airfoils = [Airfoil(af) for af in yml.get('airfoils')]
-#    materials = read_IEA37_materials(yml.get('materials'))
-#    
-#    job = Blade(name='IEAonshoreWT')
-#    job.read_IEAjob.blade_post_3dtopo(flag_lft = True, flag_topo = True)37(yml.get('components').get('blade'), airfoils, materials, wt_flag=True)     
-#    job.blade_gen_section(mesh_flag = False)
-#    #job.blade_run_vabs()
-#    #job.blade_plot_sections()
-#    job.blade_post_3dtopo(flag_lft = False, flag_topo = True)
+    #%% ====== WindTurbine ============== 
+    with open('./jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
+        inputs  = myfile.read()
+    with open('jobs/PBortolotti/IEAontology_schema.yaml', 'r') as myfile:
+        schema  = myfile.read()
+    validate(yaml.load(inputs), yaml.load(schema))    
+    yml = yaml.load(inputs)
     
-
-#   %% ====== Helicopter ============== 
-    #with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as f:
-    with open('jobs/VHeuschneider/blade_config.yml', 'r') as f:
-         yml = yaml.load(f.read())
-        
     airfoils = [Airfoil(af) for af in yml.get('airfoils')]
     materials = read_IEA37_materials(yml.get('materials'))
     
-    job = Blade()
-    job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=False)     
-    job.blade_gen_section()
+    job = Blade(name='IEAonshoreWT')
+    job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=True)
+
+    job.blade_gen_section(mesh_flag = False)
     
-    loads = {}
-    loads['F'] = np.array([[0.3, 88500, 0, 0],
-                          [1.0, 0, 0, 0]])
-    loads['M'] = np.array([[0.3, -12, 640, -150],
-                          [1.0, 0, 0, 0]])
-    
-    job.blade_run_vabs(loads)  
-    job.blade_plot_sections(attribute='stressM.sigma11')
-    job.blade_plot_sections(attribute='sf', vmin=0, vmax=3)
-    job.beam_properties[0,1].MpUS
-    #job.blade_post_3dtopo(flag_lft = True, flag_topo = True)
-    print((job.sections[0,1].BeamProperties.Xm2/0.130)*100, '%')
-    #job.blade_plot_sections(attribute='sf', vmin=0, vmax=3)
+    #job.blade_run_vabs()
+    #job.blade_plot_sections()
+
+    job.blade_post_3dtopo(flag_lft = False, flag_topo = False)
+
+#   %% ====== Helicopter ============== 
+#    #with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as f:
+#    with open('jobs/VHeuschneider/blade_config.yml', 'r') as f:
+#         yml = yaml.load(f.read())
+#        
+#    airfoils = [Airfoil(af) for af in yml.get('airfoils')]
+#    materials = read_IEA37_materials(yml.get('materials'))
+#    
+#    job = Blade()
+#    job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=False)     
+#    job.blade_gen_section()
+#    
+#    loads = {}
+#    loads['F'] = np.array([[0.3, 88500, 0, 0],
+#                          [1.0, 0, 0, 0]])
+#    loads['M'] = np.array([[0.3, -12, 640, -150],
+#                          [1.0, 0, 0, 0]])
+#    
+#    job.blade_run_vabs(loads)  
+#    job.blade_plot_sections(attribute='stressM.sigma11')
+#    job.blade_plot_sections(attribute='sf', vmin=0, vmax=3)
+#    job.beam_properties[0,1].MpUS
+#    #job.blade_post_3dtopo(flag_lft = True, flag_topo = True)
+#    print((job.sections[0,1].BeamProperties.Xm2/0.130)*100, '%')
+#    #job.blade_plot_sections(attribute='sf', vmin=0, vmax=3)
