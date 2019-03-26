@@ -198,7 +198,7 @@ class Segment(object):
         return get_BSplineLst_Pnt2d(BSplineLst, S, start, end)
         
     
-    def build_layers(self, WebLst = None, Segment0 = None, display = None, l0 = None):
+    def build_layers(self, WebLst = None, Segment0 = None, display = None, l0 = None, **kwargs):
         '''The build_layers member function of the class Segment generates all Layer objects and it's associated wires
         and return the relevant_boundary_BSplineLst'''
         #plot_layup_projection(self.Layup)
@@ -222,11 +222,12 @@ class Segment(object):
                                   self.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
                 
                 tmp_Layer.build_layer(l0) 
+                tmp_Layer.ivLst = ivLst
                 
                 if tmp_Layer.IsClosed:
-                    tmp_Layer.BSplineLst = set_BSplineLst_to_Origin(tmp_Layer.BSplineLst, self.Theta)
-                
-                tmp_Layer.ivLst = ivLst
+                    #tmp_Layer.BSplineLst = set_BSplineLst_to_Origin(tmp_Layer.BSplineLst, self.Theta)
+                    tmp_Layer.set_layer_origin()
+    
                 #tmp_Layer.cumB_ivLst = cummulated_layup_boundaries(self.Layup)[i-1]
                 tmp_Layer.cumB_ivLst = cum_ivLst
                 cum_ivLst = insert_interval_in_layup(cum_ivLst,begin,end,value=self.ID*1000+i)
@@ -400,7 +401,9 @@ class Segment(object):
         '''
         DCT_data = AirfoilDat2d(filename).T
         DCT_data = np.multiply(DCT_data,scale_factor)
-        self.BSplineLst = seg_boundary_from_dct(DCT_data, angular_deflection)
+        #self.BSplineLst = seg_boundary_from_dct(DCT_data, angular_deflection)
+        self.BSplineLst = BSplineLst_from_dct(DCT_data)
+        #BSplineLst_from_dct
         return self.BSplineLst
             
 

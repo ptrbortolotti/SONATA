@@ -33,6 +33,25 @@ def corners_of_BSplineLst(BSplineLst):
     
 
 def ProjectPointOnBSplineLst(BSplineLst,Pnt2d,tolerance_distance=100):
+    """
+    Projets a Pnt2d onto a list of BSplines with given tolerance_distance and 
+    returns the a tuple of information of the closest Point
+    
+    Parameters
+    ----------
+    BSplineLst : list
+        consecutive list of Geom2d_BSplineCurves 
+    
+    Pnt2d : gp_Pnt2d
+        2d Point object of OCC.gp.gp_Pnt2d
+    
+    Returns
+    ----------
+    p2 : list 
+     list of projection information [gp_Pnt2d, index of BSplineLst, curve parameter u, distance]
+         
+    
+    """
     p2 = []
     for idx,item in enumerate(BSplineLst):
         projection2 = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item.GetHandle())
@@ -47,7 +66,8 @@ def ProjectPointOnBSplineLst(BSplineLst,Pnt2d,tolerance_distance=100):
         return p2[min_index,:]
     else:
         return []
-
+    
+    
 def distance_on_BSplineLst(BSplineLst,para1,para2):
 #    para1 = findPnt_on_BSplineLst(P1,BSplineLst)
 #    para2 = findPnt_on_BSplineLst(P2,BSplineLst)
@@ -633,7 +653,7 @@ def seg_boundary_from_dct(DCT_data,angular_deflection = 30):
             #tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), True, 1e-6)             #Interpolate datapoints to bspline
             tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 1e-6)             #Interpolate datapoints to bspline
         else:     
-            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 1e-6)             #Interpolate datapoints to bspline
+            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 1e-4)             #Interpolate datapoints to bspline
         tmp_interpolation.Perform()                                               
         tmp_bspline = tmp_interpolation.Curve().GetObject()
         list_of_bsplines.append(tmp_bspline)
@@ -835,6 +855,8 @@ def set_BSplineLst_to_Origin(BSplineLst, Theta=0):
     else: None
 
     return OBSplineLst
+
+
 
 
 

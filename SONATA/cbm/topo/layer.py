@@ -1,18 +1,24 @@
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy.spatial import distance
 
 from OCC.gp import gp_Pnt2d
+
 
 from SONATA.cbm.fileIO.CADinput import order_BSplineLst_Head2Tail
 
 from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length, get_BSplineLst_Pnt2d, \
                                          trim_BSplineLst, copy_BSplineLst, \
                                          BSplineLst_from_dct, discretize_BSplineLst, \
-                                         find_BSplineLst_pos, get_BSpline_length
+                                         find_BSplineLst_pos, get_BSpline_length, \
+                                         ProjectPointOnBSplineLst, copy_BSpline, \
+                                         findPnt_on_BSplineLst
 from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst
 from SONATA.cbm.topo.cutoff import cutoff_layer
 from SONATA.cbm.topo.offset import shp_parallel_offset
 from SONATA.cbm.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
-from SONATA.cbm.topo.layer_utils import get_layer, get_web, get_segment       
+from SONATA.cbm.topo.layer_utils import get_layer, get_web, get_segment
+from SONATA.cbm.topo.utils import isclose
 
 from SONATA.cbm.mesh.mesh_byprojection import mesh_by_projecting_nodes_on_BSplineLst
 from SONATA.cbm.mesh.mesh_utils import grab_nodes_of_cells_on_BSplineLst, equidistant_nodes_on_BSplineLst, sort_and_reassignID, find_cells_that_contain_node, \
@@ -154,8 +160,8 @@ class Layer(object):
     
     def build_layer(self,l0 = 1):
         npArray = discretize_BSplineLst(self.Boundary_BSplineLst, 1e-6*l0) 
-        offlinepts = shp_parallel_offset(npArray,self.thickness,self.join_style)
-        OffsetBSplineLst = BSplineLst_from_dct(offlinepts, angular_deflection=30, tol_interp = 1e-8*l0)
+        self.offlinepts = shp_parallel_offset(npArray,self.thickness,self.join_style)
+        OffsetBSplineLst = BSplineLst_from_dct(self.offlinepts, angular_deflection=30, tol_interp = 1e-8*l0)
         OffsetBSplineLst = cutoff_layer(self.Boundary_BSplineLst,OffsetBSplineLst,self.S1,self.S2,self.cutoff_style)
         self.BSplineLst = OffsetBSplineLst
          
@@ -277,6 +283,74 @@ class Layer(object):
             
         return self.cells
     
+    def set_layer_origin(self):
+        """
+        this procedure reorders the self.BSplineLst to and origin if the layer 
+        is closed. The Origin is detected by searching for an orthogonal 
+        projection of the StartPoint of the self.Boundary_BSplineLst. It no 
+        projection is found it takes the closest neighbor of the discrete 
+        offlinepts (Offset Line Points).
+                
+        """
+        #Determine Origin as point     
+        if self.IsClosed:
+            org = self.Boundary_BSplineLst[0].StartPoint()
+            proj = ProjectPointOnBSplineLst(self.BSplineLst,org,3*self.thickness)
+            
+            if len(proj)>0:
+                OriPnt = proj[0]
+            elif len(proj) == 0:            
+                distarr = distance.cdist(self.offlinepts, np.asarray([org.Coord()]))
+                OriPnt = gp_Pnt2d(self.offlinepts[distarr.argmin()][0],self.offlinepts[distarr.argmin()][1])
+         
+        else:
+            print('Only apply member layer.set_layer_origin method when layer is Closed!')
+                         
+        #Reorder Sequence of BSplines of BSplinesLst
+        OriPara = findPnt_on_BSplineLst(OriPnt,self.BSplineLst)
+        OBSplineLst =  []
+        CorrectOrigin = False
+                  
+        for i,item in enumerate(self.BSplineLst):     
+            if i  == OriPara[0]:
+                First = item.FirstParameter() 
+                Last =  item.LastParameter()
+                
+                if isclose(OriPara[1],First) == True:
+                    OBSplineLst.append(item)
+                    CorrectOrigin = True
+                
+                elif isclose(OriPara[1],Last) == True:
+                    CorrectOrigin = False
+                    BSplineCurve2 = item
+                
+                else: 
+                    CorrectOrigin = False
+                    BSplineCurve1 = copy_BSpline(item)
+                    BSplineCurve1.Segment(OriPara[1],Last)
+                    BSplineCurve2 = copy_BSpline(item)
+                    BSplineCurve2.Segment(First,OriPara[1])
+                    OBSplineLst.append(BSplineCurve1)
+       
+            elif i > OriPara[0]:
+                OBSplineLst.append(item)
+            else:
+                None
+    
+        for i,item in enumerate(self.BSplineLst):
+            if i < OriPara[0]:
+                OBSplineLst.append(item)
+            else:
+                None
+                
+        if CorrectOrigin == False:
+            OBSplineLst.append(BSplineCurve2)    
+        else: None
+    
+        self.BSplineLst = OBSplineLst
+        
+        return None
+        
 
 
 #execute the following code if this file is executed as __main__   
