@@ -509,7 +509,7 @@ class CBM(object):
         self.__cbm_generate_SegmentLst(**kwargs)
         #Build Segment 0:
         self.SegmentLst[0].build_wire()
-        self.SegmentLst[0].build_layers(l0 = self.refL)
+        self.SegmentLst[0].build_layers(l0 = self.refL, **kwargs)
         self.SegmentLst[0].determine_final_boundary()
         
         #Build Webs:    
@@ -596,14 +596,14 @@ class CBM(object):
                 self.mesh.extend(seg.mesh_core(self.SegmentLst, self.WebLst, core_cell_area, display=self.display))
                 
         #===================consolidate mesh on web interface         
-        # for web in self.WebLst:
-            # #print web.ID,  'Left:', SegmentLst[web.ID].ID, 'Right:', SegmentLst[web.ID+1].ID,
-            # print('STATUS:\t Consolidate Mesh on Web Interface', web.ID)  
-            # (web.wl_nodes, web.wl_cells) = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID].cells, web.BSplineLst)            
-            # (web.wr_nodes, web.wr_cells) = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID+1].cells, web.BSplineLst)
-                       
-            # newcells = consolidate_mesh_on_web(web, web_consolidate_tol, self.display)
-            # self.mesh.extend(newcells)
+        for web in self.WebLst:
+            #print web.ID,  'Left:', SegmentLst[web.ID].ID, 'Right:', SegmentLst[web.ID+1].ID,
+            print('STATUS:\t Consolidate Mesh on Web Interface', web.ID)  
+            (web.wl_nodes, web.wl_cells) = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID].cells, web.BSplineLst)            
+            (web.wr_nodes, web.wr_cells) = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID+1].cells, web.BSplineLst)
+                      
+            newcells = consolidate_mesh_on_web(web, web_consolidate_tol, self.display)
+            self.mesh.extend(newcells)
         
         #=====================split quad cells into trias:
         if split_quads == True:
@@ -998,7 +998,7 @@ class CBM(object):
 ###############################################################################    
 if __name__ == '__main__':   
     plt.close('all')
-    fname = 'jobs/VariSpeed/uh60a_cbm_advanced/sec_config.yml'
+    fname = 'jobs/debug/issue20/sec_config.yml'
     #fname = 'jobs/VariSpeed/uh60a_cbm_simple/sec_config.yml'
     #fname = 'jobs/AREA/R250/sec_config.yml'
     #fname = 'jobs/PBortolotti/sec_config.yml'
@@ -1006,15 +1006,13 @@ if __name__ == '__main__':
     
     job = CBM(config)
     
-    job.cbm_gen_topo()
-    job.cbm_gen_mesh()
+    #job.cbm_gen_mesh()
     
-    job.cbm_review_mesh()
-    job.cbm_run_vabs(rm_vabfiles=False)
-    job.cbm_post_2dmesh(title='Hello World!')
+    #job.cbm_review_mesh()
+    #job.cbm_run_vabs(rm_vabfiles=False)
+    #job.cbm_post_2dmesh(title='Hello World!')
     
+    #job.cbm_post_3dtopo()
     
-    job.cbm_post_3dtopo()
 #    job.config.vabs_cfg.recover_flag = 1
 #    job.config.vabs_cfg.M = [0,2000e4,0]
-

@@ -128,7 +128,7 @@ class Blade(Component):
     def __repr__(self):
         """__repr__ is the built-in function used to compute the "official" 
         string reputation of an object, """
-        return 'Blade: '+ self.name
+        return 'Blade: '+ str(self.name)
     
     
     def read_IEA37(self, yml, airfoils, materials, stations = [], npts = 11, wt_flag=False):
@@ -314,6 +314,10 @@ class Blade(Component):
         """
         plots the beam properties of the blade
         """
+        self.beam_properties()
+        
+        
+        
         pass
     
     
@@ -322,7 +326,7 @@ class Blade(Component):
         plots the different sections of the blade
         """      
         for (x,cs) in self.sections:
-            string = 'Blade: '+ self.name + '; Section : '+str(x)
+            string = 'Blade: '+ str(self.name) + '; Section : '+str(x)
             cs.cbm_post_2dmesh(title=string, **kwargs)
         return None    
     
@@ -392,12 +396,12 @@ if __name__ == '__main__':
     job = Blade(name='IEAonshoreWT')
     job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=True)
 
-    job.blade_gen_section(mesh_flag = False)
-    
-    #job.blade_run_vabs()
-    #job.blade_plot_sections()
+    job.blade_gen_section(mesh_flag = True)
+    job.blade_run_vabs()
+    job.blade_plot_sections()
 
-    job.blade_post_3dtopo(flag_lft = False, flag_topo = False)
+    job.blade_post_3dtopo(flag_lft = False, flag_topo = True)
+
 
 #   %% ====== Helicopter ============== 
 #    #with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as f:
