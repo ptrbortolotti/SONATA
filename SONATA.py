@@ -18,25 +18,27 @@ https://numpydoc.readthedocs.io/en/latest/format.html
 
 """
 import yaml
-
+from jsonschema import validate
 from SONATA.classBlade import Blade
 from SONATA.classAirfoil import Airfoil
 from SONATA.classMaterial import read_IEA37_materials
 
-with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as f:
-     yml = yaml.load(f.read())
+#%% ====== WindTurbine ============== 
+with open('./jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
+    inputs  = myfile.read()
+with open('jobs/PBortolotti/IEAontology_schema.yaml', 'r') as myfile:
+    schema  = myfile.read()
+validate(yaml.load(inputs), yaml.load(schema))    
+yml = yaml.load(inputs)
 
 airfoils = [Airfoil(af) for af in yml.get('airfoils')]
 materials = read_IEA37_materials(yml.get('materials'))
 
-byml = yml.get('components').get('blade')
-B2 = Blade(name='UH-60A_adv')
-B2.read_IEA37(byml, airfoils, materials)     
-# B2.post_3dtopo()
+job = Blade(name='IEAonshoreWT')
+job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=True)
 
-for key, cs in B2.sections.items():
-   print('STATUS:\t Building Section at grid location %s' % (key))
-   cs.cbm_gen_topo()
-   cs.cbm_gen_mesh()
-   cs.cbm_run_vabs()
-   cs.cbm_post_2dmesh()
+job.blade_gen_section(mesh_flag = True)
+job.blade_run_vabs()
+job.blade_plot_sections()
+
+job.blade_post_3dtopo(flag_lft = False, flag_topo = True)
