@@ -30,6 +30,7 @@ from SONATA.cbm.classCBMConfig import CBMConfig
 from SONATA.vabs.classVABSConfig import VABSConfig
 
 from SONATA.utl.blade_utl import interp_airfoil_position, make_loft, interp_loads
+from SONATA.utl.plot import plot_beam_properties
 from SONATA.utl.converter import iea37_converter
 from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire
 
@@ -310,16 +311,67 @@ class Blade(Component):
         plt.show()
  
 
-    def blade_plot_beamproperties(self):
+
+    
+    
+    def blade_exp_beam_props(self, cosy='global', style='DYMORE', eta_offset=0):
+        """
+        Exports the beam_properties in the 
+        
+        Parameters
+        ----------
+        cosy : str
+            either 'global' for the global beam coordinate system or 
+            'local' for a coordinate system that is always pointing with 
+            the chord-line (in the twisted frame)
+        
+        style : str
+            select the style you want the beam_properties to be exported
+            'DYMORE' will return an array of the following form:
+            [[Massterms(6) (m00, mEta2, mEta3, m33, m23, m22) 
+            Stiffness(21) (k11, k12, k22, k13, k23, k33,... k16, k26, ...k66)
+            Viscous Damping(1) mu, Curvilinear coordinate(1) eta]]
+        
+            ...
+            
+        eta_offset : float
+            if the beam eta coordinates from start to end of the beam doesn't 
+            coincide with the global coorinate system of the blade. The unit
+            is in nondimensional r coordinates (x/Radius)
+                
+            
+        Returns
+        ----------
+        """
+        
+        lst = []
+        for cs in self.sections:
+            #define rotation angle in rad
+            if cosy=='global':
+                rot = 0
+            elif cosy=='local':
+                rot = float(job.f_twist(cs[0])) 
+                        
+            #export data for each section
+            if style=='DYMORE':
+                lst.append(cs[1].cbm_exp_dymore_beamprops(eta=cs[0], rotate=rot))
+            elif style == 'CAMRADII':
+                pass
+            elif style == 'CPLambda':
+                pass        
+                        
+        arr = np.asarray(lst)
+        return arr
+        
+    
+    def blade_plot_beam_props(self):
         """
         plots the beam properties of the blade
-        """
+        
         self.beam_properties()
+        """
+        plot_beam_properties(self.blade_exp_beam_props())
         
-        
-        
-        pass
-    
     
     def blade_plot_sections(self, **kwargs):
         """
