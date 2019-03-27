@@ -960,8 +960,8 @@ class CBM(object):
         self.start_display()   
         return None
     
-    
-    def cbm_set_DymoreMK(self, x_offset = 0):
+        
+    def cbm_exp_dymore_beamprops(self, eta, rotate=0, units={'mass':'kg', 'length':'m', 'force': 'N'}):
         '''
         Converts the Units of CBM to DYMORE/PYMORE/MARC units and returns the 
         array of the beamproperties with Massterms(6), Stiffness(21), 
@@ -969,12 +969,12 @@ class CBM(object):
 
         Parameters
         ----------
-        x_offset : float, optional
-            the x_offset parameter can be used if the DYMORE coordinate system 
-            is different to the SONATA coordinate system of the rotor blade. 
-            For example for the UH-60A Rotor model it is x_offset = 0.81786984, 
-            because the curvilinear_coordinates "eta" are starting at the blade 
-            root attachment, and not at the center of rotation.
+        
+        eta : float, 
+            is the beam curvilinear coordinate of the beam from 0 to 1. 
+        
+        rotate: float
+            is the angle of rotation of the coordinate system in "radians"
 
         Returns
         ----------
@@ -982,16 +982,25 @@ class CBM(object):
             [Massterms(6) (m00, mEta2, mEta3, m33, m23, m22) 
             Stiffness(21) (k11, k12, k22, k13, k23, k33,... k16, k26, ...k66)
             Viscous Damping(1) mu, Curvilinear coordinate(1) eta]
+            
+            
+        Notes
+        ----------
+        - Unit Convertion takes sooo much time. Commented out for now!
         
         '''
-        MM = self.BeamProperties.MM_convert_units()
+        #MM = self.BeamProperties.MM_convert_units(out_dct = units)
+        MM = self.BeamProperties.MM
+        #MM = self.BeamProperties.TS_convert_units(out_dct = units)
+        TS = self.BeamProperties.TS
         MASS = np.array([MM[0,0], MM[2,3], MM[0,4], MM[5,5], MM[4,5], MM[4,4]])
-        TS_u = np.triu(self.BeamProperties.TS_convert_units())
-        TS_f = TS_u.flatten('F')
-        STIFF = TS_f[TS_f != 0]
+        STIFF = TS[np.triu_indices(6)]
+        
+        #TODO: rotate stiffness and mass matrix
         mu = 0.0
-        eta = self.config.setup['radial_station']/1000 - x_offset 
-        return np.hstack((MASS,STIFF,mu,eta))
+        
+        return np.hstack((MASS,STIFF,mu,eta))   
+    
         
 #%%############################################################################
 #                           M    A    I    N                                  #
