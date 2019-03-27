@@ -115,7 +115,7 @@ def plot_histogram_2Ddata(data, **kwargs):
     return None
 
 
-def plot_beam_properties(data, sigma, ref, x_offset = 0.8178698):
+def plot_beam_properties(data, sigma=None, ref=None, x_offset = 0):
     '''
     generates a plot of the beamproperties using the 
     
@@ -139,7 +139,8 @@ def plot_beam_properties(data, sigma, ref, x_offset = 0.8178698):
     #Inertia Properties:
     #ylabel_dct = {'m00': 'kg/m', 'mEta2':'None', 'mEta3':'None', 'm33':'None', 'm23':'None', 'm22':'None'}
     x = data[:,-1] + x_offset
-    ref_x = ref[:,-1]  + x_offset
+    if ref:
+        ref_x = ref[:,-1]  + x_offset
     fig1, ax1 = plt.subplots(2, 3, sharex=True)
     fig1.subplots_adjust(wspace=0.3, hspace=0.3)
     fig1.suptitle('Inertia Properties', fontsize=14)
@@ -147,8 +148,10 @@ def plot_beam_properties(data, sigma, ref, x_offset = 0.8178698):
     c = 0
     for i in range(2):
         for j in range(3):
-            ax1[i][j].plot(ref_x,ref[:,c],'-.b')
-            ax1[i][j].fill_between(x, data[:,c]-sigma[:,c], data[:,c]+sigma[:,c], alpha=0.25, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
+            if ref:
+                ax1[i][j].plot(ref_x,ref[:,c],'-.b')
+            if sigma:
+                ax1[i][j].fill_between(x, data[:,c]-sigma[:,c], data[:,c]+sigma[:,c], alpha=0.25, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
             ax1[i][j].plot(x,data[:,c],'--k.')
             ax1[i][j].ticklabel_format(axis='y',style='sci')
             
@@ -167,8 +170,10 @@ def plot_beam_properties(data, sigma, ref, x_offset = 0.8178698):
     for j in range(6):
         for i in range(6):
             if ut[i,j] == 1:
-                ax2[i][j].plot(ref_x,ref[:,c],'-.b')
-                ax2[i][j].fill_between(x, data[:,c]-sigma[:,c], data[:,c]+sigma[:,c], alpha=0.25, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
+                if ref:
+                    ax2[i][j].plot(ref_x,ref[:,c],'-.b')
+                if sigma:
+                    ax2[i][j].fill_between(x, data[:,c]-sigma[:,c], data[:,c]+sigma[:,c], alpha=0.25, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
                 ax2[i][j].plot(x,data[:,c],'--k.')
                 ylabel = 'k%s%s' % (i+1,j+1)
                 ax2[i][j].set_ylabel(ylabel)
