@@ -26,8 +26,12 @@ B.read_IEA37(byml, airfoils, materials, stations = [0.0, 0.1, 0.4], wt_flag = Tr
 for key, cs in B.sections:
     print('STATUS:\t Building Section at grid location %s' % (key))
     cs.cbm_gen_topo()
-    cs.cbm_gen_mesh()
-    cs.cbm_run_vabs()
+    cs.cbm_gen_mesh(split_quads=True)
+    # cs.cbm_run_vabs()
     title_plot = 'Blade station ' + str(key*100.) + '%'
     save_path  = 'jobs/PBortolotti/station_' + str(int(key*100.)) + '.pdf'
     cs.cbm_post_2dmesh(title=title_plot)
+    cs.cbm_run_anbax()
+    
+    
+    
