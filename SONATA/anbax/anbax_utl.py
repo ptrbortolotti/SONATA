@@ -14,7 +14,7 @@ def build_mat_library(cbm_materials):
         if m.orth == 0:
             maxE = max(m.E, maxE)
             matMechanicProp = [m.E, m.nu]
-            mat = material.IsotropicMaterial(matMechanicProp)
+            mat = material.IsotropicMaterial(matMechanicProp, m.rho)
         elif m.orth == 1:
             matMechanicProp = np.zeros((3,3))
             maxE = max(m.E[0], maxE)
@@ -29,7 +29,7 @@ def build_mat_library(cbm_materials):
             matMechanicProp[2,0] = m.nu[1] #nu_zy
             matMechanicProp[2,1] = m.nu[0] #nu_zx
             matMechanicProp[2,2] = m.nu[2] #nu_xy
-            mat = material.OrthotropicMaterial(matMechanicProp)
+            mat = material.OrthotropicMaterial(matMechanicProp, m.rho)
         elif m.orth == 2:
             raise ValueError('material type 2 (anysotropic) not supported by Anba')
 
