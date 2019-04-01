@@ -24,8 +24,9 @@ def write_beamdyn_axis(wt_name, byml):
     f_interp = interp1d(yaml_ref_axis.get('z').get('grid'), yaml_ref_axis.get('z').get('values'))
     kp_yr    = f_interp(grid)
     # Twist
-    f_interp = interp1d(yaml_twist.get('grid'), yaml_twist.get('values'))
-    twist    = f_interp(grid)*180./np.pi
+    # f_interp = interp1d(yaml_twist.get('grid'), yaml_twist.get('values'))
+    # twist    = f_interp(grid)*180./np.pi
+    twist    = np.zeros_like(kp_yr)
     
     data     = np.vstack((kp_xr, kp_yr, kp_zr, twist)).T
 
