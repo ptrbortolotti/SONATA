@@ -1,4 +1,4 @@
-name: IEA37 onshore wind turbine
+name: IEA37_onshoreWT
 
 components:
     blade:

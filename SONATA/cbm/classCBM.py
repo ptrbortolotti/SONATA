@@ -823,9 +823,19 @@ class CBM(object):
         #TBD: pass it to anbax and run it!
         anba = anbax(mesh, 1, matLibrary, materials, plane_orientations, fiber_orientations, maxE)
         stiff = anba.compute()
+        print('STIFFNESS MATRIX')
         stiff.view()
         
-        return None
+        mass = anba.inertia()
+        print('MASS MATRIX')
+        mass.view()
+        
+        stiff_matrix = stiff.getValues(range(6), range(6))
+        mass_matrix  = mass.getValues(range(6), range(6))
+        
+        
+        
+        return stiff_matrix, mass_matrix
     
     def cbm_calc_failurecriteria(self, criteria='tsaiwu_2D', iso_criteria = 'nocriteria'):
         """

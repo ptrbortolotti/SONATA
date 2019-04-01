@@ -10,14 +10,14 @@ import math
 from OCC.Display.SimpleGui import init_display
 from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax3,gp_Ax1
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
-from OCC.Graphic3d import (Graphic3d_EF_PDF,
-                            Graphic3d_EF_SVG,
-                            Graphic3d_EF_TEX,
-                            Graphic3d_EF_PostScript,
-                            Graphic3d_EF_EnhPostScript)
+# from OCC.Graphic3d import (Graphic3d_EF_PDF,
+                            # Graphic3d_EF_SVG,
+                            # Graphic3d_EF_TEX,
+                            # Graphic3d_EF_PostScript,
+                            # Graphic3d_EF_EnhPostScript)
 
 from OCC.Quantity import Quantity_Color
-from OCC.AIS import AIS_Shape
+# from OCC.AIS import AIS_Shape
 
 from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire
 
