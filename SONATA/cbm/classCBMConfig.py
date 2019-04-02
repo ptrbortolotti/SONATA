@@ -83,6 +83,9 @@ class CBMConfig(object):
         self.setup['BalanceWeight'] = False 
         self.setup['mesh_resolution'] = 280 #GET FROM function
        
+        if yml.get('mesh_resolution'):
+            self.setup['mesh_resolution'] = yml.get('mesh_resolution')
+        
         #Webs:
         foo = {}
         if yml.get('webs'):
