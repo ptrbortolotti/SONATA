@@ -32,7 +32,8 @@ def build_mat_library(cbm_materials):
             mat = material.OrthotropicMaterial(matMechanicProp, m.rho)
         elif m.orth == 2:
             raise ValueError('material type 2 (anysotropic) not supported by Anba')
-
+            
+            #mat = material.
         matLibrary.append(mat)
         matdict[m.id] = matid
         matid = matid + 1
@@ -97,3 +98,4 @@ def build_dolfin_mesh(cbm_mesh, cbm_nodes, cbm_materials):
         fiber_orientations[c.id-1] = c.theta_3
    
     return mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE
+
