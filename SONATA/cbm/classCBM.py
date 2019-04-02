@@ -49,13 +49,14 @@ from SONATA.cbm.mesh.mesh_core import gen_core_cells
 
 from SONATA.vabs.classVABSConfig import VABSConfig
 from SONATA.vabs.vabs_utl import export_cells_for_VABS
-from SONATA.vabs.classVABSSectionalProps import VABSSectionalProps
+
 from SONATA.vabs.classStrain import Strain
 from SONATA.vabs.classStress import Stress
 from SONATA.vabs.failure_criteria import von_Mises, tsaiwu_2D, maxstress_2D, maxstrain_2D, hashin_2D
 
+from SONATA.cbm.classBeamSectionalProps import BeamSectionalProps
 
-
+from SONATA.cbm.cbm_utl import trsf_sixbysix
 from SONATA.cbm.display.display_mesh import plot_cells
 from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
                                         export_to_SVG, export_to_PS, export_to_EnhPS, \
@@ -63,9 +64,11 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
                                         show_coordinate_system, display_SONATA_SegmentLst,\
                                         display_custome_shape, transform_wire_2to3d, display_config
 
+
 try:
-    from SONATA.anbax.anbax_utl import build_dolfin_mesh
+    from SONATA.anbax.anbax_utl import build_dolfin_mesh 
     from anba4 import anbax
+    #from SONATA.anbax.anba_v4.anba4.anbax import anbax
 except:
     pass
 
@@ -759,8 +762,7 @@ class CBM(object):
                 #print('STATUS:\t Total Elapsed Time: %s' % (datetime.now() - self.startTime))
                 print(stdout)
                 #VABS Postprocessing:
-                result = VABSSectionalProps(vabs_filename+'.K')
-            
+                result = BeamSectionalProps(vabs_filename+'.K')
             except Exception as e:
                     if 'All "vabsiii" licenses in us' in stdout:
                         time.sleep(0.01)
@@ -768,7 +770,7 @@ class CBM(object):
                     else:
                         print(e)
                         break
-
+                    
         self.BeamProperties = result
         
         if self.config.vabs_cfg.recover_flag == 1:
@@ -822,10 +824,19 @@ class CBM(object):
             print('==========================================\n\n')
         #TBD: pass it to anbax and run it!
         anba = anbax(mesh, 1, matLibrary, materials, plane_orientations, fiber_orientations, maxE)
-        stiff = anba.compute()
-        stiff.view()
         
-        return None
+ 
+        tmp_TS = anba.compute().getValues(range(6),range(6))
+        tmp_MM = anba.inertia().getValues(range(6),range(6))
+        
+        #Define transformation T (from ANBA to SONATA/VABS coordinates)
+        B = np.array([[0,0,1],[1,0,0],[0,1,0]])
+        T = np.dot(np.identity(3),np.linalg.inv(B))
+        
+        self.AnbaBeamProperties = BeamSectionalProps()
+        self.AnbaBeamProperties.TS = trsf_sixbysix(tmp_TS,T)
+        self.AnbaBeamProperties.MM = trsf_sixbysix(tmp_MM,T)
+        return self.AnbaBeamProperties
     
     def cbm_calc_failurecriteria(self, criteria='tsaiwu_2D', iso_criteria = 'nocriteria'):
         """
@@ -961,7 +972,7 @@ class CBM(object):
         return None
     
         
-    def cbm_exp_dymore_beamprops(self, eta, rotate=0, units={'mass':'kg', 'length':'m', 'force': 'N'}):
+    def cbm_exp_dymore_beamprops(self, eta, Theta=0, solver='vabs', units={'mass':'kg', 'length':'m', 'force': 'N'}):
         '''
         Converts the Units of CBM to DYMORE/PYMORE/MARC units and returns the 
         array of the beamproperties with Massterms(6), Stiffness(21), 
@@ -973,7 +984,7 @@ class CBM(object):
         eta : float, 
             is the beam curvilinear coordinate of the beam from 0 to 1. 
         
-        rotate: float
+        Theta: float
             is the angle of rotation of the coordinate system in "radians"
 
         Returns
@@ -989,16 +1000,22 @@ class CBM(object):
         - Unit Convertion takes sooo much time. Commented out for now!
         
         '''
-        #MM = self.BeamProperties.MM_convert_units(out_dct = units)
-        MM = self.BeamProperties.MM
-        #MM = self.BeamProperties.TS_convert_units(out_dct = units)
-        TS = self.BeamProperties.TS
+        if solver == 'vabs':
+            if Theta != 0:
+                tmp_bp = self.BeamProperties.rotate(Theta)        
+            else:
+                tmp_bp = self.BeamProperties
+
+        elif solver == 'anbax':
+            if Theta != 0:
+                tmp_bp = self.AnbaBeamProperties.rotate(Theta)        
+            else:
+                tmp_bp = self.AnbaBeamProperties
+
+        MM = tmp_bp.MM
         MASS = np.array([MM[0,0], MM[2,3], MM[0,4], MM[5,5], MM[4,5], MM[4,4]])
-        STIFF = TS[np.triu_indices(6)]
-        
-        #TODO: rotate stiffness and mass matrix
+        STIFF = tmp_bp.TS[np.tril_indices(6)[1],np.tril_indices(6)[0]]
         mu = 0.0
-        
         return np.hstack((MASS,STIFF,mu,eta))   
     
         
@@ -1015,13 +1032,15 @@ if __name__ == '__main__':
     
     job = CBM(config)
     
-    #job.cbm_gen_mesh()
+    job.cbm_gen_topo()
+    job.cbm_gen_mesh(split_quads=True)
     
-    #job.cbm_review_mesh()
-    #job.cbm_run_vabs(rm_vabfiles=False)
+    job.cbm_review_mesh()
+    job.cbm_run_vabs(rm_vabfiles=False)
+    AnbaBeamProperties = job.cbm_run_anbax()
+    
+    
     #job.cbm_post_2dmesh(title='Hello World!')
-    
     #job.cbm_post_3dtopo()
-    
 #    job.config.vabs_cfg.recover_flag = 1
 #    job.config.vabs_cfg.M = [0,2000e4,0]

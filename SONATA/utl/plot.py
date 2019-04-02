@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import matplotlib.lines as mlines
 
-from matplotlib2tikz import save as tikz_save
+#from matplotlib2tikz import save as tikz_save
 import SONATA.Pymore.utl.read as read
 
 def plot_histogram_2Ddata(data, **kwargs):
@@ -139,7 +139,7 @@ def plot_beam_properties(data, sigma=None, ref=None, x_offset = 0):
     #Inertia Properties:
     #ylabel_dct = {'m00': 'kg/m', 'mEta2':'None', 'mEta3':'None', 'm33':'None', 'm23':'None', 'm22':'None'}
     x = data[:,-1] + x_offset
-    if ref:
+    if isinstance(ref, (np.ndarray)):
         ref_x = ref[:,-1]  + x_offset
     fig1, ax1 = plt.subplots(2, 3, sharex=True)
     fig1.subplots_adjust(wspace=0.3, hspace=0.3)
@@ -148,13 +148,13 @@ def plot_beam_properties(data, sigma=None, ref=None, x_offset = 0):
     c = 0
     for i in range(2):
         for j in range(3):
-            if ref:
-                ax1[i][j].plot(ref_x,ref[:,c],'-.b')
+            if isinstance(ref, (np.ndarray)):
+                ax1[i][j].plot(ref_x,ref[:,c],'-xb')
             if sigma:
                 ax1[i][j].fill_between(x, data[:,c]-sigma[:,c], data[:,c]+sigma[:,c], alpha=0.25, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
             ax1[i][j].plot(x,data[:,c],'--k.')
             ax1[i][j].ticklabel_format(axis='y',style='sci')
-            
+            #ax1[i][j].set_ylim(0)
             c += 1
     
     #6x6 Stiffness Properties:
@@ -170,17 +170,18 @@ def plot_beam_properties(data, sigma=None, ref=None, x_offset = 0):
     for j in range(6):
         for i in range(6):
             if ut[i,j] == 1:
-                if ref:
-                    ax2[i][j].plot(ref_x,ref[:,c],'-.b')
+                if isinstance(ref, (np.ndarray)):
+                    ax2[i][j].plot(ref_x,ref[:,c],'-xb')
                 if sigma:
                     ax2[i][j].fill_between(x, data[:,c]-sigma[:,c], data[:,c]+sigma[:,c], alpha=0.25, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
                 ax2[i][j].plot(x,data[:,c],'--k.')
                 ylabel = 'k%s%s' % (i+1,j+1)
                 ax2[i][j].set_ylabel(ylabel)
+                #ax2[i][j].set_ylim(0)
                 #ax2[i][j].yaxis.set_major_formatter(mtick.FormatStrFormatter('%.1e'))
                 
                 if i==j:
-                    ax2[i][j].set_xlabel('radial station [m]')
+                    ax2[i][j].set_xlabel('radial station [1/R]')
                 
                 c += 1
             else:
