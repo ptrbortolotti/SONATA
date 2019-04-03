@@ -162,6 +162,7 @@ class VABSConfig(object):
             self.k1 = kw['k1']
             self.k2 = kw['k2']
             self.k3 = kw['k3']
+            
         if 'oblique_flags' in kw:
             self.oblique_flag = kw['oblique_flag']     #to model oblique cross sections. See VABS USER MANUAL
             self.oblique_cosine1 = kw['oblique_cosine1']             #Angle between beam axis x1 and and oblique axis y1. See VABS USER MANUAL Figure 6

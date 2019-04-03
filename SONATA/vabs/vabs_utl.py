@@ -55,7 +55,7 @@ def export_cells_for_VABS(cells, nodes, filename, VABSsetup, materials, rotation
             f.write('%i %i %i\n' % (VABSsetup.Timoshenko_flag, VABSsetup.recover_flag, VABSsetup.thermal_flag))
             f.write('%i %i %i %i\n' % (VABSsetup.curve_flag,VABSsetup.oblique_flag,VABSsetup.trapeze_flag,VABSsetup.Vlasov_flag))
             if VABSsetup.curve_flag == 1:
-                f.write(('%.2f %.2f %.2f\n') % (VABSsetup.k1,VABSsetup.k2,VABSsetup.k3))
+                f.write(('%.4f %.4f %.4f\n') % (VABSsetup.k1,VABSsetup.k2,VABSsetup.k3))
             if VABSsetup.oblique_flag == 1:
                 f.write('%.2f %.2f\n' % (VABSsetup.oblique_cosine1,VABSsetup.oblique_cosine2))
             f.write('\n')
