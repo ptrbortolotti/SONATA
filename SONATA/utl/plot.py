@@ -9,8 +9,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import matplotlib.lines as mlines
-
+from matplotlib.widgets import TextBox
 #from matplotlib2tikz import save as tikz_save
+#plt.rc('text', usetex=True)
+
 
 def plot_histogram_2Ddata(data, **kwargs):
     """
@@ -114,7 +116,7 @@ def plot_histogram_2Ddata(data, **kwargs):
     return None
 
 
-def plot_beam_properties(data, sigma=None, ref=None, x_offset = 0):
+def plot_beam_properties(data, sigma=None, ref=None, x_offset = 0, description = True):
     '''
     generates a plot of the beamproperties using the 
     
@@ -136,14 +138,14 @@ def plot_beam_properties(data, sigma=None, ref=None, x_offset = 0):
     '''
       
     #Inertia Properties:
-    #ylabel_dct = {'m00': 'kg/m', 'mEta2':'None', 'mEta3':'None', 'm33':'None', 'm23':'None', 'm22':'None'}
+    ylabel = [(r'm_{00}','kg/m'), (r'm_{00}X_{m2}','kg'), (r'm_{00}X_{m3}','kg'), (r'm_{33}','kg m'), (r'm_{23}','kg m'), (r'm_{22}','kg m')]
     x = data[:,-1] + x_offset
     if isinstance(ref, (np.ndarray)):
         ref_x = ref[:,-1]  + x_offset
     fig1, ax1 = plt.subplots(2, 3, sharex=True)
     fig1.subplots_adjust(wspace=0.3, hspace=0.3)
     fig1.suptitle('Inertia Properties', fontsize=14)
-    
+
     c = 0
     for i in range(2):
         for j in range(3):
@@ -153,17 +155,26 @@ def plot_beam_properties(data, sigma=None, ref=None, x_offset = 0):
                 ax1[i][j].fill_between(x, data[:,c]-sigma[:,c], data[:,c]+sigma[:,c], alpha=0.25, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
             ax1[i][j].plot(x,data[:,c],'--k.')
             ax1[i][j].ticklabel_format(axis='y',style='sci')
-            #ax1[i][j].set_ylim(0)
+            ax1[i][j].set_xlabel(r'$r \quad [1/R]$')
+            tmp = r'$%s \quad [%s]$' % (ylabel[c][0],ylabel[c][1])
+            ax1[i][j].set_ylabel(tmp)
+
             c += 1
     
     #6x6 Stiffness Properties:
-    #stiffness_terms = {'k11':'N', 'k12':, k22, k13, k23, k33,... k16, k26, ...k66}
+    TSunits = np.array([['N','N','N','Nm','Nm','Nm'],
+                        ['N','N','N','Nm','Nm','Nm'],
+                        ['N','N','N','Nm','Nm','Nm'],
+                        ['Nm','Nm','Nm','Nm^2','Nm^2','Nm^2'],
+                        ['Nm','Nm','Nm','Nm^2','Nm^2','Nm^2'],
+                        ['Nm','Nm','Nm','Nm^2','Nm^2','Nm^2']])
+    
     ut = np.zeros((6,6))            
     ut[np.triu_indices(6)] = 1          
     
     fig2, ax2 = plt.subplots(6, 6)
     fig2.subplots_adjust(wspace=0.5, hspace=0.5)
-    fig2.suptitle('6x6 Stiffness Properties', fontsize=14)
+    fig2.suptitle('6x6 Stiffness Matrix', fontsize=14)
     
     c = 6
     for j in range(6):
@@ -174,18 +185,44 @@ def plot_beam_properties(data, sigma=None, ref=None, x_offset = 0):
                 if sigma:
                     ax2[i][j].fill_between(x, data[:,c]-sigma[:,c], data[:,c]+sigma[:,c], alpha=0.25, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
                 ax2[i][j].plot(x,data[:,c],'--k.')
-                ylabel = 'k%s%s' % (i+1,j+1)
+                ylabel = r'$k_{%s%s} \quad [%s]$' % (i+1,j+1,TSunits[i,j])
                 ax2[i][j].set_ylabel(ylabel)
                 #ax2[i][j].set_ylim(0)
                 #ax2[i][j].yaxis.set_major_formatter(mtick.FormatStrFormatter('%.1e'))
                 
                 if i==j:
-                    ax2[i][j].set_xlabel('radial station [1/R]')
+                    ax2[i][j].set_xlabel(r'$r \quad [1/R]$')
                 
                 c += 1
             else:
                 fig2.delaxes(ax2[i][j])
-                
+                #fig2.text(0,0,r'$A=B\cdotC$')
+                #fig2.text(0,0,r'$\left(\begin{matrix}k11&k12&k13&k14&k15&k16\\k12&k22&k23&k24&k25&k26\\k13&k23&k33&k34&k35&k36\\k14&k24&k34&k44&k45&k46\\k15&k25&k35&k45&k55&k56\\k16&k26&k36&k46&k56&k66\end{matrix}\right)$')
+
+
+    desc = r'\begin{minipage}[b]{10cm} '\
+        r'\underline{\textbf{Description:}} \\' \
+        r'The 6x6 sectional stiffness matrix, TS (Timoshenko Stiffness Matrix) ' \
+        r'(1-extension; 2,3-shear, 4-twist; 5,6-bending) relates the sectional axial ' \
+        r'strain, $\epsilon_1$, transverse shearing strains, $\epsilon_2$ and $\epsilon_3$, '\
+        r'twisting curvatures, $\kappa_1$ and two bending curvatures, $\kappa_2$ and $\kappa_3$, '\
+        r'to the axial force, $F_1$, transverse shear forces, $F_2$ and $F_3$, twisting '\
+        r'moment, $M_1$, and two bending moments, $M_2$ and $M_3$. The relationship between '\
+        r'these sectional strains and sectional stress resultants takes the form of a'\
+        r'symmetric, 6x6 matrix: \\' \
+        r'$$ \left( \begin{matrix} F_{1} \\ F_{2} \\ F_{3} \\ M_{1} \\ M_{2} \\ M_{3} \end{matrix} \right) = ' \
+        r'\left( \begin{matrix} k_{11} & k_{12} & k_{13} & k_{14} & k_{15} & k_{16} \\ ' \
+                                r'k_{12} & k_{22} & k_{23} & k_{24} & k_{25} & k_{26} \\ ' \
+                                r'k_{13} & k_{23} & k_{33} & k_{34} & k_{35} & k_{36} \\ ' \
+                                r'k_{14} & k_{24} & k_{34} & k_{44} & k_{45} & k_{46} \\ ' \
+                                r'k_{15} & k_{25} & k_{35} & k_{45} & k_{55} & k_{56} \\ ' \
+                                r'k_{16} & k_{26} & k_{36} & k_{46} & k_{56} & k_{66} \end{matrix} \right) '\
+          r'\cdot \left( \begin{matrix} \epsilon_{1} \\ \epsilon_{2} \\ \epsilon_{3} \\ \kappa_{1} \\ \kappa_{2} \\ \kappa_{3} \end{matrix} \right) $$ \end{minipage} '
+
+    if description == True:
+        from matplotlib import rcParams
+        rcParams['text.latex.preamble'] = r'\usepackage{amsmath}'
+        plt.figtext(0.05, 0.05, desc, usetex=True, wrap=True,  bbox=dict(ec=(1., 0.5, 0.5), fc=(1., 0.8, 0.8)))        
     plt.show()
 
 
