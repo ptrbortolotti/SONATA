@@ -117,19 +117,19 @@ class Blade(Component):
 
     """ 
     
-    __slots__ = ('coordinates', 'chord', 'twist', 'pitch_axis', 'airfoils',  \
+    __slots__ = ('coordinates', 'chord', 'twist','curvature', 'pitch_axis', 'airfoils',  \
                  'sections', 'beam_properties', 'f_chord', 'f_twist', 'f_coordinates_x',  \
                  'f_coordinates_y', 'f_coordinates_z', 'f_pa', \
-                 'display', 'start_display', 'add_menu', 'add_function_to_menu')
+                 'f_curvature','display', 'start_display', 'add_menu', 'add_function_to_menu', 'anba_beam_properties')
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
         self.beam_properties = None
         
-    def __repr__(self):
-        """__repr__ is the built-in function used to compute the "official" 
-        string reputation of an object, """
-        return 'Blade: '+ str(self.name)
+#    def __repr__(self):
+#        """__repr__ is the built-in function used to compute the "official" 
+#        string reputation of an object, """
+#        return 'Blade: '+ str(self.name)
     
     
     def read_IEA37(self, yml, airfoils, materials, stations = [], npts = 11, wt_flag=False):
@@ -192,6 +192,13 @@ class Blade(Component):
         self.twist = blade_matrix[:,[0,5]]
         self.pitch_axis = blade_matrix[:,[0,6]]
         
+        #Calculate initial twist rate and curvature and strore in curvature array (grid, k1, k2 k3) and create interpolation function
+        tmp_k1 = np.gradient(self.twist[:,1], self.coordinates[:,1])
+        tmp_k2 = np.gradient(self.coordinates[:,2], self.coordinates[:,1])
+        tmp_k3 = np.gradient(self.coordinates[:,3], self.coordinates[:,1])
+        self.curvature = np.vstack((self.coordinates[:,0], tmp_k1, tmp_k2, tmp_k3)).T
+        self.f_curvature = interp1d(self.curvature[:,0], self.curvature[:,1:], axis=0)
+        
         #Generate CBMConfigs
         if wt_flag:
             cbmconfigs = iea37_converter(self, cs_pos, yml, materials)
@@ -225,7 +232,7 @@ class Blade(Component):
         nondimensional grid values """
         return self.coordinates[:,0]
 
-    def blade_gen_section(self, topo_flag=True, mesh_flag=True):
+    def blade_gen_section(self, topo_flag=True, mesh_flag=True, **kwargs):
         """
         generates and meshes all sections of the blade
         """
@@ -235,7 +242,7 @@ class Blade(Component):
                 cs.cbm_gen_topo()
             if mesh_flag:
                 print('STATUS:\t Meshing Section at grid location %s' % (x))
-                cs.cbm_gen_mesh()
+                cs.cbm_gen_mesh(**kwargs)
         return None
                
 
@@ -258,7 +265,12 @@ class Blade(Component):
             ddm : nparray([[grid, m1'', m2'', m3'']])
             dddf : nparray([[grid, f1''', f2''', f3''']])
             dddm : nparray([[grid, m1''', m2''', m3''']])
-            
+        
+        ToDo
+        ----------
+            To model initially curved and twisted beams, curve flag is 1, and three real numbers for the
+            twist (k1) and curvatures (k2 and k3) should be provided in the vabs config!!!!
+        
         """
         vc = VABSConfig()
         lst = []
@@ -268,14 +280,58 @@ class Blade(Component):
                 load = interp_loads(loads, x)
                 for k,v in load.items():
                     setattr(vc,k,v)
-            cs.config.vabs_cfg = vc
             
+            #set initial twist and curvature
+            vc.curve_flag = 1
+            vc.k1 = self.f_curvature(x)[0]
+            vc.k2 = self.f_curvature(x)[1]
+            vc.k3 = self.f_curvature(x)[2]
+            
+            cs.config.vabs_cfg = vc
             print('STATUS:\t Running VABS at grid location %s' % (x))
             cs.cbm_run_vabs(**kwargs)
             lst.append([x, cs.BeamProperties])
         self.beam_properties = np.asarray(lst)
         return None        
 
+
+    def blade_run_anbax(self, loads = None, **kwargs):
+        """
+        runs anbax for every section
+        
+        Parameters
+        ----------
+        loads : dict, optional
+            dictionary of the following keys and values, (default=None)
+            for detailed information see the VABSConfig documentation or the 
+            VABS user manual
+            F : nparray([[grid, F1, F2, F3]]) 
+            M : nparray([[grid, M1, M2, M3]]) 
+            f : nparray([[grid, f1, f2, f2]])
+            df : nparray([[grid, f1', f2', f3']])
+            dm :  nparray([[grid, m1', m2', m3']])
+            ddf : nparray([[grid, f1'', f2'', f3'']])
+            ddm : nparray([[grid, m1'', m2'', m3'']])
+            dddf : nparray([[grid, f1''', f2''', f3''']])
+            dddm : nparray([[grid, m1''', m2''', m3''']])
+        
+        ToDo
+        ----------
+            To model initially curved and twisted beams, curve flag is 1, and three real numbers for the
+            twist (k1) and curvatures (k2 and k3) should be provided in the vabs config!!!!
+                
+        """
+        lst = []
+        for (x, cs) in self.sections:            
+            print('STATUS:\t Running ANBAX at grid location %s' % (x))
+            cs.cbm_run_anbax(**kwargs)
+            lst.append([x, cs.AnbaBeamProperties])
+        self.anba_beam_properties = np.asarray(lst)
+        return None      
+        
+        
+        
+        
 
     def blade_plot_attributes(self):
         """
@@ -310,11 +366,8 @@ class Blade(Component):
 #            ax3d.plot(np.ones(tmp_shape)*bm[1],arr[:,0],arr[:,1])
         plt.show()
  
-
-
     
-    
-    def blade_exp_beam_props(self, cosy='global', style='DYMORE', eta_offset=0):
+    def blade_exp_beam_props(self, cosy='global', style='DYMORE', eta_offset=0, solver='vabs'):
         """
         Exports the beam_properties in the 
         
@@ -328,10 +381,9 @@ class Blade(Component):
         style : str
             select the style you want the beam_properties to be exported
             'DYMORE' will return an array of the following form:
-            [[Massterms(6) (m00, mEta2, mEta3, m33, m23, m22) 
+            [[Massterms(6) (m00, mEta2, mEta3, m33, m23, m22)
             Stiffness(21) (k11, k12, k22, k13, k23, k33,... k16, k26, ...k66)
             Viscous Damping(1) mu, Curvilinear coordinate(1) eta]]
-        
             ...
             
         eta_offset : float
@@ -350,11 +402,11 @@ class Blade(Component):
             if cosy=='global':
                 rot = 0
             elif cosy=='local':
-                rot = float(job.f_twist(cs[0])) 
+                rot = float(self.f_twist(cs[0])) 
                         
             #export data for each section
             if style=='DYMORE':
-                lst.append(cs[1].cbm_exp_dymore_beamprops(eta=cs[0], rotate=rot))
+                lst.append(cs[1].cbm_exp_dymore_beamprops(eta=cs[0], Theta=rot, solver=solver))
             elif style == 'CAMRADII':
                 pass
             elif style == 'CPLambda':
@@ -364,13 +416,13 @@ class Blade(Component):
         return arr
         
     
-    def blade_plot_beam_props(self):
+    def blade_plot_beam_props(self, **kwargs):
         """
         plots the beam properties of the blade
         
         self.beam_properties()
         """
-        plot_beam_properties(self.blade_exp_beam_props())
+        plot_beam_properties(self.blade_exp_beam_props(), **kwargs)
         
     
     def blade_plot_sections(self, **kwargs):
@@ -453,7 +505,6 @@ if __name__ == '__main__':
     job.blade_plot_sections()
 
     job.blade_post_3dtopo(flag_lft = False, flag_topo = True)
-
 
 #   %% ====== Helicopter ============== 
 #    #with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as f:

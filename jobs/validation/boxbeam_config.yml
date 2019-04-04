@@ -1,0 +1,371 @@
+#==============================SONATA-Configuration YAML=============================
+#This file contains the input information for the design of a helicopter
+#with SONATA 
+# Units: meter (m), Newton (N), kilogramm (kg), degree (deg), Kelvin (K),
+# Hints: g/cm**3 == 1e3 kg/m**3; GPa = 1e9 N/m**2 (Pa); MPa == 1e6 N/m**2 (Pa);  
+#Author: Tobias Pflumm
+#Date: 02/12/2019
+
+name: Box-Beam
+
+components:
+    #==================== B L A D E ====================================
+    blade:
+        outer_shape_bem:
+            name: 'Box Beam'
+            airfoil_position:
+                grid: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]        
+                labels: [square, square, square, square, square, square, square, square, square, square, square]
+                
+            chord:
+                grid: &grid001 [0.0, 1.0]  
+                values: [1.0, 1.0]
+                
+            pitch_axis:
+                grid: *grid001
+                values: [0.5, 0.5]
+                
+            twist:
+                grid: *grid001
+                values: [0.0, 1.5707]
+                
+            reference_axis:
+                x:
+                    grid: *grid001
+                    values: [0.0,  10.0]
+                y:
+                    grid: [0, 0.5, 1.0]
+                    values: [0.0, 1.0, 3.0]
+                z:
+                    grid: *grid001
+                    values: [0.0, 0.0]
+
+
+        #-------------------- C B M ------------------------------------
+        internal_structure_2d_fem:
+            sections:
+              - position: 0.5
+                mesh_resolution: 160
+                
+                #........... w e b s ...........
+                webs: Null
+                      
+                #........... s e g m e n t s ...........
+                segments:
+                    - id: 0
+                      filler: Null
+                      layup: 
+                          #-[Start[-], End[-], thickness[m], Orientation [deg], MatID[int], 'name'[str]]
+                          - [0.00, 1.00, 0.025,  0, 9, 'l1']
+                          - [0.00, 1.00, 0.025,  0, 9, 'l2']
+                          - [0.00, 1.00, 0.025,  0, 9, 'l3']
+                          - [0.00, 1.00, 0.025,  0, 9, 'l4']
+
+
+#==================== A I R F O I L S ==================================
+airfoils:
+
+    - name: square
+      coordinates: 
+        x : [1.0, 1.0, 0.0, 0.0, 1.0, 1.0]
+        y : [0.0, 1.0, 1.0, -1.0, -1.0 , 0.0]
+      polars: null
+      relative_thickness: null
+
+ 
+#==================== M A T E R I A L S ================================
+materials:
+#...............composites..............
+  - id: 1
+    name: ud_cf_ht_ep_060
+    description: basic unidirektional ht-carbon fiber composite with epoxy matrix (FVC of 60%)
+    source: elasitc properties derived from Schuermann, (p.184, 417) with a semi-empiric Puck approach
+    orth: 1                     
+    rho: 1.536e3                         #kg/m**3
+    E_1: 139.360e9                       #N/m**2, 0° Tensile Modulus
+    E_2: 12.615e9                        #N/m**2, 90° Tensile Modulus
+    E_3: 12.615e9                        #N/m**2, E_3 = E_2
+    G_12: 5.892e9                        #N/m**2, G_ij, is the shear modulus in direction j on the plane whose normal is in direction  i,
+    G_13: 5.892e9                        #N/m**2, G_13 = G_12
+    G_23: 9.332e9                        #N/m**2, 
+    nu_12: 0.025                         #-, nu_ij is the Poisson's ratio that corresponds to a contraction in direction j when an extension is applied in direction i.
+    nu_13: 0.025                         #-, nu_13 = nu_12 
+    nu_23: 0.352                         #-,
+    alpha_11:  Null                      #1/K Coefficient of thermal expansion
+    alpha_22:  Null                      #1/K alpha_22 = alpha_33
+    alpha_33:  Null                      #1/K
+    Xt: 1800e6                           #N/m**2,, 0° tensile strengh
+    Xc: 1200e6                           #N/m**2,, 0° compressive strenght
+    Yt: 60e6                             #N/m**2,, 90° tensile strenght
+    Yc: 200e6                            #N/m**2,, 90° compressive strenght
+    S21: 90e6                            #N/m**2,, in-/out of plane shear strength 
+
+
+  - id: 2
+    name: ud_cf_hm_ep_060
+    description: basic unidirektional hm-carbon fiber composite with epoxy matrix (FVC of 60%)
+    source: elasitc properties derived from Schuermann, (p.184, 417) with a semi-empiric approach
+    orth: 1
+    rho: 1.578e3
+    E_1: 236.560e9
+    E_2: 10.742e9
+    E_3: 10.742e9
+    G_12: 5.663e9
+    G_13: 5.663e9
+    G_23: 8.050e9
+    nu_12: 0.012
+    nu_13: 0.012
+    nu_23: 0.334
+    alpha_11:  Null                    
+    alpha_22:  Null                    
+    alpha_33:  Null                    
+    Xt: Null
+    Xc: Null
+    Yt: Null
+    Yc: Null
+    S21: Null
+
+
+  - id: 3
+    name: ud_cf_im_ep_060
+    description: M30S Prepreg
+    source: Torayca M30S Data Sheet
+    orth: 1
+    rho: 1.572e3
+    E_1: 177.760e9
+    E_2: 12.615e9
+    E_3: 12.615e9
+    G_12: 5.892e9
+    G_13: 5.892e9
+    G_23: 9.330e9
+    nu_12: 0.020e9
+    nu_13: 0.020e9
+    nu_23: 0.352e9
+    alpha_11:  Null                    
+    alpha_22:  Null                    
+    alpha_33:  Null                    
+    Xt: 2990e6
+    Xc: 1370e6
+    Yt: 51e6
+    Yc: 51e6
+    S21: 100e6
+
+
+  - id: 4
+    name: ud_gf_e_ep_060
+    description: nodescription
+    source: nosource
+    orth: 1
+    rho: 2.016e3
+    E_1: 45.160e9
+    E_2: 14.460e9
+    E_3: 14.460e9
+    G_12: 5.686e9
+    G_13: 5.686e9
+    G_23: 10.772e9
+    nu_12: 0.087
+    nu_13: 0.087
+    nu_23: 0.342
+    alpha_11:  Null                    
+    alpha_22:  Null                    
+    alpha_33:  Null                    
+    Xt: Null
+    Xc: Null
+    Yt: Null
+    Yc: Null
+    S21: Null
+    
+    
+  - id: 5
+    name: ud_gf_s_ep_060
+    description: nodescription
+    source: nosource
+    orth: 1
+    rho: 1.986e3
+    E_1: 53.446e9
+    E_2: 14.672e9
+    E_3: 14.672e9
+    G_12: 5.766e9
+    G_13: 5.766e9
+    G_23: 10.924e9
+    nu_12: 0.075
+    nu_13: 0.075
+    nu_23: 0.343
+    alpha_11:  Null                    
+    alpha_22:  Null                    
+    alpha_33:  Null                    
+    Xt: Null
+    Xc: Null
+    Yt: Null
+    Yc: Null
+    S21: Null
+
+
+  - id: 6
+    name: ud_af_hm_ep_060
+    description: nodescription
+    source: nosource
+    orth: 1
+    rho: 1.362e3
+    E_1: 79.360e9
+    E_2: 6.759e9
+    E_3: 6.759e9
+    G_12: 2.099e9
+    G_13: 2.099e9
+    G_23: 4.815e9
+    nu_12: 0.028
+    nu_13: 0.028
+    nu_23: 0.404
+    alpha_11:  Null                    
+    alpha_22:  Null                    
+    alpha_33:  Null                    
+    Xt: Null
+    Xc: Null
+    Yt: Null
+    Yc: Null
+    S21: Null
+
+
+  - id: 7
+    name:   fabric_cf_ht_ep_050
+    description: fabric
+    source: Null
+    orth:   1
+    rho:     1.561e3
+    E_1:     70e9
+    E_2:     70e9
+    E_3:     66e9
+    G_12:     5.0e9
+    G_13:     5.0e9
+    G_23:     5.0e9
+    nu_12:     0.1
+    nu_13:     0.1
+    nu_23:     0.1
+    alpha_11:  Null
+    alpha_22:  Null
+    alpha_33:  Null
+    Xt:       730e6
+    Xc:       846e6
+    Yt:       878e6
+    Yc:       775e6
+    S21:      90e6
+
+
+#...............metals..............
+
+  - id: 8
+    name: steel
+    description: 25CrMo4
+    source: 
+    orth: 0
+    rho: 7.75e3
+    E: 210e9
+    nu: 0.3
+    alpha: 11.5e-6
+    YS: 700e6
+    UTS: 900e6
+
+
+  - id: 9
+    name: aluminium
+    description: EN AW 7075 
+    source: gleich.de technical data sheet
+    orth: 0     
+    rho: 2.80e3
+    E: 71e9
+    nu: 0.33
+    alpha: 23.4e-6 
+    YS: 470e6
+    UTS: 540e6
+
+
+  - id: 10
+    name: titanium
+    description: 3.7164 / Ti6Al4V (Grade 5)
+    source: hsm-stahl.de technical data sheet 
+    orth: 0
+    rho: 4.43e3
+    E: 114e9
+    nu: 0.342       
+    alpha: 8.9e-6
+    YS: 830e6               
+    UTS: 895e6
+
+
+  - id: 11
+    name: lead
+    description: 99.9Pb
+    source: azom.com
+    orth: 0
+    rho: 11.35e3      
+    E: 14e9       
+    nu: 0.44      
+    alpha: 29.1e-6
+    YS: 8e6                 
+    UTS: 16e6               
+
+
+  #- id: 14
+    #name: nickel
+    #description:
+    #source: 
+    #orth: 0
+    #rho:  Null 
+    #E: Null
+    #nu: Null
+    #alpha: Null
+    #YS: Null               
+    #UTS: Null              
+
+  #- id: 15
+    #name: tungsten
+    #description:
+    #source: 
+    #orth: 0
+    #rho:  Null 
+    #E: Null
+    #nu: Null
+    #alpha: Null
+    #YS: Null               
+    #UTS: Null              
+
+
+
+#...............filler..............
+
+  - id: 12
+    name: foam
+    description: rohacell51_ig-f      
+    source: evonic rohacell datasheet
+    orth: 0     
+    rho: 52    
+    E: 70e6    
+    nu: 0.4     
+    alpha: 4.71e-5
+    YS: 1.9e6
+    UTS: 1.9e6               
+
+
+  - id: 13
+    name: honeycomb_al
+    description: Alu Honeycomb HexWeb 5.2-1/4-25 (3003) - Hexcel Composites 2001
+    source:  Schwingshackl, C.W. - Determination of Honeycomb Material Properties - Existing Theories and an Alternative Dynamic Approach    
+    orth:   1
+    rho:     0.083e3                        #g/cm3
+    E_1:     0.0189e9                       
+    E_2:     1.89e9                                                     
+    E_3:     0.0189e9                       
+    G_12:     0.369e9                       
+    G_13:     0.002935e9                    
+    G_23:     0.217e9                       
+    nu_12:    0.1                        
+    nu_13:     0.1                        
+    nu_23:     0.1 
+    alpha_11:  Null                        #1/C°
+    alpha_22:  Null                         #1/C°
+    alpha_33:  Null                         #1/C°
+    Xt:       Null                         #MPa, 0° tensile strengh
+    Xc:       Null                        #MPa, 0° compressive strenght
+    Yt:       Null                         #MPa, 90° tensile strenght
+    Yc:       Null                        #MPa, 90° compressive strenght
+    S21:      Null                          #MPa, in-/out of plane shear strength

@@ -121,11 +121,11 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
             
     if VABSProperties != None:
         pass
-        CG, = plt.plot(VABSProperties.Xm2,VABSProperties.Xm3,'ro', label='CG: Mass Center')
+        CG, = plt.plot(VABSProperties.Xm[0],VABSProperties.Xm[1],'ro', label='CG: Mass Center')
         #ax.annotate('CG', (VABSProperties.Xm2,VABSProperties.Xm3),fontsize=20)
-        GC, = plt.plot(VABSProperties.Xg2,VABSProperties.Xg3,'b^', label='GC: Geometric Center')
+        GC, = plt.plot(VABSProperties.Xg[0],VABSProperties.Xg[1],'b^', label='GC: Geometric Center')
         #ax.annotate('GC', (VABSProperties.Xg2,VABSProperties.Xg3),fontsize=20)
-        NA, = plt.plot(VABSProperties.Xt2,VABSProperties.Xt3,'gs',  label='NA: Neutral Axes')
+        NA, = plt.plot(VABSProperties.Xt[0],VABSProperties.Xt[1],'gs',  label='NA: Neutral Axes')
         #ax.annotate('NA', (VABSProperties.Xt2,VABSProperties.Xt3),fontsize=20)
         plt.legend(handles=[CG,GC,NA])
         
@@ -145,8 +145,8 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
             
         
 
-        if VABSProperties.Xs2 != None:
-            SC, = plt.plot(VABSProperties.Xs2,VABSProperties.Xs3,'kD',label='SC: Generalized Shear Center')
+        if isinstance(VABSProperties.Xs,np.ndarray):
+            SC, = plt.plot(VABSProperties.Xs[0],VABSProperties.Xs[1],'kD',label='SC: Generalized Shear Center')
             #ax.annotate('SC', (VABSProperties.Xs2,VABSProperties.Xs3),fontsize=20)
             plt.legend(handles=[CG,GC,NA,SC])
 
