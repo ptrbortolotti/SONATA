@@ -506,7 +506,6 @@ if __name__ == '__main__':
 
     job.blade_post_3dtopo(flag_lft = False, flag_topo = True)
 
-
 #   %% ====== Helicopter ============== 
 #    #with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as f:
 #    with open('jobs/VHeuschneider/blade_config.yml', 'r') as f:

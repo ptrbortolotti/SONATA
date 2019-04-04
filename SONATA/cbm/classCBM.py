@@ -792,7 +792,6 @@ class CBM(object):
         if rm_vabfiles:
             folder = '/'.join(vabs_filename.split('/')[:-1])
             fstring = vabs_filename.split('/')[-1]
-            #print(vabs_filename)
             if folder != '':
                 for file in os.listdir(folder):
                     if fstring in file:
