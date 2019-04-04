@@ -10,8 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import matplotlib.lines as mlines
 
-from matplotlib2tikz import save as tikz_save
-# import SONATA.Pymore.utl.read as read
+# from matplotlib2tikz import save as tikz_save
 
 def plot_histogram_2Ddata(data, **kwargs):
     """

@@ -17,6 +17,8 @@ import math
 import numpy as np
 import platform
 import time
+import copy
+
 
 #PythonOCC Modules
 from OCC.Display.SimpleGui import init_display
@@ -1017,6 +1019,64 @@ class CBM(object):
         mu = 0.0
         return np.hstack((MASS,STIFF,mu,eta))   
     
+    def cbm_exp_BeamDyn_beamprops(self, Theta=0, solver='vabs'):
+        """ 
+        Converts the Beam Properties of CBM to the correct coordinate System of
+        BeamDyn and returns the 6x6 Stiffness matrix, the 6x6 MassMatrix.
+        
+        The geometry of the blade is defined by key-point coordinates and initial
+        twist angles (in units of degree) in the blade local coordinate system
+        (IEC standard blade system where Zr is along blade axis from root to
+        tip, Xr directs normally toward the suction side, and Yr directs 
+        normally toward the trailing edge).
+        https://openfast.readthedocs.io/en/master/source/user/beamdyn/input_files.html
+        
+        Parameters
+        ----------
+        Theta: float, optional
+            is the angle of rotation of the coordinate system in "radians"
+        solver: str, optional
+        
+        Returns
+        ----------
+            tuple of arrays
+            (6x6 StiffnessMatrix, 6x6MassMatrix)
+            
+            
+        Notes:
+        ----------
+        - Following the station location parameter η, there are two 
+        6×6 matrices providing the structural and inertial properties for this
+        cross-section. First is the stiffness matrix and then the mass matrix. 
+        We note that these matrices are defined in a local coordinate system 
+        along the blade axis with Zl directing toward the unit tangent vector 
+        of the blade reference axis.
+        - Does this create an oblique cross-section!?
+        
+        
+        """
+        if solver == 'vabs':
+            if Theta != 0:
+                tmp_bp = self.BeamProperties.rotate(Theta)        
+            else:
+                tmp_bp = self.BeamProperties
+
+        elif solver == 'anbax':
+            if Theta != 0:
+                tmp_bp = self.AnbaBeamProperties.rotate(Theta)        
+            else:
+                tmp_bp = self.AnbaBeamProperties
+        
+        tmp_bp = copy.deepcopy(tmp_bp)
+        
+        #transform to BeamDYN Coordinates
+        B = np.array([[0,0,1],[0,-1,0],[1,0,0]])
+        T = np.dot(np.identity(3),np.linalg.inv(B))
+        
+        tmp_TS = trsf_sixbysix(tmp_bp.TS,T)
+        tmp_MM = trsf_sixbysix(tmp_bp.MM,T)
+        return (tmp_TS, tmp_MM) 
+        
         
 #%%############################################################################
 #                           M    A    I    N                                  #
@@ -1036,7 +1096,7 @@ if __name__ == '__main__':
     
     job.cbm_review_mesh()
     job.cbm_run_vabs(rm_vabfiles=False)
-    AnbaBeamProperties = job.cbm_run_anbax()
+    #AnbaBeamProperties = job.cbm_run_anbax()
     
     
     #job.cbm_post_2dmesh(title='Hello World!')

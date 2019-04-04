@@ -330,7 +330,70 @@ class Blade(Component):
         return None      
         
         
+     
+    def blade_exp_beam_props(self, cosy='global', style='DYMORE', eta_offset=0, solver='vabs', filename = None):
+        """
+        Exports the beam_properties in the 
         
+        Parameters
+        ----------
+        cosy : str, optional
+            either 'global' for the global beam coordinate system or 
+            'local' for a coordinate system that is always pointing with 
+            the chord-line (in the twisted frame)
+        
+        style : str, optional
+            select the style you want the beam_properties to be exported
+            'DYMORE' will return an array of the following form:
+            [[Massterms(6) (m00, mEta2, mEta3, m33, m23, m22)
+            Stiffness(21) (k11, k12, k22, k13, k23, k33,... k16, k26, ...k66)
+            Viscous Damping(1) mu, Curvilinear coordinate(1) eta]]
+            ...
+            
+        eta_offset : float, optional
+            if the beam eta coordinates from start to end of the beam doesn't 
+            coincide with the global coorinate system of the blade. The unit
+            is in nondimensional r coordinates (x/Radius)
+            
+        solver : str, optional
+            solver : if multiple or other solvers than vabs were applied, use 
+            this option
+        
+        filename : str, optional
+            if the user wants to write the output to a file. 
+            
+        Returns
+        ----------
+        arr : ndarray
+            an array that reprensents the beam properties for the 
+        """
+        Theta = 0
+        lst = []
+        for cs in self.sections:
+            #consider the local coordinate system rotational angle in rad    
+            if cosy=='local':
+                Theta = float(self.f_twist(cs[0])) 
+                        
+            #collect data for each section
+            if style=='DYMORE':
+                lst.append(cs[1].cbm_exp_dymore_beamprops(eta=cs[0], Theta=Theta, solver=solver))
+    
+            elif style == 'BeamDyn':
+                pass
+            
+            elif style == 'CAMRADII':
+                pass
+            
+            elif style == 'CPLambda':
+                pass    
+                #lst.append()
+                        
+        arr = np.asarray(lst)
+        
+
+        return arr
+        
+       
         
 
     def blade_plot_attributes(self):
@@ -367,54 +430,6 @@ class Blade(Component):
         plt.show()
  
     
-    def blade_exp_beam_props(self, cosy='global', style='DYMORE', eta_offset=0, solver='vabs'):
-        """
-        Exports the beam_properties in the 
-        
-        Parameters
-        ----------
-        cosy : str
-            either 'global' for the global beam coordinate system or 
-            'local' for a coordinate system that is always pointing with 
-            the chord-line (in the twisted frame)
-        
-        style : str
-            select the style you want the beam_properties to be exported
-            'DYMORE' will return an array of the following form:
-            [[Massterms(6) (m00, mEta2, mEta3, m33, m23, m22)
-            Stiffness(21) (k11, k12, k22, k13, k23, k33,... k16, k26, ...k66)
-            Viscous Damping(1) mu, Curvilinear coordinate(1) eta]]
-            ...
-            
-        eta_offset : float
-            if the beam eta coordinates from start to end of the beam doesn't 
-            coincide with the global coorinate system of the blade. The unit
-            is in nondimensional r coordinates (x/Radius)
-                
-            
-        Returns
-        ----------
-        """
-        
-        lst = []
-        for cs in self.sections:
-            #define rotation angle in rad
-            if cosy=='global':
-                rot = 0
-            elif cosy=='local':
-                rot = float(self.f_twist(cs[0])) 
-                        
-            #export data for each section
-            if style=='DYMORE':
-                lst.append(cs[1].cbm_exp_dymore_beamprops(eta=cs[0], Theta=rot, solver=solver))
-            elif style == 'CAMRADII':
-                pass
-            elif style == 'CPLambda':
-                pass        
-                        
-        arr = np.asarray(lst)
-        return arr
-        
     
     def blade_plot_beam_props(self, **kwargs):
         """
