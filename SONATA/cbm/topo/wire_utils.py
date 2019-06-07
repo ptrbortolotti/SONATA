@@ -112,7 +112,6 @@ def rotate_wire(wire, ax1, angle, copy=False):    #for top
     rotWire = topods.Wire(RotatedWire)
     return rotWire
 
-
 def translate_wire(wire,gp_Pnt1,gp_Pnt2, copy=False):
     aTrsf = gp_Trsf()
     aTrsf.SetTranslation(gp_Pnt1,gp_Pnt2)
@@ -130,6 +129,16 @@ def scale_wire(wire,gp_Pnt1,factor, copy=False):
     scaledWire = topods.Wire(aScaledShape)
     return scaledWire
 
+def trsf_wire(wire, gp_Trsf, copy=False):
+    aBRespTrsf = BRepBuilderAPI_Transform(wire, gp_Trsf, copy)
+    aBRespTrsf.Build()
+    atrsfedShape = aBRespTrsf.Shape()
+    trsfedWire = topods.Wire(atrsfedShape)
+    return trsfedWire
+    
+    
+    
+    
 def mirror_wire_pnt_dir(brep, pnt, direction, copy=False):
     '''
     from pythonocc-utils
@@ -174,7 +183,7 @@ def find_coordinate_on_ordered_edges(TopoDS_wire,S):
     return [idx,U]  #Return index of edge and parameter U on edge!
 
 
-def discretize_wire(wire, Resolution=600, Deflection = 5e-3, display=None):
+def discretize_wire(wire, Resolution=500, Deflection = 5e-3, refine = True, display=None):
     Pnt2dLst = []
     AdaptorComp = BRepAdaptor_CompCurve(wire, True)
     #discretization = GCPnts_TangentialDeflection(AdaptorComp,AngularDeflection,CurvatureDeflection,MinimumOfPoints, UTol)
@@ -182,6 +191,7 @@ def discretize_wire(wire, Resolution=600, Deflection = 5e-3, display=None):
     #print 'NbPoints3 = ', discretization.NbPoints()
     
     NbPoints = discretization.NbPoints()
+    #print(NbPoints)
     for j in range(1, NbPoints+1):
         Pnt = discretization.Value(j)
         Pnt2dLst.append(Pnt)
@@ -201,7 +211,7 @@ def discretize_wire(wire, Resolution=600, Deflection = 5e-3, display=None):
         npArray = np.vstack((npArray,b[0]))
     else: None
         
-    #Interpolate Large spaces! 
+    #Interpolate Large spaces!
     seg_P2Plength = []
     cumm_length = 0
     data = npArray
@@ -215,6 +225,8 @@ def discretize_wire(wire, Resolution=600, Deflection = 5e-3, display=None):
         Refinement = True
     else:
         Refinement = False
+    
+    Refinement = refine
     
     while Refinement == True:
         temp_data = []
@@ -243,7 +255,6 @@ def discretize_wire(wire, Resolution=600, Deflection = 5e-3, display=None):
             Refinement = True
         else:
             Refinement = False   
-
 
     return data
 
@@ -326,7 +337,6 @@ def build_wire_from_BSplineLst(BSplineLst, twoD=True): #Builds TopoDS_Wire from 
     
 def set_BoundaryWire_to_Origin(TopoDS_wire):
     '''
-    The Origin is determined by the most right Intersection Point of the X-Axis with the segment boundary 
     '''   
     Face = BRepLib_MakeFace(gp_Pln(gp_Pnt(0,0,0), gp_Dir(0,1,0)),-2,2,-2,2).Face()
     tolerance=1e-10
