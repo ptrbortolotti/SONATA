@@ -12,39 +12,51 @@ components:
     #==================== B L A D E ====================================
     blade:
         name: 'UH-60A Cdvanced Composite Blade'
-        airfoil_position:
-            grid: [0.1491807, 0.4700000, 0.5000000, 0.8200000, 0.8500000, 1.0000000]        
-            labels: [sc1095, sc1095, sc1094r8, sc1094r8, sc1095, sc1095]
-            
-        chord:
-            grid: [0.1491807, 0.2431389, 0.4700000, 0.5000000, 0.8200000, 0.8500000, 1.0000000]
-            values: [0.3257790, 0.5300000, 0.5300000, 0.5400000, 0.5400000, 0.5340000, 0.5340000]
-            
-        pitch_axis:
-            grid: [0.1491807, 1.0000000]
-            values: [0.2500000, 0.2500000]
-            
-        twist:
-            grid: [0.1491807, 0.2058498, 0.7400831, 0.8794644, 0.8817095, 0.9246356, 0.9624872, 1.0000000]
-            values: [0.1711034, 0.1714437, 0.0044471, -0.0223385, -0.0447642, -0.0617306, -0.0618964, -0.0431899]
-            
-        coordinates:
-            x:
-                grid: [0.1491807, 0.2431389, 0.9300000, 1.0000000]
-                values: [1.2200000, 1.9883900, 7.6055400, 8.1780000]
-            y:
-                grid: [0.1491807, 0.2431389, 0.9300000, 1.0000000]
-                values: [0.0500000, 0.0000000, 0.0000000, -0.1957900]
-            z:
-                grid: [0.1491807, 0.2431389, 0.9300000, 1.0000000]
-                values: [0.0000000, 0.0000000, 0.0000000, 0.0000000]
+        outer_shape_bem:
+            airfoil_position:
+                grid: [0.1491807, 0.4700000, 0.5000000, 0.8200000, 0.8500000, 1.0000000]        
+                labels: [sc1095, sc1095, sc1094r8, sc1094r8, sc1095, sc1095]
+                
+            chord:
+                grid: [0.1491807, 0.2431389, 0.4700000, 0.5000000, 0.8200000, 0.8500000, 1.0000000]
+                values: [0.3257790, 0.5300000, 0.5300000, 0.5400000, 0.5400000, 0.5340000, 0.5340000]
+                
+            pitch_axis:
+                grid: [0.1491807, 1.0000000]
+                values: [0.2500000, 0.2500000]
+                
+            twist:
+                grid: [0.1491807, 0.2058498, 0.7400831, 0.8794644, 0.8817095, 0.9246356, 0.9624872, 1.0000000]
+                values: [0.1711034, 0.1714437, 0.0044471, -0.0223385, -0.0447642, -0.0617306, -0.0618964, -0.0431899]
+                
+            reference_axis:
+                x:
+                    grid: [0.1491807, 0.2431389, 0.9300000, 1.0000000]
+                    values: [1.2200000, 1.9883900, 7.6055400, 8.1780000]
+                y:
+                    grid: [0.1491807, 0.2431389, 0.9300000, 1.0000000]
+                    values: [0.0000, 0.0, 0.00, -0.1957900]
+                z:
+                    grid: [0.1491807, 0.2431389, 0.9300000, 1.0000000]
+                    values: [0.0000000, 0.0000000, 0.0000000, 0.0000000]
 
+            beam_reference_axis:
+                x:
+                    grid: [0.1491807, 0.2431389, 0.9300000, 1.0000000]
+                    values: [1.2200000, 1.9883900, 7.6055400, 8.1780000]
+                y:
+                    grid: [0.1491807, 0.2431389, 0.9300000, 1.0000000]
+                    values: [0.0, 0.00, 0.00, 0.00]
+                z:
+                    grid: [0.1491807, 0.2431389, 0.9300000, 1.0000000]
+                    values: [0.0000000, 0.0000000, 0.0000000, 0.0000000]
 
         #-------------------- C B M ------------------------------------
-        2d_fem:
+        internal_structure_2d_fem:
             sections:
               - position: 0.4
-                mesh_resolution: 280
+                trim_mass: False
+                mesh_resolution: 450
                 
                 #........... w e b s ...........
                 webs:
@@ -58,11 +70,11 @@ components:
                       
                 #........... trim_mass ...........
                 trim_mass: 
-                        XPos: -124              #	X Position	[-]						[float]
-                        YPos: 0.5               #	Y Position	[-]						[float]
-                        Diameter: 10.0          #	Diameter of Balance Weight [mm]	[float]
-                        Material: 6             #   Material ID							[int]
-
+                    s: 0.505                 #	curve coordinate position	[-]						[float]
+                    t: 7.5e-3                  #	distance t, left of segment boundary	[m]						[float]
+                    Diameter: 10.0e-3          #	Diameter of Balance Weight [m]	[float]
+                    Material: 6             #   Material ID							[int]
+                    
                 #........... s e g m e n t s ...........
                 segments:
                     - id: 0
@@ -106,8 +118,8 @@ components:
                           
                           
               - position: 0.7
-                trim_mass: True
-                mesh_resolution: 280
+                trim_mass: False
+                mesh_resolution: 450
                 
                 #........... w e b s ...........
                 webs:
@@ -121,10 +133,10 @@ components:
                       
                 #........... trim_mass ...........
                 trim_mass: 
-                        XPos: -124              #	X Position	[-]						[float]
-                        YPos: 0.5               #	Y Position	[-]						[float]
-                        Diameter: 10.0          #	Diameter of Balance Weight [mm]	[float]
-                        Material: 6             #   Material ID							[int]
+                    s: 0.495 #curve coordinate position	[-]						[float]
+                    t: 7.5e-3                  #	distance t, left of segment boundary	[m]						[float]
+                    Diameter: 10.0e-3          #	Diameter of Balance Weight [m]	[float]
+                    Material: 6             #   Material ID							[int]
 
                 #........... s e g m e n t s ...........
                 segments:
