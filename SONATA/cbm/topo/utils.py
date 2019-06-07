@@ -5,7 +5,7 @@
 #Basic Libraries:
 import math 
 import numpy as np 
-                          
+from scipy.spatial import cKDTree     
 #Python OCC Libraries
 from OCC.gp import gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec2d
 from OCC.TColgp import (TColgp_Array1OfPnt, TColgp_Array1OfPnt2d, TColgp_HArray1OfPnt2d, 
@@ -45,6 +45,43 @@ def isclose(a, b, rel_tol=2e-09, abs_tol=2e-09):
     The name, isclose, is selected for consistency with the existing isnan and isinf .
     """ 
     return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
+
+def fuse_rows(a, tol = 1e-5, keep_closed=True):
+    """
+    fuses rows if the coordiante points are closer than tol but keeps the set 
+    of coordinates closed if keep_closed is selected 
+    
+    Parameters
+    --------
+    a : ndarray
+        input array of coordinate points
+    tol : float
+         tolerance distance
+    keep_closed : bool
+        to keep the set of coordinates closed after the fuse
+        
+    Returns
+    -------
+    d : ndarray 
+        returns the fused array
+    
+    """
+    tree = cKDTree(a)
+    #print(a)
+    rows_to_fuse = tree.query_pairs(r=1e-5, output_type='ndarray')
+    #print(rows_to_fuse)
+    #to delete but respect first and last rows:
+    b = np.unique(rows_to_fuse[:,1])
+    
+    if keep_closed and len(b)>0 and b[-1] == len(a)-1:
+            c = b[:-1]
+    else:
+        c = b
+        
+    d = np.asarray([e for i,e in enumerate(a) if i not in c])
+    return d
+
 
 def Polygon_orientation(npArray):
     #Calculate of Polygon.
@@ -298,6 +335,10 @@ def PntLst_to_npArray(PntLst):
     lst_tmp = [p.Coord() for p in PntLst]
     return np.asarray(lst_tmp)
 
+def Array_to_PntLst(array):
+    PntLst = [gp_Pnt(a[0],a[1],a[2]) for a in array]
+    return PntLst
+
 def gp_Pnt2d_to_npArray(Ptn2d):
         vector = np.array([Ptn2d.X(),Ptn2d.Y()])
         return vector
@@ -312,7 +353,40 @@ def np_GetNormal2d(Vec2d):
         
 def npArray_to_gp_Pnt2d(vector):
         Pnt2d = gp_Pnt2d(vector[0],vector[1])
-        return Pnt2d     
+        return Pnt2d 
+   
         
 def getID(custom):
     return custom.ID        
+
+
+def lin_pln_intersect(n0, p, p1, p2):
+    """
+    calculates the intersection point of the a line and plane. 
+    The plane is defined by its normalized normal vector n0 and a plane point p.
+    the line is defined from p1 to p2. The function not only returns the 
+    intersection point but also the line coordinate lambda
+    
+    Parameters
+    ---------
+    n0 : array
+    p : array
+    p1 : array
+    p2 : array
+    
+    Returns
+    --------
+    Pnt : array
+    lamb : float 
+    
+    """
+    n0 = np.asarray(n0)
+    p = np.asarray(p)
+    p1 = np.asarray(p1)
+    p2 = np.asarray(p2)
+    
+    v = p2-p1
+    d = np.dot(n0,p)
+    lamb = (d - np.dot(n0,p1)) / (np.dot(n0, p2-p1))
+    pnt = p1 + lamb*v
+    return(pnt, lamb)
