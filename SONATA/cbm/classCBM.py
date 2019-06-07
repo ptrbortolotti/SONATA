@@ -22,7 +22,7 @@ import copy
 
 #PythonOCC Modules
 from OCC.Display.SimpleGui import init_display
-from OCC.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1
+from OCC.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1, gp_Trsf, gp_Ax3 
 
 if __name__ == '__main__':
     os.chdir('../..')
@@ -40,7 +40,7 @@ from SONATA.cbm.topo.web import Web
 from SONATA.cbm.topo.utils import  getID
 from SONATA.cbm.topo.weight import Weight
 from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length, BSplineLst_from_dct, set_BSplineLst_to_Origin
-from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire, discretize_wire, get_wire_length
+from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire, discretize_wire, get_wire_length, trsf_wire
 
 from SONATA.cbm.mesh.node import Node
 from SONATA.cbm.mesh.cell import Cell
@@ -206,14 +206,15 @@ class CBM(object):
         if kwargs.get('name'):
             self.name = kwargs.get('name')
         
+        self.Ax2 = gp_Ax2()
         self.SegmentLst = []
         self.WebLst = []    
         self.BW = None
-                
+        
         self.mesh = []
         self.BeamProperties = None
         self.display = None
-
+        
         self.refL = 1.0       
         
         self.startTime = datetime.now()
@@ -229,25 +230,15 @@ class CBM(object):
             self.surface3d = self.blade.surface
       
         elif self.config.setup['input_type'] == 5:
-            bm = kwargs.get('blade_matrix')
-            af = kwargs.get('airfoil')
-            self.Theta = np.degrees(bm[5])
-            wire = af.gen_OCCtopo()
-            
-            wire = rotate_wire(wire, gp_Ax1(gp_Pnt(bm[6],0,0), gp_Dir(0,0,1)), -bm[5], copy=True)
-            wire = translate_wire(wire, gp_Pnt(bm[6],0,0), gp_Pnt(0,0,0))
-            wire = scale_wire(wire, gp_Pnt(0,0,0), bm[4])
-            #wire = translate_wire(wire, gp_Pnt(0,0,0), gp_Pnt(bm[1],bm[2],bm[3]))
-            self.refL = get_wire_length(wire)
-            
-            npArray = discretize_wire(wire, Deflection = self.refL*1e-6)
-            BSplineLst = BSplineLst_from_dct(npArray, angular_deflection = 20, tol_interp=self.refL*1e-5)
-            self.BoundaryBSplineLst = set_BSplineLst_to_Origin(BSplineLst,self.Theta) 
-            
+            #wire = kwargs.get('wire') #in the blade reference frame!
+            self.Ax2 = kwargs.get('Ax2')
+            self.BoundaryBSplineLst = kwargs.get('BSplineLst')
+            self.Theta = 0
+            self.refL = get_BSplineLst_length(self.BoundaryBSplineLst)
+                        
     def __getstate__(self):
         """Return state values to be pickled."""
         return (self.config, self.materials, self.SegmentLst, self.WebLst, self.BW, self.mesh, self.BeamProperties)   
-    
     
     def __setstate__(self, state):
         """Restore state from the unpickled state values."""
@@ -447,7 +438,7 @@ class CBM(object):
         return None
 
 
-    def __cbm_generate_SegmentLst(self, **kwargs):
+    def _cbm_generate_SegmentLst(self, **kwargs):
         '''
         psydo private method of the cbm class to generate the list of 
         Segments in the instance. 
@@ -511,7 +502,7 @@ class CBM(object):
         '''               
         #Generate SegmentLst from config:
         self.SegmentLst = []
-        self.__cbm_generate_SegmentLst(**kwargs)
+        self._cbm_generate_SegmentLst(**kwargs)
         #Build Segment 0:
         self.SegmentLst[0].build_wire()
         self.SegmentLst[0].build_layers(l0 = self.refL, **kwargs)
@@ -538,9 +529,11 @@ class CBM(object):
         self.BW = None
         #Balance Weight:
         if self.config.setup['BalanceWeight'] == True:
-            print('STATUS:\t Building Balance Weight')   
-            self.BW = Weight(0, self.config.bw['XPos'], self.config.bw['YPos'], self.config.bw['Diameter'], self.config.bw['Material'])
-            
+            #print('STATUS:\t Building Balance Weight')   
+            #self.BW = Weight(0, self.config.bw['XPos'], self.config.bw['YPos'], self.config.bw['Diameter'], self.config.bw['Material'])
+            p = self.SegmentLst[0].det_weight_Pnt2d(self.config.bw['s'], self.config.bw['t'])
+            self.BW = Weight(0,p,self.config.bw['Diameter'], self.config.bw['Material'])
+            #print(p.Coord())
         return None
 
 
@@ -659,8 +652,6 @@ class CBM(object):
         
         return None
 
-
-        
    
     def cbm_run_vabs(self, jobid=None, rm_vabfiles=True, ramdisk=False):
         '''CBM method to run the solver VABS (Variational Asymptotic Beam 
@@ -767,7 +758,7 @@ class CBM(object):
                 result = BeamSectionalProps(vabs_filename+'.K')
             except Exception as e:
                     if 'All "vabsiii" licenses in us' in stdout:
-                        time.sleep(0.01)
+                        time.sleep(0.2)
                         counter += 1
                     else:
                         print(e)
@@ -790,17 +781,22 @@ class CBM(object):
             
             #Calculate standart failure criterias
             self.cbm_calc_failurecriteria()
-    
+        
+        print(vabs_filename)
+        #REMOVE VABS FILES:
         if rm_vabfiles:
             folder = '/'.join(vabs_filename.split('/')[:-1])
             fstring = vabs_filename.split('/')[-1]
-            if folder != '':
-                for file in os.listdir(folder):
-                    if fstring in file:
-                        #print('removing: '+folder+'/'+file)
+            if not folder:
+                folder = None
+                
+            for file in os.listdir(folder):
+                if fstring in file:
+                    #print('removing: '+folder+'/'+file)
+                    if folder:
                         os.remove(folder+'/'+file)
-            else:
-                print(folder)
+                    else:
+                        os.remove(file)
         
         return None
             
