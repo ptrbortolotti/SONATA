@@ -3,7 +3,7 @@ import numpy as np
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge,BRepBuilderAPI_MakeWire
 from OCC.Geom import Geom_Plane
 from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
-from OCC.gp import gp_Pnt, gp_Pnt2d, gp_Pln, gp_Dir, gp_Vec
+from OCC.gp import gp_Pnt, gp_Pnt2d, gp_Pln, gp_Dir, gp_Vec, gp_Vec2d
 
 
 from SONATA.cbm.fileIO.readinput import UIUCAirfoil2d, AirfoilDat2d
@@ -12,7 +12,7 @@ from SONATA.cbm.topo.BSplineLst_utils import get_BSpline_length, get_BSplineLst_
                             find_BSplineLst_coordinate, get_BSplineLst_Pnt2d, \
                             trim_BSplineLst, seg_boundary_from_dct, set_BSplineLst_to_Origin, \
                             copy_BSplineLst, trim_BSplineLst_by_Pnt2d, reverse_BSplineLst, \
-                            BSplineLst_from_dct
+                            BSplineLst_from_dct, get_BSplineLst_D2
 from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst
 from SONATA.cbm.topo.projection import cummulated_layup_boundaries, relevant_cummulated_layup_boundaries,\
                                     plot_layup_projection, inverse_relevant_cummulated_layup_boundaries, \
@@ -197,6 +197,29 @@ class Segment(object):
         (BSplineLst, start, end) = self.get_BsplineLst_plus(lid, SegmentLst, WebLst)
         return get_BSplineLst_Pnt2d(BSplineLst, S, start, end)
         
+    def det_weight_Pnt2d(self, s, t):
+        """
+        determine the position of the 2d Point that describes the balance 
+        weight
+        
+        Parameters
+        --------
+        s : float
+            nondimensional s position between Start S1 and End S2
+        t : float
+            distance in normaldirection left of the boundary_BesplineLst
+        
+        Returns:
+        -------
+        p1 : gp_Pnt2d
+        
+        """
+        p0,v1,v2 = get_BSplineLst_D2(self.BSplineLst, s, 0, 1)
+        v = gp_Vec2d(-v1.Y(), v1.X())
+        v.Normalize()
+        v.Multiply(t)
+        p1 = p0.Translated(v)
+        return p1
     
     def build_layers(self, WebLst = None, Segment0 = None, display = None, l0 = None, **kwargs):
         '''The build_layers member function of the class Segment generates all Layer objects and it's associated wires
