@@ -6,21 +6,22 @@ import sys
 import os
 import matplotlib as plt
 import math
+import numpy as np
 
 from OCC.Display.SimpleGui import init_display
 from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax3,gp_Ax1
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
-# from OCC.Graphic3d import (Graphic3d_EF_PDF,
-                            # Graphic3d_EF_SVG,
-                            # Graphic3d_EF_TEX,
-                            # Graphic3d_EF_PostScript,
-                            # Graphic3d_EF_EnhPostScript)
+from OCC.Graphic3d import (Graphic3d_EF_PDF,
+                             Graphic3d_EF_SVG,
+                             Graphic3d_EF_TEX,
+                             Graphic3d_EF_PostScript,
+                             Graphic3d_EF_EnhPostScript)
 
 from OCC.Quantity import Quantity_Color
-# from OCC.AIS import AIS_Shape
+from OCC.AIS import AIS_Shape
 
-from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire
-
+from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, trsf_wire
+from SONATA.utl.trsf import trsf_cbm_to_blfr
 
 def display_config(DeviationAngle = 1e-5, DeviationCoefficient = 1e-5, bg_c = ((20,6,111),(200,200,200)), cs_size = 25):
     '''
@@ -206,9 +207,9 @@ def show_coordinate_system(display,length,event=None):
     h3 = BRepBuilderAPI_MakeEdge(O,p3).Shape()
 
     display.DisplayShape(O,color='BLACK')
-    display.DisplayShape(h1,color='RED')
-    display.DisplayShape(h2,color='GREEN')
-    display.DisplayShape(h3,color='BLUE')
+    display_custome_shape(display, h1, linewidth=2.0, RGB=[1,0,0])
+    display_custome_shape(display, h2, linewidth=2.0, RGB=[0,1,0])
+    display_custome_shape(display, h3, linewidth=2.0, RGB=[0,0,1])
     display.DisplayMessage(p1,'x',message_color=(0,0,0))
     display.DisplayMessage(p2,'y',message_color=(0,0,0))
     display.DisplayMessage(p3,'z',message_color=(0,0,0))
@@ -243,7 +244,7 @@ def transform_wire_2to3d(display,wire,coord=(0,0,0),alpha=0,beta=0,color='BLACK'
 def display_SONATA_SegmentLst(display,SegmentLst,coord=(0,0,0),alpha=0,beta=0):
     # transfer shapes and display them in the viewer   
     if SegmentLst:
-        transform_wire_2to3d(display,SegmentLst[0].wire,coord,alpha,beta,color='BLACK')
+        #transform_wire_2to3d(display,SegmentLst[0].wire,coord,alpha,beta,color='BLACK')
         
         for i,seg in enumerate(SegmentLst):
             wire = transform_wire_2to3d(display,seg.wire,coord,alpha,beta,)
@@ -270,6 +271,64 @@ def display_SONATA_SegmentLst(display,SegmentLst,coord=(0,0,0),alpha=0,beta=0):
                     k = 0
     return None
 
+
+def display_cbm_SegmentLst(display,SegmentLst, Ax2_blfr, Ax2_befr):
+    """
+    replaces the display SONATA_SegmentLst in the future!
+    
+    Parameters
+    ---------
+    display : OCC.Display.OCCViewer.Viewer3d 
+        OCC 3d Viewer instance
+    
+    SegmentLst : list
+        list of Segments of the cbm 
+        
+    fromAx2 : gp_Ax2
+        OCC gp_Ax2 coordinate system
+        
+    toAx2: : gp_Ax2
+        OCC gp_Ax2 coordinate system
+        
+    """
+    Trsf = trsf_cbm_to_blfr(Ax2_blfr, Ax2_befr)
+
+    # transfer shapes and display them in the viewer   
+    if SegmentLst:        
+        for i,seg in enumerate(SegmentLst):
+            wire = trsf_wire(seg.wire, Trsf)
+            display.DisplayColoredShape(wire, Quantity_Color(0, 0, 0, 0),update=True)
+            k = 0
+            for j,layer in enumerate(seg.LayerLst):
+                [R,G,B,T] =  plt.cm.jet(k*50)
+                wire = trsf_wire(layer.wire, Trsf)
+                display.DisplayColoredShape(wire, Quantity_Color(R, G, B, 0),update=True)
+                k = k+1;
+                if k>5:
+                    k = 0
+    return None
+
+
+def display_Ax2(display, Ax2, length=1):
+    """
+    
+    
+    """
+    p0 = Ax2.Location()
+    px = p0.Translated(gp_Vec(Ax2.XDirection()).Normalized().Multiplied(length))
+    py = p0.Translated(gp_Vec(Ax2.YDirection()).Normalized().Multiplied(length))
+    pz = p0.Translated(gp_Vec(Ax2.Direction()).Normalized().Multiplied(length))
+    
+    e1 = BRepBuilderAPI_MakeEdge(p0,px).Shape()
+    e2 = BRepBuilderAPI_MakeEdge(p0,py).Shape()
+    e3 = BRepBuilderAPI_MakeEdge(p0,pz).Shape()
+    
+    display.DisplayShape(p0,color='BLACK')
+    display.DisplayShape(e1,color='RED')
+    display.DisplayShape(e2,color='GREEN')
+    display.DisplayShape(e3,color='BLUE')
+    
+    return None
 
 if __name__ == '__main__':   
     pass
