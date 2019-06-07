@@ -6,16 +6,20 @@ import matplotlib.pyplot as plt
 from scipy.optimize import leastsq
 
 #PythonOCC Libraries
-from OCC.gp import gp_Pnt2d, gp_Dir2d, gp_Vec2d
+from OCC.gp import gp_Pnt2d, gp_Dir2d, gp_Vec2d, gp_Pnt, gp_Dir, gp_Vec
+from OCC.Geom import Geom_BSplineCurve, Geom_Curve
+from OCC.Geom2d import Geom2d_BSplineCurve, Geom2d_Curve
+
 from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
+from OCC.GeomAdaptor import GeomAdaptor_Curve
 from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection,GCPnts_UniformDeflection, GCPnts_TangentialDeflection, GCPnts_QuasiUniformAbscissa
 from OCC.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve, Geom2dAPI_ProjectPointOnCurve, Geom2dAPI_PointsToBSpline
 from OCC.Geom2d import Handle_Geom2d_BSplineCurve_DownCast, Geom2d_Line
-from OCC.GeomAPI import GeomAPI_Interpolate
+from OCC.GeomAPI import GeomAPI_Interpolate, GeomAPI_ProjectPointOnCurve, GeomAPI_IntCS
 #Own Libraries:
 from SONATA.cbm.topo.utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_to_npArray, \
                     discrete_stepsize, curvature_of_curve, isclose, unique_rows, \
-                    P2Pdistance, PolygonArea, TColgp_Array1OfPnt2d_from_nparray, TColgp_HArray1OfPnt_from_nparray
+                    P2Pdistance, PolygonArea, TColgp_Array1OfPnt2d_from_nparray, TColgp_HArray1OfPnt_from_nparray, fuse_rows
 
 from SONATA.cbm.topo.para_Geom2d_BsplineCurve import Para_Geom2d_BSplineCurve
 
@@ -109,9 +113,44 @@ def distance_on_BSplineLst(BSplineLst,para1,para2):
 
     return Distance		
 
+#Obsolete
+#def isPnt_on_2dcurve(Pnt2d,Curve2d,tolerance=1e-6):
+#    projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,Curve2d)
+#    Trigger = False
+#    for i in range(1,projection.NbPoints()+1):
+#        if projection.Distance(i) <= tolerance:
+#            Trigger = True
+#        else:
+#            None           
+#    return Trigger
 
-def isPnt_on_2dcurve(Pnt2d,Curve2d,tolerance=1e-6):
-    projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,Curve2d)
+
+def isPnt_on_curve(Pnt, Curve, tolerance=1e-6):
+    """
+    checks if a point (either gp_Pnt or gp_Pnt2d) is on a curve (subclass of 
+    Geom2d_Curve or Geom_Curve) by projecting the Point orthogonal on to the 
+    curve and checing ifthe distance is below a tolerance tol.
+    
+    Parameter
+    ---------
+    Pnt : OCC.gp_Pnt or OCC.gp_Pnt2d
+    Curve : OCC.Geom_Curve or OCC.Geom_Curve Handle
+    tolerance : float, optional
+        default tolerance 1e-6
+        
+    Return
+    --------
+    Trigger : bool    
+    """
+    if isinstance(Pnt, gp_Pnt2d) and issubclass(Curve.GetObject().__class__,Geom2d_Curve):
+        twoD = True
+    elif  isinstance(Pnt, gp_Pnt) and issubclass(Curve.GetObject().__class__,Geom_Curve):
+        twoD = False
+    
+    if twoD:
+        projection = Geom2dAPI_ProjectPointOnCurve(Pnt, Curve)
+    else:
+        projection = GeomAPI_ProjectPointOnCurve(Pnt, Curve)
     Trigger = False
     for i in range(1,projection.NbPoints()+1):
         if projection.Distance(i) <= tolerance:
@@ -121,23 +160,57 @@ def isPnt_on_2dcurve(Pnt2d,Curve2d,tolerance=1e-6):
     return Trigger
 
 
-def isPnt_on_BSplineLst(Pnt2d,BSplineLst,tolerance=1e-6):
+def isPnt_on_BSplineLst(Pnt, BSplineLst, tolerance=1e-6):
+    """
+    checks if a point (either gp_Pnt or gp_Pnt2d) is on a BSplineLst (list of 
+    either OCC.Geom_BSplineCurve or OCC.Geom2d_BSplineCurve) by projecting the 
+    Point orthogonal on to the curve and checing if the distance is below a 
+    tolerance tol. Using the fucntion 
+    'SONATA.cbm.topo.BSplineLst_utils.isPnt_on_curve'.
+    
+    Parameter
+    ---------
+    Pnt : OCC.gp_Pnt or OCC.gp_Pnt2d
+    BSplineLst : list
+         list of either OCC.Geom_BSplineCurve or OCC.Geom2d_BSplineCurve
+    tolerance : float, optional
+        default tolerance 1e-6
+    
+    Return
+    --------
+    Bool : bool    
+    """
     Bool = False
     for item in BSplineLst:
-        if isPnt_on_2dcurve(Pnt2d,item.GetHandle(),tolerance):
+        if isPnt_on_curve(Pnt,item.GetHandle(),tolerance):
             Bool = True
             break
     return Bool
 
-def findPnt_on_2dcurve(Pnt2d,Curve2d):
-    projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,Curve2d)
+# OBSOLETE
+#def findPnt_on_2dcurve(Pnt2d,Curve2d):
+#    projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,Curve2d)
+#    u = projection.LowerDistanceParameter()
+#    return u
+
+def findPnt_on_curve(Pnt,Curve):
+    if isinstance(Pnt, gp_Pnt2d) and issubclass(Curve.GetObject().__class__,Geom2d_Curve):
+        twoD = True
+    elif  isinstance(Pnt, gp_Pnt) and issubclass(Curve.GetObject().__class__,Geom_Curve):
+        twoD = False
+        
+    if twoD:
+        projection = Geom2dAPI_ProjectPointOnCurve(Pnt,Curve)
+    else:
+        projection = GeomAPI_ProjectPointOnCurve(Pnt,Curve)
     u = projection.LowerDistanceParameter()
     return u
     
-def findPnt_on_BSplineLst(Pnt2d,BSplineLst):
+
+def findPnt_on_BSplineLst(Pnt, BSplineLst):
     for i,item in enumerate(BSplineLst):
-        if isPnt_on_2dcurve(Pnt2d,item.GetHandle()):
-            u = findPnt_on_2dcurve(Pnt2d,item.GetHandle())
+        if isPnt_on_curve(Pnt,item.GetHandle()):
+            u = findPnt_on_curve(Pnt,item.GetHandle())
             coordinates = [i,u]
             break
         else:
@@ -146,10 +219,23 @@ def findPnt_on_BSplineLst(Pnt2d,BSplineLst):
 
     
 def get_BSpline_length(BSpline):
+    """
+    Returns the Length of the BSpline
+    """
+    if isinstance(BSpline,Geom_BSplineCurve):
+        twoD = False
+    elif isinstance(BSpline,Geom2d_BSplineCurve):
+        twoD = True
+        
     tolerance=1e-10
     first = BSpline.FirstParameter()
     last = BSpline.LastParameter()
-    Adaptor = Geom2dAdaptor_Curve(BSpline.GetHandle())
+    
+    if twoD:
+        Adaptor = Geom2dAdaptor_Curve(BSpline.GetHandle())
+    else: 
+        Adaptor = GeomAdaptor_Curve(BSpline.GetHandle())
+    
     Length = GCPnts_AbscissaPoint().Length(Adaptor, first, last, tolerance)
     return Length
 
@@ -167,7 +253,10 @@ def copy_BSplineLst(BSplineLst):
     
     
 def get_BSplineLst_length(BSplineLst):
-    #Return the cummulated length of the BSplineLst
+    """
+    Returns the cummulated length of the BSplineLst
+    """
+    
     CummLength = 0
     for i,item in enumerate(BSplineLst):
          CummLength += get_BSpline_length(item)
@@ -203,19 +292,32 @@ def find_BSpline_coordinate(BSpline,s):
              u = tmp.Parameter()
     return u                            
 
+
 def find_BSplineLst_coordinate(BSplineLst, S, start, end):
     '''The function find_BSplineLst_coordinate returns the list index of 
     the bspline and its parameter where the coordinate is located.
     
-    Args:
-        S: (float) Coordinate to be found 
-        start: (float) start of the interval where the BSplineLst is defined
-        end: (float) end of the interval where the BSplineLst is defined
-        
-    Returns: 
-        [i,U]: #Return [index of the bspline,parameter U on the bspline]
+    Parameters
+    ----------
+    S : float
+        Coordinate to be found 
+    start : float
+        start of the interval where the BSplineLst is defined
+    end : float
+        end of the interval where the BSplineLst is defined
+    
+    Returns
+    ----------
+    [i,U]: list
+        Return [index of the bspline, parameter U on the bspline]
         
     '''
+    
+    if all(isinstance(s,Geom_BSplineCurve) for s in BSplineLst):
+        twoD = False
+    elif all(isinstance(s,Geom2d_BSplineCurve) for s in BSplineLst):
+        twoD = True
+        
     BSplineLstLength = get_BSplineLst_length(BSplineLst)
     x = BSplineLstLength*(S-start)/(end-start)
     CummLength = 0
@@ -224,7 +326,12 @@ def find_BSplineLst_coordinate(BSplineLst, S, start, end):
     for i,item in enumerate(BSplineLst):
         first = item.FirstParameter()
         last = item.LastParameter()
-        Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
+        
+        if twoD:
+            Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
+        else:
+            Adaptor = GeomAdaptor_Curve(item.GetHandle())
+        
         CummLength += get_BSpline_length(item)
         if x < CummLength or isclose(x,CummLength):
              dist = x - (CummLength - GCPnts_AbscissaPoint().Length(Adaptor, first, last, tolerance))
@@ -233,6 +340,7 @@ def find_BSplineLst_coordinate(BSplineLst, S, start, end):
              break
     #print 'idx: '+ str(i) + '     U: '+ str(U) 
     return [i,U]
+
 
 def find_BSplineLst_pos(BSplineLst,para):
     idx = para[0]
@@ -270,23 +378,33 @@ def get_BSplineLst_Pnt2d(BSplineLst,S,start,end):
     BSplineLst[idx].D0(U,P)
     return P
 
-def get_BSplineLst_D2(BSplineLst,S, start, end):
+def get_BSplineLst_D2(BSplineLst,S, start, end, **kwargs):
     if start>end: #transfrom the interval if start>end to a basic interval [0..]
         D = 1-start
         S = (S+D)%1
         end = (end+D)%1
         start = (start+D)%1 
     
-    P = gp_Pnt2d()
-    V1 = gp_Vec2d()
-    V2 = gp_Vec2d()
-    [idx,U] = find_BSplineLst_coordinate(BSplineLst,S, start, end)
+    if all(isinstance(s,Geom_BSplineCurve) for s in BSplineLst):
+        twoD = False
+    elif all(isinstance(s,Geom2d_BSplineCurve) for s in BSplineLst):
+        twoD = True
+    
+    if twoD:
+        P = gp_Pnt2d()
+        V1 = gp_Vec2d()
+        V2 = gp_Vec2d()
+    else:
+        P = gp_Pnt()
+        V1 = gp_Vec()
+        V2 = gp_Vec()
+    
+    [idx,U] = find_BSplineLst_coordinate(BSplineLst,S, start, end, **kwargs)
     BSplineLst[idx].D2(U,P,V1,V2)
     return P,V1,V2
 
     
-def intersect_BSplineLst_with_BSpline(BSplineLst,BSpline):
-    tolerance=1e-10
+def intersect_BSplineLst_with_BSpline(BSplineLst, BSpline, tolerance=1e-10):
     IntPnts = []
     IntPnts_Pnt2d = []
     for i,item in enumerate(BSplineLst): 
@@ -294,10 +412,43 @@ def intersect_BSplineLst_with_BSpline(BSplineLst,BSpline):
         for j in range(1,intersection.NbPoints()+1):
                 IntPnt = intersection.Point(j)
                 IntPnts_Pnt2d.append(IntPnt)
-                u = findPnt_on_2dcurve(IntPnt,item.GetHandle())
+                u = findPnt_on_curve(IntPnt,item.GetHandle())
                 IntPnts.append([i,u])
     return IntPnts, IntPnts_Pnt2d
 
+def intersect_BSplineLst_with_plane(BSplineLst, plane):
+    """
+    intersects a 3D-BSplineLst (OCC.Geom_BSplineCurve) with a plane (Handle<Geom_Surface>) and returns the
+    a list of intersection coordinates and the corresponding list of 
+    intersection points
+    
+    Paramters
+    ---------
+    BSplineLst : list
+         list of OCC.Geom_BSplineCurve
+    plane : <Geom_Surface>
+         Plane or surface - Geom_Surface, Geom_Plane is a subclass of Geom_Surface
+    
+    Return
+    --------
+    IntCoords : list
+        list of intersection coordinates
+        [index of the bspline, parameter U on the bspline]
+    IntPnts : list 
+        list of intersection points (OCC.gp_Pnt)
+    """
+    #plane = Geom_Plane(gp_Pnt(float(x),0,0), gp_Dir(1,0,0))
+    IntCoords = []
+    IntPnts = []
+    for i,item in enumerate(BSplineLst): 
+        intersection = GeomAPI_IntCS(item.GetHandle(), plane.GetHandle())
+        for j in range(1,intersection.NbPoints()+1):
+            IntPnt = intersection.Point(j)
+            IntPnts.append(IntPnt)
+            u = findPnt_on_curve(IntPnt,item.GetHandle())
+            IntCoords.append([i,u])
+
+    return IntCoords, IntPnts
     
 
 def BSplineLst_Orientation(BSplineLst, NbPoints=31):   
@@ -488,7 +639,7 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
     return trimmed_BSplineLst		
 
 
-def trim_BSplineLst_by_coordinates(BSplineLst, para1,para2):
+def trim_BSplineLst_by_coordinates(BSplineLst, para1, para2):
     trimmed_BSplineLst = []
 #    para1 =  find_BSplineLst_coordinate(BSplineLst, S1, start, end)
 #    para2 =  find_BSplineLst_coordinate(BSplineLst, S2, start, end)
@@ -686,7 +837,57 @@ def discretize_BSplineLst(BSplineLst, Deflection = 2e-4, AngularDeflection=0.02,
         npArray = np.vstack((npArray,b[0]))
     else: None
     #print len(npArray)
+    
+    
+#    #new Interpolate Large spaces!
+#    refine = True
+#    Resolution = 1000
+#    seg_P2Plength = []
+#    cumm_length = 0
+#    data = npArray
+#    
+#    for j in range(0,len(data)-1):
+#        seg_P2Plength.append(P2Pdistance(data[j],data[j+1]))
+#        cumm_length += P2Pdistance(data[j],data[j+1]) 
+#        
+#    #Check if Refinement is necessary:
+#    if len(seg_P2Plength) > 0 and max(seg_P2Plength) > cumm_length/Resolution :
+#        Refinement = True
+#    else:
+#        Refinement = False
+#    
+#    
+#    while Refinement == True:
+#        print(Refinement)
+#        
+#        temp_data = []
+#        for i in range(0,len(data)-1):
+#            if P2Pdistance(data[i],data[i+1]) > (cumm_length/Resolution):
+#                p0 = data[i]
+#                p1 = data[i+1]  
+#                v1 = p1-p0
+#                p05 = p0+v1/2
+#                temp_data.append(p0)
+#                temp_data.append(p05)
+#            else:
+#                temp_data.append(data[i])
+#                
+#        temp_data.append(data[-1])        
+#        data = np.vstack(temp_data)        
+#         
+#        #Check if further Refinement is necessary
+#        seg_P2Plength = []
+#        cumm_length = 0
+#        for j in range(0,len(data)-1):
+#            seg_P2Plength.append(P2Pdistance(data[j],data[j+1]))
+#            cumm_length += P2Pdistance(data[j],data[j+1]) 
+#         
+#        if max(seg_P2Plength) > cumm_length/Resolution:
+#            Refinement = True
+#        else:
+#            Refinement = False 
     return npArray
+#return data
              
     
 def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_interp = 1e-6, twoD = True):
@@ -694,9 +895,8 @@ def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_inter
     if closed and not np.allclose(DCT_data[0],DCT_data[-1]):
         print('INFO:\t Closing open discrete definition')
         DCT_data = np.concatenate((DCT_data,DCT_data[0:1,:]),axis=0)   
-    
-    
-    #TODP: check all datapoints and merge if allclose is true 
+
+    DCT_data = fuse_rows(DCT_data, 1e-6) #check all datapoints and merge if allclose is true 
     
     #Find corners and edges of data
     #print(DCT_data)
@@ -765,13 +965,13 @@ def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_inter
                 tmp_interpolation = GeomAPI_Interpolate(tmp_harray.GetHandle(), False, tol_interp)
         except: 
             print('ERROR: BSplineLst_from_dct did not perform the Interpolation with tol_interp', tol_interp)#RAISED ERROR
-#            plt.figure()
-#            plt.clf()
-#            plt.axis('equal')  
-#            plt.plot(*item.T, marker='.')
-#            for i, it in enumerate(item):
-#                plt.annotate(i, (it[0],it[1]), color='black')   
-#            plt.show()                   
+            plt.figure()
+            plt.clf()
+            plt.axis('equal')  
+            plt.plot(*item.T, marker='.')
+            for i, it in enumerate(item):
+                plt.annotate(i, (it[0],it[1]), color='black')   
+            plt.show()                   
                    
         tmp_interpolation.Perform()                              
         tmp_bspline = tmp_interpolation.Curve().GetObject()
@@ -784,7 +984,8 @@ def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_inter
     
 def set_BSplineLst_to_Origin(BSplineLst, Theta=0):
     '''
-    The Origin is determined by the most right Intersection Point of the X-Axis with the segment boundary, the axis is rotated backwards by Theta (in degree). 
+    The Origin is determined by the most right Intersection Point of the X-Axis
+    with the segment boundary, the axis is rotated backwards by Theta (in degree). 
     '''
     
     Theta=Theta/float(180)*np.pi
@@ -806,7 +1007,7 @@ def set_BSplineLst_to_Origin(BSplineLst, Theta=0):
                 v1 = gp_Vec2d(OPnt,IntPnt) 
                 vres = v0.Dot(v1)
                 #distance = IntPnt.Distance(OPnt)
-                u = findPnt_on_2dcurve(IntPnt,item.GetHandle())
+                u = findPnt_on_curve(IntPnt,item.GetHandle())
                 IntPnts.append([i,u,vres])
                 
     #Determine Origin as point                 
@@ -858,7 +1059,78 @@ def set_BSplineLst_to_Origin(BSplineLst, Theta=0):
 
 
 
+def set_BSplineLst_to_Origin2(BSplineLst, gp_Pnt2d, tol = 1e-3):
+    """
+    this procedure reorders the self.BSplineLst to and origin if the layer 
+    is closed. The Origin is detected by searching for an orthogonal 
+    projection of the StartPoint of the self.Boundary_BSplineLst. If no 
+    projection is found it takes the closest neighbor of the discrete 
+    offlinepts (Offset Line Points).
+            
+    """
+    #print(BSplineLst, gp_Pnt2d)
+    #Determine Origin as point     
+    if BSplineLst[0].StartPoint().IsEqual(BSplineLst[-1].EndPoint(),1e-5)  :
+        proj = ProjectPointOnBSplineLst(BSplineLst,gp_Pnt2d,tol)
+        
+        if len(proj)>0:
+            OriPnt = proj[0]
+        elif len(proj) == 0:            
+            print('WARNING : No Projection found to produce origin!')
+     
+    else:
+        print('ERRROR: Only apply set_BSplineLst_to_Origin2 function when BSplineLst is Closed!')
+                     
+    #Reorder Sequence of BSplines of BSplinesLst
+    OriPara = findPnt_on_BSplineLst(OriPnt,BSplineLst)
+    OBSplineLst =  []
+    CorrectOrigin = False
+              
+    for i,item in enumerate(BSplineLst):     
+        if i  == OriPara[0]:
+            First = item.FirstParameter() 
+            Last =  item.LastParameter()
+            
+            if isclose(OriPara[1],First) == True:
+                OBSplineLst.append(item)
+                CorrectOrigin = True
+            
+            elif isclose(OriPara[1],Last) == True:
+                CorrectOrigin = False
+                BSplineCurve2 = item
+            
+            else: 
+                CorrectOrigin = False
+                BSplineCurve1 = copy_BSpline(item)
+                BSplineCurve1.Segment(OriPara[1],Last)
+                BSplineCurve2 = copy_BSpline(item)
+                BSplineCurve2.Segment(First,OriPara[1])
+                OBSplineLst.append(BSplineCurve1)
+   
+        elif i > OriPara[0]:
+            OBSplineLst.append(item)
+        else:
+            None
 
+    for i,item in enumerate(BSplineLst):
+        if i < OriPara[0]:
+            OBSplineLst.append(item)
+        else:
+            None
+            
+    if CorrectOrigin == False:
+        OBSplineLst.append(BSplineCurve2)    
+    else: None
+
+    BSplineLst = OBSplineLst
+    
+    return BSplineLst
+    
+    
+    
+    
+    
+    
 
 
 if __name__ == '__main__':
