@@ -159,13 +159,22 @@ class Layer(object):
             
     
     def build_layer(self,l0 = 1):
-        npArray = discretize_BSplineLst(self.Boundary_BSplineLst, 1e-6*l0) 
+        npArray = discretize_BSplineLst(self.Boundary_BSplineLst, 1e-6*l0)
+        #plt.plot(*npArray.T, '.-')     
         self.offlinepts = shp_parallel_offset(npArray,self.thickness,self.join_style)
-        OffsetBSplineLst = BSplineLst_from_dct(self.offlinepts, angular_deflection=30, tol_interp = 1e-8*l0)
+        #plt.plot(*self.offlinepts.T, 'x-')     
+        OffsetBSplineLst = BSplineLst_from_dct(self.offlinepts, angular_deflection=15, tol_interp = 1e-8*l0)
         OffsetBSplineLst = cutoff_layer(self.Boundary_BSplineLst,OffsetBSplineLst,self.S1,self.S2,self.cutoff_style)
         self.BSplineLst = OffsetBSplineLst
          
+
         
+        
+        
+        
+        
+        
+    
     def determine_a_nodes(self,SegmentLst,global_minLen,display=None):
         ''' '''
         unmeshed_ids = []
@@ -227,8 +236,8 @@ class Layer(object):
         self.a_nodes = merge_nodes_if_too_close(self.a_nodes,self.a_BSplineLst,global_minLen,0.01)
         
         
-    def mesh_layer(self, SegmentLst, global_minLen, proj_tol_1=8e-2, 
-                   proj_tol_2= 3e-1, crit_angle_1 = 110, alpha_crit_2 = 60, 
+    def mesh_layer(self, SegmentLst, global_minLen, proj_tol_1=9e-2, 
+                   proj_tol_2= 4e-1, crit_angle_1 = 110, alpha_crit_2 = 60, 
                    growing_factor=1.8, shrinking_factor=0.01, display=None, l0=None):
         '''
         The mesh layer function discretizes the layer, which is composed of a 
@@ -240,27 +249,30 @@ class Layer(object):
         second_stage_improvements) try to imporve the quality of the mesh. 
         everything is stored in the layer.cells and is returned
         
-        Args:
-            SegmentLst:               The overall list of Segments within the 
-                                    segemet. This list is needed to determine
-                                    the a_nodes
-            global_minLen:          
-            proj_tol_1 = 5e-2:      tolerance value to determine a distance, 
-                                    in which the resulting projection point 
-                                    has to be. 
-                                    (mesh_by_projecting_nodes_on_BSplineLst)
-            proj_tol_2 = 2e-1:      tolerance value to determine a distance, 
-                                    in which the resulting projection point 
-                                    has to be. (modify_sharp_corners)
-            crit_angle_1 = 115:     is the critical angle to determine a corner 
-                                    if 2 projection points are found.    
-            alpha_crit_2 = 60:      is the critical angle to refine  a corner 
-            growing_factor = 1.8:   critical growing factor of cell before 
-                                    splitting 
-            shrinking_factor = 0.10:  critical shrinking factor for cells 
-                                    before merging nodes
-            
-        returns: self.cells: (list of cells) 
+        Parameters
+        --------
+        SegmentLst:               The overall list of Segments within the 
+                                segemet. This list is needed to determine
+                                the a_nodes
+        global_minLen:          
+        proj_tol_1 = 5e-2:      tolerance value to determine a distance, 
+                                in which the resulting projection point 
+                                has to be. 
+                                (mesh_by_projecting_nodes_on_BSplineLst)
+        proj_tol_2 = 2e-1:      tolerance value to determine a distance, 
+                                in which the resulting projection point 
+                                has to be. (modify_sharp_corners)
+        crit_angle_1 = 115:     is the critical angle to determine a corner 
+                                if 2 projection points are found.    
+        alpha_crit_2 = 60:      is the critical angle to refine  a corner 
+        growing_factor = 1.8:   critical growing factor of cell before 
+                                splitting 
+        shrinking_factor = 0.10:  critical shrinking factor for cells 
+                                before merging nodes
+        
+        Returns
+        -------
+        self.cells: (list of cells) 
         '''
         self.determine_a_nodes(SegmentLst,global_minLen,display)
         self.a_nodes, self.b_nodes, self.cells = mesh_by_projecting_nodes_on_BSplineLst(self.a_BSplineLst,self.a_nodes,self.b_BSplineLst,self.thickness, proj_tol_1, crit_angle_1, LayerID = self.ID, refL = l0, display=display) 
@@ -287,7 +299,7 @@ class Layer(object):
         """
         this procedure reorders the self.BSplineLst to and origin if the layer 
         is closed. The Origin is detected by searching for an orthogonal 
-        projection of the StartPoint of the self.Boundary_BSplineLst. It no 
+        projection of the StartPoint of the self.Boundary_BSplineLst. If no 
         projection is found it takes the closest neighbor of the discrete 
         offlinepts (Offset Line Points).
                 

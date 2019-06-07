@@ -19,7 +19,7 @@ from OCC.gp import gp_Pnt2d,gp_Lin2d, gp_Dir2d,gp_Dir,gp_Pnt,gp_Pln,gp_Vec, gp_V
 from OCC.Geom2d import Geom2d_Line
 from OCC.Geom2dAPI import Geom2dAPI_InterCurveCurve
 
-from SONATA.cbm.topo.BSplineLst_utils import findPnt_on_2dcurve
+from SONATA.cbm.topo.BSplineLst_utils import findPnt_on_curve
 from SONATA.cbm.mesh.mesh_utils import remove_duplicates_from_list_preserving_order
 
 def map_node_on_curve(node,Curve2d,theta_11,distance=1e5,**kwargs):
@@ -188,7 +188,7 @@ def map_mesh_by_intersect_curve2d(mesh,curve2d,wire,global_minLen,**kwargs):
     uLst = []
     mapped_nodes = list(set(mapped_nodes))
     for n in mapped_nodes:
-        uLst.append(findPnt_on_2dcurve(n.Pnt2d,curve2d.GetHandle()))        
+        uLst.append(findPnt_on_curve(n.Pnt2d,curve2d.GetHandle()))        
     mapped_nodes = [x for y, x in sorted(zip(uLst, mapped_nodes))]
     
     

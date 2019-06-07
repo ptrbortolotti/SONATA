@@ -123,7 +123,6 @@ def EdgeLst_to_Wire(EdgeLst):
 #            filter_orientation_seq.append(i)
 #    EdgeLst = filter_orientation_seq
     
- 
     pool = EdgeLst
     wire = BRepBuilderAPI_MakeWire()
     idx_pool = []
@@ -140,6 +139,7 @@ def EdgeLst_to_Wire(EdgeLst):
         #Build Wire according to order_sheme
         for i,item in enumerate(order_sheme):
             wire.Add(pool[item])
+            #print('test')
          
         #Find the next element that fits to the temporary wire
         remaining_idx_pool = list(idx_pool)
@@ -149,9 +149,12 @@ def EdgeLst_to_Wire(EdgeLst):
         tmp_wire = wire
         for idx in remaining_idx_pool: #BRepBuilderAPI_DisconnectedWire: The last edge which you attempted to add was not connected to the wire.
             tmp_wire.Add(pool[idx])
+            #print(tmp_wire.Error())
             if tmp_wire.Error() == 2:
-                None
+                pass
+                #print('BRepBuilderAPI_DisconnectedWire')
             else:
+                #print(tmp_wire.Error())
                 order_sheme.append(idx)
                 break
             tmp_wire = wire    
@@ -245,13 +248,25 @@ def stp2d_to_wire(TopoDS_Shape):
     return wire
     
     
-
 def stp3d_to_wire(TopoDS_Shape, R):
     #Define the Point and direction of the slicing plane
     Dir = gp_Dir(1., 0., 0.) 
     Pnt = gp_Pnt(R,0,0)
     Pln = gp_Pln(Pnt, Dir)
-    face = BRepBuilderAPI_MakeFace(Pln).Shape()
+    
+    wire = intersect_shape_pln(TopoDS_Shape, Pln)
+    return wire
+
+def intersect_shape_pln(TopoDS_Shape, pln):
+    
+    """
+    
+    
+    TODO
+    --------
+    check old edgeLst_to_wire function ordering scheme that remains in infinity loop! ->Recheck!!!
+    """
+    face = BRepBuilderAPI_MakeFace(pln).Shape()
 
     section = BRepAlgoAPI_Section(TopoDS_Shape, face)   # Computes Shape/Plane intersection
     section.ComputePCurveOn1(True)
@@ -271,15 +286,20 @@ def stp3d_to_wire(TopoDS_Shape, R):
         #display.DisplayShape(edge)
         ex.Next()
     
-     
-    Wire = EdgeLst_to_Wire(EdgeLst)
+    #print(EdgeLst)
+    Wire = EdgeLst_to_Wire(EdgeLst)    #old ordering scheme that remains in infinity loop! ->Recheck!!!
+#    tmp = BRepBuilderAPI_MakeWire()
+#    for e in EdgeLst: #BRepBuilderAPI_DisconnectedWire: The last edge which you attempted to add was not connected to the wire.
+#        tmp.Add(e)
+#    wire = tmp.Build()
     
     #DISPLAY SECTIONING PLANE
     #display_face = BRepBuilderAPI_MakeFace(Pln,- 100., 100., -120., 120).Shape()
     #display.DisplayShape(display_face, color="BLACK", transparency=0.8, update=True)
     return Wire
-   
     
+
+
 
 def import_2d_stp(fname, scale_factor=1, Theta=0):
     '''
