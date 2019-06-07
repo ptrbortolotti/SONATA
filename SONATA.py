@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+pass#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 SONATA: Multidiciplinary Rotor Blade Design Environment for Structural 
@@ -17,18 +17,19 @@ Please Use the following Docstring styleguide:
 https://numpydoc.readthedocs.io/en/latest/format.html
 
 """
+
 import yaml
 import numpy as np
 from jsonschema import validate
 import matplotlib.pyplot as plt
-
 from SONATA.classBlade import Blade
 from SONATA.classAirfoil import Airfoil
 from SONATA.classMaterial import read_IEA37_materials
 
-
-#with open('./jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
-with open('./jobs/validation/boxbeam_config.yml', 'r') as myfile:
+plt.close('all')
+with open('./jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
+#with open('./jobs/validation/boxbeam_config.yml', 'r') as myfile:
+#with open('./jobs/VariSpeed/UH-60A_adv.yml', 'r') as myfile:
     inputs  = myfile.read()
 yml = yaml.load(inputs)
 
@@ -36,17 +37,18 @@ airfoils = [Airfoil(af) for af in yml.get('airfoils')]
 materials = read_IEA37_materials(yml.get('materials'))
 
 job = Blade(name='IEAonshoreWT')
-job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=False)
+job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=True)
 
-job.blade_gen_section(mesh_flag = True, split_quads=True)
-job.blade_run_vabs()
+job.blade_gen_section(mesh_flag = True, split_quads=False)
+#job.blade_run_vabs()
 #job.blade_run_anbax()
 
-#job.blade_plot_sections()
-#job.blade_post_3dtopo(flag_lft = True, flag_topo = True, flag_mesh = True)
+job.blade_plot_sections()
+#job.blade_post_3dtopo(flag_lft = True, flag_topo = True, flag_mesh = False)
 #anba = job.blade_exp_beam_props(solver='anbax')
-vabs = job.blade_exp_beam_props(solver='vabs')
+#vabs = job.blade_exp_beam_props(solver='vabs')
 #anba_loc = job.blade_exp_beam_props(solver='anbax', cosy='local')
-vabs_loc = job.blade_exp_beam_props(solver='vabs', cosy='local')
+#vabs_loc = job.blade_exp_beam_props(solver='vabs', cosy='local', )
+#job.blade_plot_beam_props()
 
-job.blade_plot_beam_props(ref = vabs_loc)
+#beam = job.blade_exp_beam_props(solver='vabs', cosy='local', eta_offset=0.1491807)

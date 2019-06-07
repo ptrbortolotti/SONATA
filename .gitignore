@@ -50,8 +50,10 @@ license
 
 #ignored folders
 #jobs/PBortolotti
+jobs/FBerghammer
 jobs/AAbdelmoula
 jobs/EPiet
+jobs/validation
 jobs/debug
 jobs/JBlaut
 jobs/MSmialy
