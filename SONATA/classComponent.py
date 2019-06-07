@@ -22,10 +22,10 @@ class Component(object):
         
     """
 
-    __slots__ = ('name', 'cosy')    
+    __slots__ = ('name', 'Ax2')    
     def __init__(self, *args, **kwargs):
         self.name = kwargs.get('name')
-        self.cosy = gp_Ax2(*args)
+        self.Ax2 = gp_Ax2(*args)
         #self.units = {'mass': 'g', 'length': 'mm', 'force' : 'N'}
         #TODO: How to define Units in the global SONATA context
         
