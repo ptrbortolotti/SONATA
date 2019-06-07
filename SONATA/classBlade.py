@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+ #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Wed Dec 19 09:38:19 2018
@@ -14,7 +14,8 @@ from jsonschema import validate
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 
-from OCC.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1
+from OCC.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1, gp_Vec, gp_Ax3, gp_Pln, gp_Trsf, gp_Pnt2d
+from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
 from OCC.Display.SimpleGui import init_display
 
 if __name__ == '__main__':
@@ -29,16 +30,21 @@ from SONATA.cbm.classCBMConfig import CBMConfig
 
 from SONATA.vabs.classVABSConfig import VABSConfig
 
-from SONATA.utl.blade_utl import interp_airfoil_position, make_loft, interp_loads
+from SONATA.utl.trsf import trsf_blfr_to_cbm, trsf_cbm_to_blfr
+from SONATA.utl.blade_utl import interp_airfoil_position, make_loft, interp_loads, check_uniformity, array_pln_intersect
 from SONATA.utl.plot import plot_beam_properties
 from SONATA.utl.converter import iea37_converter
-from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire
-
+from SONATA.utl.interpBSplineLst import interpBSplineLst
+from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire, discretize_wire, get_wire_length, equidistant_Points_on_wire
+from SONATA.cbm.fileIO.CADinput import intersect_shape_pln
+from SONATA.cbm.topo.BSplineLst_utils import BSplineLst_from_dct, get_BSplineLst_D2, set_BSplineLst_to_Origin, set_BSplineLst_to_Origin2
+from SONATA.cbm.topo.utils import PntLst_to_npArray, lin_pln_intersect, Array_to_PntLst
 from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
                                         export_to_SVG, export_to_PS, export_to_EnhPS, \
                                         export_to_TEX, export_to_BMP,export_to_TIFF, \
                                         show_coordinate_system, display_SONATA_SegmentLst,\
-                                        display_custome_shape, transform_wire_2to3d, display_config
+                                        display_custome_shape, transform_wire_2to3d, display_config, \
+                                        display_Ax2, display_cbm_SegmentLst
 
 class Blade(Component):
     """
@@ -117,10 +123,12 @@ class Blade(Component):
 
     """ 
     
-    __slots__ = ('coordinates', 'chord', 'twist','curvature', 'pitch_axis', 'airfoils',  \
-                 'sections', 'beam_properties', 'f_chord', 'f_twist', 'f_coordinates_x',  \
-                 'f_coordinates_y', 'f_coordinates_z', 'f_pa', \
-                 'f_curvature','display', 'start_display', 'add_menu', 'add_function_to_menu', 'anba_beam_properties')
+    __slots__ = ('blade_ref_axis', 'chord', 'twist','curvature', 'pitch_axis', 'airfoils',  \
+                 'sections', 'beam_properties', 'beam_ref_axis', \
+                 'f_chord', 'f_twist', \
+                 'blade_ref_axis_BSplineLst', 'f_blade_ref_axis',
+                 'beam_ref_axis_BSplineLst', 'f_beam_ref_axis', 
+                 'f_pa', 'f_curvature_k1','display', 'start_display', 'add_menu', 'add_function_to_menu', 'anba_beam_properties')
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
@@ -131,8 +139,143 @@ class Blade(Component):
 #        string reputation of an object, """
 #        return 'Blade: '+ str(self.name)
     
+    def _read_ref_axes(self, yml_ra):
+        """
+        
+        """
+        tmp_ra = {} 
+        tmp_ra['x'] = np.asarray((yml_ra.get('x').get('grid'),yml_ra.get('x').get('values'))).T
+        tmp_ra['y'] = np.asarray((yml_ra.get('y').get('grid'),yml_ra.get('y').get('values'))).T
+        tmp_ra['z'] = np.asarray((yml_ra.get('z').get('grid'),yml_ra.get('z').get('values'))).T
+        
+        f_ref_axis_x = interp1d(tmp_ra['x'][:,0], tmp_ra['x'][:,1], bounds_error=False, fill_value='extrapolate')
+        f_ref_axis_y = interp1d(tmp_ra['y'][:,0], tmp_ra['y'][:,1], bounds_error=False, fill_value='extrapolate')
+        f_ref_axis_z = interp1d(tmp_ra['z'][:,0], tmp_ra['z'][:,1], bounds_error=False, fill_value='extrapolate')
+        
+        x_blra = np.unique(np.sort(np.hstack((tmp_ra['x'][:,0], tmp_ra['y'][:,0], tmp_ra['z'][:,0]))))
+        tmp_ra = np.vstack((x_blra, f_ref_axis_x(x_blra), f_ref_axis_y(x_blra), f_ref_axis_z(x_blra))).T
+        
+        if check_uniformity(tmp_ra[:,0],tmp_ra[:,1]) == False:
+            print('WARNING:\t The blade beference axis is not uniformly defined along x')            
+       
+        #print(tmp_ra[:,1:])
+        BSplineLst = BSplineLst_from_dct(tmp_ra[:,1:], angular_deflection=5, twoD = False)
+        f_ra = interpBSplineLst(BSplineLst,  tmp_ra[:,0], tmp_ra[:,1])
+        return (BSplineLst, f_ra, tmp_ra)
     
-    def read_IEA37(self, yml, airfoils, materials, stations = [], npts = 11, wt_flag=False):
+    
+    def _get_local_Ax2(self, x):
+        """
+        
+        """
+        #interpolate blade_ref_axis
+        res, resCoords = self.f_beam_ref_axis.interpolate(x)
+        #print(res)
+        p = gp_Pnt()
+        vx = gp_Vec()
+        v2 = gp_Vec()
+        
+        #determine local the local cbm coordinate system Ax2
+        self.beam_ref_axis_BSplineLst[int(resCoords[0,0])].D2(resCoords[0,1],p,vx,v2)
+        vz = gp_Vec(vx.Z(),0,vx.X()).Normalized()
+        tmp_Ax2 = gp_Ax2(p, gp_Dir(vz), gp_Dir(vx))
+        local_Ax2 = tmp_Ax2.Rotated(gp_Ax1(p,gp_Dir(vx)),float(self.f_twist(x)))
+        return local_Ax2
+    
+    
+    def _interpolate_cbm_boundary(self, x, fs=1.1):
+        """
+        interpolates a cbm boundary BSplineLst from the blade definition at a 
+        certain grid station. Following the procedure: 
+        Determine all important neighboring airfoil positions
+        discretize all airfoils equidistantly with the same number of Points. 
+        Use these Points to performe a plane_line_intersection with the local 
+        coordinate system Ax2. Find the correct intersection and extrapolate if
+        necessary over the blade boundaries.
+        Transfer the points to the local cbm frame and performe a BSpline 
+        interpolation.        
+
+        Parameters
+        -------
+        x : float
+            nondimensional grid location
+        
+        Returns
+        -------
+        BoundaryBSplineLst : BSplineLst
+            of the Boundary for the CBM Crosssection in the cbm frame
+
+        ToDo
+        -------
+        - Use equidistant_Points_on_BSplineLst instead of equidistant_Points_on_wire 
+            to capture corners
+            
+        """
+        ax2 = self._get_local_Ax2(x)       
+        
+        a=float(self.f_chord(x)) * float(self.f_pa(x))
+        b=float(self.f_chord(x)) * (1-float(self.f_pa(x)))
+        beta = self.Ax2.Angle(self._get_local_Ax2(x))
+        x0 = x - (np.sin(beta)*a*fs/self.f_blade_ref_axis.interpolate(1.0)[0][0,0])
+        x1 = x + (np.sin(beta)*b*fs/self.f_blade_ref_axis.interpolate(1.0)[0][0,0])
+                
+        #select all airfoil in the interval between x0 < x1 and their closest neigors
+        idx0 = np.searchsorted(self.airfoils[:,0], x0, side='left')-1
+        idx1 = np.searchsorted(self.airfoils[:,0], x1, side='right')
+        
+        if idx0<0:
+            idx0 = 0
+        
+        afs = self.airfoils[idx0:idx1+1]
+        
+        #transform airfoils from nondimensional coordinates to coordinates
+        afs = self.airfoils[idx0:idx1+1]
+        wireframe = []
+        tes = []
+        for item in afs:
+            xi = item[0]
+            af = item[1]
+            (wire, te_pnt) = af.transform_to_bladerefframe(self.f_blade_ref_axis.interpolate(xi)[0][0], float(self.f_pa(xi)), float(self.f_chord(xi)), float(self.f_twist(xi)))
+            wireframe.append(wire)
+            tes.append(te_pnt)
+        
+        nPoints = 3000
+        if len(wireframe) > 1:
+            tmp = []
+            for w in wireframe:
+                PntLst = equidistant_Points_on_wire(w,nPoints)
+                tmp.append(PntLst_to_npArray(PntLst))
+            array = np.asarray(tmp)
+            #tes = np.asarray([tes]
+            te_array = np.expand_dims(PntLst_to_npArray(tes), axis=1)
+            result = array_pln_intersect(array, ax2)
+            te_res = array_pln_intersect(te_array, ax2)
+
+        else:
+            w = wireframe[0]
+            PntLst = equidistant_Points_on_wire(w,nPoints)
+            result = PntLst_to_npArray(PntLst)
+            te_res = PntLst_to_npArray(tes)
+            
+        trsf = trsf_blfr_to_cbm(self.Ax2, ax2)
+        
+#        plt.plot(*result[:,1:].T)
+#        plt.plot(*te_res[:,1:].T,'s')
+
+        PntLst = Array_to_PntLst(result)
+        te_pnt = Array_to_PntLst(te_res)[0]
+        PntLst = [p.Transformed(trsf) for p in PntLst]
+        te_pnt = te_pnt.Transformed(trsf)
+        
+        array = PntLst_to_npArray(PntLst)
+        array = np.flipud(array) 
+        BSplineLst = BSplineLst_from_dct(array[:,0:2], angular_deflection = 15, tol_interp=1e-6)
+
+        BoundaryBSplineLst = set_BSplineLst_to_Origin2(BSplineLst, gp_Pnt2d(te_pnt.Coord()[0],te_pnt.Coord()[1]))
+        return BoundaryBSplineLst
+        
+    
+    def read_IEA37(self, yml, airfoils, materials, stations=None, npts = 11, wt_flag=False):
         """
         reads the IEA Wind Task 37 style Blade dictionary 
         generates the blade matrix and airfoil to represent all given 
@@ -146,58 +289,50 @@ class Blade(Component):
         airfoils : list
             Is the database of airfoils
         
-        
         """
         self.name = yml.get('name')
         print('STATUS:\t Reading IAE37 Definition for Blade: %s' % (self.name))
-        #Read information from DataDictionary
-
-        tmp_coords = {}
-
-        tmp_coords['x'] = np.asarray((yml.get('outer_shape_bem').get('reference_axis').get('x').get('grid'),yml.get('outer_shape_bem').get('reference_axis').get('x').get('values'))).T
-        tmp_coords['y'] = np.asarray((yml.get('outer_shape_bem').get('reference_axis').get('y').get('grid'),yml.get('outer_shape_bem').get('reference_axis').get('y').get('values'))).T
-        tmp_coords['z'] = np.asarray((yml.get('outer_shape_bem').get('reference_axis').get('z').get('grid'),yml.get('outer_shape_bem').get('reference_axis').get('z').get('values'))).T
-        tmp_tw = np.asarray((yml.get('outer_shape_bem').get('twist').get('grid'),yml.get('outer_shape_bem').get('twist').get('values'))).T
-        tmp_chord = np.asarray((yml.get('outer_shape_bem').get('chord').get('grid'),yml.get('outer_shape_bem').get('chord').get('values'))).T
-        tmp_pa = np.asarray((yml.get('outer_shape_bem').get('pitch_axis').get('grid'),yml.get('outer_shape_bem').get('pitch_axis').get('values'))).T
-        airfoil_position = (yml.get('outer_shape_bem').get('airfoil_position').get('grid'),yml.get('outer_shape_bem').get('airfoil_position').get('labels'))
         
-        #Generate Blade Matrix 
+        #Read blade & beam reference axis and create BSplineLst & interpolation instance
+        (self.blade_ref_axis_BSplineLst, self.f_blade_ref_axis, tmp_blra) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'))
+        (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('beam_reference_axis'))
+        
+        #Read chord, twist and nondim. pitch axis location and create interpolation
+        tmp_chord = np.asarray((yml.get('outer_shape_bem').get('chord').get('grid'),yml.get('outer_shape_bem').get('chord').get('values'))).T
+        tmp_tw = np.asarray((yml.get('outer_shape_bem').get('twist').get('grid'),yml.get('outer_shape_bem').get('twist').get('values'))).T
+        tmp_pa = np.asarray((yml.get('outer_shape_bem').get('pitch_axis').get('grid'),yml.get('outer_shape_bem').get('pitch_axis').get('values'))).T
+        
+        self.f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1], bounds_error=False, fill_value='extrapolate')
+        self.f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
+        self.f_pa = interp1d(tmp_pa[:,0], tmp_pa[:,1], bounds_error=False, fill_value='extrapolate')
+        
+        #Read chord, twist and nondim. pitch axis location and create interpolation
+        airfoil_position = (yml.get('outer_shape_bem').get('airfoil_position').get('grid'),yml.get('outer_shape_bem').get('airfoil_position').get('labels'))
         tmp = []
         for an in airfoil_position[1]: 
             tmp.append(next((x for x in airfoils if x.name == an), None).id)
         arr = np.asarray([airfoil_position[0],tmp]).T
             
-        self.f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1], bounds_error=False, fill_value='extrapolate')
-        self.f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
-        self.f_coordinates_x = interp1d(tmp_coords['x'][:,0], tmp_coords['x'][:,1], bounds_error=False, fill_value='extrapolate')
-        self.f_coordinates_y = interp1d(tmp_coords['y'][:,0], tmp_coords['y'][:,1], bounds_error=False, fill_value='extrapolate')
-        self.f_coordinates_z = interp1d(tmp_coords['z'][:,0], tmp_coords['z'][:,1], bounds_error=False, fill_value='extrapolate')
-        self.f_pa = interp1d(tmp_pa[:,0], tmp_pa[:,1], bounds_error=False, fill_value='extrapolate')
-        
+        #Read CBM Positions
         if wt_flag:
-            if stations == []:
-                cs_pos = np.linspace(0.0, 1.0, npts)
-            else:
+            if stations: 
                 cs_pos = stations
+            else:
+                cs_pos = np.linspace(0.0, 1.0, npts)
         else:
             cs_pos = np.asarray([cs.get('position') for cs in yml.get('internal_structure_2d_fem').get('sections')])
             
-        x = np.unique(np.sort(np.hstack((tmp_chord[:,0], tmp_tw[:,0], tmp_coords['x'][:,0], tmp_coords['y'][:,0], tmp_coords['z'][:,0], tmp_pa[:,0], arr[:,0], cs_pos))))
-        
-        blade_matrix = np.transpose(np.unique(np.array([x, self.f_coordinates_x(x), self.f_coordinates_y(x), self.f_coordinates_z(x), self.f_chord(x), self.f_twist(x), self.f_pa(x)]), axis=1))
+        x = np.unique(np.sort(np.hstack((tmp_chord[:,0], tmp_tw[:,0], \
+                                         tmp_blra[:,0], tmp_bera[:,0], \
+                                         tmp_pa[:,0], arr[:,0], cs_pos))))
+
         self.airfoils = np.asarray([[x, interp_airfoil_position(airfoil_position, airfoils, x)] for x in x])
-        self.coordinates = blade_matrix[:,0:4]
-        self.chord = blade_matrix[:,[0,4]]
-        self.twist = blade_matrix[:,[0,5]]
-        self.pitch_axis = blade_matrix[:,[0,6]]
-        
-        #Calculate initial twist rate and curvature and strore in curvature array (grid, k1, k2 k3) and create interpolation function
-        tmp_k1 = np.gradient(self.twist[:,1], self.coordinates[:,1])
-        tmp_k2 = np.gradient(self.coordinates[:,2], self.coordinates[:,1])
-        tmp_k3 = np.gradient(self.coordinates[:,3], self.coordinates[:,1])
-        self.curvature = np.vstack((self.coordinates[:,0], tmp_k1, tmp_k2, tmp_k3)).T
-        self.f_curvature = interp1d(self.curvature[:,0], self.curvature[:,1:], axis=0)
+        self.blade_ref_axis = np.hstack((np.expand_dims(x, axis=1),self.f_blade_ref_axis.interpolate(x)[0]))
+        self.beam_ref_axis =  np.hstack((np.expand_dims(x, axis=1),self.f_beam_ref_axis.interpolate(x)[0]))
+        self.chord = np.vstack((x, self.f_chord(x))).T
+        self.twist = np.vstack((x, self.f_twist(x))).T
+        self.pitch_axis = np.vstack((x, self.f_pa(x))).T
+        self.f_curvature_k1 = interp1d(x, np.gradient(self.twist[:,1],self.beam_ref_axis[:,1]))
         
         #Generate CBMConfigs
         if wt_flag:
@@ -210,27 +345,26 @@ class Blade(Component):
         #Generate CBMs
         tmp = []
         for x, cfg in cbmconfigs:
-            bm = np.array([x, self.f_coordinates_x(x), self.f_coordinates_y(x), self.f_coordinates_z(x), self.f_chord(x), self.f_twist(x), self.f_pa(x)])
-            af = interp_airfoil_position(airfoil_position, airfoils, x)
-            tmp.append([x, CBM(cfg, materials = materials, blade_matrix = bm, airfoil=af)])
+            #get local beam coordinate system, and local cbm_boundary
+            tmp_Ax2 = self._get_local_Ax2(x)
+            tmp_blra = self.f_beam_ref_axis.interpolate(x)[0][0]    
+            BoundaryBSplineLst = self._interpolate_cbm_boundary(x)
+            tmp.append([x, CBM(cfg, materials = materials, Ax2 = tmp_Ax2, BSplineLst = BoundaryBSplineLst)])
         self.sections = np.asarray(tmp)
-        
 
-        
         return None
-    
     
     @property
     def blade_matrix(self):
         """ getter method for the property blade_matrix to retrive the full
         information set of the class in one reduced array"""
-        return np.column_stack((self.coordinates, self.chord[:,1], self.twist[:,1], self.pitch_axis[:,1]))
+        return np.column_stack((self.blade_ref_axis, self.chord[:,1], self.twist[:,1], self.pitch_axis[:,1]))
 
     @property
     def x(self):
         """ getter method for the property grid to retrive only the 
         nondimensional grid values """
-        return self.coordinates[:,0]
+        return self.blade_ref_axis[:,0]
 
     def blade_gen_section(self, topo_flag=True, mesh_flag=True, **kwargs):
         """
@@ -269,9 +403,11 @@ class Blade(Component):
         ToDo
         ----------
             To model initially curved and twisted beams, curve flag is 1, and three real numbers for the
-            twist (k1) and curvatures (k2 and k3) should be provided in the vabs config!!!!
+            twist (k1) and curvatures (k2 and k3) should be provided in the vabs config
+            Be Careful to define the curvature measures in the local Ax2 frame!
         
         """
+        
         vc = VABSConfig()
         lst = []
         for (x, cs) in self.sections:
@@ -283,11 +419,10 @@ class Blade(Component):
             
             #set initial twist and curvature
             vc.curve_flag = 1
-            vc.k1 = self.f_curvature(x)[0]
-            vc.k2 = self.f_curvature(x)[1]
-            vc.k3 = self.f_curvature(x)[2]
-            
+            vc.k1 = float(self.f_curvature_k1(x))
+            (vc.k2, vc.k3) = self.f_beam_ref_axis.interpolate_curvature(x)
             cs.config.vabs_cfg = vc
+            
             print('STATUS:\t Running VABS at grid location %s' % (x))
             cs.cbm_run_vabs(**kwargs)
             lst.append([x, cs.BeamProperties])
@@ -331,7 +466,7 @@ class Blade(Component):
         
         
      
-    def blade_exp_beam_props(self, cosy='global', style='DYMORE', eta_offset=0, solver='vabs', filename = None):
+    def blade_exp_beam_props(self, cosy='local', style='DYMORE', eta_offset=0, solver='vabs', filename = None):
         """
         Exports the beam_properties in the 
         
@@ -367,30 +502,25 @@ class Blade(Component):
         arr : ndarray
             an array that reprensents the beam properties for the 
         """
-        Theta = 0
+
         lst = []
         for cs in self.sections:
-            #consider the local coordinate system rotational angle in rad    
-            if cosy=='local':
-                Theta = float(self.f_twist(cs[0])) 
-                        
             #collect data for each section
+            eta = -eta_offset/(1-eta_offset) + (1/(1-eta_offset))*cs[0]
             if style=='DYMORE':
-                lst.append(cs[1].cbm_exp_dymore_beamprops(eta=cs[0], Theta=Theta, solver=solver))
+                lst.append(cs[1].cbm_exp_dymore_beamprops(eta=eta, solver=solver))
     
             elif style == 'BeamDyn':
-                pass
-            
+                lst.append(cs[1].cbm_exp_BeamDyn_beamprops(eta=eta, solver=solver))
+                
             elif style == 'CAMRADII':
                 pass
             
             elif style == 'CPLambda':
                 pass    
-                #lst.append()
                         
         arr = np.asarray(lst)
         
-
         return arr
         
        
@@ -404,13 +534,13 @@ class Blade(Component):
         fig.suptitle(self.name, fontsize=16)
         fig.subplots_adjust(wspace=0.25, hspace=0.25)
         
-        ax[0][0].plot(self.coordinates[:,0], self.coordinates[:,1], 'k.-')
+        ax[0][0].plot(self.blade_ref_axis[:,0], self.blade_ref_axis[:,1], 'k.-')
         ax[0][0].set_ylabel('x-coordinate [m]')
         
-        ax[1][0].plot(self.coordinates[:,0], self.coordinates[:,2], 'k.-')
+        ax[1][0].plot(self.blade_ref_axis[:,0], self.blade_ref_axis[:,2], 'k.-')
         ax[1][0].set_ylabel('y-coordinate [m]')
         
-        ax[2][0].plot(self.coordinates[:,0], self.coordinates[:,3], 'k.-')
+        ax[2][0].plot(self.blade_ref_axis[:,0], self.blade_ref_axis[:,3], 'k.-')
         ax[2][0].set_ylabel('z-coordinate [m]')
         
         ax[0][1].plot(self.chord[:,0], self.chord[:,1], 'k.-')
@@ -461,35 +591,40 @@ class Blade(Component):
         
         wireframe : list
             list of every airfoil_wire scaled and rotated at every grid point
+            
+            
+        ToDo
+        ----------
+
         """
-        (self.display, self.start_display, self.add_menu, self.add_function_to_menu) = display_config(cs_size = 0.3)
+        (self.display, self.start_display, self.add_menu, self.add_function_to_menu) = display_config(cs_size = 2, DeviationAngle = 1e-5, DeviationCoefficient = 1e-5)
         
         if flag_wf:
             wireframe = []
+            
+            #visualize blade and beam reference axis
+            for s in self.blade_ref_axis_BSplineLst:
+                self.display.DisplayShape(s, color='RED')
+            
+            for s in self.beam_ref_axis_BSplineLst:
+                self.display.DisplayShape(s, color='GREEN')
+            
+            #airfoil wireframe
             for bm, afl in zip(self.blade_matrix, self.airfoils[:,1]):
-                if afl.wire == None:
-                    afl.gen_OCCtopo()
-                wire = afl.wire
-                
-                wire = rotate_wire(wire, gp_Ax1(gp_Pnt(bm[6],0,0), gp_Dir(0,0,1)), -bm[5], copy=True)
-                wire = translate_wire(wire, gp_Pnt(bm[6],0,0), gp_Pnt(0,0,0))
-                wire = scale_wire(wire, gp_Pnt(0,0,0), bm[4])
-                
-                wire = rotate_wire(wire, gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,0,1)), -np.pi/2)
-                wire = rotate_wire(wire, gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,1,0)), -np.pi/2)
-                wire = translate_wire(wire, gp_Pnt(0,0,0), gp_Pnt(bm[1],bm[2],bm[3]))
-                
+                (wire, te_pnt) = afl.transform_to_bladerefframe(bm[1:4], bm[6], bm[4], bm[5])
                 wireframe.append(wire)
                 self.display.DisplayShape(wire, color='BLACK')
-            
+                #self.display.DisplayShape(te_pnt, color='WHITE', transparency=0.7)
+                
         if flag_lft:
             loft = make_loft(wireframe, ruled=True, tolerance=1e-3, continuity=1, check_compatibility=True)
             self.display.DisplayShape(loft, transparency=0.5, update=True)
         
         if flag_topo:
             for (x,cs) in self.sections:
-                coord = self.f_coordinates_x(x), self.f_coordinates_y(x), self.f_coordinates_z(x)
-                display_SONATA_SegmentLst(self.display, cs.SegmentLst, coord, -np.pi/2, -np.pi/2)
+                #display sections
+                display_Ax2(self.display, cs.Ax2)
+                display_cbm_SegmentLst(self.display, cs.SegmentLst, self.Ax2, cs.Ax2)
                 
         self.display.View_Iso()
         self.display.FitAll()
@@ -497,11 +632,11 @@ class Blade(Component):
         return None         
 
 
-#%% ====== M A I N ==============
+# ====== M A I N ==============
 if __name__ == '__main__':
     plt.close('all')
     
-    #%% ====== WindTurbine ============== 
+    #% ====== WindTurbine ============== 
     with open('./jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
         inputs  = myfile.read()
     with open('jobs/PBortolotti/IEAontology_schema.yaml', 'r') as myfile:
@@ -515,34 +650,7 @@ if __name__ == '__main__':
     job = Blade(name='IEAonshoreWT')
     job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=True)
 
-    job.blade_gen_section(mesh_flag = True)
-    job.blade_run_vabs()
-    job.blade_plot_sections()
-
-    job.blade_post_3dtopo(flag_lft = False, flag_topo = True)
-
-#   %% ====== Helicopter ============== 
-#    #with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as f:
-#    with open('jobs/VHeuschneider/blade_config.yml', 'r') as f:
-#         yml = yaml.load(f.read())
-#        
-#    airfoils = [Airfoil(af) for af in yml.get('airfoils')]
-#    materials = read_IEA37_materials(yml.get('materials'))
-#    
-#    job = Blade()
-#    job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=False)     
-#    job.blade_gen_section()
-#    
-#    loads = {}
-#    loads['F'] = np.array([[0.3, 88500, 0, 0],
-#                          [1.0, 0, 0, 0]])
-#    loads['M'] = np.array([[0.3, -12, 640, -150],
-#                          [1.0, 0, 0, 0]])
-#    
-#    job.blade_run_vabs(loads)  
-#    job.blade_plot_sections(attribute='stressM.sigma11')
-#    job.blade_plot_sections(attribute='sf', vmin=0, vmax=3)
-#    job.beam_properties[0,1].MpUS
-#    #job.blade_post_3dtopo(flag_lft = True, flag_topo = True)
-#    print((job.sections[0,1].BeamProperties.Xm2/0.130)*100, '%')
-#    #job.blade_plot_sections(attribute='sf', vmin=0, vmax=3)
+    #job.blade_gen_section(mesh_flag = True)
+    #job.blade_run_vabs()
+    #job.blade_plot_sections()
+    #job.blade_post_3dtopo(flag_lft = False, flag_topo = True)

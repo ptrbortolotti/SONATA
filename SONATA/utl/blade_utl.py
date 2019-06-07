@@ -12,6 +12,7 @@ from scipy.interpolate import interp1d
 from OCC.TopoDS import TopoDS_Wire,  TopoDS_Vertex
 from OCC.BRepOffsetAPI import BRepOffsetAPI_ThruSections
 
+from SONATA.cbm.topo.utils import PntLst_to_npArray, lin_pln_intersect, Array_to_PntLst
 
 
 def interp_loads(loads, grid_loc):
@@ -129,4 +130,80 @@ def make_loft(elements, ruled=False, tolerance=1e-6, continuity=4, check_compati
     loft = sections.Shape()
     
     return loft
+    
+
+def check_uniformity(grid,values, tol=1e-6):
+    """
+    Checks the uniformity of the values along the grid by calculating the 
+    gradient and checking if it's constant with respect to a giving tolererance
+    
+    Parameters
+    ----------
+    grid : array
+    values : array
+    tol : float, optional
+    
+    Returns
+    ----------
+    bool
+    """
+    grad = np.gradient(values,grid)
+    mean = np.mean(grad)
+    return all(mean-tol<x<mean+tol for x in grad)
+
+
+
+def array_pln_intersect(array, ax2):
+    """
+    intersects an array of connecting points with the yz plane of the 
+    ax2 coordinate system.
+    
+    Parameters:
+        ax2 : gp_Ax2
+            right handed coordinate system
+        array : 
+    
+    """
+    factors = []
+    coords = []
+    for i in range(len(array)-1):
+        coord = []
+        factor = []
+        for p1,p2 in zip(array[i], array[i+1]):
+            #print(p1,p2)
+            pnt,lmb = lin_pln_intersect(ax2.XDirection().Coord(), ax2.Location().Coord(), p1, p2)
+            coord.append(pnt)
+            factor.append(lmb)
+        coords.append(np.asarray(coord))
+        factors.append(np.asarray(factor))
+
+    # ==== extrapolate ===
+    coords = np.asarray(coords)
+    factors = np.asarray(factors)
+    
+    result = []
+    #iterate first over points j and than over airfoils i
+    for j,lmbs in enumerate(factors.swapaxes(0,1)):
+        found = False
+        for i,l in enumerate(lmbs):
+            if 0<=l<=1:
+                #print(i,j,l,res2[i,j])
+                result.append(coords[i,j])
+                found = True
+                break
+
+        if found == False:
+            #print(j, lmbs, lmbs[-1]>0,lmbs[0]<0)
+            #try last
+            if lmbs[-1]>0:
+                i = len(lmbs)-1
+                result.append(coords[i,j])
+            #try first
+            elif lmbs[0]<0:
+                i = 0
+                result.append(coords[i,j])
+            else:
+                result.append(np.array([np.nan,np.nan,np.nan]))
+                
+    return np.asarray(result)
     
