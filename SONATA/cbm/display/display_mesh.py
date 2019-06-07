@@ -47,7 +47,7 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
     data_name : string
     
     """
-    
+    #print(data_name, max(data))
     alpha = 0.7
     if 'cmap' in kw:
         cmap = plt.cm.get_cmap(kw['cmap'])
@@ -59,6 +59,15 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
         cmap_name, colors, N=6)
         #cmap.set_over(color='white')
         #cmap.set_under(color='k')
+        
+    elif data_name == 'MatID':
+        cmap = plt.cm.get_cmap()
+        # extract all colors from the .jet map
+        cmaplist = [cmap(i) for i in range(cmap.N)]
+        # force the first color entry to be grey
+        #cmaplist[0] = (.5, .5, .5, 1.0)
+        # create the new map
+        cmap = LinearSegmentedColormap.from_list('Custom cmap', cmaplist, max(data))
         
     else:
         cmap = plt.cm.get_cmap()
@@ -92,8 +101,14 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
     p.set_clim(vmin, vmax)
     ax.add_collection(p)
     
-    cbar = fig.colorbar(p, ax=ax)
-    cbar = cbar.ax.set_ylabel(data_name)
+    
+    cbar = fig.colorbar(p, ax=ax, drawedges=True)
+    cbar.ax.set_ylabel(data_name)
+    
+    if data_name == 'MatID':
+        cbar.set_ticks(np.linspace(1, max(data), max(data)))
+        cbar.set_ticklabels(np.linspace(1, max(data), max(data)))
+        p.set_clim(0.5, max(data)+0.5)
     
     if len(theta_11)==len(elements):
         for i,cent in enumerate(centroids):
@@ -106,9 +121,16 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
     plt.axis('equal')
     if title!=None:
         ax.set_title(title)
-    ax.set_xlabel('x [m]')
-    ax.set_ylabel('y [m]')
+    ax.set_xlabel(r'$x_2$ in m')
+    ax.set_ylabel(r'$x_3$ in m')
     
+    #plot coordinate system.
+    cslength=0.015
+    ax.arrow(0, 0, cslength, 0, color='lime')
+    ax.arrow(0, 0, 0, cslength, color='deepskyblue')
+
+    ax.annotate(r'$x_2$', (cslength,0),fontsize=10, color = 'lime')
+    ax.annotate(r'$x_3$', (0,cslength),fontsize=10, color='deepskyblue')
     ##display element number
     if show_element_number == True:
         for i, item in enumerate(centroids):
