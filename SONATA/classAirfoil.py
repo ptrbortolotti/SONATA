@@ -14,19 +14,21 @@ from urllib.request import urlopen
 from collections import OrderedDict
 
 #PythonOCC Libraries
-from OCC.gp import gp_Pnt, gp_Vec,gp_Dir
+from OCC.gp import gp_Pnt, gp_Vec, gp_Dir, gp_Ax1, gp_Trsf
 from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire
 from OCC.GeomAPI import GeomAPI_Interpolate
 from OCC.Geom2dAPI import Geom2dAPI_Interpolate
 from OCC.Geom import Geom_BezierCurve, Geom_Plane
 from OCC.Display.SimpleGui import init_display
 
+
 #SONATA modules:
 if __name__ == '__main__':
     os.chdir('..')
 from SONATA.classPolar import Polar
 from SONATA.cbm.topo.utils import TColgp_HArray1OfPnt_from_nparray, point_list_to_TColgp_Array1OfPnt, PntLst_to_npArray, TColgp_HArray1OfPnt2d_from_nparray
-from SONATA.cbm.topo.BSplineLst_utils import BSplineLst_from_dct
+from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire, trsf_wire
+from SONATA.cbm.topo.BSplineLst_utils import BSplineLst_from_dct, copy_BSplineLst
 from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst, build_wire_from_BSplineLst2, get_wire_length, equidistant_Points_on_wire
 
 from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
@@ -92,6 +94,16 @@ class Airfoil(object):
         if isinstance(relative_thickness, numbers.Real) and relative_thickness>=0:
             self.relative_thickness = relative_thickness
 
+
+    @property
+    def te_coordinates(self):
+        """
+        returns the calculated trailing edge coordinates. Mean of the first and
+        the last coordinate point
+        """
+        te = np.mean(np.vstack((self.coordinates[0],self.coordinates[-1])),axis=0)
+        return te
+    
     def __repr__(self):
         """__repr__ is the built-in function used to compute the "official" 
         string reputation of an object, """
@@ -144,12 +156,104 @@ class Airfoil(object):
         """
         generates a Opencascade TopoDS_Wire and BSplineLst from the airfoil coordinates.
         This can be used for interpolation and surface generation
+        
+        
+        Returns
+        ---------
+        self.wire : TopoDS_Wire
+            wire of the airfoil
+        
         """
         data = np.hstack((self.coordinates,np.zeros((self.coordinates.shape[0],1))))
         self.BSplineLst = BSplineLst_from_dct(data, angular_deflection = 30, closed=True, tol_interp=1e-5, twoD = False)
         self.wire = build_wire_from_BSplineLst(self.BSplineLst, twoD=False)
         return self.wire
         
+    
+    def transform_to_bladerefframe(self, loc, pa_loc, chord, twist):
+        """
+        transforms the nondim. airfoil to the blade reference frame location
+        and pitch-axis information, scales it with chord information and rotates 
+        it with twist information
+        
+        Parameters
+        ----------
+        loc : array
+            [x,y,z] position in blade reference coordinates
+        pa_loc : float
+            nondim. pitch axis location
+        chord : float
+            chordlength
+        twist : float
+            twist angle about x in radians
+        
+        Retruns
+        ---------
+        wire : TopoDS_Wire
+        
+        """
+        Trsf = self._trsf_bladeref(loc, pa_loc, chord, twist)
+        
+        if self.wire == None or self.BSplineLst == None:
+            self.gen_OCCtopo()
+        
+        wire = trsf_wire(self.wire,Trsf)
+        tmp_pnt = gp_Pnt(self.te_coordinates[0], self.te_coordinates[1], 0)
+        te_pnt = tmp_pnt.Transformed(Trsf)
+#        print(self.BSplineLst)
+#        BSplineLst_tmp = copy_BSplineLst(self.BSplineLst)
+#        print(BSplineLst_tmp)
+#        [s.Transform(Trsf) for s in BSplineLst_tmp]
+        #print(BSplineLst)
+        return (wire, te_pnt)
+        
+
+    def _trsf_bladeref(self, loc, pa_loc, chord, twist):
+        """
+        Defines the transformation in 3D space to the blade reference frame location
+        and pitch-axis information, scales it with chord information and rotates 
+        it with twist information
+        
+        Parameters
+        ----------
+        loc : array
+            [x,y,z] position in blade reference coordinates
+        pa_loc : float
+            nondim. pitch axis location
+        chord : float
+            chordlength
+        twist : float
+            twist angle about x in radians
+        
+        Retruns
+        ---------
+        Trsf : OCC.gp_Trsf 
+            non-persistent transformation in 3D space.
+        
+        """
+        trsf_rot1 = gp_Trsf()
+        trsf_rot2 = gp_Trsf()
+        trsf_rot3 = gp_Trsf()
+        trsf_trans1 = gp_Trsf()
+        trsf_trans2 = gp_Trsf()
+        trsf_scale = gp_Trsf()
+        
+        trsf_rot1.SetRotation(gp_Ax1(gp_Pnt(pa_loc,0,0), gp_Dir(0,0,1)), -twist)
+        trsf_trans1.SetTranslation(gp_Pnt(pa_loc,0,0), gp_Pnt(0,0,0))
+        trsf_scale.SetScale(gp_Pnt(0,0,0), chord)
+        trsf_rot2.SetRotation(gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,0,1)), -np.pi/2)
+        trsf_rot3.SetRotation(gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,1,0)), -np.pi/2)
+        trsf_trans2.SetTranslation(gp_Pnt(0,0,0), gp_Pnt(loc[0],loc[1],loc[2]))
+    
+        Trsf = gp_Trsf()
+        Trsf.Multiply(trsf_trans2)
+        Trsf.Multiply(trsf_rot3)
+        Trsf.Multiply(trsf_rot2)
+        Trsf.Multiply(trsf_scale)
+        Trsf.Multiply(trsf_trans1)
+        Trsf.Multiply(trsf_rot1)
+        
+        return Trsf
     
     def transformed(self, airfoil2, k=0.5, n=500):
         """
