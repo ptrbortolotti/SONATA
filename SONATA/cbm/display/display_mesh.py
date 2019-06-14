@@ -34,7 +34,7 @@ def plot_nodes(nodes):
 
 
 def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProperties=None, 
-              show_element_number=False, show_node_number=False, **kw):
+              show_element_number=False, show_node_number=False, invert_xaxis = True, lfactor=0.5e-3, **kw):
     
     """
     To be continued...
@@ -112,10 +112,10 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
     
     if len(theta_11)==len(elements):
         for i,cent in enumerate(centroids):
-            lfactor=0.5
+            
             dx = lfactor*math.cos(math.radians(theta_11[i]))
             dy = lfactor*math.sin(math.radians(theta_11[i]))
-            ax.arrow(cent[0], cent[1], dx, dy, head_width=0.05, head_length=0.1, fc='k', ec='k') 
+            ax.arrow(cent[0], cent[1], dx, dy, width = 0.001e-3, head_width=0.05e-3, head_length=0.1e-3, fc='k', ec='k') 
         
     #ax.scatter(nodes[:,0],nodes[:,1],c='k',)
     plt.axis('equal')
@@ -172,8 +172,9 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
             #ax.annotate('SC', (VABSProperties.Xs2,VABSProperties.Xs3),fontsize=20)
             plt.legend(handles=[CG,GC,NA,SC])
 
-    
-
+    if invert_xaxis:
+        ax.invert_xaxis()
+        
     plt.show()
     return (fig,ax)
     
