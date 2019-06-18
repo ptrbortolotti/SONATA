@@ -43,7 +43,7 @@ class BSpline2dLst(list):
     def contains_Pnt2d(self,Pnt2d,tolerance=1e-6):
         Bool = False
         for item in self:
-            if isPnt_on_2dcurve(Pnt2d,item.GetHandle(),tolerance):
+            if isPnt_on_2dcurve(Pnt2d,item,tolerance):
                 Bool = True
                 break
         return Bool
@@ -51,8 +51,8 @@ class BSpline2dLst(list):
     
     def find_Pnt2d(self,Pnt2d):
         for i,item in enumerate(self):
-            if isPnt_on_2dcurve(Pnt2d,item.GetHandle()):
-                u = findPnt_on_2dcurve(Pnt2d,item.GetHandle())
+            if isPnt_on_2dcurve(Pnt2d,item):
+                u = findPnt_on_2dcurve(Pnt2d,item)
                 coordinates = (i,u)
                 break
             else:
@@ -66,7 +66,7 @@ class BSpline2dLst(list):
         '''
         poclst = []
         for idx,item in enumerate(self,):
-            poc = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item.GetHandle())
+            poc = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item)
             for j in range(1,poc.NbPoints()+1):
                 poclst.append((poc.NearestPoint(), idx, poc.LowerDistanceParameter(), poc.LowerDistance()))
         
@@ -90,7 +90,7 @@ class BSpline2dLst(list):
         
         Distance = 0
         for i,item in enumerate(self):
-            Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
+            Adaptor = Geom2dAdaptor_Curve(item)
             First = item.FirstParameter() 
             Last =  item.LastParameter() 
             if para1[0] == i and para2[0] != i:

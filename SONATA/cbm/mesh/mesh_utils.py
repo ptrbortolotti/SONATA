@@ -80,7 +80,7 @@ def equidistant_nodes_on_BSplineLst(BSplineLst, IC=False, IncStart=True, IncEnd=
         
         nodes = []
         for idx,item in enumerate(BSplineLst):
-            Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
+            Adaptor = Geom2dAdaptor_Curve(item)
             length = get_BSpline_length(item)
             if not math.isnan(length):
                 NbPoints = int(length//minLen)+2  
@@ -147,7 +147,7 @@ def move_node_on_BSplineLst(BSplineLst,node,dist,tol=1e-6):
     for j,BSpline in enumerate(itertools.cycle(RO_BSplineLst)):  #Infinitely Loop BSplineLst!
         first = BSpline.FirstParameter()
         last = BSpline.LastParameter()
-        Adaptor = Geom2dAdaptor_Curve(BSpline.GetHandle())
+        Adaptor = Geom2dAdaptor_Curve(BSpline)
         L = GCPnts_AbscissaPoint().Length(Adaptor, first, last, tol) 
         #Add new Spline to CRL
         if j==0:
@@ -236,7 +236,7 @@ def grab_nodes_on_BSplineLst(nodes, BSplineLst, tolerance=1e-5):
     disco_nodes = []    
     for n in nodes:
         for idx,item in enumerate(BSplineLst):
-            projection = Geom2dAPI_ProjectPointOnCurve(n.Pnt2d,item.GetHandle())
+            projection = Geom2dAPI_ProjectPointOnCurve(n.Pnt2d,item)
             for j in range(1,projection.NbPoints()+1):
                 if projection.Distance(j) <= tolerance:
                     n.parameters[1] = idx

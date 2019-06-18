@@ -41,8 +41,8 @@ def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
             Offset_StartPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S1,S1,S2)
             Offset_EndPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S2,S1,S2)
             
-            Start_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d[Org_StartPnt,Offset_StartPnt]).Curve().GetObject()
-            End_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([Offset_EndPnt,Org_EndPnt])).Curve().GetObject()
+            Start_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d[Org_StartPnt,Offset_StartPnt]).Curve()
+            End_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([Offset_EndPnt,Org_EndPnt])).Curve()
                        
         elif cutoff_style == 1: #LINEAR-CUTOFF
             #cutoff_depth = 1.05*dist
@@ -50,8 +50,8 @@ def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
             Offset_StartPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S1,S1,S2)
             Offset_EndPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst,S2,S1,S2)
             
-            Start_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([Org_StartPnt,Offset_StartPnt])).Curve().GetObject()
-            End_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([Offset_EndPnt,Org_EndPnt])).Curve().GetObject()
+            Start_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([Org_StartPnt,Offset_StartPnt])).Curve()
+            End_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([Offset_EndPnt,Org_EndPnt])).Curve()
         
         elif cutoff_style == 2: #ROUND-CUTOFF
             #cutoff_depth = 1.05*dist
@@ -75,8 +75,8 @@ def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
             Start_Bezier = Geom2d_BezierCurve(point2d_list_to_TColgp_Array1OfPnt2d(Start_Bezier_PntList))
             End_Bezier = Geom2d_BezierCurve(point2d_list_to_TColgp_Array1OfPnt2d(End_Bezier_PntList)) 
                     
-            Start_bspline = geom2dconvert_CurveToBSplineCurve(Start_Bezier.GetHandle()).GetObject()     
-            End_bspline = geom2dconvert_CurveToBSplineCurve(End_Bezier.GetHandle()).GetObject() 
+            Start_bspline = geom2dconvert_CurveToBSplineCurve(Start_Bezier)  
+            End_bspline = geom2dconvert_CurveToBSplineCurve(End_Bezier)
             
         elif cutoff_style == 3: #BEZIER-CUTOFF
             #cutoff_depth = 1.05*dist
@@ -104,8 +104,8 @@ def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
             Start_Bezier = Geom2d_BezierCurve(point2d_list_to_TColgp_Array1OfPnt2d(Start_Bezier_PntList))
             End_Bezier = Geom2d_BezierCurve(point2d_list_to_TColgp_Array1OfPnt2d(End_Bezier_PntList)) 
                     
-            Start_bspline = geom2dconvert_CurveToBSplineCurve(Start_Bezier.GetHandle()).GetObject()     
-            End_bspline = geom2dconvert_CurveToBSplineCurve(End_Bezier.GetHandle()).GetObject()    
+            Start_bspline = geom2dconvert_CurveToBSplineCurve(Start_Bezier)   
+            End_bspline = geom2dconvert_CurveToBSplineCurve(End_Bezier)  
             
 
         OffsetBSplineLst.insert(0,Start_bspline)

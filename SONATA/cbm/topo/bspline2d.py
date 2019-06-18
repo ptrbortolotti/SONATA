@@ -23,7 +23,7 @@ class BSpline2d(Geom2d_BSplineCurve):
     def getLength(self,tolerance = 1e-7):
         first = self.FirstParameter()
         last = self.LastParameter()
-        Adaptor = Geom2dAdaptor_Curve(self.GetHandle())
+        Adaptor = Geom2dAdaptor_Curve(self)
         length = GCPnts_AbscissaPoint().Length(Adaptor, first, last, tolerance)
         return length
   
@@ -33,6 +33,6 @@ if __name__ == '__main__':
    
     p1 = gp_Pnt2d(0,0)
     p2 = gp_Pnt2d(2,0)
-    tmp = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([p1,p2])).Curve().GetObject()
+    tmp = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([p1,p2])).Curve()
     test = BSpline2d(tmp)
     test.getLength()

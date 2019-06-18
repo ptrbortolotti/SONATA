@@ -82,7 +82,7 @@ if __name__ == '__main__':
     array.SetValue(3, gp_Pnt2d(2, 3))
     array.SetValue(4, gp_Pnt2d(4, 3))
     array.SetValue(5, gp_Pnt2d(5, 5))
-    bspline_1 = Geom2dAPI_PointsToBSpline(array).Curve().GetObject()
+    bspline_1 = Geom2dAPI_PointsToBSpline(array).Curve()
     
     
     ParType = 2
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     DegMax = 8
     Continuity = 4
     Tol2D = 1.0e-3 
-    bspline_2 = Geom2dAPI_PointsToBSpline(array,ParType,DegMin,DegMax,Continuity,Tol2D).Curve().GetObject()
+    bspline_2 = Geom2dAPI_PointsToBSpline(array,ParType,DegMin,DegMax,Continuity,Tol2D).Curve()
     
     
     # the second one
@@ -101,9 +101,9 @@ if __name__ == '__main__':
     harray.SetValue(4, gp_Pnt2d(4, 3))
     harray.SetValue(5, gp_Pnt2d(5, 5))
     
-    anInterpolation = Geom2dAPI_Interpolate(harray.GetHandle(), False, 0.01)
+    anInterpolation = Geom2dAPI_Interpolate(harray, False, 0.01)
     anInterpolation.Perform()
-    bspline_3 = anInterpolation.Curve().GetObject()
+    bspline_3 = anInterpolation.Curve()
     
     
     

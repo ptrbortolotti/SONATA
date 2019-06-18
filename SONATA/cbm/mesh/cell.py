@@ -196,8 +196,8 @@ class Cell(object):
         P_distances = []
 
         for i in range(0,len(self.nodes)-1):
-            spline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([self.nodes[i].Pnt2d, self.nodes[i+1].Pnt2d])).Curve().GetObject()
-            projection = Geom2dAPI_ProjectPointOnCurve(node.Pnt2d,spline.GetHandle())
+            spline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([self.nodes[i].Pnt2d, self.nodes[i+1].Pnt2d])).Curve()
+            projection = Geom2dAPI_ProjectPointOnCurve(node.Pnt2d,spline)
             
             for j in range(1,projection.NbPoints()+1):
                 P_distances.append(projection.Distance(j))
@@ -208,8 +208,8 @@ class Cell(object):
     def closest_cell_edge(self,node):
         P_distances = []
         for i in range(0,len(self.nodes)-1):
-            spline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([self.nodes[i].Pnt2d, self.nodes[i+1].Pnt2d])).Curve().GetObject()
-            projection = Geom2dAPI_ProjectPointOnCurve(node.Pnt2d,spline.GetHandle())
+            spline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([self.nodes[i].Pnt2d, self.nodes[i+1].Pnt2d])).Curve()
+            projection = Geom2dAPI_ProjectPointOnCurve(node.Pnt2d,spline)
             for j in range(1,projection.NbPoints()+1):
                 P_distances.append([projection.Distance(j),i])
         

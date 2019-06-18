@@ -31,7 +31,7 @@ def map_node_on_curve(node,Curve2d,theta_11,distance=1e5,**kwargs):
     #==================DIRECTION 1 ===============================
     Line1 = Geom2d_Line(gp_Lin2d(node.Pnt2d, gp_Dir2d(math.cos(math.radians(theta_11)),math.sin(math.radians(theta_11)))))
     #display.DisplayShape(Line1,color='BLACK')
-    Intersection1 = Geom2dAPI_InterCurveCurve(Curve2d.GetHandle(),Line1.GetHandle())
+    Intersection1 = Geom2dAPI_InterCurveCurve(Curve2d,Line1)
     dist=distance
     for i in range(1,Intersection1.NbPoints()+1):
         if node.Pnt2d.Distance(Intersection1.Point(i))<dist:
@@ -41,7 +41,7 @@ def map_node_on_curve(node,Curve2d,theta_11,distance=1e5,**kwargs):
     #===================DIRECTION 2 ===============================
     Line2 = Geom2d_Line(gp_Lin2d(node.Pnt2d, gp_Dir2d(-math.sin(math.radians(theta_11)),math.cos(math.radians(theta_11)))))
     #display.DisplayShape(Line2,color='WHITE')
-    Intersection2 = Geom2dAPI_InterCurveCurve(Curve2d.GetHandle(),Line2.GetHandle())
+    Intersection2 = Geom2dAPI_InterCurveCurve(Curve2d,Line2)
     dist=distance
     for i in range(1,Intersection2.NbPoints()+1):
         if node.Pnt2d.Distance(Intersection2.Point(i))<dist:
@@ -78,7 +78,7 @@ def map_mesh_by_intersect_curve2d(mesh,curve2d,wire,global_minLen,**kwargs):
     
     #Determine the interior nodes of Intersecting Cells
     #===================INTERIOR NODES of Intersecting Cells===================
-    Adaptor = Geom2dAdaptor_Curve(curve2d.GetHandle())
+    Adaptor = Geom2dAdaptor_Curve(curve2d)
     NbPoints = 60
     discretization = GCPnts_QuasiUniformAbscissa(Adaptor,NbPoints)
     shpPointLst2 = []    
@@ -188,7 +188,7 @@ def map_mesh_by_intersect_curve2d(mesh,curve2d,wire,global_minLen,**kwargs):
     uLst = []
     mapped_nodes = list(set(mapped_nodes))
     for n in mapped_nodes:
-        uLst.append(findPnt_on_curve(n.Pnt2d,curve2d.GetHandle()))        
+        uLst.append(findPnt_on_curve(n.Pnt2d,curve2d))        
     mapped_nodes = [x for y, x in sorted(zip(uLst, mapped_nodes))]
     
     

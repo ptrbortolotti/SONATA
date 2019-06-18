@@ -23,7 +23,7 @@ class Web(object):
         
         self.Pos1_Pnt2d = SegmentLst[0].get_Pnt2d(self.Pos1, SegmentLst)
         self.Pos2_Pnt2d = SegmentLst[0].get_Pnt2d(self.Pos2, SegmentLst)
-        self.BSplineLst = [Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([self.Pos1_Pnt2d,self.Pos2_Pnt2d])).Curve().GetObject()]
+        self.BSplineLst = [Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([self.Pos1_Pnt2d,self.Pos2_Pnt2d])).Curve()]
 
         self.wr_nodes =[] 
         self.wl_nodes = []

@@ -83,8 +83,8 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
             tol = 1e-7*refL
             Umin = first-(last-first)*tol
             Umax = last+(last-first)*tol
-            projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item.GetHandle(),Umin,Umax)
-            #projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item.GetHandle())
+            projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item,Umin,Umax)
+            #projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item)
             
             for j in range(1,projection.NbPoints()+1):
                 if projection.Distance(j)<=distance:
@@ -251,7 +251,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
                 v2.Normalize()
                 far_Pnt = node.Pnt2d.Translated(v2.Multiplied(10))
 
-                straigh_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([node.Pnt2d,far_Pnt])).Curve().GetObject()
+                straigh_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([node.Pnt2d,far_Pnt])).Curve()
                 (iPnts, iPnts_Pnt2d) = intersect_BSplineLst_with_BSpline(b_BSplineLst,straigh_bspline)
 
                 newPara = iPnts[0]
@@ -340,7 +340,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
             #===CORNERSTYLE 5====== 
             elif len(exterior_corners) > 2 and node.corner==True:
                 node.cornerstyle = 5
-                print('cornerstyles > 4 have not been implemented yet.')
+                print('WARNING: cornerstyle 5 has not been implemented yet.')
                 
 #                display.DisplayShape(pPnts[0], color='BLUE')
 #                display.DisplayShape(pPnts[1], color='RED')
@@ -354,6 +354,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
             #===CORNERSTYLE 6====== 
             elif len(exterior_corners) == 4 and node.corner==True:
                 node.cornerstyle = 6
+                print('WARNING: cornerstyle 6 has not been implemented yet.')
                 #TODO: 
                   #for p in exterior_corners:
                         #display.DisplayShape(p,color='RED')

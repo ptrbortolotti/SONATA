@@ -108,7 +108,7 @@ def projection_of_layers2(layup,begin,end,idx):
 #    for iv in t1:
 #        datalist.append(iv.data)
 #    nextlayer = max(datalist)+1
-    
+
     #Bring everything together
     for iv in t2: 
         if iv.data == True:
@@ -251,7 +251,7 @@ def sort_layup_projection(Projection):
             tmp = b
         #regular interval:  
         else:
-            splitter =  np.asscalar(np.where(b[:,0]==iv_boundaries[2])[0])
+            splitter =  (np.where(b[:,0]==iv_boundaries[2])[0]).item()
             c = [b[0:splitter,:],b[splitter::,:]]
             #print i,"Split:",b, '@:', splitter, '\n C:', c
             tmp = np.vstack((c[1],c[0]))

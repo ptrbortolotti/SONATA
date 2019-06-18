@@ -64,7 +64,7 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
                         pPara = []
                         pIdx = []
                         for idx,item in enumerate(b_BSplineLst):
-                            projection = Geom2dAPI_ProjectPointOnCurve(n.Pnt2d,item.GetHandle())
+                            projection = Geom2dAPI_ProjectPointOnCurve(n.Pnt2d,item)
                             for j in range(1,projection.NbPoints()+1):
                                 if projection.Distance(j)<=distance:
                                     if not any(item.IsEqual(projection.Point(j),1e-6) for item in pPnts):

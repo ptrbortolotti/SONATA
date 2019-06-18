@@ -239,7 +239,7 @@ class Blade(Component):
             wireframe.append(wire)
             tes.append(te_pnt)
         
-        nPoints = 3000
+        nPoints = 5000
         if len(wireframe) > 1:
             tmp = []
             for w in wireframe:
@@ -506,7 +506,9 @@ class Blade(Component):
         lst = []
         for cs in self.sections:
             #collect data for each section
+            R = self.blade_ref_axis[-1,1]
             eta = -eta_offset/(1-eta_offset) + (1/(1-eta_offset))*cs[0]
+            eta = (cs[0]*R)-(eta_offset*R)
             if style=='DYMORE':
                 lst.append(cs[1].cbm_exp_dymore_beamprops(eta=eta, solver=solver))
     
@@ -597,7 +599,7 @@ class Blade(Component):
         ----------
 
         """
-        (self.display, self.start_display, self.add_menu, self.add_function_to_menu) = display_config(cs_size = 2, DeviationAngle = 1e-5, DeviationCoefficient = 1e-5)
+        (self.display, self.start_display, self.add_menu, self.add_function_to_menu) = display_config(cs_size = 0.5, DeviationAngle = 1e-4, DeviationCoefficient = 1e-4)
         
         if flag_wf:
             wireframe = []
@@ -617,13 +619,14 @@ class Blade(Component):
                 #self.display.DisplayShape(te_pnt, color='WHITE', transparency=0.7)
                 
         if flag_lft:
-            loft = make_loft(wireframe, ruled=True, tolerance=1e-3, continuity=1, check_compatibility=True)
-            self.display.DisplayShape(loft, transparency=0.5, update=True)
+            for i in range(len(wireframe)-1):
+                loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-2, continuity=1, check_compatibility=True)
+                self.display.DisplayShape(loft, transparency=0.5, update=True)
         
         if flag_topo:
             for (x,cs) in self.sections:
                 #display sections
-                display_Ax2(self.display, cs.Ax2)
+                display_Ax2(self.display, cs.Ax2, length=0.2)
                 display_cbm_SegmentLst(self.display, cs.SegmentLst, self.Ax2, cs.Ax2)
                 
         self.display.View_Iso()

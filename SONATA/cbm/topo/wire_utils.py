@@ -29,11 +29,11 @@ def Unique_EdgeLst(EdgeLst):
     NonUniques = []
     for edg in EdgeLst:
         Adaptor = BRepAdaptor_Curve(edg)
-        BSplineLst3D.append(Adaptor.BSpline().GetObject())
+        BSplineLst3D.append(Adaptor.BSpline())
     
     for i,bspline in enumerate(BSplineLst3D):
         for j,item in enumerate(BSplineLst3D):
-            if bspline.IsEqual(item.GetHandle(),Preci) and i!=j:
+            if bspline.IsEqual(item,Preci) and i!=j:
                 NonUniques.append(j)
                 
     return NonUniques
@@ -272,28 +272,28 @@ def trim_wire(TopoDS_wire, S1, S2):
          Last =  Adaptor.LastParameter()
          #CummLength += GCPnts_AbscissaPoint().Length(Adaptor, tolerance)
          if para1[0] == idx and para2[0] != idx:
-             BSplineCurve = Adaptor.BSpline().GetObject()
+             BSplineCurve = Adaptor.BSpline()
              BSplineCurve.Segment(para1[1],Last,)
-             tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve.GetHandle())
+             tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve)
              #display.DisplayShape(tmp_edge.Edge(), color='CYAN') 
              twire.Add(tmp_edge.Edge())
              
          elif (para1[0] != idx and para2[0] != idx) and (para1[0] < idx and para2[0] > idx):
-             BSplineCurve = Adaptor.BSpline().GetObject()
-             tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve.GetHandle())
+             BSplineCurve = Adaptor.BSpline()
+             tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve)
              twire.Add(tmp_edge.Edge()) 
              
          elif para1[0] == idx and para2[0] == idx:
-             BSplineCurve = Adaptor.BSpline().GetObject()
+             BSplineCurve = Adaptor.BSpline()
              BSplineCurve.Segment(para1[1],para2[1])
-             tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve.GetHandle())
+             tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve)
              twire.Add(tmp_edge.Edge())
              break
     
          elif para1[0] != idx and para2[0] == idx:
-             BSplineCurve = Adaptor.BSpline().GetObject()
+             BSplineCurve = Adaptor.BSpline()
              BSplineCurve.Segment(First,para2[1])
-             tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve.GetHandle())
+             tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve)
              twire.Add(tmp_edge.Edge())
              break
          idx += 1
@@ -309,7 +309,7 @@ def build_wire_from_BSplineLst2(BSplineLst): #Builds TopoDS_Wire from connecting
         P = gp_Pnt(0,0,0)
         V = gp_Dir(gp_Vec(0,0,1))
         Plane = Geom_Plane(P, V)
-        tmp_edge = BRepBuilderAPI_MakeEdge(item.GetHandle(),Plane.GetHandle())
+        tmp_edge = BRepBuilderAPI_MakeEdge(item,Plane)
         #print(tmp_edge.IsDone())
         tmp_wire.Add(tmp_edge.Edge())
     return tmp_wire.Wire()
@@ -322,9 +322,9 @@ def build_wire_from_BSplineLst(BSplineLst, twoD=True): #Builds TopoDS_Wire from 
     TopTools_EdgeLst = TopTools_ListOfShape()
     for i,item in enumerate(BSplineLst):
         if twoD:        
-            tmp_edge = BRepBuilderAPI_MakeEdge(item.GetHandle(),Plane.GetHandle())
+            tmp_edge = BRepBuilderAPI_MakeEdge(item,Plane)
         else:
-            tmp_edge = BRepBuilderAPI_MakeEdge(item.GetHandle())
+            tmp_edge = BRepBuilderAPI_MakeEdge(item)
         #print(tmp_edge.IsDone())
         TopTools_EdgeLst.Append(tmp_edge.Edge())
         
@@ -370,12 +370,12 @@ def set_BoundaryWire_to_Origin(TopoDS_wire):
             Adaptor = BRepAdaptor_Curve(edg)
             First = Adaptor.FirstParameter() 
             Last =  Adaptor.LastParameter()
-            BSplineCurve1 = Adaptor.BSpline().GetObject()
+            BSplineCurve1 = Adaptor.BSpline()
             BSplineCurve1.Segment(OriEdgePnt[1],Last)
-            BSplineCurve2 = Adaptor.BSpline().GetObject()
+            BSplineCurve2 = Adaptor.BSpline()
             BSplineCurve2.Segment(First,OriEdgePnt[1])
-            tmp_edge1 = BRepBuilderAPI_MakeEdge(BSplineCurve1.GetHandle())
-            tmp_edge2 = BRepBuilderAPI_MakeEdge(BSplineCurve2.GetHandle())
+            tmp_edge1 = BRepBuilderAPI_MakeEdge(BSplineCurve1)
+            tmp_edge2 = BRepBuilderAPI_MakeEdge(BSplineCurve2)
             Owire.Add(tmp_edge1.Edge())
             
         elif idx > OriEdgePnt[0]:

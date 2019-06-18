@@ -374,7 +374,6 @@ class Airfoil(object):
         """
         pass
     
-    
     def run_xfoil(self,re,ma):
         """
         run xfoil to calculate the polars.

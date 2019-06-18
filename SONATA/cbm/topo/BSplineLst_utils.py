@@ -58,7 +58,7 @@ def ProjectPointOnBSplineLst(BSplineLst,Pnt2d,tolerance_distance=100):
     """
     p2 = []
     for idx,item in enumerate(BSplineLst):
-        projection2 = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item.GetHandle())
+        projection2 = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item)
         for j in range(1,projection2.NbPoints()+1):
             if projection2.Distance(j)<=tolerance_distance:
                 p2.append([projection2.Point(j), idx, projection2.Parameter(j),projection2.Distance(j)])
@@ -85,7 +85,7 @@ def distance_on_BSplineLst(BSplineLst,para1,para2):
     
     Distance = 0
     for i,item in enumerate(BSplineLst):
-        Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
+        Adaptor = Geom2dAdaptor_Curve(item)
         First = item.FirstParameter() 
         Last =  item.LastParameter() 
         if para1[0] == i and para2[0] != i:
@@ -142,9 +142,9 @@ def isPnt_on_curve(Pnt, Curve, tolerance=1e-6):
     --------
     Trigger : bool    
     """
-    if isinstance(Pnt, gp_Pnt2d) and issubclass(Curve.GetObject().__class__,Geom2d_Curve):
+    if isinstance(Pnt, gp_Pnt2d) and issubclass(Curve.__class__,Geom2d_Curve):
         twoD = True
-    elif  isinstance(Pnt, gp_Pnt) and issubclass(Curve.GetObject().__class__,Geom_Curve):
+    elif  isinstance(Pnt, gp_Pnt) and issubclass(Curve.__class__,Geom_Curve):
         twoD = False
     
     if twoD:
@@ -182,7 +182,7 @@ def isPnt_on_BSplineLst(Pnt, BSplineLst, tolerance=1e-6):
     """
     Bool = False
     for item in BSplineLst:
-        if isPnt_on_curve(Pnt,item.GetHandle(),tolerance):
+        if isPnt_on_curve(Pnt,item,tolerance):
             Bool = True
             break
     return Bool
@@ -194,9 +194,9 @@ def isPnt_on_BSplineLst(Pnt, BSplineLst, tolerance=1e-6):
 #    return u
 
 def findPnt_on_curve(Pnt,Curve):
-    if isinstance(Pnt, gp_Pnt2d) and issubclass(Curve.GetObject().__class__,Geom2d_Curve):
+    if isinstance(Pnt, gp_Pnt2d) and issubclass(Curve.__class__,Geom2d_Curve):
         twoD = True
-    elif  isinstance(Pnt, gp_Pnt) and issubclass(Curve.GetObject().__class__,Geom_Curve):
+    elif  isinstance(Pnt, gp_Pnt) and issubclass(Curve.__class__,Geom_Curve):
         twoD = False
         
     if twoD:
@@ -209,8 +209,8 @@ def findPnt_on_curve(Pnt,Curve):
 
 def findPnt_on_BSplineLst(Pnt, BSplineLst):
     for i,item in enumerate(BSplineLst):
-        if isPnt_on_curve(Pnt,item.GetHandle()):
-            u = findPnt_on_curve(Pnt,item.GetHandle())
+        if isPnt_on_curve(Pnt,item):
+            u = findPnt_on_curve(Pnt,item)
             coordinates = [i,u]
             break
         else:
@@ -232,16 +232,16 @@ def get_BSpline_length(BSpline):
     last = BSpline.LastParameter()
     
     if twoD:
-        Adaptor = Geom2dAdaptor_Curve(BSpline.GetHandle())
+        Adaptor = Geom2dAdaptor_Curve(BSpline)
     else: 
-        Adaptor = GeomAdaptor_Curve(BSpline.GetHandle())
+        Adaptor = GeomAdaptor_Curve(BSpline)
     
     Length = GCPnts_AbscissaPoint().Length(Adaptor, first, last, tolerance)
     return Length
 
     
 def copy_BSpline(BSpline):
-    BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(BSpline.Copy()).GetObject()
+    BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(BSpline.Copy())
     return BSplineCopy
   
     
@@ -268,7 +268,7 @@ def equidistant_Points_on_BSplineLst(BSplineLst,minLen):
     '''
     Pnt2dLst = []
     for item in BSplineLst:
-        Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
+        Adaptor = Geom2dAdaptor_Curve(item)
         length = get_BSpline_length(item)
         NbPoints = int(length//minLen)+2  
         discretization = GCPnts_QuasiUniformAbscissa(Adaptor,NbPoints)
@@ -286,7 +286,7 @@ def find_BSpline_coordinate(BSpline,s):
     # Be careful, s stands for the lenght coordinate of a single BSpline, while S represents the Global Coordinate!
     BSpline_length = get_BSpline_length(BSpline)
     tolerance=1e-10
-    Adaptor = Geom2dAdaptor_Curve(BSpline.GetHandle())
+    Adaptor = Geom2dAdaptor_Curve(BSpline)
     if s <= BSpline_length:
              tmp = GCPnts_AbscissaPoint(tolerance, Adaptor, s, 0)
              u = tmp.Parameter()
@@ -328,9 +328,9 @@ def find_BSplineLst_coordinate(BSplineLst, S, start, end):
         last = item.LastParameter()
         
         if twoD:
-            Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
+            Adaptor = Geom2dAdaptor_Curve(item)
         else:
-            Adaptor = GeomAdaptor_Curve(item.GetHandle())
+            Adaptor = GeomAdaptor_Curve(item)
         
         CummLength += get_BSpline_length(item)
         if x < CummLength or isclose(x,CummLength):
@@ -352,7 +352,7 @@ def find_BSplineLst_pos(BSplineLst,para):
         #print 'x',x
         CummLength += get_BSpline_length(BSplineLst[x])    
 
-    Adaptor = Geom2dAdaptor_Curve(BSplineLst[idx].GetHandle())
+    Adaptor = Geom2dAdaptor_Curve(BSplineLst[idx])
     First = BSplineLst[idx].FirstParameter() 
     partial_length = GCPnts_AbscissaPoint().Length(Adaptor, First, U, tol)     
     S = (CummLength + partial_length)/float(BSplineLst_length)
@@ -408,11 +408,11 @@ def intersect_BSplineLst_with_BSpline(BSplineLst, BSpline, tolerance=1e-10):
     IntPnts = []
     IntPnts_Pnt2d = []
     for i,item in enumerate(BSplineLst): 
-        intersection = Geom2dAPI_InterCurveCurve(BSpline.GetHandle(), item.GetHandle(),tolerance)
+        intersection = Geom2dAPI_InterCurveCurve(BSpline, item,tolerance)
         for j in range(1,intersection.NbPoints()+1):
                 IntPnt = intersection.Point(j)
                 IntPnts_Pnt2d.append(IntPnt)
-                u = findPnt_on_curve(IntPnt,item.GetHandle())
+                u = findPnt_on_curve(IntPnt,item)
                 IntPnts.append([i,u])
     return IntPnts, IntPnts_Pnt2d
 
@@ -441,11 +441,11 @@ def intersect_BSplineLst_with_plane(BSplineLst, plane):
     IntCoords = []
     IntPnts = []
     for i,item in enumerate(BSplineLst): 
-        intersection = GeomAPI_IntCS(item.GetHandle(), plane.GetHandle())
+        intersection = GeomAPI_IntCS(item, plane)
         for j in range(1,intersection.NbPoints()+1):
             IntPnt = intersection.Point(j)
             IntPnts.append(IntPnt)
-            u = findPnt_on_curve(IntPnt,item.GetHandle())
+            u = findPnt_on_curve(IntPnt,item)
             IntCoords.append([i,u])
 
     return IntCoords, IntPnts
@@ -537,7 +537,7 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
             First = item.FirstParameter() 
             Last =  item.LastParameter()
             if para1[0] == i and para2[0] != i: #Okay
-                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  if isclose(para1[1],Last):
                      pass 
                  elif isclose(para1[1],First):
@@ -548,26 +548,26 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
                      trimmed_BSplineLst.append(BSplineCopy)
                  
             elif (para1[0] != i and para2[0] != i) and (para1[0] > i and para2[0] > i):
-                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  BSplineCopy.Segment(First,Last)
                  front_BSplineLst.append(BSplineCopy)
                  
             elif (para1[0] != i and para2[0] != i) and (para1[0] < i and para2[0] < i):
-                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  BSplineCopy.Segment(First,Last)
                  rear_BSplineLst.append(BSplineCopy)
                  
             elif para1[0] == i and para2[0] == i: #Okay
-                 BSplineCopy1 = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy1 = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  BSplineCopy1.Segment(para1[1],Last)
                  trimmed_BSplineLst.append(BSplineCopy1)
-                 BSplineCopy2 = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy2 = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  BSplineCopy2.Segment(First,para2[1])
                  trimmed_BSplineLst.append(BSplineCopy2)
                  break
         
             elif para1[0] != i and para2[0] == i: #Okay
-                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  BSplineCopy.Segment(First,para2[1])
                  front_BSplineLst.append(BSplineCopy)
                  #break
@@ -605,7 +605,7 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
              First = item.FirstParameter() 
              Last =  item.LastParameter() 
              if para1[0] == i and para2[0] != i:
-                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  if isclose(para1[1],Last):
                      pass 
                  elif isclose(para1[1],First):
@@ -616,18 +616,18 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
                      trimmed_BSplineLst.append(BSplineCopy)
                  
              elif (para1[0] != i and para2[0] != i) and (para1[0] < i and para2[0] > i):
-                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  BSplineCopy.Segment(First,Last)
                  trimmed_BSplineLst.append(BSplineCopy)
                  
              elif para1[0] == i and para2[0] == i:
-                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  BSplineCopy.Segment(para1[1],para2[1])
                  trimmed_BSplineLst.append(BSplineCopy)
                  break
         
              elif para1[0] != i and para2[0] == i:
-                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  if isclose(para2[1],Last):
                      trimmed_BSplineLst.append(BSplineCopy)
                  else:
@@ -647,24 +647,24 @@ def trim_BSplineLst_by_coordinates(BSplineLst, para1, para2):
          First = item.FirstParameter() 
          Last =  item.LastParameter() 
          if para1[0] == i and para2[0] != i:
-             BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+             BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
              BSplineCopy.Segment(para1[1],Last)
              trimmed_BSplineLst.append(BSplineCopy)
              
          elif (para1[0] != i and para2[0] != i) and (para1[0] < i and para2[0] > i):
-             BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+             BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
              BSplineCopy.Segment(First,Last)
              trimmed_BSplineLst.append(BSplineCopy)
              
          elif para1[0] == i and para2[0] == i:
-             BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+             BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
              BSplineCopy.Segment(para1[1],para2[1])
              trimmed_BSplineLst.append(BSplineCopy)
              break
     
     #NOTE: Somehow the execption if para2 is close to Last doesn't work properly!!!!!!!     
          elif para1[0] != i and para2[0] == i:
-             BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+             BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
              if isclose(para2[1],Last):
                  trimmed_BSplineLst.append(BSplineCopy)
              else:
@@ -673,7 +673,7 @@ def trim_BSplineLst_by_coordinates(BSplineLst, para1, para2):
              break
          
     #             elif para1[0] != i and para2[0] == i:
-    #                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+    #                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
     #                 BSplineCopy.Segment(First,para2[1])
     #                 trimmed_BSplineLst.append(BSplineCopy)
     #                 break
@@ -696,23 +696,23 @@ def trim_BSplineLst_by_Pnt2d(BSplineLst,Pos1_Pnt2d,Pos2_Pnt2d):
             First = item.FirstParameter() 
             Last =  item.LastParameter() 
             if para1[0] == i and para2[0] != i:
-                BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                 BSplineCopy.Segment(para1[1],Last)
                 trimmed_BSplineLst.append(BSplineCopy)
                  
             elif (para1[0] != i and para2[0] != i) and (para1[0] < i and para2[0] > i):
-                BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                 BSplineCopy.Segment(First,Last)
                 trimmed_BSplineLst.append(BSplineCopy)
                  
             elif para1[0] == i and para2[0] == i:
-                BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                 BSplineCopy.Segment(para1[1],para2[1])
                 trimmed_BSplineLst.append(BSplineCopy)
                 break
         
             elif para1[0] != i and para2[0] == i:
-                BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                 BSplineCopy.Segment(First,para2[1])
                 trimmed_BSplineLst.append(BSplineCopy)
                 break
@@ -724,31 +724,31 @@ def trim_BSplineLst_by_Pnt2d(BSplineLst,Pos1_Pnt2d,Pos2_Pnt2d):
             First = item.FirstParameter() 
             Last =  item.LastParameter()
             if para1[0] == i and para2[0] != i: #Okay
-                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  BSplineCopy.Segment(para1[1],Last)
                  rear_BSplineLst.append(BSplineCopy)
                  
             elif (para1[0] != i and para2[0] != i) and (para1[0] > i and para2[0] > i):
-                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  BSplineCopy.Segment(First,Last)
                  front_BSplineLst.append(BSplineCopy)
                  
             elif (para1[0] != i and para2[0] != i) and (para1[0] < i and para2[0] < i):
-                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  BSplineCopy.Segment(First,Last)
                  rear_BSplineLst.append(BSplineCopy)
                  
             elif para1[0] == i and para2[0] == i: #Okay
-                 BSplineCopy1 = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy1 = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  BSplineCopy1.Segment(para1[1],Last)
                  trimmed_BSplineLst.append(BSplineCopy1)
-                 BSplineCopy2 = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy2 = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  BSplineCopy2.Segment(First,para2[1])
                  trimmed_BSplineLst.append(BSplineCopy2)
                  break
         
             elif para1[0] != i and para2[0] == i: #Okay
-                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy()).GetObject()
+                 BSplineCopy = Handle_Geom2d_BSplineCurve_DownCast(item.Copy())
                  BSplineCopy.Segment(First,para2[1])
                  front_BSplineLst.append(BSplineCopy)
                  #break
@@ -801,12 +801,12 @@ def seg_boundary_from_dct(DCT_data,angular_deflection = 30):
                
         tmp_harray = TColgp_HArray1OfPnt2d_from_nparray(data)
         if NbCorners == 0:
-            #tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), True, 1e-6)             #Interpolate datapoints to bspline
-            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 1e-6)             #Interpolate datapoints to bspline
+            #tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray, True, 1e-6)             #Interpolate datapoints to bspline
+            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray, False, 1e-6)             #Interpolate datapoints to bspline
         else:     
-            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, 1e-4)             #Interpolate datapoints to bspline
+            tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray, False, 1e-4)             #Interpolate datapoints to bspline
         tmp_interpolation.Perform()                                               
-        tmp_bspline = tmp_interpolation.Curve().GetObject()
+        tmp_bspline = tmp_interpolation.Curve()
         list_of_bsplines.append(tmp_bspline)
         
     return list_of_bsplines
@@ -815,7 +815,7 @@ def seg_boundary_from_dct(DCT_data,angular_deflection = 30):
 def discretize_BSplineLst(BSplineLst, Deflection = 2e-4, AngularDeflection=0.02,CurvatureDeflection=0.06,MinimumOfPoints=50):
     Pnt2dLst = []
     for i,item in enumerate(BSplineLst):
-        Adaptor = Geom2dAdaptor_Curve(item.GetHandle())
+        Adaptor = Geom2dAdaptor_Curve(item)
         discretization = GCPnts_QuasiUniformDeflection(Adaptor,Deflection, 1)	#GeomAbs_Shape Continuity: 1=C0, 2=G1, 3=C1, 3=G2,... 
         #discretization = GCPnts_TangentialDeflection(Adaptor,AngularDeflection,CurvatureDeflection,MinimumOfPoints)
         NbPoints = discretization.NbPoints()
@@ -960,9 +960,9 @@ def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_inter
         
         try: 
             if twoD:      
-                tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray.GetHandle(), False, tol_interp)             #Interpolate datapoints to bspline
+                tmp_interpolation = Geom2dAPI_Interpolate(tmp_harray, False, tol_interp)             #Interpolate datapoints to bspline
             else:
-                tmp_interpolation = GeomAPI_Interpolate(tmp_harray.GetHandle(), False, tol_interp)
+                tmp_interpolation = GeomAPI_Interpolate(tmp_harray, False, tol_interp)
         except: 
             print('ERROR: BSplineLst_from_dct did not perform the Interpolation with tol_interp', tol_interp)#RAISED ERROR
             plt.figure()
@@ -974,7 +974,7 @@ def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_inter
             plt.show()                   
                    
         tmp_interpolation.Perform()                              
-        tmp_bspline = tmp_interpolation.Curve().GetObject()
+        tmp_bspline = tmp_interpolation.Curve()
         #print(tmp_bspline.Degree(), tmp_bspline.NbKnots())
         list_of_bsplines.append(tmp_bspline)
         
@@ -1001,13 +1001,13 @@ def set_BSplineLst_to_Origin(BSplineLst, Theta=0):
     for i,item in enumerate(BSplineLst): 
         First = item.FirstParameter()
         Last = item.LastParameter()
-        intersection = Geom2dAPI_InterCurveCurve(axis.GetHandle(), item.GetHandle(),tolerance)
+        intersection = Geom2dAPI_InterCurveCurve(axis, item, tolerance)
         for j in range(1,intersection.NbPoints()+1):
                 IntPnt = intersection.Point(j)
                 v1 = gp_Vec2d(OPnt,IntPnt) 
                 vres = v0.Dot(v1)
                 #distance = IntPnt.Distance(OPnt)
-                u = findPnt_on_curve(IntPnt,item.GetHandle())
+                u = findPnt_on_curve(IntPnt,item)
                 IntPnts.append([i,u,vres])
                 
     #Determine Origin as point                 
