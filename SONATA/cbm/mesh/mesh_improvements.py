@@ -155,9 +155,10 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
                     enhanced_cells.append(c)
             
             
-           #elif c.nodes[0].cornerstyle == 4 and c.nodes[0].id != trigger_id_cs4:
-               #print c.nodes[0].id
-#              trigger_id_cs4 = c.nodes[0].id
+            #elif c.nodes[0].cornerstyle == 4 and c.nodes[0].id != trigger_id_cs4:
+                #print('modify_sharp_corners has not been implemented for cornerstyle = 4')
+                #print c.nodes[0].id
+#               trigger_id_cs4 = c.nodes[0].id
 #                
 #                display.DisplayShape(c.nodes[0].Pnt2d,color='RED')
 #                display.DisplayShape(c.nodes[2].Pnt2d,color='ORANGE')
@@ -177,6 +178,7 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
  
             else:
                 enhanced_cells.append(c)
+                #print('modify_sharp_corners has not been implemented for cornerstyle ', c.nodes[0].cornerstyle)
         else:
             enhanced_cells.append(c)
     try:

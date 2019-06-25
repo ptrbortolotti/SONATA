@@ -12,7 +12,7 @@ from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length, get_BSplineL
                                          BSplineLst_from_dct, discretize_BSplineLst, \
                                          find_BSplineLst_pos, get_BSpline_length, \
                                          ProjectPointOnBSplineLst, copy_BSpline, \
-                                         findPnt_on_BSplineLst
+                                         findPnt_on_BSplineLst, BSplineLst_Orientation, reverse_BSplineLst
 from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst
 from SONATA.cbm.topo.cutoff import cutoff_layer
 from SONATA.cbm.topo.offset import shp_parallel_offset
@@ -167,12 +167,6 @@ class Layer(object):
         OffsetBSplineLst = cutoff_layer(self.Boundary_BSplineLst,OffsetBSplineLst,self.S1,self.S2,self.cutoff_style)
         self.BSplineLst = OffsetBSplineLst
          
-
-        
-        
-        
-        
-        
         
     
     def determine_a_nodes(self,SegmentLst,global_minLen,display=None):
@@ -317,7 +311,8 @@ class Layer(object):
          
         else:
             print('Only apply member layer.set_layer_origin method when layer is Closed!')
-                         
+        
+        #print(OriPnt.Coord())
         #Reorder Sequence of BSplines of BSplinesLst
         OriPara = findPnt_on_BSplineLst(OriPnt,self.BSplineLst)
         OBSplineLst =  []
@@ -359,8 +354,11 @@ class Layer(object):
             OBSplineLst.append(BSplineCurve2)    
         else: None
     
-        self.BSplineLst = OBSplineLst
         
+#        if BSplineLst_Orientation(OBSplineLst,11) == True:
+#            OBSplineLst = reverse_BSplineLst(OBSplineLst) 
+
+        self.BSplineLst = OBSplineLst
         return None
         
 

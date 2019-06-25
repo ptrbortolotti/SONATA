@@ -21,7 +21,7 @@ from SONATA.cbm.mesh.cell import Cell
 
 #===================FUNCTIONALITIES==========================================
 
-def triangle_mesh(nodes,options):
+def triangle_mesh(array, options):
     '''The triangle_mesh function generates the triagular mesh within the 
     a_nodes polygon. It uses the Python Triangle module, which is a python 
     wrapper around Jonathan Richard Shewchuks two-dimensional quality mesh
@@ -31,7 +31,7 @@ def triangle_mesh(nodes,options):
     - http://www.cs.cmu.edu/~quake/triangle.html
         
     Args:
-        nodes: (list of nodes), the list contains all nodes that are on the
+        array: (array of nodes), the array contains all nodes that are on the
             innermost boundary of the generated topology. And are the boundary 
             for the triangulation
             
@@ -43,20 +43,15 @@ def triangle_mesh(nodes,options):
             as keys
     '''
     
-    points = []
-    for n in nodes:
-        points.append([n.Pnt2d.X(),n.Pnt2d.Y()])
-      
-    old_vertices = np.asarray(points)
     tmp = []
-    for i,v in enumerate(old_vertices):  
-        if i == len(old_vertices)-1:
+    for i,v in enumerate(array):  
+        if i == len(array)-1:
             tmp.append([i,0])
         else: tmp.append([i,i+1])
     segments_core = np.asarray(tmp)
         
     poly = {'vertices': None, 'segments': None}
-    poly['vertices'] = old_vertices
+    poly['vertices'] = array
     poly['segments'] = segments_core
     #plt.plot(old_vertices[:,0],old_vertices[:,1],'.-')
     mesh =  triangulate(poly, options)
@@ -111,25 +106,28 @@ def gen_core_cells(a_nodes, area=1.0,**kwargs):
         options = kwargs.get('options')
     else:
         if area<1.0:  
-            options = 'pq'    
+            #options = 'pq'   
+            scalefactor = np.sqrt(1/area)+0.1
+            area = area * scalefactor**2
+            #print('area:', area, 'scalefactor:', scalefactor)
+            options = 'pa%f' % (area)   #Somehow crashing!?
+        
         else:
+             scalefactor = 1
              options = 'pa%f' % (area)   #Somehow crashing!?
-             
-
-    mesh = triangle_mesh(a_nodes, options)  
-  
-    tmp = []
-    for n in a_nodes:
-        tmp.append([n.Pnt2d.X(),n.Pnt2d.Y(),n.id])
-    old_vertices = np.asarray(tmp)
     
+    old_vertices = np.asarray([[n.Pnt2d.X(),n.Pnt2d.Y(), n.id] for n in a_nodes])
+    mesh = triangle_mesh(old_vertices[:,:2]*scalefactor, options)  
+  
     c_nodes = []
     connector = []      #connector stores the information [tri_vertex_id, old_node_id]
     for tri_id,v in enumerate(mesh['vertices']):
+        #print(type(v))
+        v = v/scalefactor
         vec = np.linalg.norm(old_vertices[:,:2]-v,axis=1)
         idx = np.argmin(vec)
         value = vec[idx]
-        if value<=1e-8:
+        if value<=1e-5:
              #checks if the vertex exists allready in the a_nodes list
              connector.append([tri_id,old_vertices[idx,2]])
         else: 

@@ -10,15 +10,11 @@ import matplotlib.pyplot as plt
 from .utils import calc_DCT_angles, P2Pdistance, isclose,unique_rows,Polygon_orientation
 
 
-def shp_parallel_offset(arrPts,dist,join_style=1):
+def shp_parallel_offset(arrPts,dist,join_style=1, side='right', res=16):
     #OFFSET ALGORITHM
     #join_style = 1#( 1:round,2:mitre,3:bevels)
-    
-    side = 'left'    
-    res = 16 #resolution
     closed = None
     
-
     #==============SHAPELY-OFFSET ALGORITHM====================================
     if P2Pdistance(arrPts[0],arrPts[-1])<=1e-6:
         closed = True
@@ -53,10 +49,11 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
     #TODO: Be careful not to reverse Linestring!
     if closed == True:
         Orientation = Polygon_orientation(data)
-        if Orientation == False:
+        if Orientation == True:
             data = np.flipud(data)
-       
-    
+            
+    if closed == False: 
+        data = np.flipud(data)
     #==============Interpolate large linear spaces=============================
     seg_P2Plength = []
     cumm_length = 0
@@ -113,26 +110,28 @@ def shp_parallel_offset(arrPts,dist,join_style=1):
 #        if after<before:
 #            print 'non unique elements found',len(data)
 
-
+    #======PLOTTING for debugging
 #    fig = plt.figure()
-#    ax = fig.add_subplot(111)
+#    fig.add_subplot(111)
 #    plt.clf()         
 #    plt.plot(*arrPts.T, color='black', marker='.')
-#    
-#    for i, item in enumerate(data):
-#            plt.annotate(i, (item[0],item[1]), color='red')
-#    
 #    plt.plot(*arrPts[0].T, color='green', marker='o')
 #    plt.plot(*arrPts[-1].T, color='purple', marker='o')
-#    plt.plot(*arrPts.T,color='black',marker='.')
+#    
+#    for i, item in enumerate(arrPts):
+#        plt.annotate(i, (item[0],item[1]), color='black')
 #    
 #    plt.plot(*data.T, color='red', marker='.')
 #    plt.plot(*data[0].T, color='green', marker='>')
 #    plt.plot(*data[-1].T, color='purple', marker='>')
+#    
+#    for i, item in enumerate(data):
+#        plt.annotate(i, (item[0],item[1]), color='red')
+#    
 #    plt.axis('equal')  
 #    plt.show()   
-#    
-#   
+    
+
     return data
 
     

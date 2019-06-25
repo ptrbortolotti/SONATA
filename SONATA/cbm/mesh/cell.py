@@ -169,6 +169,8 @@ class Cell(object):
             return True
         else: return False
     
+    def invert_nodes(self):
+        self.nodes.reverse()
     
     def min_facelenght(self):  
         fl = []
@@ -215,3 +217,5 @@ class Cell(object):
         
         min_index, min_value = min(enumerate(P_distances), key=operator.itemgetter(1))       
         return min_value[1]
+    
+    

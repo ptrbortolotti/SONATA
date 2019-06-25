@@ -215,7 +215,8 @@ class Segment(object):
         
         """
         p0,v1,v2 = get_BSplineLst_D2(self.BSplineLst, s, 0, 1)
-        v = gp_Vec2d(-v1.Y(), v1.X())
+        print('det_weight_Pnt2d:', p0.Coord(), 's', s)
+        v = gp_Vec2d(v1.Y(), -v1.X())
         v.Normalize()
         v.Multiply(t)
         p1 = p0.Translated(v)
@@ -307,7 +308,7 @@ class Segment(object):
     
                 layer.inverse_ivLst = chop_interval_from_layup(self.inv_cumivLst,layer.S1,layer.S2)
                 layer.inverse_ivLst =  sort_layup_projection([layer.inverse_ivLst])[0]
-                layer.mesh_layer(SegmentLst, global_minLen, display=display, l0=l0) 
+                layer.mesh_layer(SegmentLst, global_minLen, display=display, l0=1.5*l0) 
                 self.inv_cumivLst = insert_interval_in_layup(self.inv_cumivLst,layer.S1,layer.S2,value=layer.ID)
                 self.l_cells.extend(layer.cells)   
             

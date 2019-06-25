@@ -239,7 +239,7 @@ class Blade(Component):
             wireframe.append(wire)
             tes.append(te_pnt)
         
-        nPoints = 5000
+        nPoints = 8000
         if len(wireframe) > 1:
             tmp = []
             for w in wireframe:
@@ -268,8 +268,9 @@ class Blade(Component):
         te_pnt = te_pnt.Transformed(trsf)
         
         array = PntLst_to_npArray(PntLst)
-        array = np.flipud(array) 
-        BSplineLst = BSplineLst_from_dct(array[:,0:2], angular_deflection = 15, tol_interp=1e-6)
+        #array = np.flipud(array) 
+        #print(array)
+        BSplineLst = BSplineLst_from_dct(array[:,0:2], angular_deflection = 20, tol_interp=1e-6)
 
         BoundaryBSplineLst = set_BSplineLst_to_Origin2(BSplineLst, gp_Pnt2d(te_pnt.Coord()[0],te_pnt.Coord()[1]))
         return BoundaryBSplineLst
@@ -310,6 +311,7 @@ class Blade(Component):
         airfoil_position = (yml.get('outer_shape_bem').get('airfoil_position').get('grid'),yml.get('outer_shape_bem').get('airfoil_position').get('labels'))
         tmp = []
         for an in airfoil_position[1]: 
+            print(an)
             tmp.append(next((x for x in airfoils if x.name == an), None).id)
         arr = np.asarray([airfoil_position[0],tmp]).T
             

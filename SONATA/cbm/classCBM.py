@@ -576,8 +576,8 @@ class CBM(object):
         Resolution = self.config.setup['mesh_resolution'] # Nb of Points on Segment0
         global_minLen = round(self.refL/Resolution,5)
             
-        core_cell_area = 1.25*global_minLen**2
-        bw_cell_area = 0.25*global_minLen**2
+        core_cell_area = 1.6*global_minLen**2
+        bw_cell_area = 0.7*global_minLen**2
         web_consolidate_tol = 0.5*global_minLen
 
         #===================MESH SEGMENT
@@ -588,8 +588,8 @@ class CBM(object):
         #===================MESH CORE  
         if self.config.flags['mesh_core']:
             for j,seg in enumerate(reversed(self.SegmentLst)):
-                if seg.ID == 1:
-                    core_cell_area = 0.25*global_minLen**2
+                #if seg.ID == 1:
+                    #core_cell_area = 1.6*global_minLen**2
                     #print(core_cell_area)
                 self.mesh.extend(seg.mesh_core(self.SegmentLst, self.WebLst, core_cell_area, display=self.display))
                 
@@ -628,7 +628,10 @@ class CBM(object):
             
             self.mesh.extend(bw_cells)
        
-        
+        #invert nodes list of all cell to make sure they are counterclockwise for vabs in the right coordinate system!
+        for c in self.mesh:
+            if c.orientation == False:
+                c.invert_nodes()     
         (self.mesh, nodes) = sort_and_reassignID(self.mesh)
         return None
     
@@ -927,7 +930,7 @@ class CBM(object):
         values (mm).
         
         '''
-        (self.display, self.start_display, self.add_menu, self.add_function_to_menu) = display_config(DeviationAngle = 1e-6, DeviationCoefficient=1e-6, cs_size = self.refL/5)
+        (self.display, self.start_display, self.add_menu, self.add_function_to_menu) = display_config(DeviationAngle = 1e-3, DeviationCoefficient=1e-3, cs_size = self.refL/5)
 
         #display_custome_shape(self.display,self.SegmentLst[0].wire,2,0,[0,0,0])
 
@@ -1081,7 +1084,7 @@ if __name__ == '__main__':
     plt.close('all')
     fname = 'jobs/debug/issue20/sec_config.yml'
     #fname = 'jobs/VariSpeed/uh60a_cbm_simple/sec_config.yml'
-    #fname = 'jobs/AREA/R250/sec_config.yml'
+    fname = 'jobs/AREA/R250/sec_config.yml'
     #fname = 'jobs/PBortolotti/sec_config.yml'
     config = CBMConfig(fname)
     
@@ -1096,6 +1099,6 @@ if __name__ == '__main__':
     
     
     #job.cbm_post_2dmesh(title='Hello World!')
-    #job.cbm_post_3dtopo()
+    job.cbm_post_3dtopo()
 #    job.config.vabs_cfg.recover_flag = 1
 #    job.config.vabs_cfg.M = [0,2000e4,0]
