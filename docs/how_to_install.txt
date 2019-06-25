@@ -1,16 +1,46 @@
 
-1. Make an exact copy of the basic conda environment with the following command:
-	$ conda create --clone base --name sonata 	
+################################################
+1. Install an up-to-date anaconda python=3.7 distribution
 
-2. Switch to the new environement with:
-	$ source activate sonata
+2. Create a sonata environment with the full basic anaconda modules:
+    $ conda create -n env_full anaconda --name sonata
 
-3. Install the pythonocc-package. Use the version 17.3 because it will avoid problems with dependecies of other packages such as matplotlib/freetype and pyqt 
-	$ conda conda install -c conda-forge -c dlr-sc -c pythonocc -c oce pythonocc-core==0.17.3 
+3. Activate sonata environment
+    $ source activate sonata
 
-4. conda install -c conda-forge pint intervaltree
-5. pip install openmdao triangle shapely==1.6.4 
+4. Install the openmdao module
+    $ pip install openmdao
 
-6. Make a small change to one file of pythoncc: src/Display/SimpleGui.py _ https://github.com/tpaviot/pythonocc-core/commit/d90e0c3fb17a0dbe3beb8ad6cd46d9516032f290
+5. Install mpi4py
+    Make sure you have a valid openmpi (1.8.3 in my case) version installed and the $PATH and $LD_LIBRARY_PATH Set correctly 
 
+    git clone https://github.com/mpi4py/mpi4py.git ./mpi4py.git
+    cd mpi4py.git
+    python setup.py build --mpicc=/opt/openmpi/bin/mpicc                #path could be different to you. 
+    python setup.py install
 
+6. Install PETSc and petsc4py
+    git clone https://bitbucket.org/petsc/petsc.git ./petsc.git
+    cd petsc.git
+    python setup.py build
+    python setup.py install
+    cd ..
+    git clone https://bitbucket.org/petsc/petsc4py.git ./petsc4py.git
+    cd petsc4py.git
+    python setup.py build
+    python setup.py install
+
+7. Install the pythonocc-package
+    $ conda install -c conda-forge -c dlr-sc -c tpaviot -c oce -c pythonocc pythonocc-core==0.18.2
+
+8. Install the pint module. This is used to change units in the SONATA/CBM - DYMORE interface.
+    conda install -c conda-forge pint
+
+9. Install the intervaltree package. This is used for structuring the topology and the calculation of layup coordinates.
+    $ conda install -c conda-forge intervaltree
+
+10. Install the shapely package. This is used for the discretization and approximation of offset curves during the topology generatio
+    $ conda install -c conda-forge shapely
+
+11. Install the triangle package. This is used for the unstructured triangulation of the cavities and balance weight materials during the meshing process:
+    $ pip install triangle
