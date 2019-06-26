@@ -9,15 +9,18 @@ import numpy as np
 from pyDOE2 import lhs
 from scipy.stats.distributions import norm, norminvgauss, pareto
 import matplotlib.pyplot as plt
+
+from openmdao.api import CaseReader
+
 from SONATA.utl.plot import plot_histogram_2Ddata
 
 def doe_sampler(samples = 100, des_vars = ['x', 'y', 'z'],  means=[0, 0, 0], stdvs=[1.0, 1.0, 1.0], pdf = 'norm', design='lhs'):
     """
-    
+    generates samples for the openmdao ListGenerator(DOEGenerator) 
     
     Returns
     --------
-    samples : list of name, value tuples for the design variables.
+    samples : list of (name, value) tuples for the design variables.
     """
     
     
@@ -77,6 +80,8 @@ def plot_samples(samples, title='design variables', **kwargs):
             axh.set_ylabel(labels[0,i,j])
     plt.legend()
     plt.show()
+
+
 
 if __name__ == '__main__':
     samples = doe_sampler(500, des_vars = ['x','y'], means=[1,0], stdvs= [0.5,1])
