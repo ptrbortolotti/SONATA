@@ -4,8 +4,8 @@ Created on Mon Jan 16 14:28:42 2017
 
 @author: TPflumm
 """
-from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
-from OCC.gp import gp_Pnt, gp_Pnt2d
+from OCC.Core.Geom2dAPI import Geom2dAPI_PointsToBSpline
+from OCC.Core.gp import gp_Pnt, gp_Pnt2d
 
 from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_Pnt2d, intersect_BSplineLst_with_BSpline
 from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d

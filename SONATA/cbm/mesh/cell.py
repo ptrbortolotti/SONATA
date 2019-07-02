@@ -7,9 +7,9 @@ Created on Fri Mar 03 13:39:55 2017
 import numpy as np
 import operator
 
-from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge
-from OCC.gp import gp_Vec2d,gp_Pnt2d
-from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline,Geom2dAPI_ProjectPointOnCurve
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge
+from OCC.Core.gp import gp_Vec2d,gp_Pnt2d
+from OCC.Core.Geom2dAPI import Geom2dAPI_PointsToBSpline,Geom2dAPI_ProjectPointOnCurve
 
 from SONATA.cbm.topo.utils import PolygonArea, calc_angle_between, point2d_list_to_TColgp_Array1OfPnt2d
 from SONATA.cbm.mesh.cell_utils import calc_cell_angles

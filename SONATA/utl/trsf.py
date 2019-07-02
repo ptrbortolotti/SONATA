@@ -6,7 +6,7 @@ Created on Wed May 15 09:48:14 2019
 @author: gu32kij
 """
 import numpy as np
-from OCC.gp import gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec2d, gp_Ax3, gp_Ax1, gp_Dir, gp_Ax2
+from OCC.Core.gp import gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec2d, gp_Ax3, gp_Ax1, gp_Dir, gp_Ax2
 
 
 def trsf_blfr_to_cbm(Ax2_blfr, Ax2_befr):

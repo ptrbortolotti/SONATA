@@ -1,6 +1,6 @@
-from OCC.BRepTools import BRepTools_WireExplorer
-from OCC.TopTools import TopTools_ListOfShape,TopTools_ListIteratorOfListOfShape
-from OCC.TopoDS import TopoDS_Wire, topods_Edge, topods_Vertex
+from OCC.Core.BRepTools import BRepTools_WireExplorer
+from OCC.Core.TopTools import TopTools_ListOfShape,TopTools_ListIteratorOfListOfShape
+from OCC.Core.TopoDS import TopoDS_Wire, topods_Edge, topods_Vertex
 
 
 class WireExplorer(object):

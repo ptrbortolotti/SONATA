@@ -4,33 +4,33 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax3,gp_Ax1
+from OCC.Core.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax3,gp_Ax1
 
-from OCC.STEPControl import STEPControl_Reader
-from OCC.IGESControl import IGESControl_Reader
+from OCC.Core.STEPControl import STEPControl_Reader
+from OCC.Core.IGESControl import IGESControl_Reader
 
-from OCC.StlAPI import StlAPI_Reader
-from OCC.TopoDS import TopoDS_Shape
-from OCC.BRepTools import breptools_Read
-from OCC.BRep import BRep_Builder
-from OCC.Quantity import Quantity_Color
-from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
+from OCC.Core.StlAPI import StlAPI_Reader
+from OCC.Core.TopoDS import TopoDS_Shape
+from OCC.Core.BRepTools import breptools_Read
+from OCC.Core.BRep import BRep_Builder
+from OCC.Core.Quantity import Quantity_Color
+from OCC.Core.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
 from OCC.Display.SimpleGui import init_display
-from OCC.BRepAlgoAPI import BRepAlgoAPI_Section
-from OCC.BRepAdaptor import BRepAdaptor_CompCurve, BRepAdaptor_Curve, BRepAdaptor_Curve2d
-from OCC.BRepAlgo import BRepAlgo_Section
-from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeFace
-from OCC.TopExp import TopExp_Explorer
-from OCC.TopTools import TopTools_ListIteratorOfListOfShape, TopTools_ListOfShape
-import OCC.TopoDS as TopoDS
-from OCC.BRepBuilderAPI import BRepBuilderAPI_Transform
-from OCC.TopOpeBRep import TopOpeBRep_ShapeIntersector
-from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection, GCPnts_TangentialDeflection, GCPnts_QuasiUniformAbscissa, GCPnts_UniformDeflection
-from OCC.Geom2dAPI import Geom2dAPI_Interpolate
-from OCC.BRepTools import BRepTools_WireExplorer
-from OCC.TopoDS import topods
-from OCC.ShapeAnalysis import ShapeAnalysis_Wire, ShapeAnalysis_WireOrder
-from OCC.ShapeFix import ShapeFix_Wire
+from OCC.Core.BRepAlgoAPI import BRepAlgoAPI_Section
+from OCC.Core.BRepAdaptor import BRepAdaptor_CompCurve, BRepAdaptor_Curve, BRepAdaptor_Curve2d
+from OCC.Core.BRepAlgo import BRepAlgo_Section
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeFace
+from OCC.Core.TopExp import TopExp_Explorer
+from OCC.Core.TopTools import TopTools_ListIteratorOfListOfShape, TopTools_ListOfShape
+import OCC.Core.TopoDS as TopoDS
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_Transform
+from OCC.Core.TopOpeBRep import TopOpeBRep_ShapeIntersector
+from OCC.Core.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection, GCPnts_TangentialDeflection, GCPnts_QuasiUniformAbscissa, GCPnts_UniformDeflection
+from OCC.Core.Geom2dAPI import Geom2dAPI_Interpolate
+from OCC.Core.BRepTools import BRepTools_WireExplorer
+from OCC.Core.TopoDS import topods
+from OCC.Core.ShapeAnalysis import ShapeAnalysis_Wire, ShapeAnalysis_WireOrder
+from OCC.Core.ShapeFix import ShapeFix_Wire
 
 
 if __name__ == '__main__':
@@ -453,7 +453,7 @@ if __name__ == '__main__':
     display, start_display, add_menu, add_function_to_menu = init_display()
     display.Context.SetDeviationAngle(1e-5)       # 0.001 default. Be careful to scale it to the problem.
     display.Context.SetDeviationCoefficient(1e-5) # 0.001 default. Be careful to scale it to the problem. 
-    display.set_bg_gradient_color(20,6,111,200,200,200)
+    #display.set_bg_gradient_color(20,6,111,200,200,200)
     show_coordinate_system(display, length=25)
        
     display.DisplayShape(BSplineLst[0].StartPoint())

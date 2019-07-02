@@ -6,7 +6,7 @@ Created on Fri Mar 03 13:37:55 2017
 """
 from functools import total_ordering
 
-from OCC.gp import gp_Pnt, gp_Pnt2d
+from OCC.Core.gp import gp_Pnt, gp_Pnt2d
 from SONATA.cbm.topo.BSplineLst_utils import find_BSplineLst_pos, findPnt_on_BSplineLst
 
 @total_ordering

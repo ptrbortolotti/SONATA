@@ -12,7 +12,7 @@ Created on Thu Nov 02 10:46:29 2017
 
 import numpy as np
 
-from OCC.gp import gp_Vec2d
+from OCC.Core.gp import gp_Vec2d
 
 from SONATA.cbm.mesh.mesh_utils import find_cells_that_contain_node
 from SONATA.cbm.mesh.cell import Cell

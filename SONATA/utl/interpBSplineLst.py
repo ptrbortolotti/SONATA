@@ -8,8 +8,8 @@ Created on Thu Apr 11 15:22:29 2019
 import numpy as np
 from scipy.interpolate import interp1d
 
-from OCC.Geom import Geom_Plane
-from OCC.gp import gp_Dir, gp_Pnt, gp_Trsf, gp_Vec, gp_Ax2, gp_Ax3
+from OCC.Core.Geom import Geom_Plane
+from OCC.Core.gp import gp_Dir, gp_Pnt, gp_Trsf, gp_Vec, gp_Ax2, gp_Ax3
 
 from SONATA.utl.blade_utl import check_uniformity 
 from SONATA.cbm.topo.BSplineLst_utils import intersect_BSplineLst_with_plane

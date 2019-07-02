@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial import distance
 
-from OCC.gp import gp_Pnt2d
+from OCC.Core.gp import gp_Pnt2d
 
 
 from SONATA.cbm.fileIO.CADinput import order_BSplineLst_Head2Tail

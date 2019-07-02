@@ -99,7 +99,7 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
     p = PatchCollection(patches, alpha=alpha, cmap=cmap, edgecolors = 'k')
     p.set_array(data)
     p.set_clim(vmin, vmax)
-    ax.add_collection(p)
+    _ = ax.add_collection(p)
     
     
     cbar = fig.colorbar(p, ax=ax, drawedges=True)

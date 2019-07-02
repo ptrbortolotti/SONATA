@@ -8,10 +8,10 @@ import numpy as np
 import math
 import itertools
 
-from OCC.gp import gp_Vec2d,gp_Pnt2d,gp_Pnt,gp_Vec
-from OCC.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
+from OCC.Core.gp import gp_Vec2d,gp_Pnt2d,gp_Pnt,gp_Vec
+from OCC.Core.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
 from OCC.Display.SimpleGui import init_display
-from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
+from OCC.Core.Geom2dAPI import Geom2dAPI_PointsToBSpline
 
 
 from SONATA.cbm.mesh.node import Node

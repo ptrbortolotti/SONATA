@@ -22,7 +22,7 @@ import copy
 
 #PythonOCC Modules
 from OCC.Display.SimpleGui import init_display
-from OCC.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1, gp_Trsf, gp_Ax3 
+from OCC.Core.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1, gp_Trsf, gp_Ax3 
 
 if __name__ == '__main__':
     os.chdir('../..')
@@ -576,7 +576,7 @@ class CBM(object):
         Resolution = self.config.setup['mesh_resolution'] # Nb of Points on Segment0
         global_minLen = round(self.refL/Resolution,5)
             
-        core_cell_area = 1.6*global_minLen**2
+        core_cell_area = 1.0*global_minLen**2
         bw_cell_area = 0.7*global_minLen**2
         web_consolidate_tol = 0.5*global_minLen
 
@@ -700,8 +700,8 @@ class CBM(object):
                 path = '/tmpfs/'+user
                 if not os.path.exists(path):
                     os.makedirs(path)
-                tmp = path+'/'+self.config.filename.split('/')[-1]
-                vabs_filename = tmp.replace('.yml', fstring)
+                #tmp = path+'/'+self.config.filename.split('/')[-1]
+                vabs_filename = path+'/'+self.name+fstring
                     
             else:
                 print('ERROR: ramdisk directory "/tmpfs" does not exist!')
@@ -725,7 +725,7 @@ class CBM(object):
         elif platform.system == 'Windows':
             cmd = ['SONATA/vabs/bin/VABSIII.exe', vabs_filename]
             
-        print('vabs_fname',vabs_filename)
+        #print('vabs_fname',vabs_filename)
         result = None
         counter = 0
         stdout = ''
@@ -785,7 +785,7 @@ class CBM(object):
             #Calculate standart failure criterias
             self.cbm_calc_failurecriteria()
         
-        print(vabs_filename)
+        #print(vabs_filename)
         #REMOVE VABS FILES:
         if rm_vabfiles:
             folder = '/'.join(vabs_filename.split('/')[:-1])

@@ -7,12 +7,12 @@ import math
 import numpy as np 
 from scipy.spatial import cKDTree     
 #Python OCC Libraries
-from OCC.gp import gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec2d
-from OCC.TColgp import (TColgp_Array1OfPnt, TColgp_Array1OfPnt2d, TColgp_HArray1OfPnt2d, 
+from OCC.Core.gp import gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec2d
+from OCC.Core.TColgp import (TColgp_Array1OfPnt, TColgp_Array1OfPnt2d, TColgp_HArray1OfPnt2d, 
                         TColgp_HArray1OfPnt )
-from OCC.BRepBuilderAPI import (BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire,
+from OCC.Core.BRepBuilderAPI import (BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire,
                                 BRepBuilderAPI_Transform )
-from OCC.TopoDS import topods 
+from OCC.Core.TopoDS import topods 
 
 #Own Modules:
 

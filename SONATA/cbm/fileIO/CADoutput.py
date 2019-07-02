@@ -4,9 +4,9 @@ Created on Mon Nov 13 13:37:00 2017
 
 @author: TPflumm
 """
-from OCC.STEPControl import STEPControl_Writer, STEPControl_AsIs, STEPControl_GeometricCurveSet
-from OCC.Interface import Interface_Static_SetCVal
-from OCC.IFSelect import IFSelect_RetDone
+from OCC.Core.STEPControl import STEPControl_Writer, STEPControl_AsIs, STEPControl_GeometricCurveSet
+from OCC.Core.Interface import Interface_Static_SetCVal
+from OCC.Core.IFSelect import IFSelect_RetDone
 
 def export_to_step(itemLst, filename):
     #====================STEP-EXPORT=============================================

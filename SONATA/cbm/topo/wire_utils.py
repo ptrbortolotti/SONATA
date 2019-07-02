@@ -3,17 +3,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #PythonOCC Libraries
-from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax1
-from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection,GCPnts_UniformDeflection, GCPnts_TangentialDeflection, GCPnts_QuasiUniformAbscissa
-from OCC.BRepAdaptor import BRepAdaptor_CompCurve, BRepAdaptor_Curve
+from OCC.Core.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax1
+from OCC.Core.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection,GCPnts_UniformDeflection, GCPnts_TangentialDeflection, GCPnts_QuasiUniformAbscissa
+from OCC.Core.BRepAdaptor import BRepAdaptor_CompCurve, BRepAdaptor_Curve
 
-from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge, BRepBuilderAPI_Transform
-from OCC.BRepLib import BRepLib_MakeFace
-from OCC.BRepTools import BRepTools_WireExplorer
-from OCC.IntCurvesFace import IntCurvesFace_Intersector
-from OCC.Geom import Geom_Plane
-from OCC.TopTools import TopTools_ListIteratorOfListOfShape, TopTools_ListOfShape
-from OCC.TopoDS import topods
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge, BRepBuilderAPI_Transform
+from OCC.Core.BRepLib import BRepLib_MakeFace
+from OCC.Core.BRepTools import BRepTools_WireExplorer
+from OCC.Core.IntCurvesFace import IntCurvesFace_Intersector
+from OCC.Core.Geom import Geom_Plane
+from OCC.Core.TopTools import TopTools_ListIteratorOfListOfShape, TopTools_ListOfShape
+from OCC.Core.TopoDS import topods
 
 #Own Libraries:
 from SONATA.cbm.topo.explorer import WireExplorer

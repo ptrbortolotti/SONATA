@@ -5,7 +5,7 @@ Created on Tue Jan 15 16:10:35 2019
 
 @author: gu32kij
 """
-from OCC.gp import gp_Ax2, gp_Pnt, gp_Dir
+from OCC.Core.gp import gp_Ax2, gp_Pnt, gp_Dir
 
 class Component(object):
     """Describes a Sonata Component Object

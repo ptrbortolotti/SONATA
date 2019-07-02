@@ -11,7 +11,7 @@ import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 
-from OCC.gp import gp_Pnt2d
+from OCC.Core.gp import gp_Pnt2d
 from triangle import triangulate, plot
 
 from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length

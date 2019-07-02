@@ -3,18 +3,18 @@ import math
 import itertools
 
 # from OCC.AIS import AIS_Shape
-from OCC.BRep import BRep_Builder, BRep_Tool
-from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeFace
-from OCC.BRepAdaptor import BRepAdaptor_CompCurve
-from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Vec2d,gp_Lin2d, gp_Dir2d
-from OCC.GCPnts import GCPnts_QuasiUniformAbscissa, GCPnts_AbscissaPoint
-from OCC.Geom2d import Geom2d_Line
-from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
-from OCC.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
+from OCC.Core.BRep import BRep_Builder, BRep_Tool
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeFace
+from OCC.Core.BRepAdaptor import BRepAdaptor_CompCurve
+from OCC.Core.gp import gp_Pnt2d, gp_Pnt, gp_Vec2d,gp_Lin2d, gp_Dir2d
+from OCC.Core.GCPnts import GCPnts_QuasiUniformAbscissa, GCPnts_AbscissaPoint
+from OCC.Core.Geom2d import Geom2d_Line
+from OCC.Core.Geom2dAdaptor import Geom2dAdaptor_Curve
+from OCC.Core.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
 from OCC.Display.SimpleGui import init_display
-from OCC.Quantity import Quantity_Color
-from OCC.BRepLib import breplib_BuildCurves3d
-from OCC.TopoDS import TopoDS_Compound, topods_Face, topods_Edge
+from OCC.Core.Quantity import Quantity_Color
+from OCC.Core.BRepLib import breplib_BuildCurves3d
+from OCC.Core.TopoDS import TopoDS_Compound, topods_Face, topods_Edge
 
 
 from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length, get_BSpline_length, trim_BSplineLst, set_BSplineLst_to_Origin, \

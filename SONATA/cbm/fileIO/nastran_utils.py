@@ -9,13 +9,14 @@ Created on Mon Sep 10 13:02:57 2018
 #def read_VABS_Results(filename):
 import os
 import numpy as np
-from OCC.gp import gp_Pnt, gp_Pnt2d, gp_Vec2d
+from OCC.Core.gp import gp_Pnt, gp_Pnt2d, gp_Vec2d
+
 import platform
 import subprocess
 import shutil
 from datetime import datetime
+
 if __name__ == '__main__':
-    #Sonata Modules: Make Sure to be in the SONATA working directory!
     os.chdir('../../..')  #print(os.getcwd())
     
 from SONATA.cbm.mesh.node import Node

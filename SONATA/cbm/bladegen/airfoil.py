@@ -7,10 +7,10 @@ Created on Mon Sep 04 10:45:43 2017
 import matplotlib.pyplot as plt
 
 #PythonOCC Libraries
-from OCC.gp import gp_Pnt, gp_Vec
-from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire
-from OCC.GeomAPI import GeomAPI_Interpolate
-from OCC.Geom import Geom_BezierCurve
+from OCC.Core.gp import gp_Pnt, gp_Vec
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire
+from OCC.Core.GeomAPI import GeomAPI_Interpolate
+from OCC.Core.Geom import Geom_BezierCurve
 
 #SONATA modules:
 from SONATA.cbm.fileIO.readinput  import UIUCAirfoil

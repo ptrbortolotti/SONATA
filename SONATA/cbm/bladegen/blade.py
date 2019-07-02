@@ -13,12 +13,11 @@ import math
 
 #PythonOCC Libraries
 from OCC.Display.SimpleGui import init_display
-from OCC.gp import gp_Pnt, gp_Dir, gp_Ax1
+from OCC.Core.gp import gp_Pnt, gp_Dir, gp_Ax1
 
 #SONATA Modules
 if __name__ == '__main__':
     os.chdir('../../..')
-
 
 from SONATA.cbm.bladegen.airfoil import Airfoil
 from SONATA.utl.blade_utl import make_loft

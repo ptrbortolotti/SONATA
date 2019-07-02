@@ -6,6 +6,7 @@ Created on Wed Dec 19 09:38:19 2018
 @author: Tobias Pflumm
 """
 import os
+import logging
 
 import numpy as np
 import yaml  
@@ -14,13 +15,14 @@ from jsonschema import validate
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 
-from OCC.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1, gp_Vec, gp_Ax3, gp_Pln, gp_Trsf, gp_Pnt2d
-from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
+from OCC.Core.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1, gp_Vec, gp_Ax3, gp_Pln, gp_Trsf, gp_Pnt2d
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
 from OCC.Display.SimpleGui import init_display
 
 if __name__ == '__main__':
     os.chdir('..')
     
+import SONATA.utl.logging    
 from SONATA.classComponent import Component
 from SONATA.classAirfoil import Airfoil
 from SONATA.classMaterial import read_IEA37_materials
@@ -125,7 +127,7 @@ class Blade(Component):
     
     __slots__ = ('blade_ref_axis', 'chord', 'twist','curvature', 'pitch_axis', 'airfoils',  \
                  'sections', 'beam_properties', 'beam_ref_axis', \
-                 'f_chord', 'f_twist', \
+                 'f_chord', 'f_twist', 'materials', \
                  'blade_ref_axis_BSplineLst', 'f_blade_ref_axis',
                  'beam_ref_axis_BSplineLst', 'f_beam_ref_axis', 
                  'f_pa', 'f_curvature_k1','display', 'start_display', 'add_menu', 'add_function_to_menu', 'anba_beam_properties')
@@ -133,7 +135,20 @@ class Blade(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
         self.beam_properties = None
+
         
+        if 'filename' in kwargs:
+            filename = kwargs.get('filename')
+            with open(filename, 'r') as myfile:
+                inputs  = myfile.read()
+                yml = yaml.load(inputs, Loader = yaml.FullLoader)
+            
+            airfoils = [Airfoil(af) for af in yml.get('airfoils')]
+            self.materials = read_IEA37_materials(yml.get('materials'))
+            
+            self.read_IEA37(yml.get('components').get('blade'), airfoils, **kwargs)
+            
+            
 #    def __repr__(self):
 #        """__repr__ is the built-in function used to compute the "official" 
 #        string reputation of an object, """
@@ -276,7 +291,7 @@ class Blade(Component):
         return BoundaryBSplineLst
         
     
-    def read_IEA37(self, yml, airfoils, materials, stations=None, npts = 11, wt_flag=False):
+    def read_IEA37(self, yml, airfoils, stations=None, npts = 11, wt_flag=False, **kwargs):
         """
         reads the IEA Wind Task 37 style Blade dictionary 
         generates the blade matrix and airfoil to represent all given 
@@ -311,7 +326,6 @@ class Blade(Component):
         airfoil_position = (yml.get('outer_shape_bem').get('airfoil_position').get('grid'),yml.get('outer_shape_bem').get('airfoil_position').get('labels'))
         tmp = []
         for an in airfoil_position[1]: 
-            print(an)
             tmp.append(next((x for x in airfoils if x.name == an), None).id)
         arr = np.asarray([airfoil_position[0],tmp]).T
             
@@ -338,10 +352,10 @@ class Blade(Component):
         
         #Generate CBMConfigs
         if wt_flag:
-            cbmconfigs = iea37_converter(self, cs_pos, yml, materials)
+            cbmconfigs = iea37_converter(self, cs_pos, yml, self.materials)
             
         else:
-            lst = [[cs.get('position'), CBMConfig(cs, materials, iea37=True)] for cs in yml.get('internal_structure_2d_fem').get('sections')]
+            lst = [[cs.get('position'), CBMConfig(cs, self.materials, iea37=True)] for cs in yml.get('internal_structure_2d_fem').get('sections')]
             cbmconfigs = np.asarray(lst)
  
         #Generate CBMs
@@ -351,7 +365,7 @@ class Blade(Component):
             tmp_Ax2 = self._get_local_Ax2(x)
             tmp_blra = self.f_beam_ref_axis.interpolate(x)[0][0]    
             BoundaryBSplineLst = self._interpolate_cbm_boundary(x)
-            tmp.append([x, CBM(cfg, materials = materials, Ax2 = tmp_Ax2, BSplineLst = BoundaryBSplineLst)])
+            tmp.append([x, CBM(cfg, materials = self.materials, Ax2 = tmp_Ax2, BSplineLst = BoundaryBSplineLst)])
         self.sections = np.asarray(tmp)
 
         return None

@@ -7,9 +7,9 @@ Created on Wed Jan 04 13:52:57 2017
 """
 
 
-from OCC.Geom2d import Geom2d_BezierCurve
-from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
-from OCC.Geom2dConvert import geom2dconvert_CurveToBSplineCurve
+from OCC.Core.Geom2d import Geom2d_BezierCurve
+from OCC.Core.Geom2dAPI import Geom2dAPI_PointsToBSpline
+from OCC.Core.Geom2dConvert import geom2dconvert_CurveToBSplineCurve
 
 from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_Pnt2d, get_BSplineLst_D2, trim_BSplineLst, get_BSplineLst_length
 from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d

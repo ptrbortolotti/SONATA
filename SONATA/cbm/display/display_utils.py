@@ -9,16 +9,16 @@ import math
 import numpy as np
 
 from OCC.Display.SimpleGui import init_display
-from OCC.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax3,gp_Ax1
-from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
-from OCC.Graphic3d import (Graphic3d_EF_PDF,
+from OCC.Core.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax3,gp_Ax1
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
+from OCC.Core.Graphic3d import (Graphic3d_EF_PDF,
                              Graphic3d_EF_SVG,
                              Graphic3d_EF_TEX,
                              Graphic3d_EF_PostScript,
                              Graphic3d_EF_EnhPostScript)
 
-from OCC.Quantity import Quantity_Color
-from OCC.AIS import AIS_Shape
+from OCC.Core.Quantity import Quantity_Color
+from OCC.Core.AIS import AIS_Shape
 
 from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, trsf_wire
 from SONATA.utl.trsf import trsf_cbm_to_blfr

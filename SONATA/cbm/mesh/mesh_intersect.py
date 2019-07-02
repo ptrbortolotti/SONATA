@@ -10,14 +10,14 @@ import math
 import shapely.geometry as shp_geom
 
 #PythonOCC Libraries
-from OCC.BRepExtrema import BRepExtrema_DistShapeShape
-from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge,BRepBuilderAPI_MakeWire
-from OCC.GCPnts import GCPnts_QuasiUniformAbscissa
-from OCC.Geom import Geom_Plane
-from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
-from OCC.gp import gp_Pnt2d,gp_Lin2d, gp_Dir2d,gp_Dir,gp_Pnt,gp_Pln,gp_Vec, gp_Vec2d
-from OCC.Geom2d import Geom2d_Line
-from OCC.Geom2dAPI import Geom2dAPI_InterCurveCurve
+from OCC.Core.BRepExtrema import BRepExtrema_DistShapeShape
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge,BRepBuilderAPI_MakeWire
+from OCC.Core.GCPnts import GCPnts_QuasiUniformAbscissa
+from OCC.Core.Geom import Geom_Plane
+from OCC.Core.Geom2dAdaptor import Geom2dAdaptor_Curve
+from OCC.Core.gp import gp_Pnt2d,gp_Lin2d, gp_Dir2d,gp_Dir,gp_Pnt,gp_Pln,gp_Vec, gp_Vec2d
+from OCC.Core.Geom2d import Geom2d_Line
+from OCC.Core.Geom2dAPI import Geom2dAPI_InterCurveCurve
 
 from SONATA.cbm.topo.BSplineLst_utils import findPnt_on_curve
 from SONATA.cbm.mesh.mesh_utils import remove_duplicates_from_list_preserving_order

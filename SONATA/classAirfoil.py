@@ -14,11 +14,11 @@ from urllib.request import urlopen
 from collections import OrderedDict
 
 #PythonOCC Libraries
-from OCC.gp import gp_Pnt, gp_Vec, gp_Dir, gp_Ax1, gp_Trsf
-from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire
-from OCC.GeomAPI import GeomAPI_Interpolate
-from OCC.Geom2dAPI import Geom2dAPI_Interpolate
-from OCC.Geom import Geom_BezierCurve, Geom_Plane
+from OCC.Core.gp import gp_Pnt, gp_Vec, gp_Dir, gp_Ax1, gp_Trsf
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire
+from OCC.Core.GeomAPI import GeomAPI_Interpolate
+from OCC.Core.Geom2dAPI import Geom2dAPI_Interpolate
+from OCC.Core.Geom import Geom_BezierCurve, Geom_Plane
 from OCC.Display.SimpleGui import init_display
 
 

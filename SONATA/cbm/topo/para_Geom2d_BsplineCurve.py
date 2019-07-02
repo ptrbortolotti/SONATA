@@ -1,9 +1,9 @@
 #PythonOCC Libraries
-from OCC.gp import gp_Pnt2d
-from OCC.Geom2d import Geom2d_BSplineCurve
-from OCC.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_PointsToBSpline
-from OCC.TColgp import TColgp_Array1OfPnt2d, TColgp_HArray1OfPnt2d
-from OCC.TColStd import TColStd_Array1OfReal, TColStd_Array1OfInteger
+from OCC.Core.gp import gp_Pnt2d
+from OCC.Core.Geom2d import Geom2d_BSplineCurve
+from OCC.Core.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_PointsToBSpline
+from OCC.Core.TColgp import TColgp_Array1OfPnt2d, TColgp_HArray1OfPnt2d
+from OCC.Core.TColStd import TColStd_Array1OfReal, TColStd_Array1OfInteger
 from OCC.Display.SimpleGui import init_display
 
 #Own Libraries:

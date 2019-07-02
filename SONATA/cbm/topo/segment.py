@@ -1,9 +1,9 @@
 import numpy as np
 
-from OCC.BRepBuilderAPI import BRepBuilderAPI_MakeEdge,BRepBuilderAPI_MakeWire
-from OCC.Geom import Geom_Plane
-from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
-from OCC.gp import gp_Pnt, gp_Pnt2d, gp_Pln, gp_Dir, gp_Vec, gp_Vec2d
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge,BRepBuilderAPI_MakeWire
+from OCC.Core.Geom import Geom_Plane
+from OCC.Core.Geom2dAPI import Geom2dAPI_PointsToBSpline
+from OCC.Core.gp import gp_Pnt, gp_Pnt2d, gp_Pln, gp_Dir, gp_Vec, gp_Vec2d
 
 
 from SONATA.cbm.fileIO.readinput import UIUCAirfoil2d, AirfoilDat2d
@@ -215,7 +215,7 @@ class Segment(object):
         
         """
         p0,v1,v2 = get_BSplineLst_D2(self.BSplineLst, s, 0, 1)
-        print('det_weight_Pnt2d:', p0.Coord(), 's', s)
+        #print('det_weight_Pnt2d:', p0.Coord(), 's', s)
         v = gp_Vec2d(v1.Y(), -v1.X())
         v.Normalize()
         v.Multiply(t)

@@ -6,16 +6,16 @@ import matplotlib.pyplot as plt
 from scipy.optimize import leastsq
 
 #PythonOCC Libraries
-from OCC.gp import gp_Pnt2d, gp_Dir2d, gp_Vec2d, gp_Pnt, gp_Dir, gp_Vec
-from OCC.Geom import Geom_BSplineCurve, Geom_Curve
-from OCC.Geom2d import Geom2d_BSplineCurve, Geom2d_Curve
+from OCC.Core.gp import gp_Pnt2d, gp_Dir2d, gp_Vec2d, gp_Pnt, gp_Dir, gp_Vec
+from OCC.Core.Geom import Geom_BSplineCurve, Geom_Curve
+from OCC.Core.Geom2d import Geom2d_BSplineCurve, Geom2d_Curve
 
-from OCC.Geom2dAdaptor import Geom2dAdaptor_Curve
-from OCC.GeomAdaptor import GeomAdaptor_Curve
-from OCC.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection,GCPnts_UniformDeflection, GCPnts_TangentialDeflection, GCPnts_QuasiUniformAbscissa
-from OCC.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve, Geom2dAPI_ProjectPointOnCurve, Geom2dAPI_PointsToBSpline
-from OCC.Geom2d import Handle_Geom2d_BSplineCurve_DownCast, Geom2d_Line
-from OCC.GeomAPI import GeomAPI_Interpolate, GeomAPI_ProjectPointOnCurve, GeomAPI_IntCS
+from OCC.Core.Geom2dAdaptor import Geom2dAdaptor_Curve
+from OCC.Core.GeomAdaptor import GeomAdaptor_Curve
+from OCC.Core.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformDeflection,GCPnts_UniformDeflection, GCPnts_TangentialDeflection, GCPnts_QuasiUniformAbscissa
+from OCC.Core.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_InterCurveCurve, Geom2dAPI_ProjectPointOnCurve, Geom2dAPI_PointsToBSpline
+from OCC.Core.Geom2d import Handle_Geom2d_BSplineCurve_DownCast, Geom2d_Line
+from OCC.Core.GeomAPI import GeomAPI_Interpolate, GeomAPI_ProjectPointOnCurve, GeomAPI_IntCS
 #Own Libraries:
 from SONATA.cbm.topo.utils import calc_DCT_angles, TColgp_HArray1OfPnt2d_from_nparray, Pnt2dLst_to_npArray, \
                     discrete_stepsize, curvature_of_curve, isclose, unique_rows, \

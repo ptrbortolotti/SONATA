@@ -7,9 +7,9 @@ Created on Fri Dec 22 10:30:01 2017
 
 import numpy as np
 
-from OCC.gp import gp_Vec2d, gp_Pnt2d
-from OCC.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
-from OCC.Geom2dAPI import Geom2dAPI_PointsToBSpline
+from OCC.Core.gp import gp_Vec2d, gp_Pnt2d
+from OCC.Core.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
+from OCC.Core.Geom2dAPI import Geom2dAPI_PointsToBSpline
 
 from SONATA.cbm.mesh.node import Node
 from SONATA.cbm.mesh.cell import Cell

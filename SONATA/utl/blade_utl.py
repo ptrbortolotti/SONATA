@@ -9,8 +9,8 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 #PythonOCC Libraries
-from OCC.TopoDS import TopoDS_Wire,  TopoDS_Vertex
-from OCC.BRepOffsetAPI import BRepOffsetAPI_ThruSections
+from OCC.Core.TopoDS import TopoDS_Wire,  TopoDS_Vertex
+from OCC.Core.BRepOffsetAPI import BRepOffsetAPI_ThruSections
 
 from SONATA.cbm.topo.utils import PntLst_to_npArray, lin_pln_intersect, Array_to_PntLst
 
