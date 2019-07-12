@@ -273,6 +273,10 @@ class Segment(object):
         '''
         More Commenting!!!!
         '''
+        self.cells = []   #list of both layer and c_cells
+        self.l_cells = [] #list of layer cells
+        self.c_cells = [] #list of core cells
+        
         if self.LayerLst:
             np.set_printoptions(suppress=True)
             #initialize inv_ivLst
