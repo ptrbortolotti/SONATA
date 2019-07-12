@@ -760,8 +760,8 @@ class CBM(object):
                 #VABS Postprocessing:
                 result = BeamSectionalProps(vabs_filename+'.K')
             except Exception as e:
-                    if 'All "vabsiii" licenses in us' in stdout:
-                        time.sleep(0.2)
+                    if 'All "vabsiii" licenses in us' in stdout or 'Something wrong with the license file' in stdout:
+                        time.sleep(2)
                         counter += 1
                     else:
                         print(e)
