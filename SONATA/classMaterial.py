@@ -224,13 +224,15 @@ class AnisotropicMaterial(Material):
 def read_IEA37_materials(yml):
     materials = OrderedDict()
     for i,mat in enumerate(yml):
-        ID = i+1
+        ID = mat['id']
         if mat.get('orth') == 0:
             materials[ID] = IsotropicMaterial(ID = ID, **mat)
         elif mat.get('orth') == 1:
             materials[ID] = OrthotropicMaterial(ID = ID, **mat)
         elif mat.get('orth') == 2:
              materials[ID] =AnisotropicMaterial(ID = ID, **mat)
+    
+    materials = OrderedDict(sorted(materials.items()))
     return materials
 
 
@@ -259,15 +261,15 @@ if __name__ == '__main__':
     b = OrthotropicMaterial(ID=2, name='orth_mat', rho=0.5)
     c = AnisotropicMaterial(ID=3, name='aniso_mat', rho=0.6)
 
-    materials1 = read_yml_materials('examples/mat_db.yml')
-
-    with open('jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
-        inputs  = myfile.read()
-    wt_data     = yaml.load(inputs)    
-    materials2 = read_IEA37_materials(wt_data['materials'])
+#    materials1 = read_yml_materials('examples/mat_db.yml')
+#
+#    with open('jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
+#        inputs  = myfile.read()
+#    wt_data     = yaml.load(inputs)    
+#    materials2 = read_IEA37_materials(wt_data['materials'])
     
 
-    with open('jobs/VariSpeed/UH-60A_adv.yml', 'r') as myfile:
+    with open('jobs/MonteCarlo/UH-60A_adv.yml', 'r') as myfile:
         inputs  = myfile.read()
-    data     = yaml.load(inputs)['materials']    
+    data     = yaml.load(inputs)['materials']
     materials3 = read_IEA37_materials(data)
