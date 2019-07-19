@@ -80,7 +80,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
         for idx,item in enumerate(b_BSplineLst):
             first =  item.FirstParameter()
             last = item.LastParameter()
-            tol = 1e-7*refL
+            tol = 2e-6*refL
             Umin = first-(last-first)*tol
             Umax = last+(last-first)*tol
             projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item,Umin,Umax)
@@ -125,7 +125,15 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
         #==================DETECT CORNERS====================================== 
         if len(pPnts) == 0: 
             print('ERROR:\t No Projection found for node,', node.id)
-            
+#            for j in range(1,projection.NbPoints()+1):
+#                if projection.Distance(j)<=distance:
+#                    pPnts.append(projection.Point(j))
+#                    pPara.append(projection.Parameter(j))
+#                    pIdx.append(idx)
+#                else: 
+#                    print(projection.Distance(j), distance, node.Pnt2d.Coord())
+#                    print(Umin, Umax)
+                    
         elif len(pPnts) == 1: 
             b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))      
 
