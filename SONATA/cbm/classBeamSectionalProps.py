@@ -181,18 +181,18 @@ class BeamSectionalProps(object):
         mask[5,4] = True
         return self.MM*mask
     
-    @property
-    def CS(self):
-        tmp = np.delete(self.TS,[1,3],axis=0)
-        return np.delete(tmp,[1,3],axis=1)
+#    @property
+#    def CS(self):
+#        tmp = np.delete(self.TS,[1,2],axis=0)
+#        return np.delete(tmp,[1,2],axis=1)
 
     @property
     def TF(self):
         return np.linalg.inv(self.TS)
 
-    @property
-    def CF(self):
-        return np.linalg.inv(self.CS)
+#    @property
+#    def CF(self):
+#        return np.linalg.inv(self.CS)
     
     @property
     def VF(self):
