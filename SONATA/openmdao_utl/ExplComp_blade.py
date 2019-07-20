@@ -32,9 +32,14 @@ class ExplComp_Blade(ExplicitComponent):
         self.set_partials()
         
     def set_input(self):        
-        self.add_input('m1_E', val=np.array([139.360e9, 12.615e9, 12.615e9]), desc='material 1 - elastic modulus')  
+        self.add_input('m1_E', val=np.array([139.360e9, 12.615e9]), desc='material 1 - elastic modulus')
+        self.add_input('m1_G_lt', val=np.array([5.892e9]), desc='material 1 - shear modulus')
         self.add_input('m1_rho', val=1.536e3, desc='material 1 - density')
- 
+        
+        self.add_input('m3_E', val=np.array([177.760e9, 12.615e9]), desc='material 3 - elastic modulus')
+        self.add_input('m3_G_lt', val=np.array([5.892e9]), desc='material 3 - shear modulus')
+        self.add_input('m3_rho', val=1.572e3, desc='material 3 - density')
+
 #        self.add_input('m3_E', val=np.array([139.360e9, 12.615e9, 12.615e9]))  
 #        self.add_input('m3_rho', val=1.572e3)
 #
@@ -52,7 +57,7 @@ class ExplComp_Blade(ExplicitComponent):
 #        self.add_input('s_w2', val=0.57)
 #        
     def set_output(self):
-        self.add_output('BeamProps', val=np.zeros((11,29)), desc='Massterms(6), Stiffness(21), damping(1) and coordinate(1)')   
+        self.add_output('BeamProps', val=np.zeros((13,29)), desc='Massterms(6), Stiffness(21), damping(1) and coordinate(1)')   
         
     def set_partials(self):
          self.declare_partials('*', '*', method='fd', step=0.05) #finite differences all partials
@@ -84,7 +89,7 @@ class ExplComp_Blade(ExplicitComponent):
         try:
             with HiddenPrints():
                 self.job.blade_gen_section(mesh_flag = True, split_quads=False)
-                print(inputs['m1_E'], self.job.materials[1].E)
+            print(inputs['m1_E'], self.job.materials[1].E)
             self.job.blade_run_vabs(ramdisk=True)
             beam = self.job.blade_exp_beam_props(solver='vabs', cosy='local', eta_offset=0.1)
             beamProps = coef.join_beam_props(beam, coef.refBeamProp())
@@ -101,10 +106,21 @@ class ExplComp_Blade(ExplicitComponent):
     def connect_input_to_config(self, inputs):
         
         #Materialprops:
-        self.job.materials[1].E = inputs['m1_E']
+        self.job.materials[1].E[0] = inputs['m1_E'][0]
+        self.job.materials[1].E[1] = inputs['m1_E'][1]
+        self.job.materials[1].E[2] = inputs['m1_E'][1]
+        self.job.materials[1].G[0] = inputs['m1_G_lt']
+        self.job.materials[1].G[1] = inputs['m1_G_lt']
         self.job.materials[1].rho = inputs['m1_rho']
         
-        #Architecture:
+        self.job.materials[3].E[0] = inputs['m3_E'][0]
+        self.job.materials[3].E[1] = inputs['m3_E'][1]
+        self.job.materials[3].E[2] = inputs['m3_E'][1]
+        self.job.materials[3].G[0] = inputs['m3_G_lt']
+        self.job.materials[3].G[1] = inputs['m3_G_lt']
+        self.job.materials[3].rho = inputs['m3_rho']
+  
+      #Architecture:
 #        self.job.config.webs[1]['Pos1'] = inputs['s_w1'][0]
 #        self.job.config.webs[1]['Pos2'] = 1-self.job.config.webs[1]['Pos1']
 

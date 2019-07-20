@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 """
 Created on Wed Jun 26 16:00:30 2019
 
@@ -18,13 +19,12 @@ import SONATA.Pymore.utl.coef as coef
 from SONATA.Pymore.app.marc_flight_analysis import flight_analysis
 from SONATA.Pymore.app.marc_reference_utl import plot_ref_data
 from SONATA.Pymore.app.marc_flight_analysis_utl import interp_dui, plot_dui, \
-                    plot_sensors, extract_blade_data, plot_rotor_polarcontour
-
+                    plot_sensors, extract_blade_data, plot_rotor_polarcontour, load_pmfa_config, interp_azimuth
+from SONATA.Pymore.app.fft import extract_vibratory_hubloads
 
 class ExplComp_Flight_Analysis(ExplicitComponent):
     """
-    A simple Frequency Analysis ExplicitComponent that computes the the fanplot 
-    for the rotor with the input beam properties of the blade
+
     """
     def __init__(self):
         super().__init__()
@@ -35,28 +35,46 @@ class ExplComp_Flight_Analysis(ExplicitComponent):
         self.set_input()
         self.set_output()
         self.set_partials()
+        (self.path, self.dui, self.sensors, beamprops, massprops) = load_pmfa_config('jobs/MonteCarlo/uh60a_c8513.yml')
+        self.savepath = filename_generator(directory = '/scratch/gu32kij/uh60a_c8513', string='uh60a_c8513', file_extension= '.pkl')
         
     def set_input(self):        
-        self.add_input('BeamProps', val=np.zeros((11,29)), desc='Massterms(6), Stiffness(21), damping(1) and coordinate(1)')
+        self.add_input('BeamProps', val=np.zeros((13,29)), desc='Massterms(6), Stiffness(21), damping(1) and coordinate(1)')
         
     def set_output(self):
-        self.add_output('CT_ff', val=np.zeros((465)))  
+        self.add_output('vibratory_hubloads', val=np.zeros((6)))
+        self.add_output('mean_elastic_tip_response', val=np.zeros((3,181)))
+        self.add_output('stdvs_elastic_tip_response', val=np.zeros((3,181)))
         
     def set_partials(self):
         self.declare_partials('*', '*', method='fd', step=0.05) #finite differences all partials
 
     def compute(self, inputs, outputs):       
-        with open('SONATA/Pymore/app/uh60a_8513test.yml', 'r') as f:
-             yml = yaml.load(f.read(), Loader = yaml.FullLoader).get('pmfa')
-            
-        dui = interp_dui(yml.get('dui'))    
-        path = yml.get('path')
-        sensors = yml.get('sensors')
-        
         BeamProps = {'BLADE_BP_AB01': inputs['BeamProps']}
-        savepath = filename_generator(directory = '/scratch/gu32kij', string='uh60a_c8513', file_extension= '.pkl')
-        data = flight_analysis(path, dui, beamprops = BeamProps, sensors=sensors, savepath=savepath)
+       
+        data = flight_analysis(self.path, self.dui, beamprops = BeamProps, sensors=self.sensors, savepath=self.savepath)
         
-        data['Psi'] = np.deg2rad(-data['SHAFT_SS_POS'][:,3]+180)
-        data['CT'] = data['SHAFT_SS_HUBFORCES'][:,2]*2.4
-        outputs['CT_ff'] = data['CT'][-465:]
+        hubforces = data['SHAFT_SS_HUBFORCES']
+        time = data['time']
+        samples=465
+        
+         #========================= Normalized Vibratory Hubloads  ============
+        peaks = extract_vibratory_hubloads(time, hubforces, samples=samples)
+        steady_thrust = -np.mean(data['SHAFT_SS_HUBFORCES'][:,2][-samples:])
+        seady_torque = np.mean(data['SHAFT_SS_HUBFORCES'][:,5][-samples:])
+
+        #======================== Blade Tip-Response over azimuth =============
+        psi = data['Psi'][-samples:]
+        
+        y = data['BLADE_SS_POSTIP_BLADEMF_BE01'][-samples:,2]
+        (xint,mean_elastic_flap_response, stdvs_elastic_flap_response) = interp_azimuth(psi, y)
+        
+        y = data['BLADE_SS_POSTIP_BLADEMF_BE01'][-samples:,1]
+        (xint,mean_elastic_lag_response, stdvs_elastic_lag_response) = interp_azimuth(psi, y)
+        
+        y = data['BLADE_SS_POSTIP_BLADEMF_BE01'][-samples:,3]*180/np.pi
+        (xint,mean_elastic_torsion_response, stdvs_elastic_torsion_response) = interp_azimuth(psi, y)
+        
+        outputs['vibratory_hubloads'] = np.hstack((peaks[:3,1]/steady_thrust, peaks[3:,1]/seady_torque))
+        outputs['mean_elastic_tip_response'] = np.array([xint, mean_elastic_flap_response, mean_elastic_lag_response, mean_elastic_torsion_response])
+        outputs['stdvs_elastic_tip_response'] = np.array([xint, stdvs_elastic_flap_response, stdvs_elastic_lag_response, stdvs_elastic_torsion_response])
