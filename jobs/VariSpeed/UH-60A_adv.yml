@@ -51,7 +51,6 @@ components:
                     grid: [0.1491807, 0.2431389, 0.9300000, 1.0000000]
                     values: [0.0000000, 0.0000000, 0.0000000, 0.0000000]
 
-            beam_reference_axis: *blra
         #-------------------- C B M ------------------------------------
         internal_structure_2d_fem:
             sections:
