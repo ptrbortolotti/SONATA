@@ -125,43 +125,59 @@ class Blade(Component):
 
     """ 
     
-    __slots__ = ('blade_ref_axis', 'chord', 'twist','curvature', 'pitch_axis', 'airfoils',  \
-                 'sections', 'beam_properties', 'beam_ref_axis', \
-                 'f_chord', 'f_twist', 'materials', \
+    __slots__ = ('blade_ref_axis', 'chord', 'twist','curvature', 'pitch_axis', 'airfoils',
+                 'sections', 'beam_properties', 'beam_ref_axis',
+                 'f_chord', 'f_twist', 'materials',
                  'blade_ref_axis_BSplineLst', 'f_blade_ref_axis',
                  'beam_ref_axis_BSplineLst', 'f_beam_ref_axis', 
-                 'f_pa', 'f_curvature_k1','display', 'start_display', 'add_menu', 'add_function_to_menu', 'anba_beam_properties')
+                 'f_pa', 'f_curvature_k1','display', 'start_display',
+                 'add_menu', 'add_function_to_menu', 'anba_beam_properties', 'yml')
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
         self.beam_properties = None
 
-        
+
+
+
+
         if 'filename' in kwargs:
             filename = kwargs.get('filename')
             with open(filename, 'r') as myfile:
                 inputs  = myfile.read()
                 yml = yaml.load(inputs, Loader = yaml.FullLoader)
+                self.yml = yml
+
             
             airfoils = [Airfoil(af) for af in yml.get('airfoils')]
             self.materials = read_IEA37_materials(yml.get('materials'))
             
             self.read_IEA37(yml.get('components').get('blade'), airfoils, **kwargs)
-            
+
             
 #    def __repr__(self):
 #        """__repr__ is the built-in function used to compute the "official" 
 #        string reputation of an object, """
 #        return 'Blade: '+ str(self.name)
     
-    def _read_ref_axes(self, yml_ra):
+    def _read_ref_axes(self, yml_ra, flag_ref_axes_wt):
         """
         
         """
-        tmp_ra = {} 
-        tmp_ra['x'] = np.asarray((yml_ra.get('x').get('grid'),yml_ra.get('x').get('values'))).T
-        tmp_ra['y'] = np.asarray((yml_ra.get('y').get('grid'),yml_ra.get('y').get('values'))).T
-        tmp_ra['z'] = np.asarray((yml_ra.get('z').get('grid'),yml_ra.get('z').get('values'))).T
+        tmp_ra = {}
+
+        if flag_ref_axes_wt:
+            # adapt reference axis provided in yaml file to match with SONATA (equiv. rotorcraft) format
+            # x_SONATA equiv. to z_wind
+            # y_SONATA equiv. to -y_wind
+            # z_SONATA equiv. to x_wind
+            tmp_ra['x'] = np.asarray((yml_ra.get('z').get('grid'), yml_ra.get('z').get('values'))).T
+            tmp_ra['y'] = np.asarray((yml_ra.get('y').get('grid'), np.negative(yml_ra.get('y').get('values')))).T
+            tmp_ra['z'] = np.asarray((yml_ra.get('x').get('grid'), yml_ra.get('x').get('values'))).T
+        else:
+            tmp_ra['x'] = np.asarray((yml_ra.get('x').get('grid'),yml_ra.get('x').get('values'))).T
+            tmp_ra['y'] = np.asarray((yml_ra.get('y').get('grid'),yml_ra.get('y').get('values'))).T
+            tmp_ra['z'] = np.asarray((yml_ra.get('z').get('grid'),yml_ra.get('z').get('values'))).T
         
         f_ref_axis_x = interp1d(tmp_ra['x'][:,0], tmp_ra['x'][:,1], bounds_error=False, fill_value='extrapolate')
         f_ref_axis_y = interp1d(tmp_ra['y'][:,0], tmp_ra['y'][:,1], bounds_error=False, fill_value='extrapolate')
@@ -291,7 +307,7 @@ class Blade(Component):
         return BoundaryBSplineLst
         
     
-    def read_IEA37(self, yml, airfoils, stations=None, npts = 11, wt_flag=False, **kwargs):
+    def read_IEA37(self, yml, airfoils, stations=None, npts = 11, **kwargs):
         """
         reads the IEA Wind Task 37 style Blade dictionary 
         generates the blade matrix and airfoil to represent all given 
@@ -310,8 +326,13 @@ class Blade(Component):
         print('STATUS:\t Reading IAE37 Definition for Blade: %s' % (self.name))
         
         #Read blade & beam reference axis and create BSplineLst & interpolation instance
-        (self.blade_ref_axis_BSplineLst, self.f_blade_ref_axis, tmp_blra) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'))
-        (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('beam_reference_axis'))
+        (self.blade_ref_axis_BSplineLst, self.f_blade_ref_axis, tmp_blra) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags').get('flag_ref_axes_wt'))
+
+        if not yml.get('outer_shape_bem').get('beam_reference_axis'):
+            #  In case beam reference axis is not defined in yaml file, use identical coordinates for beam reference and reference axis
+            (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags').get('flag_ref_axes_wt'))
+        else:
+            (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('beam_reference_axis'), flag_ref_axes_wt=kwargs.get('flags').get('flag_ref_axes_wt'))
         
         #Read chord, twist and nondim. pitch axis location and create interpolation
         tmp_chord = np.asarray((yml.get('outer_shape_bem').get('chord').get('grid'),yml.get('outer_shape_bem').get('chord').get('values'))).T
@@ -328,9 +349,9 @@ class Blade(Component):
         for an in airfoil_position[1]: 
             tmp.append(next((x for x in airfoils if x.name == an), None).id)
         arr = np.asarray([airfoil_position[0],tmp]).T
-            
+
         #Read CBM Positions
-        if wt_flag:
+        if kwargs.get('flags').get('flag_wt_ontology'):
             if stations: 
                 cs_pos = stations
             else:
@@ -351,7 +372,7 @@ class Blade(Component):
         self.f_curvature_k1 = interp1d(x, np.gradient(self.twist[:,1],self.beam_ref_axis[:,1]))
         
         #Generate CBMConfigs
-        if wt_flag:
+        if kwargs.get('flags').get('flag_wt_ontology'):
             cbmconfigs = iea37_converter(self, cs_pos, yml, self.materials)
             
         else:
@@ -645,7 +666,7 @@ class Blade(Component):
         """      
         for (x,cs) in self.sections:
             string = 'Blade: '+ str(self.name) + '; Section : '+str(x)
-            cs.cbm_post_2dmesh(title=string, **kwargs)
+            cs.cbm_post_2dmesh(title=string, section = str(x), **kwargs)
         return None    
     
     

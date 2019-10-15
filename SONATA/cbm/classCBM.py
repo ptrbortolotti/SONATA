@@ -713,7 +713,7 @@ class CBM(object):
             print('config_filename')
             vabs_filename = self.config.filename.replace('.yml', fstring)
         
-        print('STATUS:\t Running VABS for Constitutive modeling:')
+        print('STATUS:\t Running VABS for constitutive modeling:')
         
         if platform.system() == 'Linux':
             #executable = 'SONATA/vabs/bin/VABSIII'
@@ -723,7 +723,11 @@ class CBM(object):
             cmd = ['VABSIII', vabs_filename]
             
         elif platform.system == 'Windows':
-            cmd = ['SONATA/vabs/bin/VABSIII.exe', vabs_filename]
+            cmd = ['VABS/bin/VABSIII.exe', vabs_filename]
+
+        # Mac
+        elif  platform.system() == 'Darwin':
+            cmd = ['wine', '/Users/rfeil/work/8_VABS/vabs_WIN/AnalySwift/VABS/VABSIII.exe', vabs_filename]
             
         #print('vabs_fname',vabs_filename)
         result = None
@@ -744,7 +748,8 @@ class CBM(object):
                 else:
                     export_cells_for_VABS(self.mesh, nodes, vabs_filename, self.config.vabs_cfg, self.materials)
                     stdout = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
-                
+                    subprocess.call(cmd, shell=True)
+
                 stdout = stdout.replace('\r\n\r\n','\n\t   -')
                 stdout = stdout.replace('\r\n','\n\t   -')
                 stdout = stdout.replace('\n\n','\n\t   -')
@@ -893,14 +898,14 @@ class CBM(object):
             Uses the string to look for the cell attributes. 
             The default attribute is MatID. Possible other attributes can be 
             fiber orientation (theta_3) or strains and stresses. 
-            If BeamProperties are allready calculated by VABS or something 
+            If BeamProperties are already calculated by VABS or something
             similar, elastic-axis, center-of-gravity... are displayed.
         title : string, optional
             Title to be placed over the plot.
         **kw : keyword arguments, optional
             are passed to the lower "plot_cells" function. Such options are: 
             VABSProperties=None, title='None', plotTheta11=False, 
-            plotDisplacement=False
+            plotDisplacement=False, savepath
             
         Returns
         ----------

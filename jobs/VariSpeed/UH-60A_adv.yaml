@@ -57,7 +57,7 @@ components:
         
               - position: 0.4
                 trim_mass: False
-                mesh_resolution: 450
+                mesh_resolution: 450 # ca 450 punkte auf der aeusseren Kurve. messing von innen nach aussen.
                 
                 #........... w e b s ...........
                 webs:

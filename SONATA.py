@@ -39,7 +39,7 @@ materials = read_IEA37_materials(yml.get('materials'))
 job = Blade(filename='./jobs/VariSpeed/UH-60A_adv.yml')
 job.read_IEA37(yml.get('components').get('blade'), airfoils, materials, wt_flag=False)
 
-job.blade_gen_section(mesh_flag = True, split_quads=False)
+#job.blade_gen_section(mesh_flag = True, split_quads=False)
 job.blade_run_vabs()
 #job.blade_run_anbax()
 

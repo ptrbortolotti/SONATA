@@ -170,7 +170,8 @@ def iea37_converter(blade, cs_pos, byml, materials):
                     id_web          = id_webs[i][(sec['web'])]['id']
                     for id_mat in range(1,len(materials)):
                         if sec['material'] == materials[id_mat].name:
-                        
+
+
                             if isinstance(materials[id_mat].E, float): # Isotropic -> fill the web
                                 tmp2[i]['segments'][id_web]['filler'] = materials[id_mat].name
                                 
@@ -193,12 +194,13 @@ def iea37_converter(blade, cs_pos, byml, materials):
                                     
                                 if tmp2[i]['segments'][id_web + 1]['layup'] != [{}]:    
                                     tmp2[i]['segments'][id_web + 1]['layup'].append({})
-                                    id_layer_web_te[i] = id_layer_web_te[i] + 1       
+                                    id_layer_web_te[i] = id_layer_web_te[i] + 1
+
 
                                     
                                 tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web_le[i]]['name'] = 'web_' + str(int(id_web/2)) + '_' + sec['material']  + '_' + str(x[i])
                                 tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web_te[i]]['name'] = 'web_' + str(int(id_web/2)) + '_' + sec['material']  + '_' + str(x[i])
-                                
+
                                 tmp2[i]['segments'][id_web - 1]['layup'][id_layer_web_le[i]]['material_name'] = sec['material']
                                 tmp2[i]['segments'][id_web + 1]['layup'][id_layer_web_te[i]]['material_name'] = sec['material']
                                 
