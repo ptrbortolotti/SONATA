@@ -665,6 +665,7 @@ class Blade(Component):
         plots the different sections of the blade
         """      
         for (x,cs) in self.sections:
+            print('STATUS:\t Plotting section at grid location %s' % x)
             string = 'Blade: '+ str(self.name) + '; Section : '+str(x)
             cs.cbm_post_2dmesh(title=string, section = str(x), **kwargs)
         return None    
@@ -719,8 +720,8 @@ class Blade(Component):
                 
         self.display.View_Iso()
         self.display.FitAll()
-        self.start_display()   
-        return None         
+        self.start_display()
+
 
 
 # ====== M A I N ==============
