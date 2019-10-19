@@ -47,6 +47,8 @@ license
 *.CATMaterial
 *.out*
 *.zip
+*.png
+*.dat
 
 #ignored folders
 #jobs/PBortolotti

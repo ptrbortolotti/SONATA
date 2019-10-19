@@ -8,7 +8,10 @@ import matplotlib as plt
 import math
 import numpy as np
 
-from OCC.Display.SimpleGui import init_display
+try:
+    from OCC.Display.SimpleGui import init_display
+except:
+    pass
 from OCC.Core.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax3,gp_Ax1
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
 from OCC.Core.Graphic3d import (Graphic3d_EF_PDF,

@@ -4,8 +4,10 @@ from OCC.Core.Geom2d import Geom2d_BSplineCurve
 from OCC.Core.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_PointsToBSpline
 from OCC.Core.TColgp import TColgp_Array1OfPnt2d, TColgp_HArray1OfPnt2d
 from OCC.Core.TColStd import TColStd_Array1OfReal, TColStd_Array1OfInteger
-from OCC.Display.SimpleGui import init_display
-
+try:
+    from OCC.Display.SimpleGui import init_display
+except:
+    pass
 #Own Libraries:
 from SONATA.cbm.topo.utils import TColgp_Array1OfPnt2d_from_nparray, _Tcol_dim_1, TColgp_Array1OfPnt2d_to_array, TColStd_to_array
 

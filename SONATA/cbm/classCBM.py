@@ -21,7 +21,10 @@ import copy
 
 
 #PythonOCC Modules
-from OCC.Display.SimpleGui import init_display
+try:
+    from OCC.Display.SimpleGui import init_display
+except:
+    pass
 from OCC.Core.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1, gp_Trsf, gp_Ax3 
 
 if __name__ == '__main__':

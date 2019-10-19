@@ -17,8 +17,10 @@ import matplotlib.pyplot as plt
 
 from OCC.Core.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1, gp_Vec, gp_Ax3, gp_Pln, gp_Trsf, gp_Pnt2d
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
-from OCC.Display.SimpleGui import init_display
-
+try:
+    from OCC.Display.SimpleGui import init_display
+except:
+    pass
 if __name__ == '__main__':
     os.chdir('..')
     

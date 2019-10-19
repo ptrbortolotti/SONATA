@@ -49,7 +49,7 @@ def arc_length(x, y):
 def iea37_converter(blade, cs_pos, byml, materials):
     """
     Converts the 
-    @author: Pietro Bortolotti
+    @author: Pietro Bortolotti, Roland Feil
     
     Parameters
     ----------
@@ -71,22 +71,35 @@ def iea37_converter(blade, cs_pos, byml, materials):
 
     # Segments and webs
     tmp0    = byml.get('internal_structure_2d_fem').get('webs')
-    #x = blade.x
-    x = cs_pos #np.asarray((byml.get('internal_structure_2d_fem').get('positions')))
+    x           = cs_pos # Non dimensional span position of the stations
+    webs_exist  = np.zeros_like(x) # Flag to set whether webs have non zero thickness, initialized at 0
 
     if tmp0 == None:
         n_webs = 0
     else:
-        n_webs  = len(tmp0)
+        n_webs  = len(tmp0) # Max number of webs along span
 
     tmp2    = [dict([('position', x[n])]) for n in range(len(x))]
     id_webs = [dict() for n in range(len(x))]
-
+    
+    # Get sections information and init the CBM instances.
+    tmp1 = byml.get('internal_structure_2d_fem').get('layers')
+    
+    # Set the webs_exist flag. This checks whether at every station there is at least a non-zero thickness layer defined in the web. If there isn't, webs are not built even if they are defined in terms of start and end positions
+    for i in range(len(x)):
+        for idx_sec, sec in enumerate(tmp1):
+            if x[i] >= sec['thickness']['grid'][0] and x[i] <= sec['thickness']['grid'][-1]:
+                set_interp_thick = PchipInterpolator(sec['thickness']['grid'], sec['thickness']['values'])
+                thick_i = set_interp_thick(x[i])
+                if thick_i > 1.e-6:
+                    if 'web' in sec.keys():
+                        webs_exist[i]   = 1
+    
     for i in range(len(x)):
         n_webs_i = 0
         for j in range(n_webs):
 
-            if x[i] >=tmp0[j]['start_nd_arc']['grid'][0] and x[i] <=tmp0[j]['start_nd_arc']['grid'][-1]:
+            if x[i] >=tmp0[j]['start_nd_arc']['grid'][0] and x[i] <=tmp0[j]['start_nd_arc']['grid'][-1] and webs_exist[i] == 1:
                 n_webs_i = n_webs_i + 1
 
                 id_webs[i][tmp0[j]['name']]       = {}
@@ -107,8 +120,6 @@ def iea37_converter(blade, cs_pos, byml, materials):
         else:
             tmp2[i]['segments'] = [dict([('id', n),('layup', [{}]),('filler', None)]) for n in range(2 * n_webs_i + 2)]
 
-    # Get sections information and init the CBM instances.
-    tmp1 = byml.get('internal_structure_2d_fem').get('layers')
 
     # Composite stacking sequences
     thick_web = np.zeros([len(x),n_webs])
@@ -131,114 +142,114 @@ def iea37_converter(blade, cs_pos, byml, materials):
         for idx_sec, sec in enumerate(tmp1):
 
             if x[i] >= sec['thickness']['grid'][0] and x[i] <= sec['thickness']['grid'][-1]:
+                
+                set_interp_thick = PchipInterpolator(sec['thickness']['grid'], sec['thickness']['values'])
+                thick_i = set_interp_thick(x[i])
 
+                if thick_i > 1.e-6:
+                    if 'web' not in sec.keys():                        
+                        if idx_sec>0:
+                            tmp2[i]['segments'][0]['layup'].append({})
+                        tmp2[i]['segments'][0]['layup'][id_layer]['thickness']     = thick_i
+                        tmp2[i]['segments'][0]['layup'][id_layer]['name']          = sec['material'] + '_' + str(x[i])
+                        tmp2[i]['segments'][0]['layup'][id_layer]['material_name'] = sec['material']
+                        if 'start_nd_arc' in sec.keys():
 
+                            if 'fixed' not in sec['start_nd_arc']:
+                                set_interp = PchipInterpolator(sec['start_nd_arc']['grid'], sec['start_nd_arc']['values'])
+                                tmp2[i]['segments'][0]['layup'][id_layer]['start']     = set_interp(x[i])
+                            else:
+                                for j in range(idx_sec):
+                                    if tmp1[j]['name'] == sec['start_nd_arc']['fixed']:
+                                        set_interp = PchipInterpolator(tmp1[j]['end_nd_arc']['grid'], tmp1[j]['end_nd_arc']['values'])
+                                        tmp2[i]['segments'][0]['layup'][id_layer]['start']     = set_interp(x[i])
 
-                if 'web' not in sec.keys():
-                    if idx_sec>0:
-                        tmp2[i]['segments'][0]['layup'].append({})
-                    tmp2[i]['segments'][0]['layup'][id_layer]['name']          = sec['material'] + '_' + str(x[i])
-                    tmp2[i]['segments'][0]['layup'][id_layer]['material_name'] = sec['material']
-                    if 'start_nd_arc' in sec.keys():
-
-                        if 'fixed' not in sec['start_nd_arc']:
-                            set_interp = PchipInterpolator(sec['start_nd_arc']['grid'], sec['start_nd_arc']['values'])
-                            tmp2[i]['segments'][0]['layup'][id_layer]['start']     = set_interp(x[i])
+                            if 'fixed' not in sec['end_nd_arc']:
+                                set_interp = PchipInterpolator(sec['end_nd_arc']['grid'], sec['end_nd_arc']['values'])
+                                tmp2[i]['segments'][0]['layup'][id_layer]['end']       = set_interp(x[i])
+                            else:
+                                for j in range(idx_sec):
+                                    if tmp1[j]['name'] == sec['end_nd_arc']['fixed']:
+                                        set_interp = PchipInterpolator(tmp1[j]['start_nd_arc']['grid'], tmp1[j]['start_nd_arc']['values'])
+                                        tmp2[i]['segments'][0]['layup'][id_layer]['end']     = set_interp(x[i])
                         else:
-                            for j in range(idx_sec):
-                                if tmp1[j]['name'] == sec['start_nd_arc']['fixed']:
-                                    set_interp = PchipInterpolator(tmp1[j]['end_nd_arc']['grid'], tmp1[j]['end_nd_arc']['values'])
-                                    tmp2[i]['segments'][0]['layup'][id_layer]['start']     = set_interp(x[i])
+                            tmp2[i]['segments'][0]['layup'][id_layer]['start']     = 0.
+                            tmp2[i]['segments'][0]['layup'][id_layer]['end']       = 1.
 
-                        if 'fixed' not in sec['end_nd_arc']:
-                            set_interp = PchipInterpolator(sec['end_nd_arc']['grid'], sec['end_nd_arc']['values'])
-                            tmp2[i]['segments'][0]['layup'][id_layer]['end']       = set_interp(x[i])
+                        if 'fiber_orientation' in sec.keys():
+                            set_interp = PchipInterpolator(sec['fiber_orientation']['grid'], sec['fiber_orientation']['values'])
+                            tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = set_interp(x[i])
                         else:
-                            for j in range(idx_sec):
-                                if tmp1[j]['name'] == sec['end_nd_arc']['fixed']:
-                                    set_interp = PchipInterpolator(tmp1[j]['start_nd_arc']['grid'], tmp1[j]['start_nd_arc']['values'])
-                                    tmp2[i]['segments'][0]['layup'][id_layer]['end']     = set_interp(x[i])
+                            tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = 0.
+                        id_layer = id_layer + 1
                     else:
-                        tmp2[i]['segments'][0]['layup'][id_layer]['start']     = 0.
-                        tmp2[i]['segments'][0]['layup'][id_layer]['end']       = 1.
+                        
+                        id_seg          = id_webs[i][(sec['web'])]['id']
+                        for id_mat in range(1,len(materials)+1):
+                            if sec['material'] == materials[id_mat].name:
 
+                                # ========= NEW wth split yaml files ========= #
+                                # Orthotropic at leading edge (_le)
+                                # if '_le' in sec['name']:  #  check if on leading edge side of web
+                                if (not web_filler_index and not isinstance(materials[id_mat].E, float)):  # begin with leading part of the web BEFORE web has been filled
 
-                    set_interp = PchipInterpolator(sec['thickness']['grid'], sec['thickness']['values'])
-                    tmp2[i]['segments'][0]['layup'][id_layer]['thickness']     = set_interp(x[i])
+                                    if tmp2[i]['segments'][id_seg - 1]['layup'] != [{}]:
+                                        tmp2[i]['segments'][id_seg - 1]['layup'].append({})
+                                        id_layer_web_le[i] = id_layer_web_le[i] + 1
 
-                    if 'fiber_orientation' in sec.keys():
-                        set_interp = PchipInterpolator(sec['fiber_orientation']['grid'], sec['fiber_orientation']['values'])
-                        tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = set_interp(x[i])
-                    else:
-                        tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = 0.
-                    id_layer = id_layer + 1
-                else:
-                    id_seg          = id_webs[i][(sec['web'])]['id']
-                    for id_mat in range(1,len(materials)+1):
-                        if sec['material'] == materials[id_mat].name:
+                                    tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['name'] = 'web_' + str(int(id_seg / 2)) + '_' + sec['material'] + '_' + str(x[i])
+                                    tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['material_name'] = sec['material']
+                                    # set_interp = PchipInterpolator(sec['thickness']['grid'], sec['thickness']['values'])
+                                    tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['thickness'] = thick_i * 0.5
+                                    flange = 0.01
+                                    tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['start'] = id_webs[i][(sec['web'])]['end_nd_arc'] - flange
+                                    tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['end']   = id_webs[i][(sec['web'])]['start_nd_arc'] + flange
+                                    if 'fiber_orientation' in sec.keys():
+                                        set_interp = PchipInterpolator(sec['fiber_orientation']['grid'], sec['fiber_orientation']['values'])
+                                        tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['orientation'] = set_interp(x[i])
+                                    else:
+                                        tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['orientation'] = 0.
 
-                            # ========= NEW wth split yaml files ========= #
-                            # Orthotropic at leading edge (_le)
-                            # if '_le' in sec['name']:  #  check if on leading edge side of web
-                            if (not web_filler_index and not isinstance(materials[id_mat].E, float)):  # begin with leading part of the web BEFORE web has been filled
+                                    # web_filler_index = False
 
-                                if tmp2[i]['segments'][id_seg - 1]['layup'] != [{}]:
-                                    tmp2[i]['segments'][id_seg - 1]['layup'].append({})
-                                    id_layer_web_le[i] = id_layer_web_le[i] + 1
+                                # Isotropic -> fill the web
+                                elif (not web_filler_index and isinstance(materials[id_mat].E, float)):
+                                    tmp2[i]['segments'][id_seg]['filler'] = materials[id_mat].name
 
-                                tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['name'] = 'web_' + str(int(id_seg / 2)) + '_' + sec['material'] + '_' + str(x[i])
-                                tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['material_name'] = sec['material']
-                                set_interp = PchipInterpolator(sec['thickness']['grid'], sec['thickness']['values'])
-                                tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['thickness'] = set_interp(x[i]) * 0.5
-                                flange = 0.01
-                                tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['start'] = id_webs[i][(sec['web'])]['end_nd_arc'] - flange
-                                tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['end']   = id_webs[i][(sec['web'])]['start_nd_arc'] + flange
-                                if 'fiber_orientation' in sec.keys():
-                                    set_interp = PchipInterpolator(sec['fiber_orientation']['grid'], sec['fiber_orientation']['values'])
-                                    tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['orientation'] = set_interp(x[i])
-                                else:
-                                    tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['orientation'] = 0.
+                                    tmp2[i]['segments'][id_seg]['layup'][0]['name'] = 'dummy'
+                                    tmp2[i]['segments'][id_seg]['layup'][0]['material_name'] = sec['material']
+                                    tmp2[i]['segments'][id_seg]['layup'][0]['thickness'] = 1e-3
+                                    tmp2[i]['segments'][id_seg]['layup'][0]['start'] = 0.0
+                                    tmp2[i]['segments'][id_seg]['layup'][0]['end'] = 1.0
+                                    tmp2[i]['segments'][id_seg]['layup'][0]['orientation'] = 0.0
 
-                                # web_filler_index = False
+                                    # set_interp = PchipInterpolator(sec['thickness']['grid'],sec['thickness']['values'])
+                                    thick_web[i, int(id_seg / 2 - 1)] = thick_web[i, int(id_seg / 2 - 1)] + thick_i
 
-                            # Isotropic -> fill the web
-                            elif (not web_filler_index and isinstance(materials[id_mat].E, float)):
-                                tmp2[i]['segments'][id_seg]['filler'] = materials[id_mat].name
+                                    web_filler_index = True  #  changes to true as web has now already been filled with material
 
-                                tmp2[i]['segments'][id_seg]['layup'][0]['name'] = 'dummy'
-                                tmp2[i]['segments'][id_seg]['layup'][0]['material_name'] = sec['material']
-                                tmp2[i]['segments'][id_seg]['layup'][0]['thickness'] = 1e-3
-                                tmp2[i]['segments'][id_seg]['layup'][0]['start'] = 0.0
-                                tmp2[i]['segments'][id_seg]['layup'][0]['end'] = 1.0
-                                tmp2[i]['segments'][id_seg]['layup'][0]['orientation'] = 0.0
+                                # Orthotropic at trailing edge (_te)
+                                # elif '_te' in sec['name']:  # check if on trailing edge side of web
+                                elif (web_filler_index and not isinstance(materials[id_mat].E, float)):  # continue with trailing part of the web AFTER web has been filled
 
-                                set_interp = PchipInterpolator(sec['thickness']['grid'],sec['thickness']['values'])
-                                thick_web[i, int(id_seg / 2 - 1)] = thick_web[i, int(id_seg / 2 - 1)] + set_interp(x[i])
+                                    if tmp2[i]['segments'][id_seg + 1]['layup'] != [{}]:
+                                        tmp2[i]['segments'][id_seg + 1]['layup'].append({})
+                                        id_layer_web_te[i] = id_layer_web_te[i] + 1
 
-                                web_filler_index = True  #  changes to true as web has now already been filled with material
+                                    tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['name'] = 'web_' + str(int(id_seg / 2)) + '_' + sec['material'] + '_' + str(x[i])
+                                    tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['material_name'] = sec['material']
+                                    # set_interp = PchipInterpolator(sec['thickness']['grid'], sec['thickness']['values'])
+                                    tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['thickness'] = thick_i * 0.5
+                                    flange = 0.01
+                                    tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['start'] = id_webs[i][(sec['web'])]['end_nd_arc'] - flange
+                                    tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['end'] = id_webs[i][(sec['web'])]['start_nd_arc'] + flange
+                                    if 'fiber_orientation' in sec.keys():
+                                        set_interp = PchipInterpolator(sec['fiber_orientation']['grid'],sec['fiber_orientation']['values'])
+                                        tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['orientation'] = set_interp(x[i])
+                                    else:
+                                        tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['orientation'] = 0.
 
-                            # Orthotropic at trailing edge (_te)
-                            # elif '_te' in sec['name']:  # check if on trailing edge side of web
-                            elif (web_filler_index and not isinstance(materials[id_mat].E, float)):  # continue with trailing part of the web AFTER web has been filled
-
-                                if tmp2[i]['segments'][id_seg + 1]['layup'] != [{}]:
-                                    tmp2[i]['segments'][id_seg + 1]['layup'].append({})
-                                    id_layer_web_te[i] = id_layer_web_te[i] + 1
-
-                                tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['name'] = 'web_' + str(int(id_seg / 2)) + '_' + sec['material'] + '_' + str(x[i])
-                                tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['material_name'] = sec['material']
-                                set_interp = PchipInterpolator(sec['thickness']['grid'], sec['thickness']['values'])
-                                tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['thickness'] = set_interp(x[i]) * 0.5
-                                flange = 0.01
-                                tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['start'] = id_webs[i][(sec['web'])]['end_nd_arc'] - flange
-                                tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['end'] = id_webs[i][(sec['web'])]['start_nd_arc'] + flange
-                                if 'fiber_orientation' in sec.keys():
-                                    set_interp = PchipInterpolator(sec['fiber_orientation']['grid'],sec['fiber_orientation']['values'])
-                                    tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['orientation'] = set_interp(x[i])
-                                else:
-                                    tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['orientation'] = 0.
-
-                                web_filler_index = False  #  after completing the te part (this web is finished now!), prepare for next web
+                                    web_filler_index = False  #  after completing the te part (this web is finished now!), prepare for next web
 
                             # ========= OLD wthout split yaml files ========= #
                             #  NEW YAML FILES INCLUDE ALREADY SEPARATED WEBS  #
@@ -281,16 +292,12 @@ def iea37_converter(blade, cs_pos, byml, materials):
                                 #     tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['orientation'] = 0.
 
 
-
-
-
-    # print(tmp2[i]['segments'])
+    # print(tmp2)
     # exit()
-
     webs    = [OrderedDict() for n in range(len(x))]
     for i in range(len(x)):
         for i_web,web in enumerate(tmp0):
-            if x[i] >= web['start_nd_arc']['grid'][0] and x[i] <= web['start_nd_arc']['grid'][-1]:
+            if x[i] >= web['start_nd_arc']['grid'][0] and x[i] <= web['start_nd_arc']['grid'][-1] and webs_exist[i] == 1:
 
                 set_interp      = PchipInterpolator(web['start_nd_arc']['grid'], web['start_nd_arc']['values'])
                 start           = set_interp(x[i])
@@ -342,6 +349,7 @@ def iea37_converter(blade, cs_pos, byml, materials):
 
 
     lst = []
+
     for (seg,w,x) in zip(tmp2, webs, x):
         tmp = {'webs':list(w.values()), 'segments':seg['segments'], 'position':x, 'mesh_resolution':240}
         lst.append([x, CBMConfig(tmp, materials, iea37=True)])

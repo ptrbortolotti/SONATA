@@ -15,7 +15,10 @@ from OCC.Core.BRepTools import breptools_Read
 from OCC.Core.BRep import BRep_Builder
 from OCC.Core.Quantity import Quantity_Color
 from OCC.Core.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
-from OCC.Display.SimpleGui import init_display
+try:
+    from OCC.Display.SimpleGui import init_display
+except:
+    pass
 from OCC.Core.BRepAlgoAPI import BRepAlgoAPI_Section
 from OCC.Core.BRepAdaptor import BRepAdaptor_CompCurve, BRepAdaptor_Curve, BRepAdaptor_Curve2d
 from OCC.Core.BRepAlgo import BRepAlgo_Section

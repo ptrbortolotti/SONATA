@@ -10,7 +10,10 @@ import itertools
 
 from OCC.Core.gp import gp_Vec2d,gp_Pnt2d,gp_Pnt,gp_Vec
 from OCC.Core.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
-from OCC.Display.SimpleGui import init_display
+try:
+    from OCC.Display.SimpleGui import init_display
+except:
+    pass
 from OCC.Core.Geom2dAPI import Geom2dAPI_PointsToBSpline
 
 
