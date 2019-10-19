@@ -195,19 +195,19 @@ class OrthotropicMaterial(Material):
 
         if flag_mat:  # wisdem includes vectors for the following material properties that are to be converted in order to comply with SONATA and VABS/anbax
             if not kw.get('Xt') is None:
-                self.Xt = float(kw.get('Xt')[1])  # retrieve axial tensile strength in [MPa] from provided 3D vector
-
+                self.Xt = float(kw.get('Xt')[0])  # retrieve axial tensile strength in [MPa] from provided 3D vector
+                
             if not kw.get('Xc') is None:
-                self.Xc = float(kw.get('Xc')[1])  # retrieve axial compression strength in [MPa] from provided 3D vector
-
+                self.Xc = float(kw.get('Xc')[0])  # retrieve axial compression strength in [MPa] from provided 3D vector
+                
             if not kw.get('Yt') is None:
-                self.Yt = float(kw.get('Xt')[2])  # retrieve transverse tensile strength in [MPa] from provided 3D vector
+                self.Yt = float(kw.get('Xt')[1])  # retrieve transverse tensile strength in [MPa] from provided 3D vector
 
             if not kw.get('Yc') is None:
-                self.Yc = float(kw.get('Xc')[2])  # retrieve transverse compression strength in [MPa] from provided 3D vector
+                self.Yc = float(kw.get('Xc')[1])  # retrieve transverse compression strength in [MPa] from provided 3D vector
 
             if not kw.get('S') is None:
-                self.S21 = float(kw.get('S')[1])  # retrieve in-/out of plane shear strength [MPa] in [MPa] from provided 3D vector
+                self.S21 = float(kw.get('S')[0])  # retrieve in-/out of plane shear strength [MPa] in [MPa] from provided 3D vector
 
         else:
             if not kw.get('Xt') is None:
@@ -261,7 +261,7 @@ def read_IEA37_materials(yml):
             materials[ID] = OrthotropicMaterial(ID=ID, flag_mat=auto_flag_wisdem_materials, **mat)
         elif mat.get('orth') == 2:
             materials[ID] = AnisotropicMaterial(ID=ID, **mat)
-
+        
     materials = OrderedDict(sorted(materials.items()))
     return materials
 
