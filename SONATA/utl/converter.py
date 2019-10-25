@@ -181,6 +181,12 @@ def iea37_converter(blade, cs_pos, byml, materials):
                             tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = set_interp(x[i])
                         else:
                             tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = 0.
+                            
+                        # Check consistency
+                        if tmp2[i]['segments'][0]['layup'][id_layer]['end'] < tmp2[i]['segments'][0]['layup'][id_layer]['start']:
+                            exit('WARNING: Layer ' + tmp2[i]['segments'][0]['layup'][id_layer]['name'] + ' ends before it starts. Check the yaml input file!!')
+                            
+                            
                         id_layer = id_layer + 1
                     else:
                         
