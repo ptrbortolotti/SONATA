@@ -302,56 +302,57 @@ def iea37_converter(blade, cs_pos, byml, materials):
     # exit()
     webs    = [OrderedDict() for n in range(len(x))]
     for i in range(len(x)):
-        for i_web,web in enumerate(tmp0):
-            if x[i] >= web['start_nd_arc']['grid'][0] and x[i] <= web['start_nd_arc']['grid'][-1] and webs_exist[i] == 1:
+        if webs_exist[i] == 1:
+            for i_web,web in enumerate(tmp0):
+                if x[i] >= web['start_nd_arc']['grid'][0] and x[i] <= web['start_nd_arc']['grid'][-1] and webs_exist[i] == 1:
 
-                set_interp      = PchipInterpolator(web['start_nd_arc']['grid'], web['start_nd_arc']['values'])
-                start           = set_interp(x[i])
+                    set_interp      = PchipInterpolator(web['start_nd_arc']['grid'], web['start_nd_arc']['values'])
+                    start           = set_interp(x[i])
 
-                set_interp      = PchipInterpolator(web['end_nd_arc']['grid'], web['end_nd_arc']['values'])
-                end             = set_interp(x[i])
+                    set_interp      = PchipInterpolator(web['end_nd_arc']['grid'], web['end_nd_arc']['values'])
+                    end             = set_interp(x[i])
 
-                profile         = blade.airfoils[i,1].coordinates
-                id_le           = np.argmin(profile[:,0])
+                    profile         = blade.airfoils[i,1].coordinates
+                    id_le           = np.argmin(profile[:,0])
 
-                if np.mean(profile[0:id_le, 1]) < 0:
-                    profile     = np.flip(profile,0)
+                    if np.mean(profile[0:id_le, 1]) < 0:
+                        profile     = np.flip(profile,0)
 
-                profile_curve   = arc_length(profile[:,0], profile[:,1]) / arc_length(profile[:,0], profile[:,1])[-1]
+                    profile_curve   = arc_length(profile[:,0], profile[:,1]) / arc_length(profile[:,0], profile[:,1])[-1]
 
-                set_interp      = PchipInterpolator(profile_curve, profile[:,0])
-                x_web_start     = set_interp(start)
-                x_web_end       = set_interp(end)
+                    set_interp      = PchipInterpolator(profile_curve, profile[:,0])
+                    x_web_start     = set_interp(start)
+                    x_web_end       = set_interp(end)
 
-                x_web_start_le  = x_web_start - thick_web[i, i_web] / blade.chord[i , 1]
-                x_web_start_te  = x_web_start + thick_web[i, i_web] / blade.chord[i , 1]
+                    x_web_start_le  = x_web_start - thick_web[i, i_web] / blade.chord[i , 1]
+                    x_web_start_te  = x_web_start + thick_web[i, i_web] / blade.chord[i , 1]
 
-                x_web_end_le    = x_web_end - thick_web[i, i_web] / blade.chord[i , 1]
-                x_web_end_te    = x_web_end + thick_web[i, i_web] / blade.chord[i , 1]
+                    x_web_end_le    = x_web_end - thick_web[i, i_web] / blade.chord[i , 1]
+                    x_web_end_te    = x_web_end + thick_web[i, i_web] / blade.chord[i , 1]
 
-                # Correction to avoid errors in the interpolation at the edges
-                if min(np.diff(np.flip(profile[0:id_le,0]))) < 0:
-                    offset_edge = np.argmin(abs(np.diff(profile[0:id_le,0]))) + 1
-                else:
-                    offset_edge = 1
+                    # Correction to avoid errors in the interpolation at the edges
+                    if min(np.diff(np.flip(profile[0:id_le,0]))) < 0:
+                        offset_edge = np.argmin(abs(np.diff(profile[0:id_le,0]))) + 1
+                    else:
+                        offset_edge = 1
 
-                set_interp      = PchipInterpolator(np.flip(profile[offset_edge:id_le - offset_edge,0]), np.flip(profile_curve[offset_edge:id_le - offset_edge]))
-                web_start_le , web_start_te    = set_interp([x_web_start_le , x_web_start_te])
+                    set_interp      = PchipInterpolator(np.flip(profile[offset_edge:id_le - offset_edge,0]), np.flip(profile_curve[offset_edge:id_le - offset_edge]))
+                    web_start_le , web_start_te    = set_interp([x_web_start_le , x_web_start_te])
 
-                set_interp      = PchipInterpolator(profile[id_le + offset_edge:-offset_edge,0], profile_curve[id_le + offset_edge:-offset_edge])
-                web_end_le , web_end_te        = set_interp([x_web_end_le , x_web_end_te])
+                    set_interp      = PchipInterpolator(profile[id_le + offset_edge:-offset_edge,0], profile_curve[id_le + offset_edge:-offset_edge])
+                    web_end_le , web_end_te        = set_interp([x_web_end_le , x_web_end_te])
 
-                w_f = {}
-                w_f['id']   = 2 * i_web + 1
-                w_f['position'] = [web_start_le, web_end_le]
-                w_f['curvature'] = None
-                webs[i][2 * i_web + 1] = w_f
+                    w_f = {}
+                    w_f['id']   = 2 * i_web + 1
+                    w_f['position'] = [web_start_le, web_end_le]
+                    w_f['curvature'] = None
+                    webs[i][2 * i_web + 1] = w_f
 
-                w_r = {}
-                w_r['id']   = 2 * i_web + 2
-                w_r['position'] = [web_start_te, web_end_te]
-                w_r['curvature'] = None
-                webs[i][2 * i_web + 2] = w_r
+                    w_r = {}
+                    w_r['id']   = 2 * i_web + 2
+                    w_r['position'] = [web_start_te, web_end_te]
+                    w_r['curvature'] = None
+                    webs[i][2 * i_web + 2] = w_r
 
 
     lst = []
