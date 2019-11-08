@@ -14,7 +14,7 @@ from urllib.request import urlopen
 from collections import OrderedDict
 
 #PythonOCC Libraries
-from OCC.Core.gp import gp_Pnt, gp_Vec, gp_Dir, gp_Ax1, gp_Trsf
+from OCC.Core.gp import gp_Pnt, gp_Vec, gp_Dir, gp_Ax1, gp_Trsf, gp_Pln
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire
 from OCC.Core.GeomAPI import GeomAPI_Interpolate
 from OCC.Core.Geom2dAPI import Geom2dAPI_Interpolate
@@ -25,10 +25,12 @@ from OCC.Display.SimpleGui import init_display
 #SONATA modules:
 if __name__ == '__main__':
     os.chdir('..')
+from SONATA.utl.trsf import trsf_af_to_blfr
 from SONATA.classPolar import Polar
 from SONATA.cbm.topo.utils import TColgp_HArray1OfPnt_from_nparray, point_list_to_TColgp_Array1OfPnt, PntLst_to_npArray, TColgp_HArray1OfPnt2d_from_nparray
 from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire, trsf_wire
-from SONATA.cbm.topo.BSplineLst_utils import BSplineLst_from_dct, copy_BSplineLst
+from SONATA.cbm.topo.BSplineLst_utils import BSplineLst_from_dct, copy_BSplineLst, \
+                                            equidistant_D1_on_BSplineLst
 from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst, build_wire_from_BSplineLst2, get_wire_length, equidistant_Points_on_wire
 
 from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
@@ -94,6 +96,11 @@ class Airfoil(object):
         if isinstance(relative_thickness, numbers.Real) and relative_thickness>=0:
             self.relative_thickness = relative_thickness
 
+    def __repr__(self):
+        """__repr__ is the built-in function used to compute the "official" 
+        string reputation of an object, """
+        return 'Airfoil: '+ self.name
+    
 
     @property
     def te_coordinates(self):
@@ -103,11 +110,6 @@ class Airfoil(object):
         """
         te = np.mean(np.vstack((self.coordinates[0],self.coordinates[-1])),axis=0)
         return te
-    
-    def __repr__(self):
-        """__repr__ is the built-in function used to compute the "official" 
-        string reputation of an object, """
-        return 'Airfoil: '+ self.name
     
     
     def read_IEA37(self, yml):
@@ -170,7 +172,7 @@ class Airfoil(object):
         return self.wire
         
     
-    def transform_to_bladerefframe(self, loc, pa_loc, chord, twist):
+    def trsf_to_blfr(self, loc, pa_loc, chord, twist):
         """
         transforms the nondim. airfoil to the blade reference frame location
         and pitch-axis information, scales it with chord information and rotates 
@@ -192,7 +194,7 @@ class Airfoil(object):
         wire : TopoDS_Wire
         
         """
-        Trsf = self._trsf_bladeref(loc, pa_loc, chord, twist)
+        Trsf = trsf_af_to_blfr(loc, pa_loc, chord, twist)
         
         if self.wire == None or self.BSplineLst == None:
             self.gen_OCCtopo()
@@ -205,57 +207,43 @@ class Airfoil(object):
 #        print(BSplineLst_tmp)
 #        [s.Transform(Trsf) for s in BSplineLst_tmp]
         #print(BSplineLst)
-        return (wire, te_pnt)
-        
-
-    def _trsf_bladeref(self, loc, pa_loc, chord, twist):
+        return (wire, te_pnt) #bspline, nodes, normals 
+            
+    
+    def gen_wopwop_dist(self, NbPoints=50, divide_surf=True):
         """
-        Defines the transformation in 3D space to the blade reference frame location
-        and pitch-axis information, scales it with chord information and rotates 
-        it with twist information
+        distributes points and normal vectors on the upper and lower part of 
+        the airfoil. Subsequently those points are transformed to the blade 
+        reference frame.
+        
         
         Parameters
         ----------
-        loc : array
-            [x,y,z] position in blade reference coordinates
-        pa_loc : float
-            nondim. pitch axis location
-        chord : float
-            chordlength
-        twist : float
-            twist angle about x in radians
         
-        Retruns
-        ---------
-        Trsf : OCC.gp_Trsf 
-            non-persistent transformation in 3D space.
         
         """
-        trsf_rot1 = gp_Trsf()
-        trsf_rot2 = gp_Trsf()
-        trsf_rot3 = gp_Trsf()
-        trsf_trans1 = gp_Trsf()
-        trsf_trans2 = gp_Trsf()
-        trsf_scale = gp_Trsf()
         
-        trsf_rot1.SetRotation(gp_Ax1(gp_Pnt(pa_loc,0,0), gp_Dir(0,0,1)), -twist)
-        trsf_trans1.SetTranslation(gp_Pnt(pa_loc,0,0), gp_Pnt(0,0,0))
-        trsf_scale.SetScale(gp_Pnt(0,0,0), chord)
-        trsf_rot2.SetRotation(gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,0,1)), -np.pi/2)
-        trsf_rot3.SetRotation(gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,1,0)), -np.pi/2)
-        trsf_trans2.SetTranslation(gp_Pnt(0,0,0), gp_Pnt(loc[0],loc[1],loc[2]))
-    
-        Trsf = gp_Trsf()
-        Trsf.Multiply(trsf_trans2)
-        Trsf.Multiply(trsf_rot3)
-        Trsf.Multiply(trsf_rot2)
-        Trsf.Multiply(trsf_scale)
-        Trsf.Multiply(trsf_trans1)
-        Trsf.Multiply(trsf_rot1)
+        data = self.coordinates
         
-        return Trsf
+        le_idx = np.argmin(np.linalg.norm(data, axis=1))
+        up_data = data[0:le_idx+1]
+        lo_data = data[le_idx:-1]
+        
+        up_BSplineLst =  BSplineLst_from_dct(up_data, angular_deflection = 45, closed=False, tol_interp=1e-5, twoD = True)
+        lo_BSplineLst = BSplineLst_from_dct(lo_data, angular_deflection = 45, closed=False, tol_interp=1e-5, twoD = True)
+        
+        up_pnts2d, up_vecs2d = equidistant_D1_on_BSplineLst(up_BSplineLst, NbPoints)
+        lo_pnts2d, lo_vecs2d = equidistant_D1_on_BSplineLst(lo_BSplineLst, NbPoints)
+        
+        BSplineLst2d = up_BSplineLst+lo_BSplineLst
+        pnts2d = up_pnts2d+lo_pnts2d
+        vecs2d = up_vecs2d+lo_vecs2d
+        
+        return (BSplineLst2d, pnts2d, vecs2d)
+        
     
-    def transformed(self, airfoil2, k=0.5, n=500):
+    
+    def transformed(self, airfoil2, k=0.5, n=200):
         """
         Performs and linear interpolation of the airfoil with another airfoil 
         by translating equidistant points in the direction of vector v. 
