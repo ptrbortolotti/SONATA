@@ -19,16 +19,17 @@ import SONATA.Pymore.utl.coef as coef
 from SONATA.Pymore.app.marc_flight_analysis import flight_analysis
 from SONATA.Pymore.app.marc_reference_utl import plot_ref_data
 from SONATA.Pymore.app.marc_flight_analysis_utl import interp_dui, plot_dui, \
-                    plot_sensors, extract_blade_data, plot_rotor_polarcontour, load_pmfa_config, interp_azimuth
+                    plot_sensors, extract_blade_data, plot_rotor_polarcontour, load_pmfa_config, interp_azimuth, fade_beam_props
 from SONATA.Pymore.app.fft import extract_vibratory_hubloads
 
 class ExplComp_Flight_Analysis(ExplicitComponent):
     """
 
     """
-    def __init__(self):
+    def __init__(self, savepath='uh60a_c8513.pkl'):
         super().__init__()
-
+        self.savepath = savepath
+        
     def setup(self):
         self.counter = 0
         self.startTime = datetime.now()
@@ -36,29 +37,30 @@ class ExplComp_Flight_Analysis(ExplicitComponent):
         self.set_output()
         self.set_partials()
         (self.path, self.dui, self.sensors, beamprops, massprops) = load_pmfa_config('jobs/MonteCarlo/uh60a_c8513.yml')
-        self.savepath = filename_generator(directory = '/scratch/gu32kij/uh60a_c8513', string='uh60a_c8513', file_extension= '.pkl')
         
     def set_input(self):        
         self.add_input('BeamProps', val=np.zeros((13,29)), desc='Massterms(6), Stiffness(21), damping(1) and coordinate(1)')
         
     def set_output(self):
         self.add_output('vibratory_hubloads', val=np.zeros((6)))
-        self.add_output('mean_elastic_tip_response', val=np.zeros((3,181)))
-        self.add_output('stdvs_elastic_tip_response', val=np.zeros((3,181)))
+        self.add_output('mean_elastic_tip_response', val=np.zeros((4,181)))
+        self.add_output('stdvs_elastic_tip_response', val=np.zeros((4,181)))
         
     def set_partials(self):
         self.declare_partials('*', '*', method='fd', step=0.05) #finite differences all partials
 
     def compute(self, inputs, outputs):       
-        BeamProps = {'BLADE_BP_AB01': inputs['BeamProps']}
-       
-        data = flight_analysis(self.path, self.dui, beamprops = BeamProps, sensors=self.sensors, savepath=self.savepath)
         
+        refProps = np.load('jobs/MonteCarlo/baseline_beamprops.npy')
+        dynBeamProps = fade_beam_props(refProps, inputs['BeamProps'], self.dui, t0 = 0.0, t1=1.0) 
+        BeamProps = {'BLADE_BP_AB01': dynBeamProps}
+        with HiddenPrints():
+            data = flight_analysis(self.path, self.dui, beamprops = BeamProps, sensors=self.sensors, savepath=self.savepath)
         hubforces = data['SHAFT_SS_HUBFORCES']
         time = data['time']
         samples=465
         
-         #========================= Normalized Vibratory Hubloads  ============
+        #========================= Normalized Vibratory Hubloads  ============
         peaks = extract_vibratory_hubloads(time, hubforces, samples=samples)
         steady_thrust = -np.mean(data['SHAFT_SS_HUBFORCES'][:,2][-samples:])
         seady_torque = np.mean(data['SHAFT_SS_HUBFORCES'][:,5][-samples:])

@@ -40,22 +40,12 @@ class ExplComp_Blade(ExplicitComponent):
         self.add_input('m3_G_lt', val=np.array([5.892e9]), desc='material 3 - shear modulus')
         self.add_input('m3_rho', val=1.572e3, desc='material 3 - density')
 
-#        self.add_input('m3_E', val=np.array([139.360e9, 12.615e9, 12.615e9]))  
-#        self.add_input('m3_rho', val=1.572e3)
-#
-#        self.add_input('m3_E', val=2.05)
-#        self.add_input('m3_rho', val=2.05)
-#       
-#        self.add_input('t_box1', val=1.35)
-#        self.add_input('t_box2', val=1.35)
-#        self.add_input('t_box3', val=1.45)
-#        self.add_input('t_box4', val=0.50) 
-#
-#        self.add_input('t_skin', val=0.25)
-#        self.add_input('t_erosion', val=0.82)
-#        self.add_input('s_w1', val=0.43)
-#        self.add_input('s_w2', val=0.57)
-#        
+        self.add_input('bs1_theta3', val=0)
+        self.add_input('bs2_theta3', val=45)
+        self.add_input('bs3_theta3', val=-45)
+        self.add_input('bs4_theta3', val=90)
+         
+
     def set_output(self):
         self.add_output('BeamProps', val=np.zeros((13,29)), desc='Massterms(6), Stiffness(21), damping(1) and coordinate(1)')   
         
@@ -63,12 +53,7 @@ class ExplComp_Blade(ExplicitComponent):
          self.declare_partials('*', '*', method='fd', step=0.05) #finite differences all partials
 #        self.declare_partials('BeamProps', 'rho_mat3', method='fd', step = 2e-2)
 #        self.declare_partials('BeamProps', 't_sparcap1', method='fd', step = 1e-2)
-#        self.declare_partials('BeamProps', 't_sparcap2', method='fd', step = 1e-2)
-#        self.declare_partials('BeamProps', 't_sparcap3', method='fd', step = 1e-2)
-#        self.declare_partials('BeamProps', 't_sparcap4', method='fd', step = 1e-2)
-#        self.declare_partials('BeamProps', 's_w1', method='fd', step = 1e-2)
-#        self.declare_partials('BeamProps', 's_w2', method='fd', step = 1e-2)
-#        self.declare_partials('BeamProps', 's_spar2', method='fd', step = 1e-2)
+
         
     def compute(self, inputs, outputs):
 #        elapsed_t = datetime.now() - self.startTime
@@ -89,17 +74,17 @@ class ExplComp_Blade(ExplicitComponent):
         try:
             with HiddenPrints():
                 self.job.blade_gen_section(mesh_flag = True, split_quads=False)
-            print(inputs['m1_E'], self.job.materials[1].E)
             self.job.blade_run_vabs(ramdisk=True)
             beam = self.job.blade_exp_beam_props(solver='vabs', cosy='local', eta_offset=0.1)
             beamProps = coef.join_beam_props(beam, coef.refBeamProp())
             outputs['BeamProps'] = beamProps
-                                       
+        
         except KeyboardInterrupt:
             raise Exception    
         
         except:
-           print('] [Unexpected error:', sys.exc_info()[0], ']')
+            #print(beamProps)
+            print('] [SONATA Unexpected error:', sys.exc_info()[0], ']')
         self.counter += 1   
         
         
@@ -120,6 +105,12 @@ class ExplComp_Blade(ExplicitComponent):
         self.job.materials[3].G[1] = inputs['m3_G_lt']
         self.job.materials[3].rho = inputs['m3_rho']
   
+        for x,cs in self.job.sections:
+            cs.config.segments[2]['Layup'][0][3] = inputs['bs1_theta3']
+            cs.config.segments[2]['Layup'][1][3] = inputs['bs2_theta3']
+            cs.config.segments[2]['Layup'][2][3] = inputs['bs3_theta3']
+            cs.config.segments[2]['Layup'][3][3] = inputs['bs4_theta3']
+    
       #Architecture:
 #        self.job.config.webs[1]['Pos1'] = inputs['s_w1'][0]
 #        self.job.config.webs[1]['Pos2'] = 1-self.job.config.webs[1]['Pos1']
@@ -151,6 +142,6 @@ class ExplComp_Blade(ExplicitComponent):
         #Segment 3:
 #        self.job.MaterialLst[10].rho = inputs['rho_mat11'][0]/1000
 #        self.job.MaterialLst[2].rho = inputs['rho_mat3'][0]/1000
-
+        pass
     def post_cbm(self):
         return self.job.blade_plot_sections(plotTheta11=False)

@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 #from openmdao.api import CaseReader
 #from SONATA.utl.plot import plot_histogram_2Ddata
 
-def doe_sampler(ivc_dct, nsamples = 100, pdf = 'norm', design='lhs'):
+def doe_sampler(ivc_dct, nsamples = 100, dist = 'norm', design='lhs'):
     """
     generates samples for the openmdao ListGenerator(DOEGenerator) 
     

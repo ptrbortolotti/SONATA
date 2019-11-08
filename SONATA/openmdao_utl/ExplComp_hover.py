@@ -18,7 +18,7 @@ import SONATA.Pymore.utl.coef as coef
 from SONATA.Pymore.app.marc_flight_analysis import flight_analysis
 from SONATA.Pymore.app.marc_reference_utl import plot_ref_data
 from SONATA.Pymore.app.marc_flight_analysis_utl import interp_dui, plot_dui, \
-                    plot_sensors, extract_blade_data, plot_rotor_polarcontour, load_pmfa_config
+                    plot_sensors, extract_blade_data, plot_rotor_polarcontour, load_pmfa_config, fade_beam_props
     
 
 class ExplComp_Hover_Analysis(ExplicitComponent):
@@ -26,9 +26,10 @@ class ExplComp_Hover_Analysis(ExplicitComponent):
     A simple Frequency Analysis ExplicitComponent that computes the the fanplot 
     for the rotor with the input beam properties of the blade
     """
-    def __init__(self):
+    def __init__(self, savepath='uh60a_hover.pkl'):
         super().__init__()
-
+        self.savepath = savepath
+        
     def setup(self):
         self.counter = 0
         self.startTime = datetime.now()
@@ -36,7 +37,7 @@ class ExplComp_Hover_Analysis(ExplicitComponent):
         self.set_output()
         self.set_partials()
         (self.path, self.dui, self.sensors, beamprops, massprops) = load_pmfa_config('jobs/MonteCarlo/uh60a_hover.yml')
-        self.savepath = filename_generator(directory = '/scratch/gu32kij/uh60a_hover', string='uh60a_hover', file_extension= '.pkl')
+
         
     def set_input(self):        
         self.add_input('BeamProps', val=np.zeros((13,29)), desc='Massterms(6), Stiffness(21), damping(1) and coordinate(1)')
@@ -51,9 +52,11 @@ class ExplComp_Hover_Analysis(ExplicitComponent):
         self.declare_partials('*', '*', method='fd', step=0.05) #finite differences all partials
 
     def compute(self, inputs, outputs):       
-        BeamProps = {'BLADE_BP_AB01': inputs['BeamProps']}
-
-        data = flight_analysis(self.path, self.dui, beamprops = BeamProps, sensors=self.sensors, savepath=self.savepath)
+        refProps = np.load('jobs/MonteCarlo/baseline_beamprops.npy')
+        dynBeamProps = fade_beam_props(refProps, inputs['BeamProps'], self.dui, t0 = 0.0, t1=1.0) 
+        BeamProps = {'BLADE_BP_AB01': dynBeamProps}
+        with HiddenPrints():
+            data = flight_analysis(self.path, self.dui, beamprops = BeamProps, sensors=self.sensors, savepath=self.savepath)
         data['Psi'] = np.deg2rad(-data['SHAFT_SS_POS'][:,3]+180)        
 
         data = {k:v[-465:] for k,v in data.items()} #last two rotor rotations
