@@ -60,8 +60,14 @@ def interp_loads(loads, grid_loc):
 
 def interp_airfoil_position(airfoil_position, airfoils, grid_loc):
     """
-    TBD:Docstring
     
+    
+    Parameters
+    ----------
+    airfoil_position: tuple
+        ([0.3, 1.0], ['n0012', 'n0012'])
+    airfoils: list
+        [Airfoil: n0012, Airfoil: naca23012]
     """
     
     #TBD: Extrapolation

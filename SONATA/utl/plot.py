@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import matplotlib.lines as mlines
 
+from SONATA.cbm.cbm_utl import dymore2sixbysix
 # from matplotlib2tikz import save as tikz_save
 
 def plot_histogram_2Ddata(data, **kwargs):
@@ -73,9 +74,9 @@ def plot_histogram_2Ddata(data, **kwargs):
     
     for i in range(shape[0]):
         for j in range(shape[1]):
-            
-            if ut[i,j] == 1 and ref[i,j] != 0:     
-          
+            print(i,j)
+            #if ut[i,j] == 1 and ref[i,j] != 0:     
+            if ut[i,j] == 1:
                 if isinstance(ref, (np.ndarray)): 
                     if ref[i,j] != 0:
                         arr = ( data[:,i,j] - ref[i,j] ) / ref[i,j] * 100
@@ -114,6 +115,88 @@ def plot_histogram_2Ddata(data, **kwargs):
     return None
 
 
+
+def plot_2dhist(data, labels, ref = None, title=None, xlim = (-20,20), bins  = 21, upper_tri=False, ptype = 'hist', MLE = False, **kwargs):
+    """
+    
+    
+    """
+    
+    if len(data.shape) == 2:
+        data = np.expand_dims(data, 2)
+        labels = np.expand_dims(labels, 1)
+    imax = data.shape[1]
+    jmax = data.shape[2]
+    
+    fig, ax = plt.subplots(imax,jmax)
+    fig.suptitle(title, fontsize=16)
+    fig.subplots_adjust(wspace=0.3, hspace=0.3)         
+    
+    #upper triangle 
+    if upper_tri:
+        ut = np.zeros((imax,jmax))            
+        ut[np.triu_indices(imax)] = 1      
+    else:
+        ut = np.ones((imax,jmax))   
+    
+    
+    for i in range(imax):
+        for j in range(jmax):
+            if imax==1 and jmax==1:
+                axh = ax
+            elif imax>1 and jmax==1:
+                axh = ax[i]
+            else:
+                axh = ax[i][j]
+                
+            if ut[i,j] == 1:
+                arr = data[:,i,j]
+                
+                if ptype == 'hist':
+                    if ref is not None:
+                        arr = ( data[:,i,j] - ref[i,j] ) / ref[i,j] * 100
+                        axh.set_xlabel((labels[i,j]+r' (\% deviation from baseline value)'))
+                        axh.axvline(c='k')
+                    else:
+                        arr = (data[:,i,j] - np.mean(data[:,i,j],axis=0) ) / np.mean(data[:,i,j],axis=0) * 100
+                        axh.set_xlabel((labels[i,j]+r' (\% deviation from mean value)'))
+                    
+                    count, bins, ignored =  axh.hist(arr, density=True, color = 'black', rwidth=0.8)
+                    sigma = arr.std()
+                    mu = arr.mean()
+                    if MLE and sigma > 0:
+                        string = r'MLE $\sigma$ = %.1f $\%%$' % sigma
+                        axh.plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) *
+                                       np.exp( - (bins - mu)**2 / (2 * sigma**2) ),
+                                 linewidth=2, color='r', linestyle='--', label=string)       
+                        axh.legend()
+                        #axh.text(mu,0,string, color = 'r')
+                    ylim = np.asarray(axh.get_ylim())
+                    #print(ylim*1)
+                    axh.set_ylim(ylim*1.2)
+                    axh.set_xlim(xlim)
+                    axh.set_ylabel('Probability of occurance') 
+                    
+                elif ptype == 'scatter':
+                    stdvs = []
+                    x = np.arange(2,arr.shape[0])
+                    for r in x:
+                        stdvs.append(np.std(arr[:r],axis=0))
+                    stdvs = np.asarray(stdvs)
+                    axh.scatter(x,stdvs, s=0.5, c = 'k', marker='.')
+                    axh.set_xlabel(r'samples')
+                    #print((r'SD of '+labels[i,j]))
+                    axh.set_ylabel((r'SD of '+labels[i,j])) 
+
+                                        
+            elif ut[i,j] == 0:
+                #fig.delaxes(ax[i][j])
+                pass
+    plt.legend()
+    plt.show()
+
+
+
 def plot_beam_properties(data, sigma=None, ref=None, x_offset = 0, description = True):
     '''
     generates a plot of the beamproperties using the 
@@ -136,28 +219,44 @@ def plot_beam_properties(data, sigma=None, ref=None, x_offset = 0, description =
     '''
       
     #Inertia Properties:
-    ylabel = [(r'm_{00}','kg/m'), (r'm_{00}X_{m2}','kg'), (r'm_{00}X_{m3}','kg'), (r'm_{33}','kg m'), (r'm_{23}','kg m'), (r'm_{22}','kg m')]
-    x = data[:,-1] + x_offset
+    ylabel = [(r'm_{00}','kg/m'), (r'X_{m2}','m'), (r'X_{m3}','m'), (r'm_{33}','kg m'), (r'm_{23}','kg m'), (r'm_{22}','kg m')]
+    #x = data[:,-1] + x_offset
+    x = (data[:,-1] + x_offset)
+    x = x/x[-1]
+    data = np.copy(data)
+    data[:,1] = data[:,1]/data[:,0]
+    data[:,2] = data[:,2]/data[:,0]
     if isinstance(ref, (np.ndarray)):
+        ref = np.copy(ref)
         ref_x = ref[:,-1]  + x_offset
-    fig1, ax1 = plt.subplots(2, 3, sharex=True)
+        ref_x = ref_x/ref_x[-1]
+        ref[:,1] = ref[:,1]/ref[:,0]
+        ref[:,2] = ref[:,2]/ref[:,0]
+    fig1, ax1 = plt.subplots(3, 2, sharex=True)
     fig1.subplots_adjust(wspace=0.3, hspace=0.3)
-    fig1.suptitle('Inertia Properties', fontsize=14)
+    #fig1.suptitle('Inertia Properties', fontsize=14)
 
     c = 0
-    for i in range(2):
-        for j in range(3):
+    for i in range(3):
+        for j in range(2):
             if isinstance(ref, (np.ndarray)):
-                ax1[i][j].plot(ref_x,ref[:,c],'-xb')
-            if sigma:
-                ax1[i][j].fill_between(x, data[:,c]-sigma[:,c], data[:,c]+sigma[:,c], alpha=0.25, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
-            ax1[i][j].plot(x,data[:,c],'--k.')
+                ref_line, = ax1[i][j].plot(ref_x,ref[:,c],'-.b')
+            if isinstance(sigma, (np.ndarray)):
+                ax1[i][j].fill_between(x, data[:,c]-sigma[:,c], data[:,c]+sigma[:,c], alpha=0.6, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
+                #ax1[i][j].errorbar(x, data[:,c], yerr=sigma[:,c])
+            line, = ax1[i][j].plot(x,data[:,c],'--k.',  markersize=2)
             ax1[i][j].ticklabel_format(axis='y',style='sci')
-            ax1[i][j].set_xlabel(r'$r \quad [1/R]$')
             tmp = r'$%s \quad [%s]$' % (ylabel[c][0],ylabel[c][1])
             ax1[i][j].set_ylabel(tmp)
-
+            
+            if i==2:
+                ax1[i][j].set_xlabel(r'radius $\quad [1/R]$')
+            
             c += 1
+    
+   # ax1[2,1].legend([ref_line, line], ['UH-60A Reference', 'Inertial Properties'])
+    ax1[2,1].set_ylim(0,0.15)
+    
     
     #6x6 Stiffness Properties:
     TSunits = np.array([['N','N','N','Nm','Nm','Nm'],
@@ -173,15 +272,14 @@ def plot_beam_properties(data, sigma=None, ref=None, x_offset = 0, description =
     fig2, ax2 = plt.subplots(6, 6)
     fig2.subplots_adjust(wspace=0.5, hspace=0.5)
     fig2.suptitle('6x6 Stiffness Matrix', fontsize=14)
-    
     c = 6
     for j in range(6):
         for i in range(6):
             if ut[i,j] == 1:
                 if isinstance(ref, (np.ndarray)):
-                    ax2[i][j].plot(ref_x,ref[:,c],'-xb')
-                if sigma:
-                    ax2[i][j].fill_between(x, data[:,c]-sigma[:,c], data[:,c]+sigma[:,c], alpha=0.25, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
+                    ax2[i][j].plot(ref_x,ref[:,c],'--b')
+                if isinstance(sigma, (np.ndarray)):
+                    ax2[i][j].fill_between(x, data[:,c]-sigma[:,c], data[:,c]+sigma[:,c], alpha=0.6, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
                 ax2[i][j].plot(x,data[:,c],'--k.')
                 ylabel = r'$k_{%s%s} \quad [%s]$' % (i+1,j+1,TSunits[i,j])
                 ax2[i][j].set_ylabel(ylabel)
@@ -189,8 +287,8 @@ def plot_beam_properties(data, sigma=None, ref=None, x_offset = 0, description =
                 #ax2[i][j].yaxis.set_major_formatter(mtick.FormatStrFormatter('%.1e'))
                 
                 if i==j:
-                    ax2[i][j].set_xlabel(r'$r \quad [1/R]$')
-                
+                    ax2[i][j].set_xlabel(r'radius $\quad [1/R]$')
+
                 c += 1
             else:
                 fig2.delaxes(ax2[i][j])
@@ -220,12 +318,114 @@ def plot_beam_properties(data, sigma=None, ref=None, x_offset = 0, description =
     if description == True:
         from matplotlib import rcParams
         rcParams['text.latex.preamble'] = r'\usepackage{amsmath}'
-        plt.figtext(0.05, 0.05, desc, usetex=True, wrap=True,  bbox=dict(ec=(1., 0.5, 0.5), fc=(1., 0.8, 0.8)))        
+        plt.figtext(0.05, 0.05, desc, usetex=True, wrap=True,  bbox=dict(ec=(1., 0.5, 0.5), fc=(1., 0.8, 0.8)))   
+        
+        
+    # ============ ONLY FOR PAPER! 
+    ut = np.zeros((6,6))            
+    ut[np.triu_indices(6)] = 1          
+    
+    fig3, ax3 = plt.subplots(3, 2)
+    fig3.subplots_adjust(wspace=0.5, hspace=0.3)
+    #fig3.suptitle('6x6 Stiffness Matrix', fontsize=14)
+    c = 6
+    p = 0
+    q = 0
+    for j in range(6):
+        for i in range(6):
+            if ut[i,j] == 1:
+                if i == j:
+                    if p==3:
+                        p = 0
+                        q = 1
+                        
+                    if isinstance(ref, (np.ndarray)):
+                        ax3[p][q].plot(ref_x,ref[:,c],'-.b')
+                    if isinstance(sigma, (np.ndarray)):
+                        ax3[p][q].fill_between(x, data[:,c]-sigma[:,c], data[:,c]+sigma[:,c], alpha=0.6, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
+                    ax3[p][q].plot(x,data[:,c],'--k.', markersize = 2)
+                    ylabel = r'$k_{%s%s} \quad [%s]$' % (i+1,j+1,TSunits[i,j])
+                    ax3[p][q].set_ylabel(ylabel)
+                    #ax2[i][j].set_ylim(0)
+                    #ax2[i][j].yaxis.set_major_formatter(mtick.FormatStrFormatter('%.1e'))
+                    ax3[p][q].set_ylim(0)
+                    if p==2:
+                        ax3[p][q].set_xlabel(r'radius $\quad [1/R]$')
+                    p += 1    
+#                else:
+#                    fig3.delaxes(ax3[i][j])
+
+                c += 1
+
+    #ax3[2,1].legend([ref_line, line], ['UH-60A Reference', 'Inertial Properties'], loc='upper center')
+    ax3[2,1].set_ylim(0,1.4e7)
+
+        
+        
     plt.show()
 
 
+def plot_beam_properties_histogram(mc_BeamProps, station_idx = [8,9,10], ptype='hist', xlim=(-10,10), **kwargs):
+    ylabel = [(r'm_{00}','kg/m'), (r'X_{m2}','kg'), (r'X_{m3}','kg'), (r'm_{33}','kg m'), (r'm_{23}','kg m'), (r'm_{22}','kg m')]
+    MMlabel = np.asarray([r'$%s \quad [%s]$' % (e[0],e[1]) for e in ylabel]).reshape((3,2))
+    
+    
+    mc_BeamProps = np.copy(mc_BeamProps)
+    mc_BeamProps[:,:,1] = mc_BeamProps[:,:,1]/mc_BeamProps[:,:,0]
+    mc_BeamProps[:,:,2] = mc_BeamProps[:,:,2]/mc_BeamProps[:,:,0]
+   
+    
+    mm = mc_BeamProps[:,:,:6].reshape((mc_BeamProps.shape[0],mc_BeamProps.shape[1], 3,2))
+    for i in station_idx:
+        plot_2dhist(mm[:,i], MMlabel, title = str(i), ptype=ptype, **kwargs)
+        
+        
+    #6x6 Stiffness Properties:
+    TSunits = np.array([['N','N','N','Nm','Nm','Nm'],
+                        ['N','N','N','Nm','Nm','Nm'],
+                        ['N','N','N','Nm','Nm','Nm'],
+                        ['Nm','Nm','Nm','Nm^2','Nm^2','Nm^2'],
+                        ['Nm','Nm','Nm','Nm^2','Nm^2','Nm^2'],
+                        ['Nm','Nm','Nm','Nm^2','Nm^2','Nm^2']])
+    #Ylabels
+    TSlabel = []
+    for i in range(6):
+        tmp = []
+        for j in range(6):
+            tmp.append(r'$k_{%s%s} \quad [%s]$' % (i+1,j+1,TSunits[i,j]))
+        TSlabel.append(tmp)
+    TSlabel = np.asarray(TSlabel)
 
-def plot_fandiagram(res, Omega, RPM_vec, **kwargs):
+    ts = [] 
+    for s in mc_BeamProps:
+        tmp = []
+        for csprop in s:
+            tmp.append(dymore2sixbysix(csprop)[1])
+        ts.append(tmp)
+    ts = np.asarray(ts)
+
+ 
+    for i in station_idx:
+        plot_2dhist(ts[:,i], TSlabel, title = str(i), upper_tri=True, ptype=ptype, **kwargs)
+
+    tmp = np.delete(ts,[1,2],axis=2)
+    cs = np.delete(tmp,[1,2],axis=3)
+    tmp = np.delete(TSlabel,[1,2],axis=0)
+    CSlabel = np.delete(tmp,[1,2],axis=1)
+    
+    for i in station_idx:
+        plot_2dhist(cs[:,i], CSlabel, upper_tri=True, ptype=ptype, xlim=xlim, **kwargs)
+
+    k44= ts[:,:,3,3]
+    k55 = ts[:,:,4,4]
+    
+    tmp = np.stack((k44,k55), axis=2)
+    tmp_label = TSlabel.diagonal()[[3,4]]
+    for i in station_idx:
+        plot_2dhist(tmp[:,i], tmp_label, ptype=ptype, xlim=xlim, **kwargs)
+
+
+def plot_fandiagram(res, Omega, RPM_vec, ptype='mean', **kwargs):
     """
     plotting procedure to generate a Fan-Diagram (rotor eigenfrequencies vs.
     rotor rotational speed).
@@ -249,7 +449,7 @@ def plot_fandiagram(res, Omega, RPM_vec, **kwargs):
     #Define function Args and Defaults for kwargs
     sigma  = None
     ref_fname = None
-    ref_str = ['x1','x1','x1','x1','x1','x1','x1']
+    ref_str = ['x1','x1','x1','x1','x1','x1','x1', 'x1']
     title='Fan Diagram'
     
     if 'sigma' in kwargs:
@@ -274,7 +474,7 @@ def plot_fandiagram(res, Omega, RPM_vec, **kwargs):
         #color = '#333333'
         plt.plot(x,i*y,'--',color='grey')
         string = r'$%i\Omega$' % (i)
-        plt.text(x[-1]-.06, i*y[-1]+.5, string, color='grey')
+        plt.text(x[-1]-.06, i*y[-1]+.5, string, color='black')
     
     
     #read and plot reference data:
@@ -285,63 +485,76 @@ def plot_fandiagram(res, Omega, RPM_vec, **kwargs):
         x = ref_data[:,0]
         for i,d in enumerate(ref_data.T):
             s=ref_str2[i]
-            if 'f' in s:
-                colorhex = 'blue'
-                plt.plot(x, d, ':',color=colorhex)
-            elif 'l' in s:
-                colorhex = 'red'
-                plt.plot(x, d,':', color=colorhex)
-            elif 't' in s:
-                colorhex = 'green'
-                plt.plot(x,d,':',color=colorhex)
-        legend_lines.append(mlines.Line2D([], [], color='black', linestyle=':', label='Reference')) 
+#            if 'f' in s:
+#                colorhex = 'blue'
+#                plt.plot(x, d, ':',color=colorhex)
+#            elif 'l' in s:
+#                colorhex = 'red'
+#                plt.plot(x, d,':', color=colorhex)
+#            elif 't' in s:
+#                colorhex = 'green'
+#                plt.plot(x,d,':',color=colorhex)
+            plt.plot(x,d,'-.',color='blue')
+        legend_lines.append(mlines.Line2D([], [], color='blue', linestyle='-.', label='UH-60A Reference')) 
     
 
     #plot standart deviation and fill between -sigma and +sigma
-    res = np.real(res)
-    x = RPM_vec/Omega
-    if isinstance(sigma, (np.ndarray)):
+    if ptype == 'mean':
+        res = np.real(res)
+        x = RPM_vec/Omega
+        if isinstance(sigma, (np.ndarray)):
+            for i,d in enumerate(res[:,:len(ref_str)].T):
+                #print(d.shape, sigma[:,i].shape)
+                plt.fill_between(x, d-sigma[:,i], d+sigma[:,i], alpha=0.6, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
+            legend_lines.append(mlines.Line2D([], [], color='red', linestyle=':', label=r'standard deviation $\pm \sigma$'))    
+             
+            
+        #plot dymore frequencies:
+        x = RPM_vec/Omega
+        #ref_str = ['l1','f1','f2','f3','l2','t1','f4']
+        D = {'1':'s','2':'^','3':'o','4':'d'}
+        ms = 3
         for i,d in enumerate(res[:,:len(ref_str)].T):
-            #print(d.shape, sigma[:,i].shape)
-            plt.fill_between(x, d-sigma[:,i], d+sigma[:,i], alpha=0.25, edgecolor='r',  linestyle=':', facecolor='r', antialiased=True,)
-        legend_lines.append(mlines.Line2D([], [], color='red', linestyle=':', label=r'standard deviation $\pm \sigma$'))    
-         
-        
-    #plot dymore frequencies:
-    x = RPM_vec/Omega
-    #ref_str = ['l1','f1','f2','f3','l2','t1','f4']
-    D = {'1':'s','2':'^','3':'o','4':'d'}
-    ms = 3
-    for i,d in enumerate(res[:,:len(ref_str)].T):
-        s=ref_str[i]
-        #plt.plot(x,d,'b')
-        m = D[s[-1]] 
-        if 'f' in s:
-            colorhex = 'blue'
-            plt.plot(x, d, '-', color=colorhex, marker=m, markersize = ms)
-            string = r'%s flap' % (s[-1])
-            plt.text(x[-1]+.01, d[-1], string, color=colorhex)
-        elif 'l' in s:
-            colorhex = 'red'
-            plt.plot(x, d, 'o-', color=colorhex, marker=m, markersize = ms)
-            string = r'%s lead-lag' % (s[-1])
-            plt.text(x[-1]+.01, d[-1], string, color=colorhex)
-        elif 't' in s:
-            colorhex = 'green'
-            plt.plot(x, d, 'o-', color=colorhex, marker=m, markersize = ms)
-            string = r'%s torsion' % (s[-1])
-            plt.text(x[-1]+.01, d[-1], string, color=colorhex)
-            
-        else:
-            colorhex = 'black'
-            plt.plot(x, d, 'o-', color=colorhex, marker=m, markersize = ms)
-            
-    legend_lines.append(mlines.Line2D([], [], color='black', linestyle='-', marker='o', label='mean eigenfrequencies'))
+            s=ref_str[i]
+            #plt.plot(x,d,'b')
+            m = D[s[-1]] 
+            if 'f' in s:
+                colorhex = 'blue'
+                plt.plot(x, d, '-', color=colorhex, marker=m, markersize = ms)
+                string = r'%s flap' % (s[-1])
+                plt.text(x[-1]+.01, d[-1], string, color=colorhex)
+            elif 'l' in s:
+                colorhex = 'red'
+                plt.plot(x, d, 'o-', color=colorhex, marker=m, markersize = ms)
+                string = r'%s lead-lag' % (s[-1])
+                plt.text(x[-1]+.01, d[-1], string, color=colorhex)
+            elif 't' in s:
+                colorhex = 'green'
+                plt.plot(x, d, 'o-', color=colorhex, marker=m, markersize = ms)
+                string = r'%s torsion' % (s[-1])
+                plt.text(x[-1]+.01, d[-1], string, color=colorhex)
+                
+            else:
+                colorhex = 'black'
+                plt.plot(x, d, 'o-', color=colorhex, marker=m, markersize = ms)
 
+
+    elif ptype=='series':
+        res = np.real(res)
+        x = RPM_vec/Omega
+        for s in res:
+            #print(s.shape)
+            for f in s.T:
+                colorhex = 'black'
+                plt.plot(x, f, '-k', color=colorhex, alpha=0.35)
+        
+        
+
+    legend_lines.append(mlines.Line2D([], [], color='black', linestyle='-', marker='o', label='mean eigenfrequencies'))
 
     plt.ylim((0,45))
     plt.xlim((0,1.2))
-    plt.title(title)
+    #plt.title(title)
     plt.xlabel(r'Rotor Rotational Speed, $\Omega / \Omega_{ref}$')
     plt.ylabel(r'Eigenfrequencies, $\omega$ [Hz]')
     plt.legend(handles=legend_lines)
@@ -490,11 +703,9 @@ def plot_eigenmodes(eigv, string='BLADE_BP_CG01', **kwargs):
     plt.xlabel('Radial Station, r/R')
     plt.ylabel('Normalized Torsion')
     #plt.subplots_adjust(wspace=0.3, left=0.1, right=0.9)
-   
-
-
+    
+    
 def sim_plot(fq_dym, RPM_vec, target_dir):
-
     #plt.figure(figsize=(12,8))
     plt.figure(figsize=(12,8))
     array_per = RPM_vec
