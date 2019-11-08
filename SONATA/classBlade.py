@@ -32,7 +32,7 @@ from SONATA.cbm.classCBMConfig import CBMConfig
 
 from SONATA.vabs.classVABSConfig import VABSConfig
 
-from SONATA.utl.trsf import trsf_blfr_to_cbm, trsf_cbm_to_blfr
+from SONATA.utl.trsf import trsf_blfr_to_cbm, trsf_cbm_to_blfr, trsf_af_to_blfr
 from SONATA.utl.blade_utl import interp_airfoil_position, make_loft, interp_loads, check_uniformity, array_pln_intersect
 from SONATA.utl.plot import plot_beam_properties
 from SONATA.utl.converter import iea37_converter
@@ -41,6 +41,7 @@ from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire, 
 from SONATA.cbm.fileIO.CADinput import intersect_shape_pln
 from SONATA.cbm.topo.BSplineLst_utils import BSplineLst_from_dct, get_BSplineLst_D2, set_BSplineLst_to_Origin, set_BSplineLst_to_Origin2
 from SONATA.cbm.topo.utils import PntLst_to_npArray, lin_pln_intersect, Array_to_PntLst
+from SONATA.cbm.topo.to3d import bsplinelst_to3d, pnt_to3d, vec_to3d
 from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
                                         export_to_SVG, export_to_PS, export_to_EnhPS, \
                                         export_to_TEX, export_to_BMP,export_to_TIFF, \
@@ -130,7 +131,9 @@ class Blade(Component):
                  'f_chord', 'f_twist', 'materials', \
                  'blade_ref_axis_BSplineLst', 'f_blade_ref_axis',
                  'beam_ref_axis_BSplineLst', 'f_beam_ref_axis', 
-                 'f_pa', 'f_curvature_k1','display', 'start_display', 'add_menu', 'add_function_to_menu', 'anba_beam_properties')
+                 'f_pa', 'f_curvature_k1', 'anba_beam_properties',  \
+                 'wopwop_bsplinelst', 'wopwop_pnts', 'wopwop_vecs', \
+                 'display', 'start_display', 'add_menu', 'add_function_to_menu' )
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
@@ -198,7 +201,7 @@ class Blade(Component):
         return local_Ax2
     
     
-    def _interpolate_cbm_boundary(self, x, fs=1.1):
+    def _interpolate_cbm_boundary(self, x, fs=1.1, nPoints=500) :
         """
         interpolates a cbm boundary BSplineLst from the blade definition at a 
         certain grid station. Following the procedure: 
@@ -250,11 +253,10 @@ class Blade(Component):
         for item in afs:
             xi = item[0]
             af = item[1]
-            (wire, te_pnt) = af.transform_to_bladerefframe(self.f_blade_ref_axis.interpolate(xi)[0][0], float(self.f_pa(xi)), float(self.f_chord(xi)), float(self.f_twist(xi)))
+            (wire, te_pnt) = af.trsf_to_blfr(self.f_blade_ref_axis.interpolate(xi)[0][0], float(self.f_pa(xi)), float(self.f_chord(xi)), float(self.f_twist(xi)))
             wireframe.append(wire)
             tes.append(te_pnt)
         
-        nPoints = 8000
         if len(wireframe) > 1:
             tmp = []
             for w in wireframe:
@@ -288,9 +290,13 @@ class Blade(Component):
         BSplineLst = BSplineLst_from_dct(array[:,0:2], angular_deflection = 20, tol_interp=1e-6)
 
         BoundaryBSplineLst = set_BSplineLst_to_Origin2(BSplineLst, gp_Pnt2d(te_pnt.Coord()[0],te_pnt.Coord()[1]))
+    
+
         return BoundaryBSplineLst
         
+
     
+        
     def read_IEA37(self, yml, airfoils, stations=None, npts = 11, wt_flag=False, **kwargs):
         """
         reads the IEA Wind Task 37 style Blade dictionary 
@@ -342,6 +348,8 @@ class Blade(Component):
                                          tmp_blra[:,0], tmp_bera[:,0], \
                                          tmp_pa[:,0], arr[:,0], cs_pos))))
 
+#        print(type(airfoil_position),airfoil_position)
+#        print(airfoils)
         self.airfoils = np.asarray([[x, interp_airfoil_position(airfoil_position, airfoils, x)] for x in x])
         self.blade_ref_axis = np.hstack((np.expand_dims(x, axis=1),self.f_blade_ref_axis.interpolate(x)[0]))
         self.beam_ref_axis =  np.hstack((np.expand_dims(x, axis=1),self.f_beam_ref_axis.interpolate(x)[0]))
@@ -358,7 +366,7 @@ class Blade(Component):
             lst = [[cs.get('position'), CBMConfig(cs, self.materials, iea37=True)] for cs in yml.get('internal_structure_2d_fem').get('sections')]
             cbmconfigs = np.asarray(lst)
  
-        #Generate CBMs
+        #Generate CBM - move functionality to gen_sections
         tmp = []
         for x, cfg in cbmconfigs:
             #get local beam coordinate system, and local cbm_boundary
@@ -540,7 +548,7 @@ class Blade(Component):
         arr = np.asarray(lst)
         
         return arr
-        
+       
        
     def blade_exp_dymore_inpt(self,  eta_offset=0):
         """
@@ -594,7 +602,77 @@ class Blade(Component):
             
         return dym_inpt
 
+    def blade_gen_wopwop_mesh(self, xres, cres, deformation = None, normals='2d', minset=False):
+        """
+        method that generates a mesh of the surface that is necessary for 
+        PSU Wopwop. It is a structured mesh of points and their normals. 
+        The normals are currently only impemented that they are within the 
+        crosssectional plane (normals = '2d') and theirfore not normal to the 
+        surface. 
+        
+        Parameters
+        ----------
+        xres : array 
+            radial resolution in the form of an array that specifies the radial 
+            locations
+            
+        cres : int
+            chordwise resolution, how many points per cross-section
+            
+        deformation : array, optional
+            in the futur it shall be possible pass a deformation vector of 3 
+            displacements and 3 rotations to get the mesh of the deformed 
+            rotor-blade. This function is carried out in the trsf_af_to_blfr
+        
+        normals : str, optional
+            currently only '2d' normal vectors are implemented that are in the
+            yz plane.
+            
+        minset : bool, otional
+            if true the minimum set of radial values are superimposed with the 
+            xres array.
+            
+        Returns
+        -------
+        wopwop_bsplinelst : [[Geom_BSplineLst]]
+        wopwop_pnts : [[gp_Pnt]]
+        wopwop_vecs : [[gp_Vec]]
+            
+        """
 
+        x = xres
+        if minset:
+            minx = self.blade_ref_axis[:,0]
+            x = np.unique(np.sort(np.hstack((xres,minx))))
+        
+        #BSplineLst, PntLst =self._interpolate_cbm_boundary(x,nPoints=50,return_Pnts = True) #Old
+        airfoil_position = (list(self.airfoils[:,0]),[af.name for af in self.airfoils[:,1]])
+        airfoils = list(self.airfoils[:,1])
+        wopafls = np.asarray([[x, interp_airfoil_position(airfoil_position, airfoils, x)] for x in x])
+        
+        self.wopwop_bsplinelst = []
+        self.wopwop_pnts = []
+        self.wopwop_vecs = []
+
+        for x,af in wopafls:
+            (BSplineLst2d, pnts2d, vecs2d) = af.gen_wopwop_dist(cres) 
+            
+            Pnts = [pnt_to3d(p) for p in pnts2d]
+            Vecs = [vec_to3d(v) for v in vecs2d]
+            BSplineLst = bsplinelst_to3d(BSplineLst2d, gp_Pln(gp_Pnt(0,0,0), gp_Dir(0,0,1)))
+            
+            Trsf = trsf_af_to_blfr(self.f_blade_ref_axis.interpolate(x)[0][0], float(self.f_pa(x)), float(self.f_chord(x)), float(self.f_twist(x)), deformation = deformation)
+            [s.Transform(Trsf) for s in BSplineLst]
+            Pnts = [p.Transformed(Trsf) for p in Pnts]
+            Vecs = [v.Transformed(Trsf) for v in Vecs]
+            
+            self.wopwop_bsplinelst.append(BSplineLst)
+            self.wopwop_pnts.append(Pnts)
+            self.wopwop_vecs.append(Vecs)
+                   
+        return self.wopwop_bsplinelst, self.wopwop_pnts, self.wopwop_vecs
+        
+    
     def blade_plot_attributes(self):
         """
         plot the coordinates, chord, twist and pitch axis location of the blade
@@ -649,7 +727,7 @@ class Blade(Component):
         return None    
     
     
-    def blade_post_3dtopo(self, flag_wf = True, flag_lft = False, flag_topo = False, flag_mesh = False):
+    def blade_post_3dtopo(self, flag_wf = True, flag_lft = False, flag_topo = False, flag_mesh = False, flag_wopwop=False):
         """
         generates the wireframe and the loft surface of the blade
 
@@ -680,7 +758,7 @@ class Blade(Component):
             
             #airfoil wireframe
             for bm, afl in zip(self.blade_matrix, self.airfoils[:,1]):
-                (wire, te_pnt) = afl.transform_to_bladerefframe(bm[1:4], bm[6], bm[4], bm[5])
+                (wire, te_pnt) = afl.trsf_to_blfr(bm[1:4], bm[6], bm[4], bm[5])
                 wireframe.append(wire)
                 self.display.DisplayShape(wire, color='BLACK')
                 #self.display.DisplayShape(te_pnt, color='WHITE', transparency=0.7)
@@ -696,6 +774,24 @@ class Blade(Component):
                 display_Ax2(self.display, cs.Ax2, length=0.2)
                 display_cbm_SegmentLst(self.display, cs.SegmentLst, self.Ax2, cs.Ax2)
                 
+        if flag_wopwop:
+            for bspl in self.wopwop_bsplinelst:
+                for s in bspl:
+                    self.display.DisplayShape(s, color='GREEN')
+            
+            for i,cs in enumerate(self.wopwop_pnts):
+                for j,p1 in enumerate(cs):
+                    v2 = self.wopwop_vecs[i][j]
+                    v1 = gp_Vec(p1.XYZ())
+                    v2.Normalize()
+                    v2.Multiply(0.1)
+                    v3 = v1.Added(v2)
+                    p2 = gp_Pnt(v3.XYZ())
+                    
+                    self.display.DisplayShape(p1, color='RED')    
+                    h1 = BRepBuilderAPI_MakeEdge(p1,p2).Shape()
+                    self.display.DisplayShape(h1, color='WHITE')     
+        
         self.display.View_Iso()
         self.display.FitAll()
         self.start_display()   
