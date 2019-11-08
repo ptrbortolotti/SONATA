@@ -61,9 +61,13 @@ jobs/SBeer
 jobs/SSuesse
 jobs/Statistics
 jobs/VHeuschneider
+jobs/MERIT
+jobs/JSirohi
 jobs/VariSpeed/**/*.png
+jobs/MonteCarlo
 /img/
 /scratch/
 /docs/source/
 /docs/build/
 SONATA/sectionbuilder/PatranMesh_example/
+
