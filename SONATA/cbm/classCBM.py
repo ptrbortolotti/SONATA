@@ -704,7 +704,13 @@ class CBM(object):
                 vabs_filename = path+'/'+self.name+fstring
                     
             else:
-                print('ERROR: ramdisk directory "/tmpfs" does not exist!')
+                user = getpass.getuser()
+                path = '/scratch/'+user
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                #tmp = path+'/'+self.config.filename.split('/')[-1]
+                vabs_filename = path+'/'+self.name+fstring
+                print('WARNING: ramdisk directory "/tmpfs" does not exist! -> running on /scratch')
 
         elif self.config.filename == '':
             vabs_filename = self.name+fstring
@@ -713,6 +719,7 @@ class CBM(object):
             print('config_filename')
             vabs_filename = self.config.filename.replace('.yml', fstring)
         
+
         print('STATUS:\t Running VABS for Constitutive modeling:')
         
         if platform.system() == 'Linux':
@@ -1083,8 +1090,8 @@ class CBM(object):
 if __name__ == '__main__':   
     plt.close('all')
     fname = 'jobs/debug/issue20/sec_config.yml'
-    #fname = 'jobs/VariSpeed/uh60a_cbm_simple/sec_config.yml'
-    fname = 'jobs/AREA/R250/sec_config.yml'
+    fname = 'jobs/VariSpeed/uh60a_cbm_advanced/sec_config_R2000.yml'
+    #fname = 'jobs/AREA/R250/sec_config.yml'
     #fname = 'jobs/PBortolotti/sec_config.yml'
     config = CBMConfig(fname)
     

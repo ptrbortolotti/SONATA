@@ -14,7 +14,7 @@ from matplotlib.collections import PatchCollection
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.colors import LinearSegmentedColormap
-
+from SONATA.openmdao_utl.doe_utl import filename_generator
 
 def centroid(points):
     x = [p[0] for p in points]
@@ -217,16 +217,27 @@ def plot_cells(cells,nodes,attr1, VABSProperties=None, title='None', plotTheta11
         theta_11 = np.asarray(theta_11)
     
     
-    fig,ax = plot_mesh(nodes_array,element_array,theta_11,data,data_name,title, VABSProperties, False, False, **kw)    
+    fig,ax = plot_mesh(nodes_array,element_array,theta_11,data,data_name,title, VABSProperties, **kw)    
    
     if 'savepath' in kw:
         #savepath = 'jobs/VHeuschneider/figures/R90_config.svg'
-        datestr = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-        fname = kw['savepath'].split('.')[0]+'_'+datestr+'.'+kw['savepath'].split('.')[1]
-        #print(fname)
+        s = kw['savepath']
+        file_extension ='.'+ s.split('.')[-1]
+
+        if s.find('/') != -1:
+            idx = [i for i, v in enumerate(s) if v == '/'][-1]
+            directory = s[:idx]
+            string = s[idx+1:s.find('.')]
+            
+        else:
+            directory = ''
+            string = s[:s.find('.')]
+        fname = filename_generator(directory, string, file_extension)
+        #fname = kw['savepath'].split('.')[0]+'_'+datestr+'.'+kw['savepath'].split('.')[1]
+        print(fname)
         tmp_fig = plt.gcf()
         #tmp_fig.set_size_inches(11.69, 8.27)    #a4 landscape
-        tmp_fig.set_size_inches(40, 20)    #a4 landscape
+        tmp_fig.set_size_inches(40, 20)    
         tmp_fig.savefig(fname, dpi=300, orientation='landscape', papertype='a4')
    
     return (fig, ax)
