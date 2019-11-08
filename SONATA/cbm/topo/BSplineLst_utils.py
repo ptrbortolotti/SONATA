@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import leastsq
 
 #PythonOCC Libraries
-from OCC.Core.gp import gp_Pnt2d, gp_Dir2d, gp_Vec2d, gp_Pnt, gp_Dir, gp_Vec
+from OCC.Core.gp import gp_Pnt2d, gp_Dir2d, gp_Vec2d, gp_Pnt, gp_Dir, gp_Vec, gp_Pln
 from OCC.Core.Geom import Geom_BSplineCurve, Geom_Curve
 from OCC.Core.Geom2d import Geom2d_BSplineCurve, Geom2d_Curve
 
@@ -281,7 +281,35 @@ def equidistant_Points_on_BSplineLst(BSplineLst,minLen):
 
     return Pnt2dLst
 
+
+def equidistant_D1_on_BSplineLst(BSplineLst, NbPoints):
+    """
+    distributes NbPoints number of Points and NormalVectors onto equidistantly on 
+    Geom2d_BSplineLst. 
     
+    """
+    PntLst = []
+    VecLst = []
+    for item in BSplineLst:
+        
+        if isinstance(item,Geom_BSplineCurve):
+            print('ERROR: Argument must be a Geom2d_BSplineLst')
+                       
+        Adaptor = Geom2dAdaptor_Curve(item)
+        discretization = GCPnts_QuasiUniformAbscissa(Adaptor,NbPoints)
+    
+        for j in range(1, NbPoints+1):
+                para = discretization.Parameter(j)
+                #print(para)
+                Pnt2d = gp_Pnt2d()
+                Vec2d = gp_Vec2d()
+                item.D1(para, Pnt2d, Vec2d)
+                PntLst.append(Pnt2d)
+                VecLst.append(Vec2d.GetNormal())
+                
+    return (PntLst, VecLst)
+    
+
 def find_BSpline_coordinate(BSpline,s):
     # Be careful, s stands for the lenght coordinate of a single BSpline, while S represents the Global Coordinate!
     BSpline_length = get_BSpline_length(BSpline)
@@ -1125,6 +1153,8 @@ def set_BSplineLst_to_Origin2(BSplineLst, gp_Pnt2d, tol = 1e-3):
     BSplineLst = OBSplineLst
     
     return BSplineLst
+    
+    
     
     
     
