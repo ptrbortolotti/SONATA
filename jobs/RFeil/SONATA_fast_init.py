@@ -58,7 +58,7 @@ flag_plotDisplacement   = False     # description ? ToDO
 flag_plotTheta11        = True      # description ? ToDo # material orientation angle (eg +-45 deg)
 # For plots within blade_post_3dtopo
 flag_wf                 = True      # plot wire-frame
-flag_lft                = False     # plot loft of blade surface (flag_wf=True obligatory); Note: create loft with grid refinement without too many radial_stations
+flag_lft                = True     # plot loft of blade surface (flag_wf=True obligatory); Note: create loft with grid refinement without too many radial_stations
 flag_topo               = True      # plot mesh topology
 
 # create flag dictionary
@@ -96,12 +96,12 @@ job = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=rad
 job.blade_gen_section()  # generate blade section(s) - build & mesh segments
 
 # ===== VABS / ANBAX ===== #
-# job.blade_run_vabs()
+job.blade_run_vabs()
 # job.blade_run_anbax()
 
 
 # The following code is only used for VABS/anbax verification studies
-flag_verify_vabs_anbax = True
+flag_verify_vabs_anbax = False
 
 if flag_verify_vabs_anbax:
     # ------------------------ #
