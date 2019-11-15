@@ -114,7 +114,7 @@ def make_loft(elements, ruled=False, tolerance=1e-6, continuity=4, check_compati
     loft : TopoDS_Shape
         surface of the ThruSections Loft
     """
-    
+
     sections = BRepOffsetAPI_ThruSections(False, ruled, tolerance)
     for i in elements:
         if isinstance(i, TopoDS_Wire):
@@ -128,7 +128,7 @@ def make_loft(elements, ruled=False, tolerance=1e-6, continuity=4, check_compati
     sections.SetContinuity(continuity)
     sections.Build()
     loft = sections.Shape()
-    
+
     return loft
     
 

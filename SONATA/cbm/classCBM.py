@@ -20,6 +20,9 @@ import time
 import copy
 
 
+from SONATA.utl.converter import anbax_converter
+
+
 #PythonOCC Modules
 try:
     from OCC.Display.SimpleGui import init_display
@@ -818,9 +821,22 @@ class CBM(object):
         Notes
         ----------
         To be defined.
-        
+
         """
+
+
+
         self.mesh, nodes = sort_and_reassignID(self.mesh)
+
+        # nodes = anbax_converter(nodes_SONATA=nodes)
+        # x_coord = np.zeros(len(nodes))
+        # y_coord = np.zeros(len(nodes))
+        # for i in range(len(nodes)):
+        #     x_coord[i] = nodes[i].coordinates[0]
+        #     y_coord[i] = nodes[i].coordinates[1]
+        #
+        # plt.plot(x_coord, y_coord)
+
         try:
             (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = \
                 build_dolfin_mesh(self.mesh, nodes, self.materials)
@@ -837,7 +853,8 @@ class CBM(object):
         tmp_MM = anba.inertia().getValues(range(6),range(6))
         
         #Define transformation T (from ANBA to SONATA/VABS coordinates)
-        B = np.array([[0,0,1],[1,0,0],[0,1,0]])
+        # B = np.array([[0,0,1],[1,0,0],[0,1,0]])
+        B = np.array([[0,0,1],[-1,0,0],[0,1,0]])  # new
         T = np.dot(np.identity(3),np.linalg.inv(B))
         
         self.AnbaBeamProperties = BeamSectionalProps()

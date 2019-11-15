@@ -39,7 +39,7 @@ from SONATA.utl.blade_utl import interp_airfoil_position, make_loft, interp_load
 from SONATA.utl.plot import plot_beam_properties
 from SONATA.utl.converter import iea37_converter
 from SONATA.utl.interpBSplineLst import interpBSplineLst
-from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire, discretize_wire, get_wire_length, equidistant_Points_on_wire
+from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire, discretize_wire, get_wire_Pnt, get_wire_length, equidistant_Points_on_wire
 from SONATA.cbm.fileIO.CADinput import intersect_shape_pln
 from SONATA.cbm.topo.BSplineLst_utils import BSplineLst_from_dct, get_BSplineLst_D2, set_BSplineLst_to_Origin, set_BSplineLst_to_Origin2
 from SONATA.cbm.topo.utils import PntLst_to_npArray, lin_pln_intersect, Array_to_PntLst
@@ -340,9 +340,13 @@ class Blade(Component):
         tmp_chord = np.asarray((yml.get('outer_shape_bem').get('chord').get('grid'),yml.get('outer_shape_bem').get('chord').get('values'))).T
         tmp_tw = np.asarray((yml.get('outer_shape_bem').get('twist').get('grid'),yml.get('outer_shape_bem').get('twist').get('values'))).T
         tmp_pa = np.asarray((yml.get('outer_shape_bem').get('pitch_axis').get('grid'),yml.get('outer_shape_bem').get('pitch_axis').get('values'))).T
-        
+
         self.f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1], bounds_error=False, fill_value='extrapolate')
-        self.f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
+
+        if kwargs['flags']['flag_wt_ontology']:  # correct twist rate sign as yaml twist is defined according to BeamDyn Definition (WTF)
+            self.f_twist = interp1d(tmp_tw[:,0], -tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
+        else:
+            self.f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
         self.f_pa = interp1d(tmp_pa[:,0], tmp_pa[:,1], bounds_error=False, fill_value='extrapolate')
         
         #Read chord, twist and nondim. pitch axis location and create interpolation
@@ -359,9 +363,12 @@ class Blade(Component):
             else:
                 cs_pos = np.linspace(0.0, 1.0, npts)
         else:
-            cs_pos = np.asarray([cs.get('position') for cs in yml.get('internal_structure_2d_fem').get('sections')])
+            if stations is None:
+                cs_pos = np.asarray([cs.get('position') for cs in yml.get('internal_structure_2d_fem').get('sections')])
+            else:
+                cs_pos = stations
             
-        x = np.unique(np.sort(np.hstack((tmp_chord[:,0], tmp_tw[:,0], \
+        x = np.unique(np.sort(np.hstack((kwargs.get('stations_sine'), tmp_chord[:,0], tmp_tw[:,0], \
                                          tmp_blra[:,0], tmp_bera[:,0], \
                                          tmp_pa[:,0], arr[:,0], cs_pos))))
 
@@ -500,7 +507,8 @@ class Blade(Component):
             print('STATUS:\t Running ANBAX at grid location %s' % (x))
             cs.cbm_run_anbax(**kwargs)
             lst.append([x, cs.AnbaBeamProperties])
-        self.anba_beam_properties = np.asarray(lst)
+        # self.anba_beam_properties = np.asarray(lst)
+        self.beam_properties = np.asarray(lst)
         return None      
         
         
@@ -707,11 +715,11 @@ class Blade(Component):
                 (wire, te_pnt) = afl.transform_to_bladerefframe(bm[1:4], bm[6], bm[4], bm[5])
                 wireframe.append(wire)
                 self.display.DisplayShape(wire, color='BLACK')
-                #self.display.DisplayShape(te_pnt, color='WHITE', transparency=0.7)
-                
+
         if flag_lft:
             for i in range(len(wireframe)-1):
-                loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-2, continuity=1, check_compatibility=True)
+                # loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-2, continuity=1, check_compatibility=True)
+                loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-6, continuity=1, check_compatibility=True)
                 self.display.DisplayShape(loft, transparency=0.5, update=True)
         
         if flag_topo:
@@ -719,7 +727,7 @@ class Blade(Component):
                 #display sections
                 display_Ax2(self.display, cs.Ax2, length=0.2)
                 display_cbm_SegmentLst(self.display, cs.SegmentLst, self.Ax2, cs.Ax2)
-                
+
         self.display.View_Iso()
         self.display.FitAll()
         self.start_display()
