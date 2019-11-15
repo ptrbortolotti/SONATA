@@ -74,8 +74,8 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
 
 
 try:
-    from SONATA.anbax.anbax_utl import build_dolfin_mesh 
-    from anba4 import anbax
+    from SONATA.anbax.anbax_utl.anbax_utl import build_dolfin_mesh
+    from SONATA.anbax.anba_v4.anba4 import anbax
     #from SONATA.anbax.anba_v4.anba4.anbax import anbax
 except:
     pass

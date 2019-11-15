@@ -81,8 +81,8 @@ else:
 
 # ===== User defined radial stations ===== #
 # Define the radial stations for cross sectional analysis (only used for flag_wt_ontology = True -> otherwise, sections from yaml file are used!)
-radial_stations = [0., 0.1, 0.2, 0.301, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0]  # ToDO: fix yaml for r/R = 0.3 and 0.9
-# radial_stations = [0.4]
+# radial_stations = [0., 0.1, 0.2, 0.301, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0]  # ToDO: fix yaml for r/R = 0.3 and 0.9
+radial_stations = [0.4]
 
 # ===== Execute SONATA Blade Component Object ===== #
 # name          - job name of current task
@@ -96,12 +96,12 @@ job = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=rad
 job.blade_gen_section()  # generate blade section(s) - build & mesh segments
 
 # ===== VABS / ANBAX ===== #
-job.blade_run_vabs()
+# job.blade_run_vabs()
 # job.blade_run_anbax()
 
 
 # The following code is only used for VABS/anbax verification studies
-flag_verify_vabs_anbax = False
+flag_verify_vabs_anbax = True
 
 if flag_verify_vabs_anbax:
     # ------------------------ #
