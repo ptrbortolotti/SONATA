@@ -51,7 +51,8 @@ license
 *.dat
 
 #ignored folders
-#jobs/PBortolotti
+jobs/RFeil/0_archive
+jobs/PBortolotti
 jobs/FBerghammer
 jobs/AAbdelmoula
 jobs/EPiet
