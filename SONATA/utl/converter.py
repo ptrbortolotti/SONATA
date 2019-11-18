@@ -369,11 +369,17 @@ def anbax_converter(nodes_SONATA):
     Converts the sign of the x2 axis from SONATA/VABS definitions to anbax requirements
     @author: Roland Feil
 
+    Inputs from SONATA definition
+    ----------
+    x-coordinates of points defined positive to leading edge
+    y-coordinates of points defined positive to suction side of the blade
+
+
 
     Definitions of anbax
     ----------
-    x-axis positive to trailing edge
-    y-axis positive to suction side of the blade
+    x-coordinates of points defined trailing to leading edge (different sign as SONATA def.)
+    y-coordinates of points defined positive to suction side of the blade (same as SONATA def.)
 
 
     Parameters
@@ -385,28 +391,40 @@ def anbax_converter(nodes_SONATA):
     nodes of mesh
     """
 
-    # nodes = nodes_SONATA
-    #
+    nodes = nodes_SONATA
+
     # coord_anba=np.zeros([len(nodes_SONATA),2])
-    #
-    # for i in range(len(nodes_SONATA)):
-    #     for j in range(2):
-    #         coord_anba[i,j] = -nodes_SONATA[i].coordinates[j]
-    #
-    #         print(coord_anba)
-    #     nodes[i].coord = coord_anba[i,:]
-    #     # nodes[i].coordinates = [-nodes_SONATA[i].coordinates[0], nodes_SONATA[i].coordinates[1]]
-    #     nodes[i] = nodes[i]._replace(coordinates=[-nodes_SONATA[i].coordinates[0], nodes_SONATA[i].coordinates[1]])
-    #
-    #     items[node.ind].v = node.v
-    #     items[node.ind] = items[node.ind]._replace(v=node.v)
-    #
-    #     # nodes[i].coordinates[0] = n
-    #     print(nodes_SONATA[i].coordinates[0])
-    #     # print(n)
-    #     print(nodes[i].coordinates)
-    #
-    # return nodes
+
+    for node_index in range(len(nodes_SONATA)):
+        # for j in range(2):
+        #     coord_anba[node_index,j] = -nodes_SONATA[node_index].coordinates[j]
+        #
+        #     print(coord_anba)
+        nodes[node_index].coordinates[0] = -nodes_SONATA[node_index].coordinates[0] # change sign of chordwise coordinate, i.e. the first value in the point coordinates
+
+
+
+        nodes[node_index] = nodes[node_index].replace(coordinates=[-nodes_SONATA[node_index].coordinates[0], nodes_SONATA[node_index].coordinates[1]])
+
+
+
+        nodes[node_index] = nodes[node_index]._replace(coordinates=[-nodes_SONATA[node_index].coordinates[0], nodes_SONATA[node_index].coordinates[1]])
+
+
+
+        # # nodes[node_index].coord = coord_anba[node_index,:]
+        # # nodes[i].coordinates = [-nodes_SONATA[i].coordinates[0], nodes_SONATA[i].coordinates[1]]
+        # nodes[node_index] = nodes[node_index]._replace(coordinates=[-nodes_SONATA[node_index].coordinates[0], nodes_SONATA[node_index].coordinates[1]])
+        #
+        # items[node.ind].v = node.v
+        # items[node.ind] = items[node.ind]._replace(v=node.v)
+        #
+        # # nodes[i].coordinates[0] = n
+        # print(nodes_SONATA[i].coordinates[0])
+        # # print(n)
+        # print(nodes[i].coordinates)
+
+    return nodes
 
 
 #%% MAIN

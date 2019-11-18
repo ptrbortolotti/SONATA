@@ -9,7 +9,7 @@ components:
                 labels: [circular, circular]
             chord:
                 grid: [0.0, 1.0]
-                values: [1., 2.]
+                values: [1., 1.]
             twist:
                 grid: [0.0, 1.0]
                 values: [0.0, 0.0]
@@ -139,33 +139,6 @@ materials:
       # # Xt:   [2236.0e+006, 0.00, 0.00]
       # # Xc:   [1528.0e+006, 0.00, 0.00]
 
-   -  name: glass_biax
-      description: Vectorply E-LT-5500, Epikote MGS RIMR 135/Epicure MGS RIMH 1366 epoxy
-      source: MSU composites database 3D property tests, Engineering Mechanics of Composite Materials, Daniel, I & Ishai, O., 1994, pg. 34
-      orth: 1
-      rho: 1940.0
-      E: [11.1e+009, 11.1e+009, 16.7e+009]
-      G: [13.53e+009, 3.49e+009, 3.49e+009]
-      nu: [0.500, 0.000, 0.066]
-      # alpha:  [14 14  21]
-      Xt: [54.47e+006, 54.47e+006, 26.6e+006]
-      Xc: [74.1e+006, 74.1e+006, 197.0e+006]
-      S: [180.0e+006, 30.0e+006, 22.9e+006]
-      fvf: 0.57
-
-   -  name: glass_triax
-      description: Vectorply E-LT-5500, Epikote MGS RIMR 135/Epicure MGS RIMH 1366 epoxy
-      source: MSU composites database 3D property tests, Engineering Mechanics of Composite Materials, Daniel, I & Ishai, O., 1994, pg. 34
-      orth: 1
-      rho: 1940.0
-      E: [28.7e+009, 16.6e+009, 16.7e+009]
-      G: [8.40e+009, 3.49e+009, 3.49e+009]
-      nu: [0.500, 0.000, 0.170]
-      # alpha:  [11 18  21]
-      Xt: [54.5e+006, 54.5e+006, 26.6e+006]
-      Xc: [74.1e+006, 74.1e+006, 197.0e+006]
-      S: [32.9e+006, 30.0e+006, 22.9e+006]
-      fvf: 0.57
 
     # - name: low_density_foam
       # description: Airex C70.40 PVC Foam

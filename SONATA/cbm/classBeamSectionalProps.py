@@ -260,8 +260,15 @@ class BeamSectionalProps(object):
         Bk = grab_str_segment(STR,i_Bk,splitpoints)
         Ck = grab_str_segment(STR,i_Ck,splitpoints)
         Dk = grab_str_segment(STR,i_Dk,splitpoints)
-        
-        #The 6X6 Mass Matrix:
+
+        # MM_new = np.zeros((6,6))
+        # #The 6X6 Mass Matrix:
+        # MM_temp = np.loadtxt(StringIO(MM),skiprows=2)
+        # for i in range(6):
+        #     for j in range(6):
+        #         MM_new[i,j] = float(MM_temp[i,j])
+        # ToDO !!!! change the way of loading the textfile content
+
         self.MM = np.loadtxt(StringIO(MM),skiprows=2)
                
         #The 6X6 Mass Matrix at the Mass Center:

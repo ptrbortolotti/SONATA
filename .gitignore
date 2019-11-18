@@ -52,6 +52,7 @@ license
 
 #ignored folders
 jobs/RFeil/0_archive
+jobs/RFeil/test
 jobs/PBortolotti
 jobs/FBerghammer
 jobs/AAbdelmoula

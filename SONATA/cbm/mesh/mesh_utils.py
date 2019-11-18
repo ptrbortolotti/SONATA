@@ -56,7 +56,8 @@ def sort_and_reassignID(mesh):
     mesh = sorted(mesh, key=lambda Cell: (Cell.id))    
     for i,c in enumerate(mesh):
         c.id = i+1
-    
+
+
     return mesh, nodes
 
 

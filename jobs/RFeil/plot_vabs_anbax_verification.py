@@ -17,9 +17,8 @@ def plot_vabs_anbax(cs_pos, vabs_beam_stiff, vabs_beam_inertia, anbax_beam_stiff
         for j in range(len(vabs_beam_stiff[0,0,:])):
             if j >= i:
                 ax = fig.add_subplot(len(vabs_beam_stiff[0,:,0]),len(vabs_beam_stiff[0,0,:]),k)
-                ax.plot(cs_pos, vabs_beam_stiff[:,i,j])
-                ax.plot(cs_pos, anbax_beam_stiff[:,i,j])
-
+                ax.plot(cs_pos, anbax_beam_stiff[:,i,j], 'r')
+                ax.plot(cs_pos, vabs_beam_stiff[:,i,j], 'k')
                 ax.set_xlabel('r/R')
                 ax.set_title('$k_{%i %i}$' %((i+1), (j+1)))
                 ax.grid(True)
@@ -37,14 +36,19 @@ def plot_vabs_anbax(cs_pos, vabs_beam_stiff, vabs_beam_inertia, anbax_beam_stiff
     for i in range(len(vabs_beam_inertia[0,:,0])):
         for j in range(len(vabs_beam_inertia[0,0,:])):
             if j >= i:
-                ax = fig.add_subplot(len(vabs_beam_inertia[0,:,0]),len(vabs_beam_inertia[0,0,:]),m)
-                ax.plot(cs_pos, vabs_beam_inertia[:,i,j])
-                ax.plot(cs_pos, anbax_beam_inertia[:,i,j])
+                # ax = fig.add_subplot(len(vabs_beam_inertia[0,:,0]),len(vabs_beam_inertia[0,0,:]),m)
+                ax.plot(cs_pos, anbax_beam_inertia[:,i,j], 'r')
+                ax.plot(cs_pos, vabs_beam_inertia[:,i,j], 'k')
+
+                # ax.plot(cs_pos, [float(vabs_beam_inertia[0,i,j]), float(vabs_beam_inertia[1,i,j])] , 'k')
+                # ax.plot(cs_pos, [float(anbax_beam_inertia[0,i,j]), float(anbax_beam_inertia[1,i,j])] , 'r')
+                # ax.plot(cs_pos, vabs_beam_inertia[:,i,j].astype(float), 'k')
+                # # ax.plot(cs_pos, anbax_beam_inertia[:,i,j].astype(float), 'r')
 
                 ax.set_xlabel('r/R')
                 ax.set_title('$m_{%i %i}$' %((i+1), (j+1)))
                 ax.grid(True)
-
+                plt.show()
             m = m+1
     plt.show()
     fig.savefig('yaml_examples/' + job_str[14:-5] + '_mass_matrix.png', dpi=150)

@@ -75,7 +75,7 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
 
 try:
     from SONATA.anbax.anbax_utl.anbax_utl import build_dolfin_mesh
-    from SONATA.anbax.anba_v4.anba4 import anbax
+    from SONATA.anbax.anbax_v4.anba4 import anbax
     #from SONATA.anbax.anba_v4.anba4.anbax import anbax
 except:
     pass
@@ -828,14 +828,22 @@ class CBM(object):
 
         self.mesh, nodes = sort_and_reassignID(self.mesh)
 
-        # nodes = anbax_converter(nodes_SONATA=nodes)
-        # x_coord = np.zeros(len(nodes))
-        # y_coord = np.zeros(len(nodes))
+        # # plot before conversion
+        # x_coord_sonata = np.zeros(len(nodes))
+        # y_coord_sonata = np.zeros(len(nodes))
         # for i in range(len(nodes)):
-        #     x_coord[i] = nodes[i].coordinates[0]
-        #     y_coord[i] = nodes[i].coordinates[1]
+        #     x_coord_sonata[i] = nodes[i].coordinates[0]  # x1
+        #     y_coord_sonata[i] = nodes[i].coordinates[1]  # x2
         #
-        # plt.plot(x_coord, y_coord)
+        # plt.plot(x_coord_sonata, y_coord_sonata)
+
+
+        # for i in range(len(nodes)):
+        #     plt.plot(nodes[i].coordinates[0], nodes[i].coordinates[1], '.k')
+
+        # nodes = anbax_converter(nodes_SONATA=nodes)
+
+
 
         try:
             (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = \
