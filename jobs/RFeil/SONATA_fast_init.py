@@ -5,6 +5,7 @@ Created on Mo Oct 07 11:18:28 2019
 @author: Roland Feil
 """
 
+
 import os
 from builtins import len, range
 
@@ -22,6 +23,8 @@ from jobs.RFeil.write_sonata2beamdyn import write_beamdyn_axis, write_beamdyn_pr
 
 from jobs.RFeil.plot_vabs_anbax_verification import plot_vabs_anbax, export_beam_struct_properties
 
+
+
 # ==============
 # Main
 # ==============
@@ -36,11 +39,11 @@ folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/'
 
 # job_str = 'BAR007.yaml'  # 'IEAonshoreWT_BAR_005a.yaml'
 # job_str = 'BAR009.yaml'
-job_str = 'BAR032.yaml'
+# job_str = 'BAR032.yaml'
 
 # job_str = 'yaml_examples/example_rectangular_beam_ht_ontology.yaml'  # apply ht ontology for rectangular beam example: flag_wt_ontology: False; flag_ref_axes_wt = False
 # job_str = 'yaml_examples/example_circular_beam_ht_ontology.yaml'
-# job_str = 'yaml_examples/example_circular_beam_wt_ontology.yaml'
+job_str = 'yaml_examples/example_circular_beam_wt_ontology.yaml'
 
 job_name = 'SONATA_job'  # can also be more specified, e.g. 'BAR_005a', 'example_rectangular_beam_ht_ontology' or else
 filename_str = folder_str + job_str
@@ -83,7 +86,7 @@ else:
 # Define the radial stations for cross sectional analysis (only used for flag_wt_ontology = True -> otherwise, sections from yaml file are used!)
 # radial_stations = [0., 0.1, 0.2, 0.301, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0]  # BAR209 ToDO: fix yaml for r/R = 0.3 and 0.9
 # radial_stations = [0., 0.1, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0]  # ToDO: fix yaml for r/R = 0.3 and 0.9
-radial_stations = [0.4]
+radial_stations = [0.0, 1.0]
 
 # ===== Execute SONATA Blade Component Object ===== #
 # name          - job name of current task
@@ -91,19 +94,19 @@ radial_stations = [0.4]
 # flags         - communicates flag dictionary (defined above)
 # stations      - input of radial stations for cross sectional analysis
 # stations_sine - input of radial stations for refinement (only and automatically applied when lofing flag flag_lft = True)
-# job = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=radial_stations, stations_sine=radial_stations_sine)  # initialize job with respective yaml input file
+job = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=radial_stations, stations_sine=radial_stations_sine)  # initialize job with respective yaml input file
 
 # ===== Build & mesh segments ===== #
 job.blade_gen_section(mesh_flag = True, split_quads=True)  # vabs working with False; anbax working with True
 # job.blade_gen_section()  # generate blade section(s) - build & mesh segments
 
 # ===== VABS / ANBAX ===== #
-job.blade_run_vabs()
+# job.blade_run_vabs()
 # job.blade_run_anbax()
 
 
 # The following code is only used for VABS/anbax verification studies
-flag_verify_vabs_anbax = False
+flag_verify_vabs_anbax = True
 
 if flag_verify_vabs_anbax:
     # ------------------------ #
@@ -159,6 +162,6 @@ if flag_write_BeamDyn:
 # saves figures in folder_str/figures if savepath is provided:
 job.blade_plot_sections(attribute=attribute_str, plotTheta11=flag_plotTheta11, plotDisplacement=False, savepath=folder_str)
 
-job.blade_post_3dtopo(flag_wf=flags_dict['flag_wf'], flag_lft=flags_dict['flag_lft'], flag_topo=flags_dict['flag_topo'])
+# job.blade_post_3dtopo(flag_wf=flags_dict['flag_wf'], flag_lft=flags_dict['flag_lft'], flag_topo=flags_dict['flag_topo'])
 
 # EOF

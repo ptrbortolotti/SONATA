@@ -36,7 +36,7 @@ def plot_vabs_anbax(cs_pos, vabs_beam_stiff, vabs_beam_inertia, anbax_beam_stiff
     for i in range(len(vabs_beam_inertia[0,:,0])):
         for j in range(len(vabs_beam_inertia[0,0,:])):
             if j >= i:
-                # ax = fig.add_subplot(len(vabs_beam_inertia[0,:,0]),len(vabs_beam_inertia[0,0,:]),m)
+                ax = fig.add_subplot(len(vabs_beam_inertia[0,:,0]),len(vabs_beam_inertia[0,0,:]),m)
                 ax.plot(cs_pos, anbax_beam_inertia[:,i,j], 'r')
                 ax.plot(cs_pos, vabs_beam_inertia[:,i,j], 'k')
 
