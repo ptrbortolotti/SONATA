@@ -866,8 +866,8 @@ class CBM(object):
         tmp_MM = anba.inertia().getValues(range(6),range(6))
         
         #Define transformation T (from ANBA to SONATA/VABS coordinates)
-        # B = np.array([[0,0,1],[1,0,0],[0,1,0]])
-        B = np.array([[0,0,1],[-1,0,0],[0,1,0]])  # new
+        B = np.array([[0,0,1],[1,0,0],[0,1,0]])
+        # B = np.array([[0,0,1],[-1,0,0],[0,1,0]])  # new
         T = np.dot(np.identity(3),np.linalg.inv(B))
         
         self.AnbaBeamProperties = BeamSectionalProps()

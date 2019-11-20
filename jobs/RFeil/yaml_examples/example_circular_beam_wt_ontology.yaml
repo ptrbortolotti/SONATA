@@ -9,13 +9,13 @@ components:
                 labels: [circular, circular]
             chord:
                 grid: [0.0, 1.0]
-                values: [1., 1.]
+                values: [0.5, 1.]
             twist:
                 grid: [0.0, 1.0]
                 values: [0.0, 0.0]
             pitch_axis:
                 grid: [0.0, 1.0]
-                values: [0.5, 0.5]
+                values: [0.2, 0.2]
             reference_axis:
                 x:
                     grid: [0.0, 1.0]
