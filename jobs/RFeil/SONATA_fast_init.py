@@ -19,9 +19,6 @@ from SONATA.classAirfoil import Airfoil
 from SONATA.classMaterial import read_IEA37_materials
 import matplotlib.pyplot as plt
 
-from jobs.RFeil.write_sonata2beamdyn import write_beamdyn_axis, write_beamdyn_prop
-from jobs.RFeil.plot_vabs_anbax_verification import plot_vabs_anbax, export_beam_struct_properties
-
 from jobs.RFeil.beam_struct_eval import beam_struct_eval
 
 
@@ -39,8 +36,8 @@ folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/'
 # folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/yaml_examples/'
 
 # job_str = 'BAR007.yaml'  # 'IEAonshoreWT_BAR_005a.yaml'
-job_str = 'BAR009.yaml'
-# job_str = 'BAR032.yaml'
+job_str = 'BAR009_test.yaml'  # baseline
+# job_str = 'BAR039.yaml'  # slender design
 
 # job_str = 'yaml_examples/example_rectangular_beam_ht_ontology.yaml'  # apply ht ontology for rectangular beam example: flag_wt_ontology: False; flag_ref_axes_wt = False
 # job_str = 'yaml_examples/example_circular_beam_ht_ontology.yaml'
@@ -61,7 +58,7 @@ flag_plotDisplacement   = False     # description ? ToDO
 flag_plotTheta11        = True      # description ? ToDo # material orientation angle (eg +-45 deg)
 # For plots within blade_post_3dtopo
 flag_wf                 = True      # plot wire-frame
-flag_lft                = True     # plot loft of blade surface (flag_wf=True obligatory); Note: create loft with grid refinement without too many radial_stations
+flag_lft                = False     # plot loft of blade surface (flag_wf=True obligatory); Note: create loft with grid refinement without too many radial_stations
 flag_topo               = True      # plot mesh topology
 
 # create flag dictionary
@@ -74,7 +71,7 @@ flags_dict = {"flag_wt_ontology": flag_wt_ontology, "flag_ref_axes_wt": flag_ref
 # === Add additional radial stations === #
 # important for resolving lofting issues
 if flags_dict['flag_lft']:
-    npts = 100
+    npts = 200
     radial_stations_sine = []
     for n in range(npts):
         radial_stations_sine.append(np.sin(n/npts*np.pi/2))
@@ -83,10 +80,11 @@ else:
 
 # ===== User defined radial stations ===== #
 # Define the radial stations for cross sectional analysis (only used for flag_wt_ontology = True -> otherwise, sections from yaml file are used!)
-# radial_stations = [0., 0.1, 0.2, 0.301, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0]  # BAR209 ToDO: fix yaml for r/R = 0.3 and 0.9
-# radial_stations = [0., 0.1, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0]  # ToDO: fix yaml for r/R = 0.3 and 0.9
-radial_stations = [0.0, 0.25, 0.5, 0.75, 1.0]
-# radial_stations = [0.0, 1.0]
+# radial_stations = [0., 0.1, 0.2, 0.301, 0.4, 0.5, 0.6, 0.7, 0.8, 0.82, 0.96, 1.0]  # BAR209 ToDO: fix yaml for r/R = 0.3 and 0.9
+# radial_stations = [0., 0.1, 0.2, 0.301, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0]  # ToDO: fix yaml for r/R = 0.3 and 0.9
+# radial_stations = [0.0, 0.25, 0.5, 0.75, 1.0]
+# radial_stations = [0.0, 0.4, 0.7, 1.0]
+radial_stations = [0.8]
 
 # ===== Execute SONATA Blade Component Object ===== #
 # name          - job name of current task
@@ -97,8 +95,8 @@ radial_stations = [0.0, 0.25, 0.5, 0.75, 1.0]
 job = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=radial_stations, stations_sine=radial_stations_sine)  # initialize job with respective yaml input file
 
 # ===== Build & mesh segments ===== #
-job.blade_gen_section(mesh_flag = True, split_quads=True)  # vabs working with False; anbax working with True
-# job.blade_gen_section()  # generate blade section(s) - build & mesh segments
+# job.blade_gen_section(mesh_flag = True, split_quads=True)  # vabs working with False; anbax working with True
+job.blade_gen_section()  # generate blade section(s) - build & mesh segments
 
 # ===== VABS / ANBAX individually ===== #
 # job.blade_run_vabs()
@@ -117,13 +115,13 @@ flags_dict['flag_csv_export'] = flag_csv_export
 flags_dict['flag_write_BeamDyn'] = flag_write_BeamDyn
 
 # run evalutation
-beam_struct_eval(flags_dict, radial_stations, job, folder_str, job_str)
+# beam_struct_eval(flags_dict, radial_stations, job, folder_str, job_str)
 
 
 # ===== PLOTS ===== #
 # saves figures in folder_str/figures if savepath is provided:
 job.blade_plot_sections(attribute=attribute_str, plotTheta11=flag_plotTheta11, plotDisplacement=False, savepath=folder_str)
 
-job.blade_post_3dtopo(flag_wf=flags_dict['flag_wf'], flag_lft=flags_dict['flag_lft'], flag_topo=flags_dict['flag_topo'])
+# job.blade_post_3dtopo(flag_wf=flags_dict['flag_wf'], flag_lft=flags_dict['flag_lft'], flag_topo=flags_dict['flag_topo'])
 
 # EOF

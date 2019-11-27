@@ -68,8 +68,8 @@ def beam_struct_eval(flags_dict, cs_pos, job, folder_str, job_str):
             vabs_beam_shear_center[i] = np.array(job.beam_properties[i, 1].Xs[:])  # Generalized Shear Center of the Cross Section
             for j in range(6):
                 vabs_beam_stiff_init[i, j, :] = np.array(job.beam_properties[i, 1].TS[j, :])  # receive 6x6 timoshenko stiffness matrix
-                # vabs_beam_inertia_init[i, j, :] = np.array(job.beam_properties[i, 1].MM[j, :])  # receive 6x6 mass matrix
-                vabs_beam_inertia_init[i, j, :] = np.array(job.beam_properties[i, 1].MMatMC[j, :])  # receive 6x6 mass matrix at mass center
+                vabs_beam_inertia_init[i, j, :] = np.array(job.beam_properties[i, 1].MM[j, :])  # receive 6x6 mass matrix
+                # vabs_beam_inertia_init[i, j, :] = np.array(job.beam_properties[i, 1].MMatMC[j, :])  # receive 6x6 mass matrix at mass center
 
         # --------------------------------------- #
         #  rotate VABS results from SONATA/VABS def to BeamDyn def coordinate system (for flag_DeamDyn_def_transform = True)
