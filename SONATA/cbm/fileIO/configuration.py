@@ -125,7 +125,7 @@ class Configuration(object):
 if __name__ == '__main__':
 
     #classic configuration file: 
-    os.chdir('/media/gu32kij/work/TPflumm/SONATA')
+    os.chdir('/Users/rfeil/work/6_SONATA/SONATA')
     #fname = 'jobs/VariSpeed/advanced/sec_config.yml'
     fname = 'examples/sec_config.yml'
     cfg = Configuration(fname)

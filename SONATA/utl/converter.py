@@ -46,7 +46,7 @@ def arc_length(x, y):
 
     return arc
 
-def iea37_converter(blade, cs_pos, byml, materials):
+def iea37_converter(blade, cs_pos, byml, materials, mesh_resolution):
     """
     Converts the 
     @author: Pietro Bortolotti, Roland Feil
@@ -118,7 +118,7 @@ def iea37_converter(blade, cs_pos, byml, materials):
             tmp2[i]['segments'][0]['layup']     = [{}]
 
         else:
-            tmp2[i]['segments'] = [dict([('id', n),('layup', [{}]),('filler', None)]) for n in range(2 * n_webs_i + 2)]
+            tmp2[i]['segments'] = [dict([('id', n),('layup', [{}]),('filler', None)]) for n in range(2 * n_webs_i + 2)]  # inits amount of segments in tmp2
 
 
     # Composite stacking sequences
@@ -144,7 +144,7 @@ def iea37_converter(blade, cs_pos, byml, materials):
             if x[i] >= sec['thickness']['grid'][0] and x[i] <= sec['thickness']['grid'][-1]:
                 
                 set_interp_thick = PchipInterpolator(sec['thickness']['grid'], sec['thickness']['values'])
-                thick_i = set_interp_thick(x[i])
+                thick_i = float(set_interp_thick(x[i]))  # added float
 
                 if thick_i > 1.e-6:
                     if 'web' not in sec.keys():                        
@@ -157,28 +157,28 @@ def iea37_converter(blade, cs_pos, byml, materials):
 
                             if 'fixed' not in sec['start_nd_arc']:
                                 set_interp = PchipInterpolator(sec['start_nd_arc']['grid'], sec['start_nd_arc']['values'])
-                                tmp2[i]['segments'][0]['layup'][id_layer]['start']     = set_interp(x[i])
+                                tmp2[i]['segments'][0]['layup'][id_layer]['start']     = float(set_interp(x[i]))  # added float
                             else:
                                 for j in range(idx_sec):
                                     if tmp1[j]['name'] == sec['start_nd_arc']['fixed']:
                                         set_interp = PchipInterpolator(tmp1[j]['end_nd_arc']['grid'], tmp1[j]['end_nd_arc']['values'])
-                                        tmp2[i]['segments'][0]['layup'][id_layer]['start']     = set_interp(x[i])
+                                        tmp2[i]['segments'][0]['layup'][id_layer]['start']     = float(set_interp(x[i]))  # added float
 
                             if 'fixed' not in sec['end_nd_arc']:
                                 set_interp = PchipInterpolator(sec['end_nd_arc']['grid'], sec['end_nd_arc']['values'])
-                                tmp2[i]['segments'][0]['layup'][id_layer]['end']       = set_interp(x[i])
+                                tmp2[i]['segments'][0]['layup'][id_layer]['end']       = float(set_interp(x[i]))  # added float
                             else:
                                 for j in range(idx_sec):
                                     if tmp1[j]['name'] == sec['end_nd_arc']['fixed']:
                                         set_interp = PchipInterpolator(tmp1[j]['start_nd_arc']['grid'], tmp1[j]['start_nd_arc']['values'])
-                                        tmp2[i]['segments'][0]['layup'][id_layer]['end']     = set_interp(x[i])
+                                        tmp2[i]['segments'][0]['layup'][id_layer]['end']     = float(set_interp(x[i]))  # added float
                         else:
                             tmp2[i]['segments'][0]['layup'][id_layer]['start']     = 0.
                             tmp2[i]['segments'][0]['layup'][id_layer]['end']       = 1.
 
                         if 'fiber_orientation' in sec.keys():
                             set_interp = PchipInterpolator(sec['fiber_orientation']['grid'], sec['fiber_orientation']['values'])
-                            tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = set_interp(x[i])
+                            tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = float(set_interp(x[i]))  # added float
                         else:
                             tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = 0.
                             
@@ -198,7 +198,7 @@ def iea37_converter(blade, cs_pos, byml, materials):
                                 # Orthotropic at leading edge (_le)
                                 # if '_le' in sec['name']:  #  check if on leading edge side of web
                                 if (not web_filler_index and not isinstance(materials[id_mat].E, float)):  # begin with leading part of the web BEFORE web has been filled
-
+                                    id_layer_web_le[i] = 0
                                     if tmp2[i]['segments'][id_seg - 1]['layup'] != [{}]:
                                         tmp2[i]['segments'][id_seg - 1]['layup'].append({})
                                         id_layer_web_le[i] = id_layer_web_le[i] + 1
@@ -212,11 +212,11 @@ def iea37_converter(blade, cs_pos, byml, materials):
                                     tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['end']   = id_webs[i][(sec['web'])]['start_nd_arc'] + flange
                                     if 'fiber_orientation' in sec.keys():
                                         set_interp = PchipInterpolator(sec['fiber_orientation']['grid'], sec['fiber_orientation']['values'])
-                                        tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['orientation'] = set_interp(x[i])
+                                        tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['orientation'] = float(set_interp(x[i]))
                                     else:
                                         tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['orientation'] = 0.
 
-                                    # web_filler_index = False
+                                    # web_filler_index = False  # <<<<<<<<<<<<<<
 
                                 # Isotropic -> fill the web
                                 elif (not web_filler_index and isinstance(materials[id_mat].E, float)):
@@ -238,6 +238,7 @@ def iea37_converter(blade, cs_pos, byml, materials):
                                 # elif '_te' in sec['name']:  # check if on trailing edge side of web
                                 elif (web_filler_index and not isinstance(materials[id_mat].E, float)):  # continue with trailing part of the web AFTER web has been filled
 
+                                    id_layer_web_te[i] = 0
                                     if tmp2[i]['segments'][id_seg + 1]['layup'] != [{}]:
                                         tmp2[i]['segments'][id_seg + 1]['layup'].append({})
                                         id_layer_web_te[i] = id_layer_web_te[i] + 1
@@ -358,7 +359,7 @@ def iea37_converter(blade, cs_pos, byml, materials):
     lst = []
 
     for (seg,w,x) in zip(tmp2, webs, x):
-        tmp = {'webs':list(w.values()), 'segments':seg['segments'], 'position':x, 'mesh_resolution':240}
+        tmp = {'webs':list(w.values()), 'segments':seg['segments'], 'position':x, 'mesh_resolution':mesh_resolution}
         lst.append([x, CBMConfig(tmp, materials, iea37=True)])
 
     return np.asarray(lst)

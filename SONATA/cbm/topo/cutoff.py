@@ -34,6 +34,7 @@ def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
     length = get_BSplineLst_length(OffsetBSplineLst)   
     paralength = abs(S2-S1)
     cutoff_depth = 1.2*dist/length*paralength
+    # cutoff_depth = 0.9*dist/length*paralength
     
     #check if OffsetBSplineLst is closed:
     if not Offset_StartPnt.IsEqual(Offset_EndPnt, 1e-4) and not(S1 == 0.0 and S2==1.0):
@@ -65,7 +66,7 @@ def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
             Offset_V1Start.Normalize()
             Offset_V1End.Normalize()
     
-            kappa_bezier = 0.5*dist  
+            kappa_bezier = 0.5*dist  #0.8*dist
             Offset_V1Start.Multiply(-kappa_bezier)
             Offset_V1End.Multiply(kappa_bezier)
                    

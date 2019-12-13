@@ -1,4 +1,4 @@
-name: BAR_009
+ name: BAR_009
 description: BAR baseline 00. Fixed trailing edge shape of SNL-FFA- W3-500 and FFA-W3-241. Latest change re-modelled airfoil polar tables.
 
 components:

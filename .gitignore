@@ -53,6 +53,8 @@ license
 
 #ignored folders
 jobs/RFeil/0_archive
+jobs/RFeil/0_archive_BAR_009
+jobs/RFeil/00_analysis
 jobs/RFeil/test
 jobs/PBortolotti
 jobs/FBerghammer

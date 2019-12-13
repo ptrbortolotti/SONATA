@@ -368,7 +368,7 @@ class Blade(Component):
             else:
                 cs_pos = stations
             
-        x = np.unique(np.sort(np.hstack((kwargs.get('stations_sine'), tmp_chord[:,0], tmp_tw[:,0], \
+        x = np.unique(np.sort(np.hstack((kwargs.get('stations_add'), tmp_chord[:,0], tmp_tw[:,0], \
                                          tmp_blra[:,0], tmp_bera[:,0], \
                                          tmp_pa[:,0], arr[:,0], cs_pos))))
 
@@ -382,7 +382,7 @@ class Blade(Component):
         
         #Generate CBMConfigs
         if kwargs.get('flags').get('flag_wt_ontology'):
-            cbmconfigs = iea37_converter(self, cs_pos, yml, self.materials)
+            cbmconfigs = iea37_converter(self, cs_pos, yml, self.materials, mesh_resolution = kwargs.get('flags').get('mesh_resolution'))
             
         else:
             lst = [[cs.get('position'), CBMConfig(cs, self.materials, iea37=True)] for cs in yml.get('internal_structure_2d_fem').get('sections')]
@@ -716,12 +716,20 @@ class Blade(Component):
                 wireframe.append(wire)
                 self.display.DisplayShape(wire, color='BLACK')
 
+
         if flag_lft:
+            # step file export
+            # from jobs.RFeil.utls.import_export_step_files import STEPExporter
+            # AP214_stepExporter = STEPExporter('loft_AP214.igs', schema='AP214CD')  # init for writing step file; alternatively: schema='AP203'
+
             for i in range(len(wireframe)-1):
                 # loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-2, continuity=1, check_compatibility=True)
                 loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-6, continuity=1, check_compatibility=True)
                 self.display.DisplayShape(loft, transparency=0.5, update=True)
-        
+            #     AP214_stepExporter.add_shape(loft)  # add each lofted shape to the AP203_stepExporter component to generate full blade
+            # AP214_stepExporter.write_file()  # write step file
+
+
         if flag_topo:
             for (x,cs) in self.sections:
                 #display sections
@@ -731,6 +739,7 @@ class Blade(Component):
         self.display.View_Iso()
         self.display.FitAll()
         self.start_display()
+
 
 
 

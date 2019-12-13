@@ -35,7 +35,7 @@ if __name__ == '__main__':
     os.chdir('../..')
 
 # --- Write BeamDyn file with blade reference line locations ---#
-def write_beamdyn_axis(folder, wt_name, byml):
+def write_beamdyn_axis(folder, wt_name, byml, refine):
     yaml_ref_axis = byml.get('internal_structure_2d_fem').get('reference_axis')
     yaml_twist = byml.get('outer_shape_bem').get('twist')
 
@@ -60,15 +60,15 @@ def write_beamdyn_axis(folder, wt_name, byml):
 
     data = np.vstack((kp_xr, kp_yr, kp_zr, twist)).T
 
-    file = open(folder + wt_name + '_BeamDyn.dat', 'w')
+    file = open(folder + '00_analysis/analysis/' + wt_name + '_BeamDyn.dat', 'w')
     file.write('--------- BEAMDYN with OpenFAST INPUT FILE -------------------------------------------\n')
     file.write('%s blade\n' % (wt_name))
     file.write('---------------------- SIMULATION CONTROL --------------------------------------\n')
-    file.write('False         Echo            - Echo input data to "<RootName>.ech" (flag)\n')
+    file.write('True          Echo            - Echo input data to "<RootName>.ech" (flag)\n')
     file.write('True          QuasiStaticInit - Use quasistatic pre-conditioning with centripetal accelerations in initialization (flag) [dynamic solve only]\n')
     file.write(' 0            rhoinf          - Numerical damping parameter for generalized-alpha integrator\n')
     file.write(' 2            quadrature      - Quadrature method: 1=Gaussian; 2=Trapezoidal (switch)\n')
-    file.write('DEFAULT       refine          - Refinement factor for trapezoidal quadrature (-). DEFAULT = 1 [used only when quadrature=2]\n')
+    file.write(' %d       refine          - Refinement factor for trapezoidal quadrature (-). DEFAULT = 1 [used only when quadrature=2]\n' % (refine))
     file.write('DEFAULT       n_fact          - Factorization frequency (-). DEFAULT = 5\n')
     file.write('DEFAULT       DTBeam          - Time step size (s).\n')
     file.write('DEFAULT       load_retries    - Number of factored load retries before quitting the aimulation\n')
@@ -99,11 +99,13 @@ def write_beamdyn_axis(folder, wt_name, byml):
     file.write('---------------------- OUTPUTS -------------------------------------------------\n')
     file.write('True          SumPrint       - Print summary data to "<RootName>.sum" (flag)\n')
     file.write('"ES10.3E2"    OutFmt         - Format used for text tabular output, excluding the time channel.\n')
-    file.write('          0   NNodeOuts      - Number of nodes to output to file [0 - 9] (-)\n')
+    file.write('          1   NNodeOuts      - Number of nodes to output to file [0 - 9] (-)\n')
     file.write('          1,          2,          3,          4,          5,          6    OutNd          - Nodes whose values will be output  (-)\n')
     file.write('          OutList            - The next line(s) contains a list of output parameters. See OutListParameters.xlsx for a listing of available output channels, (-)\n')
     file.write('"RootFxr, RootFyr, RootFzr"\n')
     file.write('"RootMxr, RootMyr, RootMzr"\n')
+    file.write('"N1Fxl, N1Fyl, N1Fzl"\n')
+    file.write('"N1Mxl, N1Myl, N1Mzl"\n')
     file.write('"TipTDxr, TipTDyr, TipTDzr"\n')
     file.write('"TipRDxr, TipRDyr, TipRDzr"\n')
     file.write('END of input file (the word "END" must appear in the first 3 columns of this last OutList line)\n')
@@ -119,7 +121,7 @@ def write_beamdyn_axis(folder, wt_name, byml):
 def write_beamdyn_prop(folder, wt_name, radial_stations, beam_stiff, beam_inertia):
     n_pts = len(radial_stations)
 
-    file = open(folder + wt_name + '_BeamDyn_Blade.dat', 'w')
+    file = open(folder + '00_analysis/analysis/' + wt_name + '_BeamDyn_Blade.dat', 'w')
     file.write(' ------- BEAMDYN V1.00.* INDIVIDUAL BLADE INPUT FILE --------------------------\n')
     file.write(' Test Format 1\n')
     file.write(' ---------------------- BLADE PARAMETERS --------------------------------------\n')
