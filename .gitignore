@@ -60,6 +60,7 @@ jobs/RFeil/csv_export
 jobs/RFeil/figures
 #jobs/RFeil/BAR0010n
 jobs/RFeil/IEA-15-240-RWT
+*.DS_Store
 
 jobs/PBortolotti
 jobs/FBerghammer
