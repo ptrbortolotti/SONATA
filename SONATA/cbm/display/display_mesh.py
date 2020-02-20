@@ -35,7 +35,7 @@ def plot_nodes(nodes):
     plt.show()
 
 
-def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProperties=None, 
+def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None, VABSProperties=None, 
               show_element_number=False, show_node_number=False, invert_xaxis = True, lfactor=0.5e-2, **kw):
     
     """
@@ -63,13 +63,16 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
         #cmap.set_under(color='k')
         
     elif data_name == 'MatID':
-        cmap = plt.cm.get_cmap()
+        # cmap = a=plt.cm.get_cmap()
+        cmap = plt.cm.get_cmap('cividis')
         # extract all colors from the .jet map
         cmaplist = [cmap(i) for i in range(cmap.N)]
         # force the first color entry to be grey
         #cmaplist[0] = (.5, .5, .5, 1.0)
         # create the new map
+        # cmap = LinearSegmentedColormap.from_list('Custom cmap', cmaplist, max(data))
         cmap = LinearSegmentedColormap.from_list('Custom cmap', cmaplist, max(data))
+        # cmap = 'viridis'
         
     else:
         cmap = plt.cm.get_cmap()
@@ -98,7 +101,8 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
         polygon = Polygon(array, True, edgecolor='k')
         patches.append(polygon)
     
-    p = PatchCollection(patches, alpha=alpha, cmap=cmap, edgecolors = 'k')
+    # p = PatchCollection(patches, alpha=alpha, cmap=cmap, edgecolors = 'k')
+    p = PatchCollection(patches, alpha=alpha, cmap=cmap, edgecolors = 'k', linewidths=0.2)
     p.set_array(data)
     p.set_clim(vmin, vmax)
     _ = ax.add_collection(p)
@@ -109,7 +113,12 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
     
     if data_name == 'MatID':
         cbar.set_ticks(np.linspace(1, max(data), max(data)))
-        cbar.set_ticklabels(np.linspace(1, max(data), max(data)))
+        # cbar.set_ticklabels(np.linspace(1, max(data), max(data)))
+        cbar_label = []
+        for cbar_label_index in range(max(data)):
+            cbar_label.append(materials[cbar_label_index+1].name)
+        cbar.set_ticklabels(cbar_label)
+        # cbar.set_ticklabels(['mat1', 'mat2', 'mat3', 'mat4', 'mat5', 'mat6'])
         p.set_clim(0.5, max(data)+0.5)
     
     if len(theta_11)==len(elements):
@@ -123,16 +132,17 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
     plt.axis('equal')
     if title!=None:
         ax.set_title(title)
-    ax.set_xlabel(r'$x_2$ in m')
-    ax.set_ylabel(r'$x_3$ in m')
+    ax.set_xlabel(r'$x_2$, m')
+    ax.set_ylabel(r'$x_3$, m')
     
     #plot coordinate system.
-    cslength=0.015
-    ax.arrow(0, 0, cslength, 0, color='lime')
-    ax.arrow(0, 0, 0, cslength, color='deepskyblue')
+    # cslength=0.015
+    # ax.arrow(0, 0, cslength, 0, color='lime')
+    # ax.arrow(0, 0, 0, cslength, color='deepskyblue')
 
-    ax.annotate(r'$x_2$', (cslength,0),fontsize=10, color = 'lime')
-    ax.annotate(r'$x_3$', (0,cslength),fontsize=10, color='deepskyblue')
+    # ax.annotate(r'$x_2$', (cslength,0),fontsize=10, color = 'lime')
+    # ax.annotate(r'$x_3$', (0,cslength),fontsize=10, color='deepskyblue')
+
     ##display element number
     if show_element_number == True:
         for i, item in enumerate(centroids):
@@ -181,7 +191,7 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
     return (fig,ax)
     
 
-def plot_cells(cells,nodes,attr1, VABSProperties=None, title='None', plotTheta11=False, plotDisplacement=False, **kw):
+def plot_cells(cells,nodes,attr1, materials, VABSProperties=None, title='None', plotTheta11=False, plotDisplacement=False, **kw):
     nodes_array = []
     for n in nodes:
         if plotDisplacement:
@@ -219,7 +229,7 @@ def plot_cells(cells,nodes,attr1, VABSProperties=None, title='None', plotTheta11
         theta_11 = np.asarray(theta_11)
     
     
-    fig,ax = plot_mesh(nodes_array,element_array,theta_11,data,data_name,title, VABSProperties, False, False, **kw)    
+    fig,ax = plot_mesh(nodes_array,element_array,theta_11,data,data_name,materials, title, VABSProperties, False, False, **kw)    
    
     if 'savepath' in kw:
 
@@ -228,7 +238,11 @@ def plot_cells(cells,nodes,attr1, VABSProperties=None, title='None', plotTheta11
 
         # datestr = datetime.datetime.now().strftime("%Y%m%d_%H%M")
         # fname = kw['savepath'].split('.')[0]+'_'+datestr+'.'+kw['savepath'].split('.')[1]
-        fname = kw['savepath']+'/figures/blade_section_'+kw['section']+'.png'
+
+        if 'opt_var' in kw:
+            fname = kw['savepath'] + '/figures/blade_section_' + kw['section'] + '_optvar_' + kw['opt_var'] + '.png'
+        else:
+            fname = kw['savepath']+'/figures/blade_section_'+kw['section']+'.png'
         # print(fname)
         # tmp_fig = plt.gcf()
         tmp_fig = fig

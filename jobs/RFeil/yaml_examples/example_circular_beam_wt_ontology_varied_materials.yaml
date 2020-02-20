@@ -1,0 +1,213 @@
+name: Circular_Beam
+description: Example test case - circular beam
+
+components:
+    blade:
+        outer_shape_bem:
+            airfoil_position:
+                grid: [0.0, 1.0]
+                labels: [circular, circular]
+            chord:
+                grid: [0.0, 1.0]
+                values: [0.5, 1.]
+            twist:
+                grid: [0.0, 1.0]
+                values: [0.0, 0.0]
+            pitch_axis:
+                grid: [0.0, 1.0]
+                values: [0.2, 0.2]
+            reference_axis:
+                x:
+                    grid: [0.0, 1.0]
+                    values: [0.0, 0.0]
+                y:
+                    grid: [0.0, 1.0]
+                    values: [0.0, 0.0]
+                z:
+                    grid: [0.0, 1.0]
+                    values: [0.0, 10.0]
+        internal_structure_2d_fem:
+            reference_axis:
+              x:
+                grid: [0.0, 1.0]
+                values: [0.0, 10.0]
+                y:
+                  grid: [0.0, 1.0]
+                  values: [0.0, 0.0]
+                z:
+                  grid: [0.0, 1.0]
+                  values: [0.0, 0.0]
+            layers:
+              - name: Shell_skin_outer
+                material: aluminium
+                thickness:
+                  grid: [0.0, 1.0]
+                  values: [0.025, 0.025]
+                start_nd_arc:
+                  grid: [0.0, 1.0]
+                  values: [0.0, 0.0]
+                end_nd_arc:
+                  grid: [0.0, 1.0]
+                  values: [1.0, 1.0]
+                fiber_orientation:
+                  grid: [0.0, 1.0]
+                  values: [0.0, 0.0]
+              - name: Shell_skin_inner_I
+                material: glass_uni
+                thickness:
+                  grid: [0.0, 1.0]
+                  values: [0.05, 0.05]
+                start_nd_arc:
+                  grid: [0.0, 1.0]
+                  values: [0.125, 0.125]
+                end_nd_arc:
+                  grid: [0.0, 1.0]
+                  values: [0.625, 0.625]
+                fiber_orientation:  # in deg for SONATA!!!
+                  grid: [0.0, 1.0]
+                  values: [0.0, 0.0]
+                  # values: [0.35, 0.35]
+#                  values: [0.78, 0.78]
+              - name: Shell_skin_inner_II
+                material: aluminium
+                thickness:
+                  grid: [0.0, 1.0]
+                  values: [0.05, 0.05]
+                start_nd_arc:
+                  grid: [0.0, 1.0]
+                  values: [0.625, 0.625]
+                end_nd_arc:
+                  grid: [0.0, 1.0]
+                  values: [1.0, 1.0]
+                fiber_orientation:
+                  grid: [0.0, 1.0]
+                  values: [0.0, 0.0]
+airfoils:
+   -  name: rectangular
+      coordinates:
+          x: [0.5, 0.5, -0.5, -0.5,  0.5, 0.5]  # follow s-coordinate along the outer profile of the structure
+          y: [0.0, 0.5,  0.5, -0.5, -0.5, 0.0]
+      relative_thickness: 1.0000
+      aerodynamic_center: 0.5000
+      polars:  # dummy 2pi polars (not used in example)
+         -  configuration: Default
+            re: 3.00E+06
+            c_m:
+                grid: [-3.141592653589793, 3.141592653589793]
+                values: [0.0, 0.0]
+            c_l:
+                grid: [-3.141592653589793, 3.141592653589793]
+                values: [0.0, 0.0]
+            c_d:
+                grid: [-3.141592653589793, 3.141592653589793]
+                values: [0.5, 0.5]
+   -  name: circular
+      coordinates:
+          x: [1.00000, 0.99901, 0.99606, 0.99114, 0.98429, 0.97553, 0.96489, 0.95241, 0.93815, 0.92216, 0.90451, 0.88526, 0.86448, 0.84227, 0.81871, 0.79389, 0.76791, 0.74088, 0.71289, 0.68406, 0.65451, 0.62434, 0.59369, 0.56267, 0.53140, 0.50000, 0.46860, 0.43733, 0.40631, 0.37566, 0.34549, 0.31594, 0.28711, 0.25912, 0.23209, 0.20611, 0.18129, 0.15773, 0.13552, 0.11474, 0.09549, 0.07784, 0.06185, 0.04759, 0.03511, 0.02447, 0.01571, 0.00886, 0.00394, 0.00099, 0.00000, 0.00099, 0.00394, 0.00886, 0.01571, 0.02447, 0.03511, 0.04759, 0.06185, 0.07784, 0.09549, 0.11474, 0.13552, 0.15773, 0.18129, 0.20611, 0.23209, 0.25912, 0.28711, 0.31594, 0.34549, 0.37566, 0.40631, 0.43733, 0.46860, 0.50000, 0.53140, 0.56267, 0.59369, 0.62434, 0.65451, 0.68406, 0.71289, 0.74088, 0.76791, 0.79389, 0.81871, 0.84227, 0.86448, 0.88526, 0.90451, 0.92216, 0.93815, 0.95241, 0.96489, 0.97553, 0.98429, 0.99114, 0.99606, 0.99901, 1.00000]
+          y: [0.00000, 0.03140, 0.06267, 0.09369, 0.12434, 0.15451, 0.18406, 0.21289, 0.24088, 0.26791, 0.29389, 0.31871, 0.34227, 0.36448, 0.38526, 0.40451, 0.42216, 0.43815, 0.45241, 0.46489, 0.47553, 0.48429, 0.49114, 0.49606, 0.49901, 0.50000, 0.49901, 0.49606, 0.49114, 0.48429, 0.47553, 0.46489, 0.45241, 0.43815, 0.42216, 0.40451, 0.38526, 0.36448, 0.34227, 0.31871, 0.29389, 0.26791, 0.24088, 0.21289, 0.18406, 0.15451, 0.12434, 0.09369, 0.06267, 0.03140, 0.00000, -0.03140, -0.06267, -0.09369, -0.12434, -0.15451, -0.18406, -0.21289, -0.24088, -0.26791, -0.29389, -0.31871, -0.34227, -0.36448, -0.38526, -0.40451, -0.42216, -0.43815, -0.45241, -0.46489, -0.47553, -0.48429, -0.49114, -0.49606, -0.49901, -0.50000, -0.49901, -0.49606, -0.49114, -0.48429, -0.47553, -0.46489, -0.45241, -0.43815, -0.42216, -0.40451, -0.38526, -0.36448, -0.34227, -0.31871, -0.29389, -0.26791, -0.24088, -0.21289, -0.18406, -0.15451, -0.12434, -0.09369, -0.06267, -0.03140, 0.00000]
+      relative_thickness: 1.0000
+      aerodynamic_center: 0.5000
+      polars:  # dummy 2pi polars (not used in example)
+         -  configuration: Default
+            re: 3.00E+06
+            c_m:
+                grid: [-3.141592653589793, 3.141592653589793]
+                values: [0.0, 0.0]
+            c_l:
+                grid: [-3.141592653589793, 3.141592653589793]
+                values: [0.0, 0.0]
+            c_d:
+                grid: [-3.141592653589793, 3.141592653589793]
+                values: [0.5, 0.5]
+materials:
+    # - name: mat_example
+      # description: xxx # Text
+      # source: yyy # Text
+      # orth: 1 # 0 anisotropic, 1 orthotropic
+      # rho:  1000  # [kg/m3]
+      # E:    [10.0e+009, 5.0e+009, 5.0e+009] # [Pa]
+      # G:    [5.0e+009, 2.0e+009, 2.0e+009] # [Pa]
+      # nu:   [0.250, 0.350, 0.250] # [-]
+      # alpha:[7, 21, 21] # Thermal coefficient of expansion[]
+      # Xt:   [1000.0e+006, 60.0e+006,  20.0e+006] # [Pa]
+      # Xc:   [800.0e+006,  200.0e+006, 200.0e+006] # [Pa]
+      # S:    [30.0e+006,   30.0e+006,  20.0e+006] # [Pa]
+      # fvf:  0.52 # Fiber volume fraction [-]
+      # ply_thickness:  0.0009 # Ply thickness [m]
+      # A:    [1000e+006, 100e+006, 100e+006] # [Pa]
+      # m:    [10.0, 9.0, 9.0] # [-]
+      # R:    [-1.0, -1.0, -1.0]     # [-]
+
+  #  -  name: Gelcoat
+  #     orth: 0
+  #     rho: 1235.0
+  #     E: 3.440e+009
+  #     G: 1.323e+009
+  #     nu: 0.300
+  #     alpha: 0.0
+  #     Xt: 74.e+006
+  #     Xc: 87.e+006
+
+   -  name: glass_uni
+      description: Vectorply E-LT-5500, Epikote MGS RIMR 135/Epicure MGS RIMH 1366 epoxy
+      source: MSU composites database 3D property tests, Engineering Mechanics of Composite Materials, Daniel, I & Ishai, O., 1994, pg. 34
+      orth: 1
+      rho: 1940.0
+      E: [44.6e+009, 17.0e+009, 16.7e+009]
+      G: [3.27e+009, 3.48e+009, 3.50e+009]
+      nu: [0.262, 0.350, 0.264]
+      # alpha:[7    21  21]
+      Xt: [1060.0e+006, 66.3e+006, 26.6e+006]
+      Xc: [826.0e+006, 196.0e+006, 197.0e+006]
+      S: [32.9e+006, 30.0e+006, 22.9e+006]
+      fvf: 0.57
+
+  #  -  name: carbon_uni
+  #     source: MSU composites database 3D property tests, Engineering Mechanics of Composite Materials, Daniel, I & Ishai, O., 1994, pg. 34
+  #     orth: 1
+  #     rho:  1630.0
+  #     E:    [150.2e+009, 9.1e+009, 9.1e+009]
+      # Xt:   [2236.0e+006, 0.00, 0.00]
+      # Xc:   [1528.0e+006, 0.00, 0.00]
+
+
+    # - name: low_density_foam
+      # description: Airex C70.40 PVC Foam
+      # source: https://www.3accorematerials.com/uploads/documents/TDS-AIREX-C70-E_1106.pdf
+      # orth: 0
+      # rho:  40.0
+      # E:    123.125e+006
+      # nu:   0.32
+      # # alpha: 2.5
+      # Xt:   0.7e+006
+      # Xc:   0.45e+006
+      # S:    0.5e+006
+  #  -  name: medium_density_foam
+  #     description: Airex C70.130 PVC Foam
+  #     source: https://www.3accorematerials.com/uploads/documents/TDS-AIREX-C70-E_1106.pdf
+  #     orth: 0
+  #     rho: 130.0
+  #     E: 129.20e+006
+  #     nu: 0.32
+  #     # alpha: 2.5
+  #     Xt: 4.0e+006
+  #     Xc: 3.0e+006
+  #     S: 2.4e+006
+  #     G: 48946969.696969695
+
+   - name: aluminium
+     description: EN AW 7075
+     source: gleich.de technical data sheet
+     orth: 0
+     rho: 2.80e3
+     E: 71e9
+     nu: 0.33
+     alpha: 23.4e-6
+     YS: 470e6
+     UTS: 540e6
+
+
+
+
+
+

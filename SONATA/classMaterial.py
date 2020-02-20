@@ -245,7 +245,7 @@ class AnisotropicMaterial(Material):
 def read_IEA37_materials(yml):
     materials = OrderedDict()
     for i, mat in enumerate(yml):
-        if id in mat:
+        if 'id' in mat:
             ID = mat['id']
             # If no ID is issued for materials, automatically define the following flag to allocate wisdem specfic material definitions
             auto_flag_wisdem_materials = False

@@ -528,7 +528,7 @@ class CBM(object):
         if len(self.config.webs) > 0:
             for k, w in self.config.webs.items(): 
                 print('STATUS:\t Building Web %s' %(k+1))
-                self.WebLst.append(Web(k, w['Pos1'], w['Pos2'], self.SegmentLst))
+                self.WebLst.append(Web(k, w['Pos1'], w['Pos2'], w['curvature'], self.SegmentLst))
             sorted(self.SegmentLst, key=getID)  
             
         #Build remaining Segments:
@@ -863,6 +863,13 @@ class CBM(object):
             print('Error, Anba4 wrapper called, but ')
             print('Anba4 _or_ Dolfin are not installed\n\n')
             print('==========================================\n\n')
+
+        # for c in self.mesh:
+        #     plane_orientations[c.id - 1] = c.theta_1[0]
+        #     fiber_orientations[c.id - 1] = c.theta_3
+        #
+        # mesh.rotate(rotation_angle)
+
         #TBD: pass it to anbax and run it!
         anba = anbax(mesh, 1, matLibrary, materials, plane_orientations, fiber_orientations, maxE)
    
@@ -871,7 +878,8 @@ class CBM(object):
         
         #Define transformation T (from ANBA to SONATA/VABS coordinates)
         B = np.array([[0,0,1],[1,0,0],[0,1,0]])
-        # B = np.array([[0,0,1],[-1,0,0],[0,1,0]])  # new
+        # B = np.array([[0,0,-1],[-1,0,0],[0,1,0]])  # new
+
         T = np.dot(np.identity(3),np.linalg.inv(B))
         
         self.AnbaBeamProperties = BeamSectionalProps()
@@ -955,7 +963,7 @@ class CBM(object):
 
         '''
         mesh,nodes = sort_and_reassignID(self.mesh)
-        fig,ax = plot_cells(self.mesh, nodes, attribute, self.BeamProperties, title, **kw)
+        fig,ax = plot_cells(self.mesh, nodes, attribute, self.materials, self.BeamProperties, title, **kw)
         return fig,ax
     
     def cbm_post_3dtopo(self):

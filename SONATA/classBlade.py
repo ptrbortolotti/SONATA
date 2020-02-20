@@ -50,6 +50,8 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
                                         display_custome_shape, transform_wire_2to3d, display_config, \
                                         display_Ax2, display_cbm_SegmentLst
 
+from jobs.RFeil.utls.utls_openmdao import utls_openmdao_apply_gains                                    
+
 class Blade(Component):
     """
     SONATA Blade component object.
@@ -324,7 +326,7 @@ class Blade(Component):
             Is the database of airfoils
         
         """
-        self.name = yml.get('name')
+        self.name = self.yml.get('name')
         print('STATUS:\t Reading IAE37 Definition for Blade: %s' % (self.name))
         
         #Read blade & beam reference axis and create BSplineLst & interpolation instance
@@ -349,7 +351,7 @@ class Blade(Component):
             self.f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
         self.f_pa = interp1d(tmp_pa[:,0], tmp_pa[:,1], bounds_error=False, fill_value='extrapolate')
         
-        #Read chord, twist and nondim. pitch axis location and create interpolation
+        #Read airfoil information 
         airfoil_position = (yml.get('outer_shape_bem').get('airfoil_position').get('grid'),yml.get('outer_shape_bem').get('airfoil_position').get('labels'))
         tmp = []
         for an in airfoil_position[1]: 
@@ -378,8 +380,24 @@ class Blade(Component):
         self.chord = np.vstack((x, self.f_chord(x))).T
         self.twist = np.vstack((x, self.f_twist(x))).T
         self.pitch_axis = np.vstack((x, self.f_pa(x))).T
-        self.f_curvature_k1 = interp1d(x, np.gradient(self.twist[:,1],self.beam_ref_axis[:,1]))
-        
+        self.f_curvature_k1 = interp1d(x, np.gradient(self.twist[:,1],self.beam_ref_axis[:,1]))  # determine twist per unit length, i.e. the twist gradient at a respective location
+
+
+        # =============================== #
+        # openMDAO wrapper (ongoing work)
+        # =============================== #
+        # Apply gains from design variables during openmdao analysis
+        # if kwargs.get('flag_opt'):
+        #     opt_vars = kwargs['opt_vars']
+        #     yml = utls_openmdao_apply_gains(self, yml, opt_vars)
+        # else:
+        #     opt_vars = 0.
+        #     yml = utls_openmdao_apply_gains(self, yml, opt_vars)
+
+        # =============================== #
+
+
+
         #Generate CBMConfigs
         if kwargs.get('flags').get('flag_wt_ontology'):
             cbmconfigs = iea37_converter(self, cs_pos, yml, self.materials, mesh_resolution = kwargs.get('flags').get('mesh_resolution'))
@@ -387,7 +405,14 @@ class Blade(Component):
         else:
             lst = [[cs.get('position'), CBMConfig(cs, self.materials, iea37=True)] for cs in yml.get('internal_structure_2d_fem').get('sections')]
             cbmconfigs = np.asarray(lst)
- 
+
+        # # Apply gains from design variables during openmdao analysis
+        # if kwargs.get('flag_opt'):
+        #     opt_vars = kwargs['opt_vars']
+        #     cbmconfigs = utls_openmdao_apply_gains(self, cs_pos, yml, cbmconfigs, opt_vars)
+
+
+
         #Generate CBMs
         tmp = []
         for x, cfg in cbmconfigs:
@@ -718,16 +743,16 @@ class Blade(Component):
 
 
         if flag_lft:
-            # step file export
-            # from jobs.RFeil.utls.import_export_step_files import STEPExporter
-            # AP214_stepExporter = STEPExporter('loft_AP214.igs', schema='AP214CD')  # init for writing step file; alternatively: schema='AP203'
+            # # step/iges file export
+            from jobs.RFeil.utls.import_export_step_files import STEPExporter
+            AP214_stepExporter = STEPExporter('loft_AP214.step', schema='AP214CD')  # init for writing step file; alternatively: schema='AP203'
 
             for i in range(len(wireframe)-1):
                 # loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-2, continuity=1, check_compatibility=True)
                 loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-6, continuity=1, check_compatibility=True)
                 self.display.DisplayShape(loft, transparency=0.5, update=True)
-            #     AP214_stepExporter.add_shape(loft)  # add each lofted shape to the AP203_stepExporter component to generate full blade
-            # AP214_stepExporter.write_file()  # write step file
+                AP214_stepExporter.add_shape(loft)  # add each lofted shape to the AP203_stepExporter component to generate full blade
+            AP214_stepExporter.write_file()  # write step file
 
 
         if flag_topo:

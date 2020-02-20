@@ -53,9 +53,14 @@ license
 
 #ignored folders
 jobs/RFeil/0_archive
-jobs/RFeil/0_archive_BAR_009
 jobs/RFeil/00_analysis
 jobs/RFeil/test
+jobs/RFeil/img
+jobs/RFeil/csv_export
+jobs/RFeil/figures
+#jobs/RFeil/BAR0010n
+jobs/RFeil/IEA-15-240-RWT
+
 jobs/PBortolotti
 jobs/FBerghammer
 jobs/AAbdelmoula

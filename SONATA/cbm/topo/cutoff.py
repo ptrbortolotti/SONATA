@@ -15,7 +15,7 @@ from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_Pnt2d, get_BSplineLs
 from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
 
 
-def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
+def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):  # best use: cutoff_style = 2
     ''' cutoff_layer creates a cutoff to connect the offsetBSpline List with the original BSplineList '''
     #cutoff_style: 0 step, 1 linear, 2 round, 3 Bezier
     
@@ -66,7 +66,7 @@ def cutoff_layer(Trimmed_BSplineLst,OffsetBSplineLst,S1,S2,cutoff_style=2):
             Offset_V1Start.Normalize()
             Offset_V1End.Normalize()
     
-            kappa_bezier = 0.5*dist  #0.8*dist
+            kappa_bezier = 0.5*dist  #0.5*dist #0.8*dist
             Offset_V1Start.Multiply(-kappa_bezier)
             Offset_V1End.Multiply(kappa_bezier)
                    

@@ -19,6 +19,8 @@ if __name__ == '__main__':
 
 from SONATA.cbm.classCBMConfig import CBMConfig
 
+from jobs.RFeil.utls.utls_openmdao import calc_axis_intersection
+
 def arc_length(x, y):
     """
     Small routine that for given x and y of a profile compute the arc length positions
@@ -70,7 +72,8 @@ def iea37_converter(blade, cs_pos, byml, materials, mesh_resolution):
     """
 
     # Segments and webs
-    tmp0    = byml.get('internal_structure_2d_fem').get('webs')
+
+    tmp0        = byml.get('internal_structure_2d_fem').get('webs')
     x           = cs_pos # Non dimensional span position of the stations
     webs_exist  = np.zeros_like(x) # Flag to set whether webs have non zero thickness, initialized at 0
 
@@ -94,11 +97,13 @@ def iea37_converter(blade, cs_pos, byml, materials, mesh_resolution):
                 if thick_i > 1.e-6:
                     if 'web' in sec.keys():
                         webs_exist[i]   = 1
-    
+
+
+    # Determine start and end positions (s-coordinates) of each web
     for i in range(len(x)):
         n_webs_i = 0
+        web_config = [dict() for n in range(len(x))]
         for j in range(n_webs):
-
             if x[i] >=tmp0[j]['start_nd_arc']['grid'][0] and x[i] <=tmp0[j]['start_nd_arc']['grid'][-1] and webs_exist[i] == 1:
                 n_webs_i = n_webs_i + 1
 
@@ -137,7 +142,7 @@ def iea37_converter(blade, cs_pos, byml, materials, mesh_resolution):
         profile_curve   = arc_length(profile[:,0], profile[:,1]) / arc_length(profile[:,0], profile[:,1])[-1]
 
         id_layer     = 0
-        web_filler_index = False  # introduce web filler index to separate leading and training web layups
+        web_filler_index = False  # introduce web filler index to separate leading and trailing web layups
 
         for idx_sec, sec in enumerate(tmp1):
 
@@ -178,7 +183,7 @@ def iea37_converter(blade, cs_pos, byml, materials, mesh_resolution):
 
                         if 'fiber_orientation' in sec.keys():
                             set_interp = PchipInterpolator(sec['fiber_orientation']['grid'], sec['fiber_orientation']['values'])
-                            tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = float(set_interp(x[i]))  # added float
+                            tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = float(set_interp(x[i]) * 180 / np.pi)  # added float
                         else:
                             tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = 0.
                             
@@ -188,13 +193,18 @@ def iea37_converter(blade, cs_pos, byml, materials, mesh_resolution):
                             
                             
                         id_layer = id_layer + 1
-                    else:
-                        
+                    else:  # if web in sec.keys():
+
+
                         id_seg          = id_webs[i][(sec['web'])]['id']
                         for id_mat in range(1,len(materials)+1):
                             if sec['material'] == materials[id_mat].name:
 
-                                # ========= NEW wth split yaml files ========= #
+
+                                # ------------------------------------------
+                                # Use the following code for separated webs
+                                # ------------------------------------------
+                                # ========= NEW with split yaml files ========= #
                                 # Orthotropic at leading edge (_le)
                                 # if '_le' in sec['name']:  #  check if on leading edge side of web
                                 if (not web_filler_index and not isinstance(materials[id_mat].E, float)):  # begin with leading part of the web BEFORE web has been filled
@@ -210,6 +220,7 @@ def iea37_converter(blade, cs_pos, byml, materials, mesh_resolution):
                                     flange = 0.01
                                     tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['start'] = id_webs[i][(sec['web'])]['end_nd_arc'] - flange
                                     tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['end']   = id_webs[i][(sec['web'])]['start_nd_arc'] + flange
+
                                     if 'fiber_orientation' in sec.keys():
                                         set_interp = PchipInterpolator(sec['fiber_orientation']['grid'], sec['fiber_orientation']['values'])
                                         tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['orientation'] = float(set_interp(x[i]))
@@ -250,6 +261,7 @@ def iea37_converter(blade, cs_pos, byml, materials, mesh_resolution):
                                     flange = 0.01
                                     tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['start'] = id_webs[i][(sec['web'])]['end_nd_arc'] - flange
                                     tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['end'] = id_webs[i][(sec['web'])]['start_nd_arc'] + flange
+
                                     if 'fiber_orientation' in sec.keys():
                                         set_interp = PchipInterpolator(sec['fiber_orientation']['grid'],sec['fiber_orientation']['values'])
                                         tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['orientation'] = set_interp(x[i])
@@ -258,7 +270,15 @@ def iea37_converter(blade, cs_pos, byml, materials, mesh_resolution):
 
                                     web_filler_index = False  #  after completing the te part (this web is finished now!), prepare for next web
 
-                            # ========= OLD wthout split yaml files ========= #
+
+
+
+
+
+
+
+
+                            # ========= OLD without split yaml files ========= #
                             #  NEW YAML FILES INCLUDE ALREADY SEPARATED WEBS  #
                                 #
                                 # if tmp2[i]['segments'][id_seg - 1]['layup'] != [{}]:
@@ -299,6 +319,7 @@ def iea37_converter(blade, cs_pos, byml, materials, mesh_resolution):
                                 #     tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['orientation'] = 0.
 
 
+    # Split webs for determining the
     # print(tmp2)
     # exit()
     webs    = [OrderedDict() for n in range(len(x))]
@@ -343,16 +364,25 @@ def iea37_converter(blade, cs_pos, byml, materials, mesh_resolution):
                     set_interp      = PchipInterpolator(profile[id_le + offset_edge:-offset_edge,0], profile_curve[id_le + offset_edge:-offset_edge])
                     web_end_le , web_end_te        = set_interp([x_web_end_le , x_web_end_te])
 
+
+                    if 'curvature' in web.keys():
+                        set_interp = PchipInterpolator(web['curvature']['grid'], web['curvature']['values'])
+                        curve_val = float(set_interp(x[i]))
+                    else:
+                        curve_val = 0.
+
+
+
                     w_f = {}
                     w_f['id']   = 2 * i_web + 1
                     w_f['position'] = [web_start_le, web_end_le]
-                    w_f['curvature'] = None
+                    w_f['curvature'] = curve_val
                     webs[i][2 * i_web + 1] = w_f
 
                     w_r = {}
                     w_r['id']   = 2 * i_web + 2
                     w_r['position'] = [web_start_te, web_end_te]
-                    w_r['curvature'] = None
+                    w_r['curvature'] = curve_val
                     webs[i][2 * i_web + 2] = w_r
 
 
