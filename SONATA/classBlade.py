@@ -50,7 +50,8 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
                                         display_custome_shape, transform_wire_2to3d, display_config, \
                                         display_Ax2, display_cbm_SegmentLst
 
-from jobs.RFeil.utls.utls_openmdao import utls_openmdao_apply_gains                                    
+
+from SONATA.utl_openmdao.utl_openmdao import utls_openmdao_apply_gains
 
 class Blade(Component):
     """
@@ -744,15 +745,15 @@ class Blade(Component):
 
         if flag_lft:
             # # step/iges file export
-            from jobs.RFeil.utls.import_export_step_files import STEPExporter
-            AP214_stepExporter = STEPExporter('loft_AP214.step', schema='AP214CD')  # init for writing step file; alternatively: schema='AP203'
+            # from jobs.RFeil.utls.import_export_step_files import STEPExporter
+            # AP214_stepExporter = STEPExporter('loft_AP214.step', schema='AP214CD')  # init for writing step file; alternatively: schema='AP203'
 
             for i in range(len(wireframe)-1):
                 # loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-2, continuity=1, check_compatibility=True)
                 loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-6, continuity=1, check_compatibility=True)
                 self.display.DisplayShape(loft, transparency=0.5, update=True)
-                AP214_stepExporter.add_shape(loft)  # add each lofted shape to the AP203_stepExporter component to generate full blade
-            AP214_stepExporter.write_file()  # write step file
+            #     AP214_stepExporter.add_shape(loft)  # add each lofted shape to the AP203_stepExporter component to generate full blade
+            # AP214_stepExporter.write_file()  # write step file
 
 
         if flag_topo:

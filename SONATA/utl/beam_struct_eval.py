@@ -14,9 +14,10 @@ import numpy as np
 import csv
 
 from SONATA.cbm.cbm_utl import trsf_sixbysix
-from jobs.RFeil.utls.utls_sonata2beamdyn import convert_structdef_SONATA_to_beamdyn, write_beamdyn_axis, write_beamdyn_prop
+from SONATA.utl_openfast.utls_sonata2beamdyn import convert_structdef_SONATA_to_beamdyn, write_beamdyn_axis, write_beamdyn_prop
 
-from jobs.RFeil.utls.utls_analytical_rectangle import utls_analytical_rectangle
+from SONATA.utl.analytical_rectangle.utls_analytical_rectangle import utls_analytical_rectangle
+
 
 
 def beam_struct_eval(flags_dict, cs_pos, job, folder_str, job_str):
@@ -105,8 +106,10 @@ def beam_struct_eval(flags_dict, cs_pos, job, folder_str, job_str):
             plot_beam_props_6by6(cs_pos, beam_prop['beam_stiff'], fig_title, save_path)
             # plot axes locations
             save_path = [folder_str + job_str[0:-5] + '_VABS_axes_locations' + str_ext + '.png']
-            plot_beam_axes(cs_pos, beam_prop['beam_mass_center'], beam_prop['beam_neutral_axes'], 
-                           beam_prop['beam_geometric_center'], beam_prop['beam_shear_center'], save_path)
+            plot_beam_axes(cs_pos, beam_prop['beam_mass_center'], beam_prop['beam_neutral_axes'], beam_prop['beam_geometric_center'], beam_prop['beam_shear_center'], save_path)
+            # plot mass distribution
+            save_path = [folder_str + job_str[0:-5] + '_VABS_mass_distribution' + str_ext + '.png']
+            plot_beam_mass_distribution(cs_pos, beam_prop['beam_section_mass'], save_path)
 
 
 
@@ -138,6 +141,7 @@ def beam_struct_eval(flags_dict, cs_pos, job, folder_str, job_str):
                 anbax_beam_stiff_init[i, j, :] = np.array(job.beam_properties[i, 1].TS[j, :])  # receive 6x6 timoshenko stiffness matrix
                 anbax_beam_inertia_init[i, j, :] = np.array(job.beam_properties[i, 1].MM[j, :])  # receive 6x6 mass matrix
 
+
         # --------------------------------------- #
         #  rotate anbax results from SONATA/VABS def to BeamDyn def coordinate system (for flag_DeamDyn_def_transform = True)
         if flags_dict['flag_DeamDyn_def_transform']:
@@ -155,6 +159,10 @@ def beam_struct_eval(flags_dict, cs_pos, job, folder_str, job_str):
             anbax_beam_stiff = anbax_beam_stiff_init
             anbax_beam_inertia = anbax_beam_inertia_init
             str_ext = ''
+
+        # np.set_printoptions(precision=3)
+        # print(anbax_beam_stiff[0])
+
 
 
         # --------------------------------------- #
@@ -241,6 +249,28 @@ def plot_beam_axes(cs_pos, vabs_beam_mass_center, vabs_beam_neutral_axes, vabs_b
     fig.savefig(''.join(save_path), dpi=300)
 
     return None
+
+def plot_beam_mass_distribution(cs_pos, vabs_beam_mass_distribution, save_path):
+
+    fig = plt.figure(tight_layout=True, figsize=(8, 5), dpi=80, facecolor='w', edgecolor='k')
+
+    # wisdem_grid = [0, 0.034482759, 0.068965517, 0.103448276, 0.137931034, 0.172413793, 0.206896552, 0.24137931, 0.275862069, 0.310344828, 0.344827586, 0.379310345, 0.413793103, 0.448275862, 0.482758621, 0.517241379, 0.551724138, 0.586206897, 0.620689655, 0.655172414, 0.689655172, 0.724137931, 0.75862069, 0.793103448, 0.827586207, 0.862068966, 0.896551724, 0.931034483, 0.965517241, 1]
+    # wisdem_mass = [2.75E+03, 2.24E+03, 1.74E+03, 1.49E+03, 1.08E+03, 7.87E+02, 6.56E+02, 6.31E+02, 6.48E+02, 6.60E+02, 6.71E+02, 6.68E+02, 6.52E+02, 6.33E+02, 6.20E+02, 5.97E+02, 5.78E+02, 5.43E+02, 5.16E+02, 4.72E+02, 4.42E+02, 4.07E+02, 3.62E+02, 3.24E+02, 2.66E+02, 2.02E+02, 1.55E+02, 1.11E+02, 9.97E+00, 4.69E+00]
+    # plt.plot(wisdem_grid, wisdem_mass)
+
+    plt.plot(cs_pos, vabs_beam_mass_distribution[:,0])
+    plt.xlabel('r/R')
+    plt.ylabel('Mass per unit length, N/m')
+    # plt.ylim([0, 1000])
+
+    plt.show()
+    fig.savefig(''.join(save_path), dpi=300)
+
+    return None
+
+
+
+
 # ============================================= #
 def plot_vabs_anbax(cs_pos, vabs_data, anbax_data, fig_title, save_path):
     # plots 6x6 matrix

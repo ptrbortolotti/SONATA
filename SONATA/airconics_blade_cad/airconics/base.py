@@ -17,7 +17,7 @@ import os
 
 import sys
 sys.path.insert(0,'/Users/rfeil/work/6_SONATA/SONATA')  # import sys path to import 'SONATA' & 'job' modules
-import SONATA.blade_cad.airconics.AirCONICStools as act
+import SONATA.airconics_blade_cad.airconics.AirCONICStools as act
 
 from OCC.Core.Graphic3d import Graphic3d_NOM_ALUMINIUM
 from OCC.Core.TopoDS import TopoDS_Shape

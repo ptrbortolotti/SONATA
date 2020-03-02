@@ -5,8 +5,8 @@ import math
 import numpy as np
 # import MassStiffTransformation as mst
 
-import jobs.RFeil.utls.utls_analytical_IsotropicRectangle as ir 
-import jobs.RFeil.utls.utls_analytical_MassStiffTransformation as mst 
+import SONATA.utl.analytical_rectangle.utls_analytical_IsotropicRectangle as ir
+import SONATA.utl.analytical_rectangle.utls_analytical_MassStiffTransformation as mst
 import quadpy
 
 from SONATA.cbm.cbm_utl import trsf_sixbysix

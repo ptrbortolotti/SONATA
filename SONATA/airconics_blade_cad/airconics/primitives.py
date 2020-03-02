@@ -16,7 +16,7 @@ import numpy as np
 
 import sys
 sys.path.insert(0,'/Users/rfeil/work/6_SONATA/SONATA')  # import sys path to import 'SONATA' & 'job' modules
-import SONATA.blade_cad.airconics.AirCONICStools as act
+import SONATA.airconics_blade_cad.airconics.AirCONICStools as act
 
 # Classes
 # -----------------------------------------------------------------------------

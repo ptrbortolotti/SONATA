@@ -855,8 +855,7 @@ class CBM(object):
 
 
         try:
-            (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = \
-                build_dolfin_mesh(self.mesh, nodes, self.materials)
+            (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = build_dolfin_mesh(self.mesh, nodes, self.materials)
         except:
             print('\n')
             print('==========================================\n\n')

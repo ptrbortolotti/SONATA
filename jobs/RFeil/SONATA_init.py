@@ -5,26 +5,18 @@ Created on Mo Oct 07 11:18:28 2019
 @author: Roland Feil
 """
 
-import os
-import subprocess
-from builtins import len, range
+import os, sys
+sys.path.insert(0,'/Users/rfeil/work/6_SONATA/SONATA')  # import sys path to import 'SONATA' & 'job' modules
 
-import yaml
-import numpy as np
-from scipy.interpolate import interp1d
+import subprocess
 import matplotlib.pyplot as plt
 
-import sys
-sys.path.insert(0,'/Users/rfeil/work/6_SONATA/SONATA')  # import sys path to import 'SONATA' & 'job' modules
 from SONATA.classBlade import Blade
-from SONATA.classAirfoil import Airfoil
-from SONATA.classMaterial import read_IEA37_materials
+from SONATA.utl.beam_struct_eval import beam_struct_eval
+import SONATA.utl_openfast.fast_out_utilities as wtc_utilities
 
-from jobs.RFeil.utls.beam_struct_eval import beam_struct_eval
-import jobs.RFeil.utls.fast_out_utilities as wtc_utilities
-
-from SONATA.blade_cad.airfoil_cst import TurbineCAD
-import SONATA.blade_cad.airconics.liftingSurface as liftingSurface
+from SONATA.airconics_blade_cad.airfoil_cst import TurbineCAD
+import SONATA.airconics_blade_cad.airconics.liftingSurface as liftingSurface
 
 
 # ==============
@@ -37,19 +29,17 @@ print('Current working directory is:', os.getcwd())
 plt.close('all')  # close existing plots
 
 # ===== Provide Path Directory & Yaml Filename ===== #
-folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/'
+# folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/'
+folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/HFM/'
 # folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/yaml_examples/'
 
-# job_str = 'BAR009n.yaml' # baseline
-job_str = 'BAR0010n.yaml' # baseline
+# job_str = 'BAR0010n.yaml' # baseline
 # job_str = 'BAR0010n_inflatable.yaml'
-# job_str = 'IEA-15-240-RWT_V4.yaml'
-# job_str = 'IEA-15-240-RWT_V9c.yaml'
-# job_str = 'IEA-15-240-RWT_TipShape_V1_old.yaml'
-# job_str = 'IEA-15-240-RWT_TipShape_V1.yaml'
+# job_str = 'BAR0013s_adapted.yaml'
 # job_str = 'IEA-15-240-RWT_V1.yaml'
+# job_str = 'box_beam_HT_layup1.yaml'
+job_str = 'box_beam_HT_circular_tube.yaml'
 
-# job_str = 'BAR0010n_ht_0_76_FFA-W3-241_V2.yaml'
 
 # job_str = 'example_circular_beam_ht_ontology.yaml'  # apply ht ontology for circular beam example: flag_wt_ontology: False; flag_ref_axes_wt = False
 # job_str = 'example_circular_beam_wt_ontology.yaml'
@@ -63,12 +53,12 @@ filename_str = folder_str + job_str
 
 # ===== Define flags ===== #
 # --- numerical flags ---
-flag_wt_ontology        = True      # if true, use ontology definition of wind turbines for yaml files
-flag_ref_axes_wt        = True      # if true, rotate reference axes from wind definition to comply with SONATA (rotorcraft # definition)
+flag_wt_ontology        = False      # if true, use ontology definition of wind turbines for yaml files
+flag_ref_axes_wt        = False      # if true, rotate reference axes from wind definition to comply with SONATA (rotorcraft # definition)
 
 # --- plotting flags ---
 # Define mesh resolution, i.e. the number of points along the profile that is used for out-to-inboard meshing of a 2D blade cross section
-mesh_resolution = 00
+mesh_resolution = 200
 # For plots within blade_plot_sections
 attribute_str           = 'MatID'   # default: MatID; others: theta_3 (ply orientation angles of individual cell alignment in space in relative to the y-axis)
 flag_plotDisplacement   = False     # description ? ToDO
@@ -76,9 +66,9 @@ flag_plotTheta11        = False      # description ? ToDo # material orientation
 # For plots within blade_post_3dtopo
 flag_wf                 = True      # plot wire-frame
 flag_lft                = True     # plot lofted shape of blade surface (flag_wf=True obligatory); Note: create loft with grid refinement without too many radial_stations; also exports step file of lofted shape
-flag_topo               = False      # plot mesh topology
+flag_topo               = True      # plot mesh topology
 
-flag_airconics_CAD      = True      # create *.iges file
+flag_airconics_CAD      = False      # create *.iges file
 
 # create flag dictionary
 flags_dict = {"flag_wt_ontology": flag_wt_ontology, "flag_ref_axes_wt": flag_ref_axes_wt, \
@@ -95,7 +85,7 @@ if flags_dict['flag_lft']:
     radial_stations_add = []
     # for n in range(npts):
     #     radial_stations_add.append(np.sin(n/npts*np.pi/2))
-    radial_stations_add = np.round(np.arange(0, 1.0, 0.0001), 2)
+    # radial_stations_add = np.round(np.arange(0, 1.0, 0.0001), 2)
 else:
     radial_stations_add = []
 
@@ -103,8 +93,6 @@ else:
 # Define the radial stations for cross sectional analysis (only used for flag_wt_ontology = True -> otherwise, sections from yaml file are used!)
 
 # BAR0010
-# radial_stations = [0., 0.05, 0.1, 0.15, 0.2, 0.2485, 0.3, 0.35, 0.4, 0.45, 0.5, 0.5512, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0]  #np.round(np.arange(0, 1.0, 0.05), 2)  # ToDo check 0.55
-# radial_stations = [0., 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.5512, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0]  #np.round(np.arange(0, 1.0, 0.05), 2)  # ToDo check 0.55
 # radial_stations = [0., 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 # radial_stations = [0., 0.25, 0.5, 0.75, 1.0]
 
@@ -112,8 +100,8 @@ else:
 # radial_stations = [0., 0.1, 0.2, 0.3, 0.4, 0.48, 0.6, 0.7, 0.8, 0.9, 1.0]
 # radial_stations = [0., 0.1, 0.2, 0.3, 0.4, 0.501, 0.6, 0.7, 0.8, 0.9, 1.0]
 
-radial_stations = [1.0]
-# radial_stations = [0.76458948]
+# radial_stations = [0.1, 0.2, 0.3, 0.4, 0.5]
+radial_stations = [0.0, 1.0]
 
 
 # ===== Execute SONATA Blade Component Object ===== #
@@ -136,9 +124,9 @@ job.blade_gen_section(topo_flag=True, mesh_flag = True, split_quads=True)  # spl
 # ===== VABS / ANBAX combination/verification ===== #
 # Define flags
 flag_run_vabs = True
-flag_run_anbax = True
-flag_verify_vabs_anbax = True              # needs flag_run_vabs & flag_run_anbax set to True to be valid!
-flag_DeamDyn_def_transform = True           # transform from SONATA to BeamDyn coordinate system
+flag_run_anbax = False
+flag_verify_vabs_anbax = False              # needs flag_run_vabs & flag_run_anbax set to True to be valid!
+flag_DeamDyn_def_transform = False           # transform from SONATA to BeamDyn coordinate system
 flag_plot_vabs_struct_characteristics = False     # plots and saves figures of structural characteristics of respective analysis for the range of defined radial stations
 flag_csv_export = True                      # export csv files with structural data
 flag_write_BeamDyn = False                   # write BeamDyn input files for follow-up OpenFAST analysis (requires flag_DeamDyn_def_transform = True)
@@ -152,11 +140,11 @@ flags_dict['flag_csv_export'] = flag_csv_export
 flags_dict['flag_write_BeamDyn'] = flag_write_BeamDyn
 
 # run evalutation
-# beam_struct_eval(flags_dict, radial_stations, job, folder_str, job_str)
+beam_struct_eval(flags_dict, radial_stations, job, folder_str, job_str)
 
 # ===== PLOTS ===== #
 # saves figures in folder_str/figures if savepath is provided:
-# job.blade_plot_sections(attribute=attribute_str, plotTheta11=flag_plotTheta11, plotDisplacement=False, savepath=folder_str)
+job.blade_plot_sections(attribute=attribute_str, plotTheta11=flag_plotTheta11, plotDisplacement=False, savepath=folder_str)
 
 # job.blade_post_3dtopo(flag_wf=flags_dict['flag_wf'], flag_lft=flags_dict['flag_lft'], flag_topo=flags_dict['flag_topo'])
 

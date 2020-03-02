@@ -48,28 +48,28 @@ components:
                 mesh_resolution: 200 # ca 450 punkte auf der aeusseren Kurve. - von innen nach aussen.
                 segments:
                   - id: 0
-                    filler: Null
+                    filler: 1
                     layup: 
                         #-[Start[-], End[-], thickness[m], Orientation [deg], MatID[int], 'name'[str]]
-                        - [0., 1., 0.05,   23, 1, 'Outer_skin']
+                        - [0., 1., 0.05,   0, 1, 'Outer_skin']
               # --- r/R = 1.0 ---
               - position: 1.0
                 trim_mass: False
                 mesh_resolution: 200 # ca 450 punkte auf der aeusseren Kurve. - von innen nach aussen.
                 segments:
                   - id: 0
-                    filler: Null
+                    filler: 1
                     layup: 
                         #-[Start[-], End[-], thickness[m], Orientation [deg], MatID[int], 'name'[str]]
-                        - [0., 1., 0.05,   23, 1, 'Outer_skin']
+                        - [0., 1., 0.05,   0, 1, 'Outer_skin']
 
 
 #==================== A I R F O I L S ==================================
 airfoils:
    -  name: rectangular
       coordinates:
-           x: [0.24, 0.24, -0.24, -0.24,  0.24, 0.24]  # orig - follow s-coordinate along the outer profile of the structure
-           y: [0.0, 0.12,  0.12, -0.12, -0.12, 0.0]
+#           x: [0.24, 0.24, -0.24, -0.24,  0.24, 0.24]  # orig - follow s-coordinate along the outer profile of the structure
+#           y: [0.0, 0.12,  0.12, -0.12, -0.12, 0.0]
 #          x: [0.10, 0.10, -0.38, -0.38,  0.10, 0.10]  # translated by -0.14
 #          y: [0.0, 0.06,  0.06, -0.18, -0.18, 0.0]  # translated by -0.06
         #   x: [0.20784609690826528, 0.14784609690826528, -0.2678460969082653, -0.14784609690826528,  0.2678460969082653, 0.20784609690826528]  # orig rotated by 30 deg
@@ -77,8 +77,8 @@ airfoils:
         #   x: [0.08660254037844388, 0.05660254037844388, -0.3590896534380867, -0.23908965343808675,  0.17660254037844386, 0.08660254037844388]  # rotated by 30 deg and translated by -0.14
         #   y: [0.049999999999999996, 0.10196152422706631,  -0.13803847577293366, -0.34588457268119893, -0.10588457268119897, 0.049999999999999996]  # rotated by 30 deg and translated by -0.06
 
-        #   x: [0.5, 0.5, -0.5, -0.5,  0.5, 0.5]  # follow s-coordinate along the outer profile of the structure
-        #   y: [0.0, 0.5,  0.5, -0.5, -0.5, 0.0]
+           x: [0.5, 0.5, -0.5, -0.5,  0.5, 0.5]  # follow s-coordinate along the outer profile of the structure
+           y: [0.0, 0.5,  0.5, -0.5, -0.5, 0.0]
       relative_thickness: 1.0000
       aerodynamic_center: 0.5000
       polars:  # dummy 2pi polars (not used in example)
@@ -126,6 +126,7 @@ materials:
     nu_12: 0.3                         #-, nu_ij is the Poisson's ratio that corresponds to a contraction in direction j when an extension is applied in direction i.
     nu_13: 0.3                         #-, nu_13 = nu_12
     nu_23: 0.34                         #-,
+
 #    alpha_11:  Null                      #1/K Coefficient of thermal expansion
 #    alpha_22:  Null                      #1/K alpha_22 = alpha_33
 #    alpha_33:  Null                      #1/K
