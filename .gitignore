@@ -63,7 +63,7 @@ jobs/RFeil/BAR0013s
 jobs/RFeil/HFM
 jobs/RFeil/IEA-15-240-RWT
 SNOPT_*
-*.DS_Store
+#*.DS_Store
 
 jobs/PBortolotti
 jobs/FBerghammer
