@@ -614,9 +614,12 @@ class CBM(object):
             print('STATUS:\t Consolidate Mesh on Web Interface', web.ID)  
             (web.wl_nodes, web.wl_cells) = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID].cells, web.BSplineLst)            
             (web.wr_nodes, web.wr_cells) = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID+1].cells, web.BSplineLst)
-                      
-            newcells = consolidate_mesh_on_web(web, web_consolidate_tol, self.display)
-            self.mesh.extend(newcells)
+
+            if not web.wl_nodes or not web.wl_cells or not web.wr_nodes or not web.wr_cells:  # in case there was no mesh in a segment
+                print('STATUS:\t No mesh on Web Interface ' + str(web.ID) + ' to be consolodated')
+            else:
+                newcells = consolidate_mesh_on_web(web, web_consolidate_tol, self.display)
+                self.mesh.extend(newcells)
         
         #=====================split quad cells into trias:
         if split_quads == True:

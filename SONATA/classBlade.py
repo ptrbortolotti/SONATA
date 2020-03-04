@@ -51,7 +51,7 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
                                         display_Ax2, display_cbm_SegmentLst
 
 
-from SONATA.utl_openmdao.utl_openmdao import utls_openmdao_apply_gains
+from SONATA.utl_openmdao.utl_openmdao import utl_openmdao_apply_gains_web_placement, utl_openmdao_apply_gains_mat_thickness
 
 class Blade(Component):
     """
@@ -388,12 +388,14 @@ class Blade(Component):
         # openMDAO wrapper (ongoing work)
         # =============================== #
         # Apply gains from design variables during openmdao analysis
-        # if kwargs.get('flag_opt'):
-        #     opt_vars = kwargs['opt_vars']
-        #     yml = utls_openmdao_apply_gains(self, yml, opt_vars)
+
+        if kwargs.get('flag_opt'):
+            opt_vars = kwargs['opt_vars']
+            # yml = utl_openmdao_apply_gains_web_placement(self, yml, opt_vars)
+            yml = utl_openmdao_apply_gains_mat_thickness(self, yml, opt_vars)
         # else:
         #     opt_vars = 0.
-        #     yml = utls_openmdao_apply_gains(self, yml, opt_vars)
+        #     yml = utls_openmdao_apply_gains_web_placement(self, yml, opt_vars)
 
         # =============================== #
 
@@ -410,7 +412,7 @@ class Blade(Component):
         # # Apply gains from design variables during openmdao analysis
         # if kwargs.get('flag_opt'):
         #     opt_vars = kwargs['opt_vars']
-        #     cbmconfigs = utls_openmdao_apply_gains(self, cs_pos, yml, cbmconfigs, opt_vars)
+        #     cbmconfigs = utl_openmdao_apply_gains_web_placement(self, cs_pos, yml, cbmconfigs, opt_vars)
 
 
 

@@ -9,9 +9,21 @@ Created on Wednesday Dec 18 20:43:28 2019
 import numpy as np
 from scipy.interpolate import PchipInterpolator, interp1d
 
+def utl_openmdao_apply_gains_mat_thickness(blade, yml, opt_vars):
 
+    # Optimize the thickness of the outer and the inner shell skins
 
-def utls_openmdao_apply_gains(blade, yml, opt_vars):
+    # initial values are:
+    t_outer = yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][1][2]  # shell skin outer
+    t_inner = yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][10][2]  # shell skin inner
+
+    # replace with optimization variable
+    yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][1][2] = float(opt_vars[0])
+    yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][10][2] = float(opt_vars[0])
+
+    return yml
+
+def utl_openmdao_apply_gains_web_placement(blade, yml, opt_vars):
 
 
     af_grid = blade.airfoils[:,0]

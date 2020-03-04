@@ -30,15 +30,20 @@ plt.close('all')  # close existing plots
 
 # ===== Provide Path Directory & Yaml Filename ===== #
 # folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/'
-folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/HFM/'
+# folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/HFM/'
 # folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/yaml_examples/'
+folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/inflatable_blade_studies/'
 
 # job_str = 'BAR0010n.yaml' # baseline
-# job_str = 'BAR0010n_inflatable.yaml'
+# job_str = 'BAR0010n_curved_webs.yaml'
+# job_str = 'BAR0010n_HT_baseline.yaml'
+job_str = 'BAR0010n_HT_baseline_kevlar.yaml'
+# job_str = 'BAR2011n.yaml' # baseline
 # job_str = 'BAR0013s_adapted.yaml'
+# job_str = 'BAR0100n.yaml'
 # job_str = 'IEA-15-240-RWT_V1.yaml'
 # job_str = 'box_beam_HT_layup1.yaml'
-job_str = 'box_beam_HT_circular_tube.yaml'
+# job_str = 'box_beam_HT_circular_tube.yaml'
 
 
 # job_str = 'example_circular_beam_ht_ontology.yaml'  # apply ht ontology for circular beam example: flag_wt_ontology: False; flag_ref_axes_wt = False
@@ -71,9 +76,9 @@ flag_topo               = True      # plot mesh topology
 flag_airconics_CAD      = False      # create *.iges file
 
 # create flag dictionary
-flags_dict = {"flag_wt_ontology": flag_wt_ontology, "flag_ref_axes_wt": flag_ref_axes_wt, \
-              "attribute_str": attribute_str, \
-              "flag_plotDisplacement": flag_plotDisplacement, "flag_plotTheta11": flag_plotTheta11, \
+flags_dict = {"flag_wt_ontology": flag_wt_ontology, "flag_ref_axes_wt": flag_ref_axes_wt,
+              "attribute_str": attribute_str,
+              "flag_plotDisplacement": flag_plotDisplacement, "flag_plotTheta11": flag_plotTheta11,
               "flag_wf": flag_wf, "flag_lft": flag_lft, "flag_topo": flag_topo, "mesh_resolution": mesh_resolution}
 
 
@@ -101,7 +106,8 @@ else:
 # radial_stations = [0., 0.1, 0.2, 0.3, 0.4, 0.501, 0.6, 0.7, 0.8, 0.9, 1.0]
 
 # radial_stations = [0.1, 0.2, 0.3, 0.4, 0.5]
-radial_stations = [0.0, 1.0]
+radial_stations = [0.76458948]
+
 
 
 # ===== Execute SONATA Blade Component Object ===== #
@@ -140,7 +146,7 @@ flags_dict['flag_csv_export'] = flag_csv_export
 flags_dict['flag_write_BeamDyn'] = flag_write_BeamDyn
 
 # run evalutation
-beam_struct_eval(flags_dict, radial_stations, job, folder_str, job_str)
+# beam_struct_eval(flags_dict, radial_stations, job, folder_str, job_str)
 
 # ===== PLOTS ===== #
 # saves figures in folder_str/figures if savepath is provided:

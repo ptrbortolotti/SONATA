@@ -1,83 +1,115 @@
+# -*- coding: utf-8 -*-
 """
-openMDAO wrapper for SONATA
+Created on Mo Oct 07 11:18:28 2019
+
+@author: Roland Feil
 """
-import os
-from datetime import datetime
+
+import os, sys
+sys.path.insert(0,'/Users/rfeil/work/6_SONATA/SONATA')  # import sys path to import 'SONATA' & 'job' modules
+
+import time
+import subprocess
+import matplotlib.pyplot as plt
 import numpy as np
+import csv
+
 from openmdao.api import Group, Problem, ScipyOptimizer, IndepVarComp, ScipyOptimizeDriver, ExplicitComponent, ExecComp  #, pyOptSparseDriver
 from openmdao.drivers.genetic_algorithm_driver import SimpleGADriver
 # from concurrent import futures
 from openmdao.drivers.pyoptsparse_driver import pyOptSparseDriver
 
-import sys
-sys.path.insert(0,'/Users/rfeil/work/6_SONATA/SONATA')  # import sys path to import 'SONATA' & 'job' modules
-
 from SONATA.classBlade import Blade
-from jobs.RFeil.utls.utls_sonata2beamdyn import convert_structdef_SONATA_to_beamdyn
+from SONATA.utl_openfast.utls_sonata2beamdyn import convert_structdef_SONATA_to_beamdyn
 
-os.chdir('/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil')  # go back to chosen working directory
+
 print('Current working directory is:', os.getcwd())
 
-import csv
+
 
 class StructOpt(ExecComp):
 
     def setup(self):
-        # self.counter = 0
-        # self.startTime = datetime.now()
-        # print(self.startTime)
 
-        self.add_input('pos_web0')
-        self.add_output('EIflap')
+        # inputs
+        self.add_input('OptVar1')
+        # outputs
+        self.add_output('Stiffness_obj')
 
     def compute(self, inputs, outputs):
-        OptVar1 = inputs['pos_web0']  # to-be-varied variable
-
+        OptVar1 = inputs['OptVar1']  # to-be-varied variable
+        print('NEW OptVar1 = ' + str(float(OptVar1)))
         # run job
         job = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=radial_stations, stations_add=radial_stations_add, flag_opt=flag_opt, opt_vars=OptVar1)
         job.blade_gen_section(mesh_flag=True, split_quads=True)
         job.blade_run_vabs()
-        beam_prop = convert_structdef_SONATA_to_beamdyn(radial_stations, job.beam_properties)  # convert to BeamDyn coord sys def
 
+        beam_prop = job.beam_properties
+        beam_prop_MM = beam_prop[0][1].MM
+        beam_prop_TS = beam_prop[0][1].TS
 
-        test_value = 4406212.6351
+        print('*******************')
+        print('STIFFNESS:')
+        print('GJ = ' + str(beam_prop_TS[3, 3]))  # GJ
+        print('EIflap = ' + str(beam_prop_TS[4, 4]))  # EIFLAP
+        print('EIlag = ' + str(beam_prop_TS[5, 5]))  # EILAG
+        print('*******************')
+
 
         # outputs['EIflap'] = np.abs(test_value * (1 + OptVar1) - 1.06*test_value)
         # outputs['EIflap'] = -0.5 * OptVar1**2
 
 
-        outputs['EIflap'] = beam_prop['beam_stiff'][0,4,4]
+        # outputs['EIflap'] = beam_prop['beam_stiff'][0,4,4]
+        GJ_diff = np.abs(beam_prop_TS[3, 3] - beam_prop_init_TS[3, 3])
+        EIflap_diff = np.abs(beam_prop_TS[4, 4] - beam_prop_init_TS[4, 4])
+        EIlag_diff = np.abs(beam_prop_TS[5, 5] - beam_prop_init_TS[5, 5])
 
+        outputs['Stiffness_obj'] = np.sqrt(GJ_diff**2 + EIflap_diff**2 + EIlag_diff**2)
 
-        print('OptVar1 = ' + str(OptVar1))
-        print('EIflap = ' + str(float(outputs['EIflap'])))
+        print('OptVar1 = ' + str(float(OptVar1)))
+        print('Delta_GJ = ' + str(float(GJ_diff)))
+        print('Delta_EIflap = ' + str(float(EIflap_diff)))
+        print('Delta_EIlag = ' + str(float(EIlag_diff)))
+        print('Stiffness_obj = ' + str(float(outputs['Stiffness_obj'])))
 
-        job.blade_plot_sections(attribute='MatID', plotTheta11=False, plotDisplacement=False, savepath=folder_str, opt_var=str(float(OptVar1)))
-
+        # job.blade_plot_sections(attribute='MatID', plotTheta11=False, plotDisplacement=False, savepath=folder_str, opt_var=str(float(OptVar1)))
 
         # write EIflap value of each iteration to file
-        with open('figures/opt_temp.csv', 'a') as opt_csvfile:
+        with open('inflatable_blade_studies/opt_temp.csv', 'a') as opt_csvfile:
             opt_csvfile_writer = csv.writer(opt_csvfile, delimiter=',')
-            opt_csvfile_writer.writerow([str(float(OptVar1)), str(float(outputs['EIflap']))])
+            # opt_csvfile_writer.writerow(['OptVar1', 'EIflap_init', 'EIflap', 'Objective - Delta_EIflap'])
+                                        # OptVar1                   init_value                    iter_value              Objective - Delta
+            opt_csvfile_writer.writerow([str(float(OptVar1)), str(beam_prop_init_TS[3, 3]), str(beam_prop_TS[3, 3]), str(float(GJ_diff)),
+                                                            str(beam_prop_init_TS[4, 4]), str(beam_prop_TS[4, 4]), str(float(EIflap_diff)),
+                                                            str(beam_prop_init_TS[5, 5]), str(beam_prop_TS[5, 5]), str(float(EIlag_diff)), str(float(outputs['Stiffness_obj']))])
 
 
 
 
 if __name__ == "__main__":
 
+    start_time = time.time()
 
     job_name = 'SONATA_job'
-    folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/'
-    job_str = 'BAR0010n.yaml'  # baseline
+    folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/inflatable_blade_studies/'
+
+    job_str_init = 'BAR0010n_HT_baseline.yaml'  # Reference job for optimization objectives
+    filename_str_init = folder_str + job_str_init
+
+    job_str = 'BAR0010n_HT_baseline_kevlar.yaml'  # To be optimized job
     filename_str = folder_str + job_str
 
+
+    # ======================== #
     # ===== Define flags ===== #
-    flag_wt_ontology = True
-    flag_ref_axes_wt = True
+    # ======================== #
+    flag_wt_ontology = False
+    flag_ref_axes_wt = False
     mesh_resolution = 200
     attribute_str = 'MatID'
     flag_plotDisplacement = False     # description ? ToDO
-    flag_plotTheta11 = True
+    flag_plotTheta11 = False
     flag_wf = True      # plot wire-frame
     flag_lft = True
     flag_topo = True      # plot mesh topology
@@ -89,27 +121,49 @@ if __name__ == "__main__":
                 "flag_wf": flag_wf, "flag_lft": flag_lft, "flag_topo": flag_topo, "mesh_resolution": mesh_resolution}
 
     radial_stations_add = []
-    radial_stations = [0.95]
+    radial_stations = [0.76458948]
 
 
+    # ============================= #
+    # ===== Compute Reference ===== #
+    # ============================= #
     # flag_opt = False         # no optimization during initalization
     # Initialize Reference job for scaling of optimization objectives
-    job_init = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=radial_stations, stations_add=radial_stations_add)
-    job_init.blade_gen_section(mesh_flag=True, split_quads=True)
+    job_init = Blade(name=job_name, filename=filename_str_init, flags=flags_dict, stations=radial_stations, stations_add=radial_stations_add)
+    job_init.blade_gen_section(topo_flag=True, mesh_flag = True, split_quads=True)
     job_init.blade_run_vabs()
-    job_init.blade_plot_sections(attribute='MatID', plotTheta11=False, plotDisplacement=False, savepath=folder_str, opt_var='init')
+    # job_init.blade_plot_sections(attribute='MatID', plotTheta11=False, plotDisplacement=False, savepath=folder_str, opt_var='init')
 
-    beam_prop_init = convert_structdef_SONATA_to_beamdyn(radial_stations, job_init.beam_properties)  # convert to BeamDyn coord sys def
+    beam_prop_init = job_init.beam_properties  # use of SONATA/VABS coordinate system
 
-    print('EIflap_init = ' + str(beam_prop_init['beam_stiff'][0][4, 4]))
+    beam_prop_init_MM = beam_prop_init[0][1].MM
+    beam_prop_init_TS = beam_prop_init[0][1].TS
+
+    print('*******************')
+    print('REFERENCE STIFFNESS:')
+    print('GJ = ' + str(beam_prop_init_TS[3, 3]))  # GJ
+    print('EIflap = ' + str(beam_prop_init_TS[4, 4]))  # EIFLAP
+    print('EIlag = ' + str(beam_prop_init_TS[5, 5]))  # EILAG
+    print('*******************')
+
+
+
+    # ======================== #
+    # ===== Optimization ===== #
+    # ======================== #
 
     flag_opt = True         # activate optimization flag after model initialization
+    try:
+        os.remove('inflatable_blade_studies/opt_temp.csv')  # remove *.csv file before running another optimization
+    except:
+        print(' ')
+
     # set up Optimization Problem
     p = Problem()
 
-    indeps = p.model.add_subsystem('indeps', IndepVarComp(), promotes=['pos_web0'])
-    indeps.add_output('pos_web0', -0.01)
-    p.model.add_subsystem('structopt', StructOpt(), promotes_inputs=['pos_web0'], promotes_outputs=['EIflap']) 
+    indeps = p.model.add_subsystem('indeps', IndepVarComp(), promotes=['OptVar1'])
+    indeps.add_output('OptVar1', 0.002)
+    p.model.add_subsystem('structopt', StructOpt(), promotes_inputs=['OptVar1'], promotes_outputs=['Stiffness_obj'])
 
     p.driver = pyOptSparseDriver()  # ScipyOptimizeDriver()
     # p.driver.options['optimizer'] = 'SLSQP'  # 'SLSQP' 'SNOPT' 'CONMIN'
@@ -121,16 +175,16 @@ if __name__ == "__main__":
     # p.driver.opt_settings['IFILE'] = 'SLSQP.out'    # Output File Name
 
     p.driver.options['optimizer'] = "SNOPT"
-    p.driver.opt_settings['Major feasibility tolerance'] = 1e-7
+    p.driver.opt_settings['Major feasibility tolerance'] = 1e+3  #1e-7
     p.driver.opt_settings['Major iterations limit'] = 10
     p.driver.opt_settings['Summary file'] = 'SNOPT_Summary_file.txt'
     p.driver.opt_settings['Print file'] = 'SNOPT_Print_file.txt'
-    p.driver.opt_settings['Major step limit'] = 0.01
+    p.driver.opt_settings['Major step limit'] = 0.001
 
 
-    p.model.add_design_var('pos_web0', lower=-0.02, upper=0.15)
-    p.model.add_objective('EIflap', scaler = -1)  #/beam_prop_init['beam_stiff'][0][4,4])  #, adder = -beam_prop_init['beam_stiff'][0][4,4])  # 1./23511118.672)  # 1./2.445646288e+09
-    # p.model.add_objective('EIflap', scaler = 1./23511118.672)  # 1./2.445646288e+09 
+    p.model.add_design_var('OptVar1', lower=0.0016, upper=0.02)
+    p.model.add_objective('Stiffness_obj', scaler = 1)
+
 
     p.setup()
     p.model.approx_totals()
@@ -138,6 +192,9 @@ if __name__ == "__main__":
 
     p.model.list_inputs(values = True, hierarchical=False)
     p.model.list_outputs(values = True, hierarchical=False)
+
+
+    print("--- Computational time: %s seconds ---" % (time.time() - start_time))
 
 
     # # ===== PLOTS ===== #

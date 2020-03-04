@@ -54,6 +54,7 @@ license
 #ignored folders
 jobs/RFeil/0_archive
 jobs/RFeil/00_analysis
+jobs/RFeil/BAR_others
 jobs/RFeil/test
 jobs/RFeil/img
 jobs/RFeil/csv_export
@@ -63,7 +64,7 @@ jobs/RFeil/BAR0013s
 jobs/RFeil/HFM
 jobs/RFeil/IEA-15-240-RWT
 SNOPT_*
-#*.DS_Store
+*.DS_Store
 
 jobs/PBortolotti
 jobs/FBerghammer
