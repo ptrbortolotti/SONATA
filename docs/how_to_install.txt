@@ -3,13 +3,13 @@
 1. Install an up-to-date anaconda python=3.7 distribution
 
 2. Create a sonata environment with the full basic anaconda modules:
-    $ conda create -n env_full anaconda --name sonata
+    $ conda create -n sonata anaconda -
 
 3. Activate sonata environment
     $ source activate sonata
 
 4. Install the openmdao module
-    $ pip install openmdao
+    $ conda install -c conda-forge openmdao
 
 5. Install mpi4py
     Make sure you have a valid openmpi (1.8.3 in my case) version installed and the $PATH and $LD_LIBRARY_PATH Set correctly 
@@ -31,7 +31,7 @@
     python setup.py install
 
 7. Install the pythonocc-package
-    $ conda install -c conda-forge -c dlr-sc -c tpaviot -c oce -c pythonocc pythonocc-core==0.18.2
+    $ conda install -c conda-forge pythonocc-core=7.4.0
 
 8. Install the pint module. This is used to change units in the SONATA/CBM - DYMORE interface.
     conda install -c conda-forge pint
