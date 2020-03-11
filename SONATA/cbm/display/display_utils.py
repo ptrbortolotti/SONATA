@@ -11,11 +11,6 @@ import numpy as np
 from OCC.Display.SimpleGui import init_display
 from OCC.Core.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax3,gp_Ax1
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
-from OCC.Core.Graphic3d import (Graphic3d_EF_PDF,
-                             Graphic3d_EF_SVG,
-                             Graphic3d_EF_TEX,
-                             Graphic3d_EF_PostScript,
-                             Graphic3d_EF_EnhPostScript)
 
 from OCC.Core.Quantity import Quantity_Color
 from OCC.Core.AIS import AIS_Shape
@@ -58,9 +53,9 @@ def display_config(DeviationAngle = 1e-5, DeviationCoefficient = 1e-5, bg_c = ((
 
     def export_png(): return export_to_PNG(display)
     def export_jpg():return export_to_JPEG(display)
-    def export_pdf(): return export_to_PDF(display)
-    def export_svg(): return export_to_SVG(display)
-    def export_ps(): return export_to_PS(display)
+#    def export_pdf(): return export_to_PDF(display)
+#    def export_svg(): return export_to_SVG(display)
+#    def export_ps(): return export_to_PS(display)
     
     #===========DISPLAY CONFIG:===============
     display, start_display, add_menu, add_function_to_menu = init_display()
@@ -82,46 +77,46 @@ def display_config(DeviationAngle = 1e-5, DeviationCoefficient = 1e-5, bg_c = ((
     add_menu('Screencapture')
     add_function_to_menu('Screencapture', export_png)
     add_function_to_menu('Screencapture', export_jpg)
-    add_function_to_menu('Screencapture', export_pdf)
-    add_function_to_menu('Screencapture', export_svg)
-    add_function_to_menu('Screencapture', export_ps)
+#    add_function_to_menu('Screencapture', export_pdf)
+#    add_function_to_menu('Screencapture', export_svg)
+#    add_function_to_menu('Screencapture', export_ps)
    
     add_menu('Export')
     
     return (display, start_display, add_menu, add_function_to_menu)
     
 
-def export_to_PDF(display,event=None):
-    f = display.View.View()
-    #display.set_bg_gradient_color([255,255,255],[255,255,255])
-    i = 0
-    while os.path.exists('img/capture_pdf%s.pdf' % i):
-        i += 1
-    f.Export('img/capture_pdf%s.pdf' % i, Graphic3d_EF_PDF)
-    print("EXPORT: \t Screencapture exported to img/capture_pdf%s.pdf" % i)
-    #display.set_bg_gradient_color([20,6,111],[200,200,200])
-    
-    
-def export_to_SVG(display,event=None):
-    f = display.View.View()
-    #display.set_bg_gradient_color([255,255,255],[255,255,255])
-    i = 0
-    while os.path.exists('img/capture_svg%s.svg' % i):
-        i += 1
-    f.Export('img/capture_svg_%s.svg' % i, Graphic3d_EF_SVG)
-    print("EXPORT: \t Screencapture exported to img/capture_svg%s.svg" % i)
-    #display.set_bg_gradient_color([20,6,111],[200,200,200])
-    
-    
-def export_to_PS(display,event=None):
-    f = display.View.View()
-    #display.set_bg_gradient_color([255,255,255],[255,255,255])
-    i = 0
-    while os.path.exists('img/capture_ps%s.ps' % i):
-        i += 1
-    f.Export('img/capture_ps%s.ps' % i, Graphic3d_EF_PostScript)
-    print("EXPORT: \t Screencapture exported to img/capture_ps%s.ps" % i)
-    #display.set_bg_gradient_color([20,6,111],[200,200,200])
+#def export_to_PDF(display,event=None):
+#    f = display.View.View()
+#    #display.set_bg_gradient_color([255,255,255],[255,255,255])
+#    i = 0
+#    while os.path.exists('img/capture_pdf%s.pdf' % i):
+#        i += 1
+#    f.Export('img/capture_pdf%s.pdf' % i, Graphic3d_EF_PDF)
+#    print("EXPORT: \t Screencapture exported to img/capture_pdf%s.pdf" % i)
+#    #display.set_bg_gradient_color([20,6,111],[200,200,200])
+#    
+#    
+#def export_to_SVG(display,event=None):
+#    f = display.View.View()
+#    #display.set_bg_gradient_color([255,255,255],[255,255,255])
+#    i = 0
+#    while os.path.exists('img/capture_svg%s.svg' % i):
+#        i += 1
+#    f.Export('img/capture_svg_%s.svg' % i, Graphic3d_EF_SVG)
+#    print("EXPORT: \t Screencapture exported to img/capture_svg%s.svg" % i)
+#    #display.set_bg_gradient_color([20,6,111],[200,200,200])
+#    
+#    
+#def export_to_PS(display,event=None):
+#    f = display.View.View()
+#    #display.set_bg_gradient_color([255,255,255],[255,255,255])
+#    i = 0
+#    while os.path.exists('img/capture_ps%s.ps' % i):
+#        i += 1
+#    f.Export('img/capture_ps%s.ps' % i, Graphic3d_EF_PostScript)
+#    print("EXPORT: \t Screencapture exported to img/capture_ps%s.ps" % i)
+#    #display.set_bg_gradient_color([20,6,111],[200,200,200])
 
 
 def export_to_EnhPS(display,event=None):
@@ -207,9 +202,9 @@ def show_coordinate_system(display,length,event=None):
     h3 = BRepBuilderAPI_MakeEdge(O,p3).Shape()
 
     display.DisplayShape(O,color='BLACK')
-    display_custome_shape(display, h1, linewidth=2.0, RGB=[1,0,0])
-    display_custome_shape(display, h2, linewidth=2.0, RGB=[0,1,0])
-    display_custome_shape(display, h3, linewidth=2.0, RGB=[0,0,1])
+    #display_custome_shape(display, h1, linewidth=2.0, RGB=[1,0,0])
+    #display_custome_shape(display, h2, linewidth=2.0, RGB=[0,1,0])
+    #display_custome_shape(display, h3, linewidth=2.0, RGB=[0,0,1])
     display.DisplayMessage(p1,'x',message_color=(0,0,0))
     display.DisplayMessage(p2,'y',message_color=(0,0,0))
     display.DisplayMessage(p3,'z',message_color=(0,0,0))
