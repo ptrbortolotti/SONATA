@@ -1,0 +1,49 @@
+{% set version = "3.4.0" %}
+
+package:
+  name: sonata
+  version: {{ version }}
+
+build:
+  number: {{ GIT_DESCRIBE_NUMBER }}
+
+#source:
+#  fn: clana.tar.gz
+#  url: "https://files.pythonhosted.org/packages/47/b1/d3fd41f7a590a669f1faba0cf9b385e01374c7a730479dd5ec46aff649bf/clana-0.3.11.tar.gz"
+#  sha256: a756b0b44dab64e2cb55f644689c993ed20189bb3b359495491b84cb8846f733
+
+source:
+  path: ..
+
+requirements:
+  build:
+    - python
+  run:
+    - python >=3.7
+    - numpy
+    - scipy
+    - pythonocc-core==7.4.0rc1
+    - openmdao
+    - pint
+    - intervaltree
+    - shapely
+
+  imports:
+    - SONATA
+
+extra:
+  recipe-maintainers:
+    - tpflumm
+
+  channels:
+    - conda-forge
+    - pythonocc
+
+about:
+  home: https://gitlab.lrz.de/gu32kij/SONATA
+  license: LGPL
+  summary: Multidiciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis
+  description: temporary description
+  doc_url:
+  dev_url:
+  doc_source_url: https://github.com/shibukawa/imagesize_py/blob/master/README.rst
