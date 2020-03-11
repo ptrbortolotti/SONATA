@@ -48,8 +48,10 @@ license
 *.out*
 *.zip
 
-#ignored folders
+#ignored folders#
+/.eggs/
 /*.egg-info/
+jobs/VariSpeed
 jobs/PBortolotti
 jobs/FBerghammer
 jobs/AAbdelmoula
@@ -64,11 +66,8 @@ jobs/Statistics
 jobs/VHeuschneider
 jobs/MERIT
 jobs/JSirohi
-jobs/VariSpeed
 jobs/MonteCarlo
 jobs/img
 /scratch/
 /docs/source/
 /docs/build/
-SONATA/sectionbuilder/PatranMesh_example/
-
