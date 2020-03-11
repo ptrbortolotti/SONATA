@@ -33,9 +33,7 @@ from SONATA.cbm.topo.BSplineLst_utils import BSplineLst_from_dct, copy_BSplineLs
                                             equidistant_D1_on_BSplineLst
 from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst, build_wire_from_BSplineLst2, get_wire_length, equidistant_Points_on_wire
 
-from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
-                                        export_to_SVG, export_to_PS, export_to_EnhPS, \
-                                        export_to_TEX, export_to_BMP,export_to_TIFF, \
+from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_BMP,export_to_TIFF, \
                                         show_coordinate_system, display_SONATA_SegmentLst,\
                                         display_custome_shape, transform_wire_2to3d, display_config
 
