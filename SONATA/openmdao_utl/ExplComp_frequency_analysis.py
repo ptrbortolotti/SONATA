@@ -11,7 +11,7 @@ import sys
 
 from openmdao.api import ExplicitComponent
 from SONATA.cbm.fileIO.hiddenprints import HiddenPrints
-from SONATA.Pymore.app.marc_fanplot import frequency_analysis
+from Pymore.app.marc_fanplot import frequency_analysis
 
 class ExplComp_Frequency_Analysis(ExplicitComponent):
     """

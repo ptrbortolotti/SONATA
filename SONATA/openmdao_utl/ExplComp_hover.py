@@ -14,10 +14,10 @@ from openmdao.api import ExplicitComponent
 from SONATA.cbm.fileIO.hiddenprints import HiddenPrints
 
 from SONATA.openmdao_utl.doe_utl import filename_generator
-import SONATA.Pymore.utl.coef as coef
-from SONATA.Pymore.app.marc_flight_analysis import flight_analysis
-from SONATA.Pymore.app.marc_reference_utl import plot_ref_data
-from SONATA.Pymore.app.marc_flight_analysis_utl import interp_dui, plot_dui, \
+import Pymore.utl.coef as coef
+from Pymore.app.marc_flight_analysis import flight_analysis
+from Pymore.app.marc_reference_utl import plot_ref_data
+from Pymore.app.marc_flight_analysis_utl import interp_dui, plot_dui, \
                     plot_sensors, extract_blade_data, plot_rotor_polarcontour, load_pmfa_config, fade_beam_props
     
 
@@ -36,7 +36,7 @@ class ExplComp_Hover_Analysis(ExplicitComponent):
         self.set_input()
         self.set_output()
         self.set_partials()
-        (self.path, self.dui, self.sensors, beamprops, massprops) = load_pmfa_config('jobs/MonteCarlo/uh60a_hover.yml')
+        (self.path, self.dui, self.sensors, beamprops, massprops) = load_pmfa_config('../../jobs/MonteCarlo/uh60a_hover.yml')
 
         
     def set_input(self):        
@@ -52,7 +52,7 @@ class ExplComp_Hover_Analysis(ExplicitComponent):
         self.declare_partials('*', '*', method='fd', step=0.05) #finite differences all partials
 
     def compute(self, inputs, outputs):       
-        refProps = np.load('jobs/MonteCarlo/baseline_beamprops.npy')
+        refProps = np.load('../../jobs/MonteCarlo/baseline_beamprops.npy')
         dynBeamProps = fade_beam_props(refProps, inputs['BeamProps'], self.dui, t0 = 0.0, t1=1.0) 
         BeamProps = {'BLADE_BP_AB01': dynBeamProps}
         with HiddenPrints():

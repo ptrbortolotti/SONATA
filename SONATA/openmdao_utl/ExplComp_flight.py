@@ -15,12 +15,12 @@ from openmdao.api import ExplicitComponent
 from SONATA.cbm.fileIO.hiddenprints import HiddenPrints
 
 from SONATA.openmdao_utl.doe_utl import filename_generator
-import SONATA.Pymore.utl.coef as coef
-from SONATA.Pymore.app.marc_flight_analysis import flight_analysis
-from SONATA.Pymore.app.marc_reference_utl import plot_ref_data
-from SONATA.Pymore.app.marc_flight_analysis_utl import interp_dui, plot_dui, \
+import Pymore.utl.coef as coef
+from Pymore.app.marc_flight_analysis import flight_analysis
+from Pymore.app.marc_reference_utl import plot_ref_data
+from Pymore.app.marc_flight_analysis_utl import interp_dui, plot_dui, \
                     plot_sensors, extract_blade_data, plot_rotor_polarcontour, load_pmfa_config, interp_azimuth, fade_beam_props
-from SONATA.Pymore.app.fft import extract_vibratory_hubloads
+from Pymore.app.fft import extract_vibratory_hubloads
 
 class ExplComp_Flight_Analysis(ExplicitComponent):
     """

@@ -14,7 +14,7 @@ from SONATA.cbm.fileIO.hiddenprints import HiddenPrints
 from SONATA.classBlade import Blade
 #from SONATA.classAirfoil import Airfoil
 #from SONATA.classMaterial import read_IEA37_materials
-import SONATA.Pymore.utl.coef as coef
+import Pymore.utl.coef as coef
 
 class ExplComp_Blade(ExplicitComponent):
     
