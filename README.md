@@ -6,10 +6,8 @@
 
 
 
-# SONATA: Multidiciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis
-
-## **Abstract:**
-
+# SONATA
+'SONATA' is a toolbox for Multidiciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis.
 Structural helicopter rotor blade optimization comprises classical aeroelastic problems, where the aerodynamic behavior, the structural elasticity and vibrational dynamics have to be studied simultaneously. Since the dynamic and modal behavior is strongly related to the structural properties of the rotor blades, adjusting these properties is essential for an effective optimization. Nevertheless, identifying constraints based on elemental matrices to keep the solution within feasible boundaries is often a protracted and iterative task. The herein presented definition of the rotor blade topology is deliberately associated to the production of composite rotor blades. Thus, manufacturability is inherent from the geometric layup definition. Using orthogonal projection with corner-style differentiation the cross-section is discretized and processed by the Variational Asymptotic Beam Sectional Analysis (VABS) afterwards. [more](docs/intro.md)
 
 ## Installation
@@ -41,6 +39,10 @@ SONATA is developed to work with a python version >3.6. An old python 2.7 releas
 9. Now you can download or clone the repository and execute the main SONATA script. 
    ```	python SONATA.py```
 
+## Usage
+
+
+
 ## Developers - Guide
 
 please read the [developers-guide](docs/developer-guide.md)
@@ -56,6 +58,7 @@ please read the [developers-guide](docs/developer-guide.md)
 
 
 ## Publications:
+
 **Pflumm, T., Garre, W., Hajek, M.:** A Preprocessor for Parametric Composite Rotor Blade Cross-Sections, 44th European Rotorcraft Forum, Delft, The Netherlands, 2018  [[pdf]](docs/Pflumm,%20T.%20-%20A%20Preprocessor%20for%20Parametric%20Composite%20Rotor%20Blade%20Cross-Sections%20(2018,%20ERF).pdf) [[more…\]](https://mediatum.ub.tum.de/604993?query=Pflumm&show_id=1455385) [[BibTeX\]](https://mediatum.ub.tum.de/export/1455385/bibtex)
 
 **Pflumm, T., Rex, W., Hajek, M.:** Propagation of Material and Manufacturing Uncertainties in Composite Helicopter Rotor Blades, 45th European Rotorcraft Forum, Warsaw, Poland, 2019 [[more…\]](https://mediatum.ub.tum.de/1520025) [BibTeX\]](https://mediatum.ub.tum.de/export/1520025/bibtex)
@@ -63,6 +66,6 @@ please read the [developers-guide](docs/developer-guide.md)
 
 ## Acknowledgment:
 
-This work is supported by the German Federal Minisfor Economic Affairs and Energy through the German Aation Research Program LuFo V-2 and the Austrian Rsearch Promotion Agency through the Austrian ReseaProgram TAKE OFF in the project VARI-SPEED.
+This work was supported by the German Federal Minisfor Economic Affairs and Energy through the German Aation Research Program LuFo V-2 and the Austrian Rsearch Promotion Agency through the Austrian Research Program TAKE OFF in the project VARI-SPEED.
 
 <img src="docs/img/acknowledgment.png" width="400">
