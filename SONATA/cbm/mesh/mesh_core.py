@@ -142,13 +142,11 @@ def gen_core_cells(a_nodes, area=1.0,**kwargs):
     #create cells from connector array
     c_cells =[]
     for ele in mesh['triangles']:
-        nodeLst = []
-        for tri_id in ele: 
-            NodeID = connector[tri_id,1]
-            nodeLst.append(find_node(nodes,NodeID))
-    
+        nodeids = [connector[tri_id,1] for tri_id in ele]
+        nodedict = {n.id:n for n in nodes}
+        nodeLst = [nodedict[i] for i in nodeids]
         c_cells.append(Cell(nodeLst))
-            
+        
     return [c_cells,nodes]
 
 
