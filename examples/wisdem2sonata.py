@@ -1,4 +1,16 @@
-import yaml  
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Dec  4 14:49:51 2018
+
+@author: PBortolotti
+
+Module Description:
+    ...
+
+"""
+import yaml
+import os  
 from jsonschema import validate
 from SONATA.classAirfoil import Airfoil
 from SONATA.classMaterial import read_IEA37_materials
@@ -6,8 +18,12 @@ from SONATA.classBlade import Blade
 import numpy as np
 from scipy.interpolate import interp1d
 
+
 def write_beamdyn_axis(wt_name, byml):
+    """
     
+    
+    """
     yaml_ref_axis = byml.get('internal_structure_2d_fem').get('reference_axis')
     yaml_twist    = byml.get('outer_shape_bem').get('twist')
     
@@ -86,75 +102,66 @@ def write_beamdyn_axis(wt_name, byml):
 
     
 def write_beamdyn_prop(wt_name, eta_stations, beam_stiff, beam_inertia):
+    """
+    Function Description
     
+    
+    Parameters
+    ----------
+    wt_name : str
+    eta_stations : 
+    beam_stiff : 
+    beam_inertia :
+    
+    """
     n_pts = len(eta_stations)
     
-    file  = open(wt_name + '_BeamDyn_Blade.dat','w')
-    file.write(' ------- BEAMDYN V1.00.* INDIVIDUAL BLADE INPUT FILE --------------------------\n')
-    file.write(' Test Format 1\n')
-    file.write(' ---------------------- BLADE PARAMETERS --------------------------------------\n')
-    file.write('%u   station_total    - Number of blade input stations (-)\n' % (n_pts))
-    file.write(' 1   damp_type        - Damping type: 0: no damping; 1: damped\n')
-    file.write('  ---------------------- DAMPING COEFFICIENT------------------------------------\n')
-    file.write('   mu1        mu2        mu3        mu4        mu5        mu6\n')
-    file.write('   (-)        (-)        (-)        (-)        (-)        (-)\n')
-    file.write('1.0E-03    1.0E-03    1.0E-03    1.0E-03    1.0E-03    1.0E-03\n')
-    file.write(' ---------------------- DISTRIBUTED PROPERTIES---------------------------------\n')
-    for i in range(n_pts):
-        file.write('\t %.5e \n' % (eta_stations[i]))
-        for j in range(6):
-            file.write('\t %.5e \t %.5e \t %.5e \t %.5e \t %.5e \t %.5e\n' % (beam_stiff[i , j, 0], beam_stiff[i , j, 1], beam_stiff[i , j, 2], beam_stiff[i , j, 3], beam_stiff[i , j, 4], beam_stiff[i , j, 5]))
-        file.write('\n')
-        for j in range(6):
-            file.write('\t %.5e \t %.5e \t %.5e \t %.5e \t %.5e \t %.5e\n' % (beam_inertia[i , j, 0], beam_inertia[i , j, 1], beam_inertia[i , j, 2], beam_inertia[i , j, 3], beam_inertia[i , j, 4], beam_inertia[i , j, 5]))
-        file.write('\n')
-    
-    file.close()
+    with open(wt_name + '_BeamDyn_Blade.dat','w') as f:
+        f.write(' ------- BEAMDYN V1.00.* INDIVIDUAL BLADE INPUT FILE --------------------------\n')
+        f.write(' Test Format 1\n')
+        f.write(' ---------------------- BLADE PARAMETERS --------------------------------------\n')
+        f.write('%u   station_total    - Number of blade input stations (-)\n' % (n_pts))
+        f.write(' 1   damp_type        - Damping type: 0: no damping; 1: damped\n')
+        f.write('  ---------------------- DAMPING COEFFICIENT------------------------------------\n')
+        f.write('   mu1        mu2        mu3        mu4        mu5        mu6\n')
+        f.write('   (-)        (-)        (-)        (-)        (-)        (-)\n')
+        f.write('1.0E-03    1.0E-03    1.0E-03    1.0E-03    1.0E-03    1.0E-03\n')
+        f.write(' ---------------------- DISTRIBUTED PROPERTIES---------------------------------\n')
+        for i in range(n_pts):
+            f.write('\t %.5e \n' % (eta_stations[i]))
+            for j in range(6):
+                f.write('\t %.5e \t %.5e \t %.5e \t %.5e \t %.5e \t %.5e\n' % (beam_stiff[i , j, 0], beam_stiff[i , j, 1], beam_stiff[i , j, 2], beam_stiff[i , j, 3], beam_stiff[i , j, 4], beam_stiff[i , j, 5]))
+            f.write('\n')
+            for j in range(6):
+                f.write('\t %.5e \t %.5e \t %.5e \t %.5e \t %.5e \t %.5e\n' % (beam_inertia[i , j, 0], beam_inertia[i , j, 1], beam_inertia[i , j, 2], beam_inertia[i , j, 3], beam_inertia[i , j, 4], beam_inertia[i , j, 5]))
+            f.write('\n')
     
     return None
     
+
+if __name__ == '__main__':
     
-
-with open('./jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
-    inputs  = myfile.read()
-with open('jobs/PBortolotti/IEAontology_schema.yaml', 'r') as myfile:
-    schema  = myfile.read()
-validate(yaml.load(inputs), yaml.load(schema))
-
-
-yml = yaml.load(inputs)
-airfoils = [Airfoil(af) for af in yml.get('airfoils')]
-materials = read_IEA37_materials(yml.get('materials'))
-
-byml = yml.get('components').get('blade')
-B = Blade(name='TestBlade')
-eta_stations = [0.0, 0.1, 0.4]
-B.read_IEA37(byml, airfoils, materials, stations = eta_stations, wt_flag = True)     
-
-beam_stiff   = np.zeros([len(eta_stations),6,6])
-beam_inertia = np.zeros([len(eta_stations),6,6])
-
-wt_name       = yml.get('name')
-write_beamdyn_axis(wt_name, byml)
-
-k = 0
-for key, cs in B.sections:
-    print('STATUS:\t Building Section at grid location %s' % (key))
-    cs.cbm_gen_topo()
-    cs.cbm_gen_mesh(split_quads=True)
-    # cs.cbm_run_vabs()
-    title_plot = 'Blade station ' + str(key*100.) + '%'
-    save_path  = 'jobs/PBortolotti/station_' + str(int(key*100.)) + '.pdf'
-    cs.cbm_post_2dmesh(title=title_plot)
-    stiff_matrix, mass_matrix = cs.cbm_run_anbax()
-    beam_stiff[k,:,:]   = stiff_matrix
-    beam_inertia[k,:,:] = mass_matrix
-    k += 1
-
-
-write_beamdyn_prop(wt_name, eta_stations, beam_stiff, beam_inertia) 
-
+    eta_stations = [0.0, 0.1, 0.4]
+    B = Blade(name='IEAonshoreWT', filename = 'jobs/PBortolotti/IEAonshoreWT.yaml', wt_flag = True)
     
+    beam_stiff   = np.zeros([len(eta_stations),6,6])
+    beam_inertia = np.zeros([len(eta_stations),6,6])
     
-    
-    
+#    write_beamdyn_axis(wt_name, byml)
+#    
+#    k = 0
+#    for key, cs in B.sections:
+#        print('STATUS:\t Building Section at grid location %s' % (key))
+#        cs.cbm_gen_topo()
+#        cs.cbm_gen_mesh(split_quads=True)
+#        # cs.cbm_run_vabs()
+#        title_plot = 'Blade station ' + str(key*100.) + '%'
+#        save_path  = 'jobs/PBortolotti/station_' + str(int(key*100.)) + '.pdf'
+#        cs.cbm_post_2dmesh(title=title_plot)
+#        stiff_matrix, mass_matrix = cs.cbm_run_anbax()
+#        beam_stiff[k,:,:]   = stiff_matrix
+#        beam_inertia[k,:,:] = mass_matrix
+#        k += 1
+#    
+#    
+#    write_beamdyn_prop(wt_name, eta_stations, beam_stiff, beam_inertia) 

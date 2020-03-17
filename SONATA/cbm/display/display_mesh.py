@@ -109,6 +109,8 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
         cbar.set_ticks(np.linspace(1, max(data), max(data)))
         cbar.set_ticklabels(np.linspace(1, max(data), max(data)))
         p.set_clim(0.5, max(data)+0.5)
+    if data_name == 'sf':
+         p.set_clim(0, 3)
     
     if len(theta_11)==len(elements):
         for i,cent in enumerate(centroids):

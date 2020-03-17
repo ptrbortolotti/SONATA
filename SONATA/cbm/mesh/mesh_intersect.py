@@ -23,6 +23,27 @@ from SONATA.cbm.topo.BSplineLst_utils import findPnt_on_curve
 from SONATA.cbm.mesh.mesh_utils import remove_duplicates_from_list_preserving_order
 
 def map_node_on_curve(node,Curve2d,theta_11,distance=1e5,**kwargs):
+    """
+    maps a node onto a curve2d.
+
+    Parameters
+    ----------
+    node : TYPE
+        DESCRIPTION.
+    Curve2d : TYPE
+        DESCRIPTION.
+    theta_11 : TYPE
+        DESCRIPTION.
+    distance : TYPE, optional
+        DESCRIPTION. The default is 1e5.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    """
     
     #KWARGS:
     if kwargs.get('display') !=  None:
@@ -63,7 +84,27 @@ def map_node_on_curve(node,Curve2d,theta_11,distance=1e5,**kwargs):
 
 
 def map_mesh_by_intersect_curve2d(mesh,curve2d,wire,global_minLen,**kwargs):
-    
+    """
+    maps the mesh with and intersecting 2dcurve
+
+    Parameters
+    ----------
+    mesh : list of cells
+        DESCRIPTION.
+    curve2d : curve2d 
+        DESCRIPTION.
+    wire : OCC.topods.wire
+        DESCRIPTION.
+    global_minLen : TYPE
+        DESCRIPTION.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    """
     #KWARGS:
     if kwargs.get('display') !=  None:
         display = kwargs.get('display')

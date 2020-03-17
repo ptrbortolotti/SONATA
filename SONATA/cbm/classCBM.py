@@ -60,8 +60,7 @@ from SONATA.cbm.classBeamSectionalProps import BeamSectionalProps
 
 from SONATA.cbm.cbm_utl import trsf_sixbysix
 from SONATA.cbm.display.display_mesh import plot_cells
-from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
-                                        export_to_SVG, export_to_PS, export_to_EnhPS, \
+from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, \
                                         export_to_TEX, export_to_BMP,export_to_TIFF, \
                                         show_coordinate_system, display_SONATA_SegmentLst,\
                                         display_custome_shape, transform_wire_2to3d, display_config
@@ -706,6 +705,7 @@ class CBM(object):
             else:
                 user = getpass.getuser()
                 path = '/scratch/'+user
+                print(path)
                 if not os.path.exists(path):
                     os.makedirs(path)
                 #tmp = path+'/'+self.config.filename.split('/')[-1]
@@ -775,7 +775,7 @@ class CBM(object):
                         break
                     
         self.BeamProperties = result
-        
+        print('self.BeamProperties',self.BeamProperties)
         if self.config.vabs_cfg.recover_flag == 1:
             self.BeamProperties.read_all_VABS_Results()
             #ASSIGN Stress and strains to elements:

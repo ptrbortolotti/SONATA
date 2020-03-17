@@ -159,7 +159,7 @@ class Layer(object):
             
     
     def build_layer(self,l0 = 1):
-        npArray = discretize_BSplineLst(self.Boundary_BSplineLst, 1e-6*l0)
+        npArray = discretize_BSplineLst(self.Boundary_BSplineLst, 1.2e-6*l0)
         #plt.plot(*npArray.T, '.-')     
         self.offlinepts = shp_parallel_offset(npArray,self.thickness,self.join_style)
         #plt.plot(*self.offlinepts.T, 'x-')     

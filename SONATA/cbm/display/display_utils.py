@@ -9,13 +9,9 @@ import math
 import numpy as np
 
 from OCC.Display.SimpleGui import init_display
+from OCC.Display.backend import get_qt_modules
 from OCC.Core.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax3,gp_Ax1
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
-from OCC.Core.Graphic3d import (Graphic3d_EF_PDF,
-                             Graphic3d_EF_SVG,
-                             Graphic3d_EF_TEX,
-                             Graphic3d_EF_PostScript,
-                             Graphic3d_EF_EnhPostScript)
 
 from OCC.Core.Quantity import Quantity_Color
 from OCC.Core.AIS import AIS_Shape
@@ -58,9 +54,9 @@ def display_config(DeviationAngle = 1e-5, DeviationCoefficient = 1e-5, bg_c = ((
 
     def export_png(): return export_to_PNG(display)
     def export_jpg():return export_to_JPEG(display)
-    def export_pdf(): return export_to_PDF(display)
-    def export_svg(): return export_to_SVG(display)
-    def export_ps(): return export_to_PS(display)
+#    def export_pdf(): return export_to_PDF(display)
+#    def export_svg(): return export_to_SVG(display)
+#    def export_ps(): return export_to_PS(display)
     
     #===========DISPLAY CONFIG:===============
     display, start_display, add_menu, add_function_to_menu = init_display()
@@ -68,6 +64,9 @@ def display_config(DeviationAngle = 1e-5, DeviationCoefficient = 1e-5, bg_c = ((
     display.Context.SetDeviationCoefficient(DeviationCoefficient) # 0.001 default. Be careful to scale it to the problem. 
     display.set_bg_gradient_color([bg_c[0][0],bg_c[0][1],bg_c[0][2]],[bg_c[1][0],bg_c[1][1],bg_c[1][2]])
     show_coordinate_system(display,cs_size)
+    
+    add_menu('File')
+    add_function_to_menu('File', close)
     
     add_menu('View')
     add_function_to_menu('View', display.FitAll)
@@ -82,9 +81,9 @@ def display_config(DeviationAngle = 1e-5, DeviationCoefficient = 1e-5, bg_c = ((
     add_menu('Screencapture')
     add_function_to_menu('Screencapture', export_png)
     add_function_to_menu('Screencapture', export_jpg)
-    add_function_to_menu('Screencapture', export_pdf)
-    add_function_to_menu('Screencapture', export_svg)
-    add_function_to_menu('Screencapture', export_ps)
+#    add_function_to_menu('Screencapture', export_pdf)
+#    add_function_to_menu('Screencapture', export_svg)
+#    add_function_to_menu('Screencapture', export_ps)
    
     add_menu('Export')
     
@@ -191,11 +190,8 @@ def print_xy_click(SHP, *kwargs):
         print(("Shape selected: ", shape))
     print(kwargs)
 
-def exit():
-    sys.exit()
-    
-    
-def show_coordinate_system(display,length,event=None):
+
+def show_coordinate_system(display,length=1,event=None):
     '''CREATE AXIS SYSTEM for Visualization'''
     O  = gp_Pnt(0., 0., 0.)
     p1 = gp_Pnt(length,0.,0.)
@@ -207,13 +203,12 @@ def show_coordinate_system(display,length,event=None):
     h3 = BRepBuilderAPI_MakeEdge(O,p3).Shape()
 
     display.DisplayShape(O,color='BLACK')
-    display_custome_shape(display, h1, linewidth=2.0, RGB=[1,0,0])
-    display_custome_shape(display, h2, linewidth=2.0, RGB=[0,1,0])
-    display_custome_shape(display, h3, linewidth=2.0, RGB=[0,0,1])
+    display.DisplayShape(h1, color='RED')
+    display.DisplayShape(h2, color='GREEN')
+    display.DisplayShape(h3, color='BLUE')
     display.DisplayMessage(p1,'x',message_color=(0,0,0))
     display.DisplayMessage(p2,'y',message_color=(0,0,0))
     display.DisplayMessage(p3,'z',message_color=(0,0,0))
-
 
 def display_points_of_array(array,display):
     for j in range(array.Lower(),array.Upper()+1):
@@ -330,5 +325,21 @@ def display_Ax2(display, Ax2, length=1):
     
     return None
 
+
+def findMainWindow():
+    # Global function to find the (open) QMainWindow in application
+
+    QtCore, QtGui, QtWidgets, QtOpenGL = get_qt_modules()
+    app = QtWidgets.QApplication.instance()
+    for widget in app.topLevelWidgets():
+        if isinstance(widget, QtWidgets.QMainWindow):
+            return widget
+    return None
+
+        
+def close():
+    win = findMainWindow()
+    win.close()
+
 if __name__ == '__main__':   
-    pass
+    (display, start_display, add_menu, add_function_to_menu) = display_config()

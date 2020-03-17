@@ -42,8 +42,7 @@ from SONATA.cbm.fileIO.CADinput import intersect_shape_pln
 from SONATA.cbm.topo.BSplineLst_utils import BSplineLst_from_dct, get_BSplineLst_D2, set_BSplineLst_to_Origin, set_BSplineLst_to_Origin2
 from SONATA.cbm.topo.utils import PntLst_to_npArray, lin_pln_intersect, Array_to_PntLst
 from SONATA.cbm.topo.to3d import bsplinelst_to3d, pnt_to3d, vec_to3d
-from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, export_to_PDF, \
-                                        export_to_SVG, export_to_PS, export_to_EnhPS, \
+from SONATA.cbm.display.display_utils import export_to_JPEG, \
                                         export_to_TEX, export_to_BMP,export_to_TIFF, \
                                         show_coordinate_system, display_SONATA_SegmentLst,\
                                         display_custome_shape, transform_wire_2to3d, display_config, \
@@ -201,7 +200,7 @@ class Blade(Component):
         return local_Ax2
     
     
-    def _interpolate_cbm_boundary(self, x, fs=1.1, nPoints=500) :
+    def _interpolate_cbm_boundary(self, x, fs=1.1, nPoints=4000) :
         """
         interpolates a cbm boundary BSplineLst from the blade definition at a 
         certain grid station. Following the procedure: 
@@ -287,7 +286,7 @@ class Blade(Component):
         array = PntLst_to_npArray(PntLst)
         #array = np.flipud(array) 
         #print(array)
-        BSplineLst = BSplineLst_from_dct(array[:,0:2], angular_deflection = 20, tol_interp=1e-6)
+        BSplineLst = BSplineLst_from_dct(array[:,0:2], angular_deflection = 30, tol_interp=1e-6)
 
         BoundaryBSplineLst = set_BSplineLst_to_Origin2(BSplineLst, gp_Pnt2d(te_pnt.Coord()[0],te_pnt.Coord()[1]))
     
@@ -361,7 +360,7 @@ class Blade(Component):
         #Generate CBMConfigs
         if wt_flag:
             cbmconfigs = iea37_converter(self, cs_pos, yml, self.materials)
-            
+                        
         else:
             lst = [[cs.get('position'), CBMConfig(cs, self.materials, iea37=True)] for cs in yml.get('internal_structure_2d_fem').get('sections')]
             cbmconfigs = np.asarray(lst)
@@ -794,7 +793,7 @@ class Blade(Component):
         
         self.display.View_Iso()
         self.display.FitAll()
-        self.start_display()   
+        #self.start_display()   
         return None         
 
 
