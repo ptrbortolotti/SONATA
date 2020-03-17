@@ -793,7 +793,7 @@ class Blade(Component):
         
         self.display.View_Iso()
         self.display.FitAll()
-        self.start_display()   
+        #self.start_display()   
         return None         
 
 
