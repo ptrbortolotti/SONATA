@@ -75,22 +75,26 @@ How to install OpenMPI, mpi4py, PETSc and petsc4py for use with OpenMDAO and SON
     $ conda install -c conda-forge pythonocc-core=7.4.0
     ```
     
-### 6. Install the pint module. This is used to change units in the SONATA/CBM - DYMORE interface.
+### 6. Install the pint module
+	This is used to change units in the SONATA/CBM - DYMORE interface.
     ```
     conda install -c conda-forge pint
     ```
 
-### 7. Install the intervaltree package. This is used for structuring the topology and the calculation of layup coordinates.
+### 7. Install the intervaltree package
+	This is used for structuring the topology and the calculation of layup coordinates.
     ```
     $ conda install -c conda-forge intervaltree
     ```
 
-### 8. Install the shapely package. This is used for the discretization and approximation of offset curves during the topology generatio
+### 8. Install the shapely package
+	This is used for the discretization and approximation of offset curves during the topology generatio
     ```
     $ conda install -c conda-forge shapely
     ```
 
-### 9. Install the triangle package. This is used for the unstructured triangulation of the cavities and balance weight materials during the meshing process:
+### 9. Install the triangle package
+	This is used for the unstructured triangulation of the cavities and balance weight materials during the meshing process:
     ```
     $ pip install triangle
     ```
