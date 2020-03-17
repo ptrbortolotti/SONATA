@@ -26,14 +26,14 @@ $ pip install .
 >>> job.blade_gen_section()
 ```
 
-Plot the Mesh of Cross-section
+### Plot the Mesh of Cross-section
 ```
 >>> job.blade_plot_sections()
 ```
 <img src="docs/img/2dmesh.png" align="center"  width="500">
 
 
-Show Results in the 3D-Viewer
+### Show Results in the 3D-Viewer
 ```
 >>>job.blade_post_3dtopo(flag_lft = True, flag_topo = True, flag_mesh = False)
 ```
