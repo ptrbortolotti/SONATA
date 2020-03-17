@@ -67,6 +67,17 @@ The following example of the CBM method cbm_run_vabs illustrates the idea:
         '''
 ```
 
+## Useful References:
+* [Numpydoc docstring guide](https://numpydoc.readthedocs.io/)
+
+* [PythonOCC](http://www.pythonocc.org/)
+* [PythonOCC API Documentation](http://api.pythonocc.org/)
+* [OpenCascadeTechnology Documentation](https://www.opencascade.com/doc/occt-6.9.1/refman/html/index.html)
+
+* [openMDAO](http://openmdao.org/)
+* [OpenMDAO Documentation](http://openmdao.org/twodocs/versions/latest/)
+
+* [Dymoresolutions User's Manual](http://www.dymoresolutions.com/UsersManual/UsersManual.html)
 
 
 

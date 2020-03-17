@@ -31,7 +31,6 @@ license
 *.pkl
 *.vab*
 #*.pdf
-*.png
 *.jpeg
 *.jpg
 #*.dat

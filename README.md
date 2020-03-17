@@ -26,23 +26,23 @@ $ pip install .
 >>> job.blade_gen_section()
 ```
 
+Plot the Mesh of Cross-section
+```
+>>> job.blade_plot_sections()
+```
+<img src="docs/img/2dmesh.png" align="center"  width="500">
 
 
+Show Results in the 3D-Viewer
+```
+>>>job.blade_post_3dtopo(flag_lft = True, flag_topo = True, flag_mesh = False)
+```
+<img src="docs/img/post_3dtopo.png" align="center"  width="500">
 
+[getting-started](docs/getting_started.md)
 
 ## Developers - Guide
-
 please read the [developers-guide](docs/developer-guide.md)
-
-* [PythonOCC](http://www.pythonocc.org/)
-* [openMDAO](http://openmdao.org/)
-
-* [OpenCascadeTechnology Documentation](https://www.opencascade.com/doc/occt-6.9.1/refman/html/index.html)
-* [PythonOCC API Documentation](http://api.pythonocc.org/)
-* [OpenMDAO Documentation](http://openmdao.org/twodocs/versions/latest/)
-* [Dymoresolutions User's Manual](http://www.dymoresolutions.com/UsersManual/UsersManual.html)
-* [Numpydoc docstring guide](https://numpydoc.readthedocs.io/)
-
 
 ## Publications:
 

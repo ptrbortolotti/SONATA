@@ -31,9 +31,10 @@ How to install OpenMPI, mpi4py, PETSc and petsc4py for use with OpenMDAO and SON
       ```
 
 
-### 3. Install an up-to-date anaconda python=3.7 distribution
+### 3. Install an up-to-date anaconda python>=3.7 distribution
 
-### 4. Create a sonata environment with the full basic anaconda modules and activate it:
+### 4. Create a conda environment.
+	with the full basic anaconda modules and activate it
     ```
     $ conda create -n sonata anaconda
     $ source activate sonata
