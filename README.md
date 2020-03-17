@@ -8,8 +8,7 @@ The herein presented definition of the rotor blade topology is deliberately asso
 Thus, manufacturability is inherent from the geometric layup definition. Using orthogonal projection with corner-style differentiation the cross-section is discretized and processed by the Variational Asymptotic Beam Sectional Analysis (VABS) afterwards. [more](docs/intro.md)
 
 ## Installation
-To use the full functionality of SONATA a bunch of installations. Please look [here](docs/installation.md). 
-SONATA is developed to work with a python version >=3.6.
+To use the full functionality of SONATA a bunch of dependecies are needed. Please look [here](docs/installation.md) for detailed instructions.
 
 ```
 $ git clone https://gitlab.lrz.de/gu32kij/SONATA.git
@@ -17,14 +16,18 @@ $ cd SONATA
 $ pip install .
 ```
 
+
 ## Usage
 
 ```
-from SONATA.classBlade import Blade
+>>> from SONATA.classBlade import Blade
 
-job = Blade(filename='merit.yml')
-job.blade_gen_section()
+>>> job = Blade(filename='merit.yml')
+>>> job.blade_gen_section()
 ```
+
+
+
 
 
 ## Developers - Guide
