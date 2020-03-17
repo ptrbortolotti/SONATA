@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import numpy as np
 
 from SONATA.classBlade import Blade
 from SONATA.classAirfoil import Airfoil
 from SONATA.classMaterial import read_IEA37_materials
-from Pymore.app.marc_fanplot import frequency_analysis
+#from Pymore.app.marc_fanplot import frequency_analysis
 
-job = Blade(filename='../jobs/MERIT/blade_config.yml')
+job = Blade(filename='UH-60A/UH-60A.yml')
 
 job.blade_gen_section(mesh_flag = True, split_quads=False)
 
