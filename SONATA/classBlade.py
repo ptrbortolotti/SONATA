@@ -158,7 +158,24 @@ class Blade(Component):
     
     def _read_ref_axes(self, yml_ra):
         """
+        reads and determines interpolates function for the reference axis of 
+        the blade
         
+        Parameters
+        ----------
+        yml_ra : dict
+            yaml style dict data describes the referenceaxis with non-dim
+            grid stations and x,y,z values
+
+        Returns
+        -------
+        BSplineLst : list of OCC.GeomBSplines
+            DESCRIPTION.
+        f_ra : function
+            BSplineLst interpolation function
+        tmp_ra : np.ndarray
+            DESCRIPTION.
+
         """
         tmp_ra = {} 
         tmp_ra['x'] = np.asarray((yml_ra.get('x').get('grid'),yml_ra.get('x').get('values'))).T
@@ -184,6 +201,17 @@ class Blade(Component):
     def _get_local_Ax2(self, x):
         """
         
+
+        Parameters
+        ----------
+        x : float
+            non-dimensional grid location
+
+        Returns
+        -------
+        local_Ax2 : OCC.gp_Ax2
+            return the gp_AX2 coordinatesystem
+
         """
         #interpolate blade_ref_axis
         res, resCoords = self.f_beam_ref_axis.interpolate(x)
@@ -379,19 +407,52 @@ class Blade(Component):
     
     @property
     def blade_matrix(self):
-        """ getter method for the property blade_matrix to retrive the full
-        information set of the class in one reduced array"""
+        """
+         getter method for the property blade_matrix to retrive the full
+        information set of the class in one reduced array
+
+        Returns
+        -------
+        np.ndarray
+            blade matrix of bl_ra, chord, twist, pa, 
+
+        """
         return np.column_stack((self.blade_ref_axis, self.chord[:,1], self.twist[:,1], self.pitch_axis[:,1]))
 
     @property
     def x(self):
-        """ getter method for the property grid to retrive only the 
-        nondimensional grid values """
+        """
+        getter method for the property grid to retrive only the 
+        nondimensional grid values
+
+        Returns
+        -------
+        float
+            non dimensional grid value (x)
+
+        """
         return self.blade_ref_axis[:,0]
 
     def blade_gen_section(self, topo_flag=True, mesh_flag=True, **kwargs):
         """
-        generates and meshes all sections of the blade
+        generates and meshes all cross-sections of the blade
+
+        Parameters
+        ----------
+        topo_flag : bool, optional
+            If this flag is true the topology of each cross-section is 
+            generated. The default is True.
+        mesh_flag : bool, optional
+            IF this flag is set true, the discretization of each cross-section 
+            is generated if a topology is generated beforhand. 
+            The default is True.
+        **kwargs : TYPE
+            keyword arguments can be passed down to the cbm_gen_mesh function
+
+        Returns
+        -------
+        None.
+
         """
         for (x, cs) in self.sections:
             if topo_flag:
@@ -675,6 +736,11 @@ class Blade(Component):
     def blade_plot_attributes(self):
         """
         plot the coordinates, chord, twist and pitch axis location of the blade
+
+        Returns
+        -------
+        None.
+
         """
         fig, ax = plt.subplots(3,2)
         fig.suptitle(self.name, fontsize=16)
@@ -710,16 +776,36 @@ class Blade(Component):
     def blade_plot_beam_props(self, **kwargs):
         """
         plots the beam properties of the blade
-        
-        self.beam_properties()
+
+        Parameters
+        ----------
+        **kwargs : TYPE
+            keyword arguments can be passed down to the plot such as 
+            sigma=None, ref=None, x_offset = 0, description = True
+
+        Returns
+        -------
+        None.
+
         """
         plot_beam_properties(self.blade_exp_beam_props(), **kwargs)
         
     
     def blade_plot_sections(self, **kwargs):
         """
-        plots the different sections of the blade
-        """      
+        plots the cross-sections of the blade with matplotlib 
+
+        Parameters
+        ----------
+        **kwargs : TYPE
+            multiple keyword arguments can be passed down to the 
+            cbm_post_2dmesh method. 
+
+        Returns
+        -------
+        None.
+
+        """
         for (x,cs) in self.sections:
             string = 'Blade: '+ str(self.name) + '; Section : '+str(x)
             cs.cbm_post_2dmesh(title=string, **kwargs)
