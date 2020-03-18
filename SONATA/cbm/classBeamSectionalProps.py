@@ -5,17 +5,24 @@ Created on Wed Feb 13 13:59:15 2019
 
 @author: gu32kij
 """
-import numpy as np
-from io import StringIO 
+# Core Library modules
 import os
+from io import StringIO
 
-if __name__ == '__main__':
-    os.chdir('../..')
+# Third party modules
+import numpy as np
 
+# First party modules
+from SONATA.cbm.cbm_utl import trsf_coords, trsf_sixbysix
 from SONATA.cbm.fileIO.readinput import read_FLOATrowSTR
-from SONATA.cbm.cbm_utl import trsf_sixbysix, trsf_coords
-from SONATA.vabs.vabs_utl import transfer_matrix_unitconvertion, read_VABS_Results, \
-                                grab_str_segment, read_PIA
+from SONATA.vabs.vabs_utl import (
+    grab_str_segment, read_PIA, read_VABS_Results,
+    transfer_matrix_unitconvertion,)
+
+if __name__ == "__main__":
+    os.chdir("../..")
+
+
 
 class BeamSectionalProps(object):
     """
@@ -123,11 +130,9 @@ class BeamSectionalProps(object):
     - Implement function to rotate the Vlasov Stiffness matrix and the Trapez 
         Effect related terms
     - Make one unit convertion method that converts the complete instance
-    """    
-    
-    __slots__ = ('TS', 'MM', 'Xg', 'Xt', 'Xs', 'PIA', 'VS', 'Ag', \
-                 'Bk', 'Ck', 'Dk', 'fname', 'ELE', 'U')
-    
+    """
+
+    __slots__ = ("TS", "MM", "Xg", "Xt", "Xs", "PIA", "VS", "Ag", "Bk", "Ck", "Dk", "fname", "ELE", "U")
 
     def __init__(self, fname=None):
         self.TS = None
@@ -147,60 +152,58 @@ class BeamSectionalProps(object):
 
     @property
     def m00(self):
-        return self.MM[0,0]
-    
+        return self.MM[0, 0]
+
     @property
     def m11(self):
-        return self.MM[3,3]
-    
+        return self.MM[3, 3]
+
     @property
     def m22(self):
-        return self.MM[4,4]
-    
+        return self.MM[4, 4]
+
     @property
     def m33(self):
-        return self.MM[5,5]
-    
+        return self.MM[5, 5]
+
     @property
     def m23(self):
-        return -self.MM[4,5]
-    
+        return -self.MM[4, 5]
+
     @property
     def Xm(self):
-        return np.array([-self.MM[0,5]/self.m00, self.MM[0,4]/self.m00])
-    
+        return np.array([-self.MM[0, 5] / self.m00, self.MM[0, 4] / self.m00])
+
     @property
     def rg(self):
-        return np.sqrt(self.m11/self.m00)
-    
+        return np.sqrt(self.m11 / self.m00)
+
     @property
     def MMatMC(self):
         mask = np.zeros(self.MM.shape, dtype=bool)
         np.fill_diagonal(mask, True)
-        mask[4,5] = True
-        mask[5,4] = True
-        return self.MM*mask
-    
-#    @property
-#    def CS(self):
-#        tmp = np.delete(self.TS,[1,2],axis=0)
-#        return np.delete(tmp,[1,2],axis=1)
+        mask[4, 5] = True
+        mask[5, 4] = True
+        return self.MM * mask
+
+    #    @property
+    #    def CS(self):
+    #        tmp = np.delete(self.TS,[1,2],axis=0)
+    #        return np.delete(tmp,[1,2],axis=1)
 
     @property
     def TF(self):
         return np.linalg.inv(self.TS)
 
-#    @property
-#    def CF(self):
-#        return np.linalg.inv(self.CS)
-    
+    #    @property
+    #    def CF(self):
+    #        return np.linalg.inv(self.CS)
+
     @property
     def VF(self):
         return np.linalg.inv(self.VS)
-    
 
-    
-    def read_vabs_K(self, fname):    
+    def read_vabs_K(self, fname):
         """
         reads the vabs .K output file
         
@@ -209,116 +212,113 @@ class BeamSectionalProps(object):
         fname : str
             filename (incl. filepath) to the vabs .K output file
         """
-    
-        a = ''
+
+        a = ""
         with open(fname) as f:
             for line in f:
-                line = line.partition('#')[0]
+                line = line.partition("#")[0]
                 line = line.rstrip()
-                a += line 
-                a += '\n'
-             
-        STR = ''.join([s for s in a.strip().splitlines(True) if s.strip("\r\n").strip()])
-    
-        i_MM = STR.find('The 6X6 Mass Matrix')
-        i_MC = STR.find('The Mass Center of the Cross Section')
-        i_MMatMC = STR.find('The 6X6 Mass Matrix at the Mass Center')   
-        i_MP = STR.find('The Mass Properties with respect to Principal Inertial Axes')
-        i_GC = STR.find('The Geometric Center of the Cross Section')
-        i_CS = STR.find('Classical Stiffness Matrix (1-extension; 2-twist; 3,4-bending)')
-        i_CF = STR.find('Classical Flexibility Matrix (1-extension; 2-twist; 3,4-bending)')
-        i_NA = STR.find('The Neutral Axes (or Tension Center) of the Cross Section')
-        i_TS = STR.find('Timoshenko Stiffness Matrix (1-extension; 2,3-shear, 4-twist; 5,6-bending)')
-        i_TF =STR.find('Timoshenko Flexibility Matrix (1-extension; 2,3-shear, 4-twist; 5,6-bending)')
-        i_GSC = STR.find('The Generalized Shear Center of the Cross Section in the User Coordinate System')        
-        i_VS = STR.find('Vlasov Stiffness Matrix (1-extension; 2-twist; 3,4-bending; 5-twist rate)')
-        i_VF = STR.find('Vlasov Flexibility Matrix (1-extension; 2-twist; 3,4-bending; 5-twist rate)'
-                        )
-        # Trapeze Effects Related Matrices
-        i_Ag = STR.find('Ag1--Ag1--Ag1--Ag1')
-        i_Bk = STR.find('Bk1--Bk1--Bk1--Bk1')
-        i_Ck = STR.find('Ck2--Ck2--Ck2--Ck2')
-        i_Dk = STR.find('Dk3--Dk3--Dk3--Dk3')
-        
-        splitpoints = [i_MM,i_MC,i_MMatMC,i_MP,i_GC,i_CS,i_CF,i_NA,i_TS,i_TF,i_GSC,i_VS,i_VF,i_Ag,i_Bk,i_Ck,i_Dk]
-        splitpoints.sort()
-                
-        MM = grab_str_segment(STR,i_MM,splitpoints)
-        #MC = grab_str_segment(STR,i_MC,splitpoints)
-        #MMatMC = grab_str_segment(STR,i_MMatMC,splitpoints)
-        MP = grab_str_segment(STR,i_MP,splitpoints)
-        GC = grab_str_segment(STR,i_GC,splitpoints)
-        #CS = grab_str_segment(STR,i_CS,splitpoints)
-        #CF = grab_str_segment(STR,i_CF,splitpoints)
-        NA = grab_str_segment(STR,i_NA,splitpoints)
-        TS = grab_str_segment(STR,i_TS,splitpoints)
-        #TF = grab_str_segment(STR,i_TF,splitpoints)
-        GSC = grab_str_segment(STR,i_GSC,splitpoints)
-        VS = grab_str_segment(STR,i_VS,splitpoints)
-        #VF = grab_str_segment(STR,i_VF,splitpoints)
-        Ag = grab_str_segment(STR,i_Ag,splitpoints)
-        Bk = grab_str_segment(STR,i_Bk,splitpoints)
-        Ck = grab_str_segment(STR,i_Ck,splitpoints)
-        Dk = grab_str_segment(STR,i_Dk,splitpoints)
-        
-        #The 6X6 Mass Matrix:
-        self.MM = np.loadtxt(StringIO(MM),skiprows=2)
-               
-        #The 6X6 Mass Matrix at the Mass Center:
-#        try:
-#            self.MMatMC = np.loadtxt(StringIO(MMatMC),skiprows=2)
-#        except:
-#            self.MMatMC = None
-            
-        try:
-            self.PIA = read_PIA(MP, 'The Principal Inertial Axes Rotated from User Coordinate System by')
-        except:
-            if  'The user coordinate axes are the principal inertial axes.' in MP:
-                self.PIA = float(0)
-        
-        self.Xg = np.array([read_FLOATrowSTR(GC,'Xg2'),read_FLOATrowSTR(GC,'Xg3')])
-        self.Xt = np.array([read_FLOATrowSTR(NA,'Xt2'),read_FLOATrowSTR(NA,'Xt3')])
+                a += line
+                a += "\n"
 
-        #Timoshenko Stiffness and Flexibility Matrix (1-extension; 2,3-shear, 4-twist; 5,6-bending)
+        STR = "".join([s for s in a.strip().splitlines(True) if s.strip("\r\n").strip()])
+
+        i_MM = STR.find("The 6X6 Mass Matrix")
+        i_MC = STR.find("The Mass Center of the Cross Section")
+        i_MMatMC = STR.find("The 6X6 Mass Matrix at the Mass Center")
+        i_MP = STR.find("The Mass Properties with respect to Principal Inertial Axes")
+        i_GC = STR.find("The Geometric Center of the Cross Section")
+        i_CS = STR.find("Classical Stiffness Matrix (1-extension; 2-twist; 3,4-bending)")
+        i_CF = STR.find("Classical Flexibility Matrix (1-extension; 2-twist; 3,4-bending)")
+        i_NA = STR.find("The Neutral Axes (or Tension Center) of the Cross Section")
+        i_TS = STR.find("Timoshenko Stiffness Matrix (1-extension; 2,3-shear, 4-twist; 5,6-bending)")
+        i_TF = STR.find("Timoshenko Flexibility Matrix (1-extension; 2,3-shear, 4-twist; 5,6-bending)")
+        i_GSC = STR.find("The Generalized Shear Center of the Cross Section in the User Coordinate System")
+        i_VS = STR.find("Vlasov Stiffness Matrix (1-extension; 2-twist; 3,4-bending; 5-twist rate)")
+        i_VF = STR.find("Vlasov Flexibility Matrix (1-extension; 2-twist; 3,4-bending; 5-twist rate)")
+        # Trapeze Effects Related Matrices
+        i_Ag = STR.find("Ag1--Ag1--Ag1--Ag1")
+        i_Bk = STR.find("Bk1--Bk1--Bk1--Bk1")
+        i_Ck = STR.find("Ck2--Ck2--Ck2--Ck2")
+        i_Dk = STR.find("Dk3--Dk3--Dk3--Dk3")
+
+        splitpoints = [i_MM, i_MC, i_MMatMC, i_MP, i_GC, i_CS, i_CF, i_NA, i_TS, i_TF, i_GSC, i_VS, i_VF, i_Ag, i_Bk, i_Ck, i_Dk]
+        splitpoints.sort()
+
+        MM = grab_str_segment(STR, i_MM, splitpoints)
+        # MC = grab_str_segment(STR,i_MC,splitpoints)
+        # MMatMC = grab_str_segment(STR,i_MMatMC,splitpoints)
+        MP = grab_str_segment(STR, i_MP, splitpoints)
+        GC = grab_str_segment(STR, i_GC, splitpoints)
+        # CS = grab_str_segment(STR,i_CS,splitpoints)
+        # CF = grab_str_segment(STR,i_CF,splitpoints)
+        NA = grab_str_segment(STR, i_NA, splitpoints)
+        TS = grab_str_segment(STR, i_TS, splitpoints)
+        # TF = grab_str_segment(STR,i_TF,splitpoints)
+        GSC = grab_str_segment(STR, i_GSC, splitpoints)
+        VS = grab_str_segment(STR, i_VS, splitpoints)
+        # VF = grab_str_segment(STR,i_VF,splitpoints)
+        Ag = grab_str_segment(STR, i_Ag, splitpoints)
+        Bk = grab_str_segment(STR, i_Bk, splitpoints)
+        Ck = grab_str_segment(STR, i_Ck, splitpoints)
+        Dk = grab_str_segment(STR, i_Dk, splitpoints)
+
+        # The 6X6 Mass Matrix:
+        self.MM = np.loadtxt(StringIO(MM), skiprows=2)
+
+        # The 6X6 Mass Matrix at the Mass Center:
+        #        try:
+        #            self.MMatMC = np.loadtxt(StringIO(MMatMC),skiprows=2)
+        #        except:
+        #            self.MMatMC = None
+
         try:
-            self.TS = np.loadtxt(StringIO(TS),skiprows=2)
+            self.PIA = read_PIA(MP, "The Principal Inertial Axes Rotated from User Coordinate System by")
         except:
-            self.TS =None
-                        
-        #The Generalized Shear Center of the Cross Section in the User Coordinate System    
+            if "The user coordinate axes are the principal inertial axes." in MP:
+                self.PIA = float(0)
+
+        self.Xg = np.array([read_FLOATrowSTR(GC, "Xg2"), read_FLOATrowSTR(GC, "Xg3")])
+        self.Xt = np.array([read_FLOATrowSTR(NA, "Xt2"), read_FLOATrowSTR(NA, "Xt3")])
+
+        # Timoshenko Stiffness and Flexibility Matrix (1-extension; 2,3-shear, 4-twist; 5,6-bending)
         try:
-            self.Xs = np.array([read_FLOATrowSTR(GSC,'Xs2'),read_FLOATrowSTR(GSC,'Xs3')])
+            self.TS = np.loadtxt(StringIO(TS), skiprows=2)
+        except:
+            self.TS = None
+
+        # The Generalized Shear Center of the Cross Section in the User Coordinate System
+        try:
+            self.Xs = np.array([read_FLOATrowSTR(GSC, "Xs2"), read_FLOATrowSTR(GSC, "Xs3")])
         except:
             self.Xs = None
 
-        #Vlasov Stiffness and Flexibility Matrix (1-extension; 2-twist; 3,4-bending; 5-twist rate)
+        # Vlasov Stiffness and Flexibility Matrix (1-extension; 2-twist; 3,4-bending; 5-twist rate)
         try:
-            self.VS = np.loadtxt(StringIO(VS),skiprows=2)
+            self.VS = np.loadtxt(StringIO(VS), skiprows=2)
         except:
             self.VS = None
-        
-        #Trapeze Effects Related Matrices
-        try:    
-            self.Ag = np.loadtxt(StringIO(Ag),skiprows=2)
-            self.Bk = np.loadtxt(StringIO(Bk),skiprows=2)
-            self.Ck = np.loadtxt(StringIO(Ck),skiprows=2)
-            self.Dk = np.loadtxt(StringIO(Dk),skiprows=2)
+
+        # Trapeze Effects Related Matrices
+        try:
+            self.Ag = np.loadtxt(StringIO(Ag), skiprows=2)
+            self.Bk = np.loadtxt(StringIO(Bk), skiprows=2)
+            self.Ck = np.loadtxt(StringIO(Ck), skiprows=2)
+            self.Dk = np.loadtxt(StringIO(Dk), skiprows=2)
         except:
-            self.Ag=None
-            self.Bk=None
-            self.Ck=None
-            self.Dk=None
-            
+            self.Ag = None
+            self.Bk = None
+            self.Ck = None
+            self.Dk = None
 
     def read_all_VABS_Results(self):
         """
         reads the strains, stresses and displacements from VABS result files
         """
-        self.ELE = read_VABS_Results(self.fname.replace('.K','.ELE'))
-        self.U = read_VABS_Results(self.fname.replace('.K','.U'))
+        self.ELE = read_VABS_Results(self.fname.replace(".K", ".ELE"))
+        self.U = read_VABS_Results(self.fname.replace(".K", ".U"))
 
-    
-    def MM_convert_units(self,in_dct = {'mass': 'kg', 'length': 'm'},out_dct = {'mass':'kg', 'length':'m'}):
+    def MM_convert_units(self, in_dct={"mass": "kg", "length": "m"}, out_dct={"mass": "kg", "length": "m"}):
         """
         method to convert units of the 6x6 Mass Matrix
         
@@ -335,18 +335,21 @@ class BeamSectionalProps(object):
         MM : np.array
             the converted 6x6 Mass Matrix
         """
-        
-        MMunits = np.array([['mass/length','','','','mass','mass'],
-                           ['','mass/length','', 'mass','',''],
-                           ['','','mass/length', 'mass','',''],
-                           ['','mass','mass','mass*length','',''],
-                           ['mass','','','','mass*length','mass*length'],
-                           ['mass','','','','mass*length','mass*length']])
-        MM_TM = transfer_matrix_unitconvertion(MMunits,in_dct,out_dct)
+
+        MMunits = np.array(
+            [
+                ["mass/length", "", "", "", "mass", "mass"],
+                ["", "mass/length", "", "mass", "", ""],
+                ["", "", "mass/length", "mass", "", ""],
+                ["", "mass", "mass", "mass*length", "", ""],
+                ["mass", "", "", "", "mass*length", "mass*length"],
+                ["mass", "", "", "", "mass*length", "mass*length"],
+            ]
+        )
+        MM_TM = transfer_matrix_unitconvertion(MMunits, in_dct, out_dct)
         return np.multiply(self.MM, MM_TM)
-        
-    
-    def TS_convert_units(self,in_dct = {'force': 'N', 'length': 'm'}, out_dct = {'force': 'N', 'length': 'm'}):
+
+    def TS_convert_units(self, in_dct={"force": "N", "length": "m"}, out_dct={"force": "N", "length": "m"}):
         """
         method to convert units of the 6x6 Timoshenko Stiffness Matrix
         
@@ -364,17 +367,20 @@ class BeamSectionalProps(object):
             the converted 6x6 Timoshenko Stiffness Matrix
         
         """
-        
-        TSunits = np.array([['force','force','force','force*length','force*length','force*length'],
-                           ['force','force','force','force*length','force*length','force*length'],
-                           ['force','force','force','force*length','force*length','force*length'],
-                           ['force*length','force*length','force*length','force*length*length','force*length*length','force*length*length'],
-                           ['force*length','force*length','force*length','force*length*length','force*length*length','force*length*length'],
-                           ['force*length','force*length','force*length','force*length*length','force*length*length','force*length*length']])
-    
-        TS_TM = transfer_matrix_unitconvertion(TSunits,in_dct,out_dct)
-        return np.multiply(self.TS, TS_TM)
 
+        TSunits = np.array(
+            [
+                ["force", "force", "force", "force*length", "force*length", "force*length"],
+                ["force", "force", "force", "force*length", "force*length", "force*length"],
+                ["force", "force", "force", "force*length", "force*length", "force*length"],
+                ["force*length", "force*length", "force*length", "force*length*length", "force*length*length", "force*length*length"],
+                ["force*length", "force*length", "force*length", "force*length*length", "force*length*length", "force*length*length"],
+                ["force*length", "force*length", "force*length", "force*length*length", "force*length*length", "force*length*length"],
+            ]
+        )
+
+        TS_TM = transfer_matrix_unitconvertion(TSunits, in_dct, out_dct)
+        return np.multiply(self.TS, TS_TM)
 
     def rotate(self, Theta=0, copy=True):
         """
@@ -394,48 +400,47 @@ class BeamSectionalProps(object):
         tmp : BeamSectionalProps
             copy and rotated VABSSectionalProps of self,
         """
-        
-        #defuine rotation matrix
-        T = np.array([[1, 0 ,0],
-                      [0, np.cos(Theta), -np.sin(Theta)],
-                      [0, np.sin(Theta), np.cos(Theta)]])
-        
-        #transform Stiffness and Mass Matrix
+
+        # defuine rotation matrix
+        T = np.array([[1, 0, 0], [0, np.cos(Theta), -np.sin(Theta)], [0, np.sin(Theta), np.cos(Theta)]])
+
+        # transform Stiffness and Mass Matrix
         if copy:
             tmp = BeamSectionalProps()
         else:
-            tmp = self 
+            tmp = self
 
-        tmp.TS = trsf_sixbysix(self.TS,T)
-        tmp.MM = trsf_sixbysix(self.MM,T)
-        
-        #transform coordinates
+        tmp.TS = trsf_sixbysix(self.TS, T)
+        tmp.MM = trsf_sixbysix(self.MM, T)
+
+        # transform coordinates
         try:
-            tmp.Xg = trsf_coords(np.hstack((np.zeros((1,)),self.Xg)),T)
-            tmp.Xt = trsf_coords(np.hstack((np.zeros((1,)),self.Xt)),T)
-            tmp.Xs = trsf_coords(np.hstack((np.zeros((1,)),self.Xs)),T)
+            tmp.Xg = trsf_coords(np.hstack((np.zeros((1,)), self.Xg)), T)
+            tmp.Xt = trsf_coords(np.hstack((np.zeros((1,)), self.Xt)), T)
+            tmp.Xs = trsf_coords(np.hstack((np.zeros((1,)), self.Xs)), T)
         except:
             pass
-        
-        #TODO: transform PIA
+
+        # TODO: transform PIA
         tmp.PIA = None
-        
-        #TODO: transform Vlasov Stiffness Matrix and Trapez Effect related Matrices
+
+        # TODO: transform Vlasov Stiffness Matrix and Trapez Effect related Matrices
         tmp.VS = None
         tmp.Ag = None
         tmp.Bk = None
         tmp.Ck = None
         tmp.Dk = None
-        
+
         if copy:
             return tmp
         else:
             return None
-    
-#======================================================
+
+
+# ======================================================
 #       MAIN
-#======================================================       
-if __name__ == '__main__':
-    filename = 'cbm_noname_2019-04-02_145252576501.vab.K'
+# ======================================================
+if __name__ == "__main__":
+    filename = "cbm_noname_2019-04-02_145252576501.vab.K"
     bp1 = BeamSectionalProps(filename)
-    bp2 = bp1.rotate(np.pi/8, copy=True)
+    bp2 = bp1.rotate(np.pi / 8, copy=True)

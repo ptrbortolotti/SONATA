@@ -6,12 +6,12 @@ Hides the DEBUG MEssages!
 @author: gu32kij
 """
 
-import logging    
-        
-#matplotlib logger
-mpl_logger = logging.getLogger('matplotlib')
-mpl_logger.setLevel(logging.WARNING)
-  
-shp_logger = logging.getLogger('shapely')
-shp_logger.setLevel(logging.WARNING)
+# Core Library modules
+import logging
 
+# matplotlib logger
+mpl_logger = logging.getLogger("matplotlib")
+mpl_logger.setLevel(logging.WARNING)
+
+shp_logger = logging.getLogger("shapely")
+shp_logger.setLevel(logging.WARNING)

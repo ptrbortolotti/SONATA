@@ -1,4 +1,5 @@
 
+# Third party modules
 import numpy as np
 
 try
@@ -105,4 +106,3 @@ def build_dolfin_mesh(cbm_mesh, cbm_nodes, cbm_materials):
         fiber_orientations[c.id-1] = c.theta_3
    
     return mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE
-

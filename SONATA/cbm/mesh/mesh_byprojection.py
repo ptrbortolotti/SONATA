@@ -4,25 +4,28 @@ Created on Tue Mar 28 09:58:14 2017
 
 @author: TPflumm
 """
-import numpy as np
-import math
+# Core Library modules
 import itertools
+import math
 
-from OCC.Core.gp import gp_Vec2d,gp_Pnt2d,gp_Pnt,gp_Vec
-from OCC.Core.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
+# Third party modules
+import numpy as np
+from OCC.Core.Geom2dAPI import (Geom2dAPI_PointsToBSpline,
+                                Geom2dAPI_ProjectPointOnCurve,)
+from OCC.Core.gp import gp_Pnt, gp_Pnt2d, gp_Vec, gp_Vec2d
 from OCC.Display.SimpleGui import init_display
-from OCC.Core.Geom2dAPI import Geom2dAPI_PointsToBSpline
 
-
-from SONATA.cbm.mesh.node import Node
-from SONATA.cbm.mesh.cell import Cell
+# First party modules
 from SONATA.cbm.display.display_utils import display_custome_shape
-from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length, find_BSplineLst_coordinate, \
-                                        ProjectPointOnBSplineLst, get_BSplineLst_Pnt2d, intersect_BSplineLst_with_BSpline
+from SONATA.cbm.mesh.cell import Cell
+from SONATA.cbm.mesh.node import Node
+from SONATA.cbm.topo.BSplineLst_utils import (
+    ProjectPointOnBSplineLst, find_BSplineLst_coordinate, get_BSplineLst_length,
+    get_BSplineLst_Pnt2d, intersect_BSplineLst_with_BSpline,)
 from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
 
 
-def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, layer_thickness, tol=1e-2, crit_angle = 95, LayerID = 0, refL = 1.0, **kw):
+def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst, layer_thickness, tol=1e-2, crit_angle=95, LayerID=0, refL=1.0, **kw):
     """
     *function to mesh the SONATA topologies by projecting nodes onto the 
     generated BSplineLists.   
@@ -48,487 +51,476 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes,b_BSplineLst, l
     TODO: * scale distance not only to layerthickenss but also to min_len.
             or adapt the distance individually for each node. 
     """
-    
-    #KWARGS:
-    if kw.get('display') !=  None:
-        display = kw.get('display')
 
-    #LayerID = 'T_' + a_nodes[0].parameters[0]
-    #TODO:
+    # KWARGS:
+    if kw.get("display") != None:
+        display = kw.get("display")
+
+    # LayerID = 'T_' + a_nodes[0].parameters[0]
+    # TODO:
     b_nodes = []
     cellLst = []
-    distance = (1+tol)*layer_thickness
-    flag_integrate_leftover_interior_nodes = False           
-               
-    #Is a_BSplineLst closed? 
+    distance = (1 + tol) * layer_thickness
+    flag_integrate_leftover_interior_nodes = False
+
+    # Is a_BSplineLst closed?
     closed_a = False
-    if a_BSplineLst[0].StartPoint().IsEqual(a_BSplineLst[-1].EndPoint(),1e-5):
+    if a_BSplineLst[0].StartPoint().IsEqual(a_BSplineLst[-1].EndPoint(), 1e-5):
         closed_a = True
 
-    #==================PROJECT POINTS ON LOWER BOUNDARY =======================            
+    # ==================PROJECT POINTS ON LOWER BOUNDARY =======================
     if closed_a == True:
         prj_nodes = a_nodes
     else:
         prj_nodes = a_nodes[1:-1]
-            
-    for i,node in enumerate(prj_nodes, start=1):
+
+    for i, node in enumerate(prj_nodes, start=1):
         Pnt2d = node.Pnt2d
         pPnts = []
         pPara = []
         pIdx = []
-        
-        for idx,item in enumerate(b_BSplineLst):
-            first =  item.FirstParameter()
+
+        for idx, item in enumerate(b_BSplineLst):
+            first = item.FirstParameter()
             last = item.LastParameter()
-            tol = 2e-6*refL
-            Umin = first-(last-first)*tol
-            Umax = last+(last-first)*tol
-            projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item,Umin,Umax)
-            #projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item)
-            
-            for j in range(1,projection.NbPoints()+1):
-                if projection.Distance(j)<=distance:
+            tol = 2e-6 * refL
+            Umin = first - (last - first) * tol
+            Umax = last + (last - first) * tol
+            projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d, item, Umin, Umax)
+            # projection = Geom2dAPI_ProjectPointOnCurve(Pnt2d,item)
+
+            for j in range(1, projection.NbPoints() + 1):
+                if projection.Distance(j) <= distance:
                     pPnts.append(projection.Point(j))
                     pPara.append(projection.Parameter(j))
                     pIdx.append(idx)
-                else: None   
-        
-        #display.DisplayShape(pPnts[0], color='GREEN')
-        
-        #==================making sure the pPnts are unique:
-        '''It happend that somehow the same points were found multiple times'''
-        unique_tol= 5e-5*refL
-        rm_idx=[]
+                else:
+                    None
+
+        # display.DisplayShape(pPnts[0], color='GREEN')
+
+        # ==================making sure the pPnts are unique:
+        """It happend that somehow the same points were found multiple times"""
+        unique_tol = 5e-5 * refL
+        rm_idx = []
         for a, b in itertools.combinations(enumerate(pPnts), 2):
-            if a[1].IsEqual(b[1],unique_tol):
+            if a[1].IsEqual(b[1], unique_tol):
                 rm_idx.append(a[0])
-        
+
         pPnts = [j for k, j in enumerate(pPnts) if k not in rm_idx]
         pPara = [j for k, j in enumerate(pPara) if k not in rm_idx]
-        pIdx = [j for k, j in enumerate(pIdx) if k not in rm_idx]  
-    
-            
-        #=========if 3 Points are found. Select the 2 points that create the larger angle.
+        pIdx = [j for k, j in enumerate(pIdx) if k not in rm_idx]
+
+        # =========if 3 Points are found. Select the 2 points that create the larger angle.
         if len(pPnts) == 3:
-            v0 = gp_Vec2d(Pnt2d,pPnts[0])
-            v1 = gp_Vec2d(Pnt2d,pPnts[1])
-            v2 = gp_Vec2d(Pnt2d,pPnts[2])
-            angle01 = abs(v0.Angle(v1)*180/np.pi)
-            angle02 = abs(v0.Angle(v2)*180/np.pi)
-            angle12 = abs(v1.Angle(v2)*180/np.pi)
-            aLst = [angle01,angle02,angle12]
+            v0 = gp_Vec2d(Pnt2d, pPnts[0])
+            v1 = gp_Vec2d(Pnt2d, pPnts[1])
+            v2 = gp_Vec2d(Pnt2d, pPnts[2])
+            angle01 = abs(v0.Angle(v1) * 180 / np.pi)
+            angle02 = abs(v0.Angle(v2) * 180 / np.pi)
+            angle12 = abs(v1.Angle(v2) * 180 / np.pi)
+            aLst = [angle01, angle02, angle12]
             pPnts.pop(aLst.index(max(aLst)))
             pPara.pop(aLst.index(max(aLst)))
             pIdx.pop(aLst.index(max(aLst)))
 
-            
-        #==================DETECT CORNERS====================================== 
-        if len(pPnts) == 0: 
-            print('ERROR:\t No Projection found for node,', node.id)
-#            for j in range(1,projection.NbPoints()+1):
-#                if projection.Distance(j)<=distance:
-#                    pPnts.append(projection.Point(j))
-#                    pPara.append(projection.Parameter(j))
-#                    pIdx.append(idx)
-#                else: 
-#                    print(projection.Distance(j), distance, node.Pnt2d.Coord())
-#                    print(Umin, Umax)
-                    
-        elif len(pPnts) == 1: 
-            b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))      
+        # ==================DETECT CORNERS======================================
+        if len(pPnts) == 0:
+            print("ERROR:\t No Projection found for node,", node.id)
+        #            for j in range(1,projection.NbPoints()+1):
+        #                if projection.Distance(j)<=distance:
+        #                    pPnts.append(projection.Point(j))
+        #                    pPara.append(projection.Parameter(j))
+        #                    pIdx.append(idx)
+        #                else:
+        #                    print(projection.Distance(j), distance, node.Pnt2d.Coord())
+        #                    print(Umin, Umax)
+
+        elif len(pPnts) == 1:
+            b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
 
         elif len(pPnts) == 2:
-            #=======================determine the angle of the potential corner 
-            v1 = gp_Vec2d(Pnt2d,pPnts[0])
-            v2 = gp_Vec2d(Pnt2d,pPnts[1])
-            angle = (180-abs(v1.Angle(v2)*180/np.pi))
+            # =======================determine the angle of the potential corner
+            v1 = gp_Vec2d(Pnt2d, pPnts[0])
+            v2 = gp_Vec2d(Pnt2d, pPnts[1])
+            angle = 180 - abs(v1.Angle(v2) * 180 / np.pi)
             vres = v1.Added(v2)
 
             if angle < crit_angle:
                 node.corner = True
-                
+
             if angle >= crit_angle:
                 node.corner = False
-            #print 'Node:', node.id, 'corner angle: ', angle 
-            
-            #=======================determine the corner character - regular_corner type:(Bool)
+            # print 'Node:', node.id, 'corner angle: ', angle
+
+            # =======================determine the corner character - regular_corner type:(Bool)
             node.regular_corner = True
-            vp0 = gp_Vec2d() 
+            vp0 = gp_Vec2d()
             vp1 = gp_Vec2d()
             p_tmp = gp_Pnt2d()
-            b_BSplineLst[pIdx[0]].D1(pPara[0],p_tmp,vp0)
-            b_BSplineLst[pIdx[1]].D1(pPara[1],p_tmp,vp1)
+            b_BSplineLst[pIdx[0]].D1(pPara[0], p_tmp, vp0)
+            b_BSplineLst[pIdx[1]].D1(pPara[1], p_tmp, vp1)
             dot0 = vres.Dot(vp0)
-            #dot1 = vres.Dot(vp1)
-            
-            if dot0<0:
+            # dot1 = vres.Dot(vp1)
+
+            if dot0 < 0:
                 node.regular_corner = False
-                z_BSplineLst = b_BSplineLst[pIdx[1]:] + b_BSplineLst[:pIdx[0]+1]
-            
-            elif dot0>0:
+                z_BSplineLst = b_BSplineLst[pIdx[1] :] + b_BSplineLst[: pIdx[0] + 1]
+
+            elif dot0 > 0:
                 node.regular_corner = True
-            
+
             else:
-                print('ERROR: cannot determine regular_corner because vres and v0 are orthogonal')
-            
-            #=======================determine the exterior corners on z_BsplineLst
-            #TODO: DETECT ALL EXTERIOR CORNERS WITHIN THAT INTERVAL pIdx[0],pPara[0],'|',pIdx[1], pPara[1]
-            #TODO: IF NO EXTERIOR CORNER IS FOUND USE BISECTOR!
-            #TODO: USE node.cornertype = 1,2,3,4 to detemine Shape of Elements
-            #TODO: THIS ALGORITHM DOESNT FIND ALL 
-            exterior_corners = [] 
+                print("ERROR: cannot determine regular_corner because vres and v0 are orthogonal")
+
+            # =======================determine the exterior corners on z_BsplineLst
+            # TODO: DETECT ALL EXTERIOR CORNERS WITHIN THAT INTERVAL pIdx[0],pPara[0],'|',pIdx[1], pPara[1]
+            # TODO: IF NO EXTERIOR CORNER IS FOUND USE BISECTOR!
+            # TODO: USE node.cornertype = 1,2,3,4 to detemine Shape of Elements
+            # TODO: THIS ALGORITHM DOESNT FIND ALL
+            exterior_corners = []
             exterior_corners_para = []
             aglTol = 5.0
             if node.regular_corner == True:
-                for j,item in enumerate(b_BSplineLst[pIdx[0]:pIdx[1]], start=pIdx[0]):
+                for j, item in enumerate(b_BSplineLst[pIdx[0] : pIdx[1]], start=pIdx[0]):
                     spline1 = item
-                    #print node, pIdx[0], pIdx[1]
-                    spline2 = b_BSplineLst[j+1]
-                    u1,p1,v1 = spline1.LastParameter(),gp_Pnt2d(),gp_Vec2d()
-                    u2,p2,v2  = spline2.FirstParameter(),gp_Pnt2d(),gp_Vec2d()
-                    spline1.D1(u1,p1,v1)
-                    spline2.D1(u2,p2,v2)
-                    
-                    Angle = abs(v1.Angle(v2))*180/np.pi
-                    if Angle>aglTol:
-                        exterior_corners.append(item.EndPoint())
-                        exterior_corners_para.append([LayerID,j,u1])  
-                        #display.DisplayShape(item.EndPoint(),color='WHITE')
+                    # print node, pIdx[0], pIdx[1]
+                    spline2 = b_BSplineLst[j + 1]
+                    u1, p1, v1 = spline1.LastParameter(), gp_Pnt2d(), gp_Vec2d()
+                    u2, p2, v2 = spline2.FirstParameter(), gp_Pnt2d(), gp_Vec2d()
+                    spline1.D1(u1, p1, v1)
+                    spline2.D1(u2, p2, v2)
 
-            else: 
-                for j,item in enumerate(z_BSplineLst[:-1]):
-                    spline1 = item
-                    spline2 = z_BSplineLst[j+1]
-                    u1,p1,v1 = spline1.LastParameter(),gp_Pnt2d(),gp_Vec2d()
-                    u2,p2,v2  = spline2.FirstParameter(),gp_Pnt2d(),gp_Vec2d()
-                    spline1.D1(u1,p1,v1)
-                    spline2.D1(u2,p2,v2)
-                    
-                    Angle = abs(v1.Angle(v2))*180/np.pi
-                    if Angle>aglTol:
+                    Angle = abs(v1.Angle(v2)) * 180 / np.pi
+                    if Angle > aglTol:
                         exterior_corners.append(item.EndPoint())
-                        if len(b_BSplineLst) > j+pIdx[1]:
-                            idx = j+pIdx[1]
-                        else: 
-                            idx = j+pIdx[1]-len(b_BSplineLst)
-                        exterior_corners_para.append([LayerID,idx,u1])  
-                        #display.DisplayShape(item.EndPoint(),color='WHITE')
-                
-    
-    
-            #=======================generate b_nodes===========================
-            #print node,'corner: ', node.corner, ', regular_corner = ',node.regular_corner, ',  Len:exterior_corners =',len(exterior_corners)
-            
-            
-            #===CORNERSTYLE 0====== 
-            if len(exterior_corners) == 0 and node.corner==False:
+                        exterior_corners_para.append([LayerID, j, u1])
+                        # display.DisplayShape(item.EndPoint(),color='WHITE')
+
+            else:
+                for j, item in enumerate(z_BSplineLst[:-1]):
+                    spline1 = item
+                    spline2 = z_BSplineLst[j + 1]
+                    u1, p1, v1 = spline1.LastParameter(), gp_Pnt2d(), gp_Vec2d()
+                    u2, p2, v2 = spline2.FirstParameter(), gp_Pnt2d(), gp_Vec2d()
+                    spline1.D1(u1, p1, v1)
+                    spline2.D1(u2, p2, v2)
+
+                    Angle = abs(v1.Angle(v2)) * 180 / np.pi
+                    if Angle > aglTol:
+                        exterior_corners.append(item.EndPoint())
+                        if len(b_BSplineLst) > j + pIdx[1]:
+                            idx = j + pIdx[1]
+                        else:
+                            idx = j + pIdx[1] - len(b_BSplineLst)
+                        exterior_corners_para.append([LayerID, idx, u1])
+                        # display.DisplayShape(item.EndPoint(),color='WHITE')
+
+            # =======================generate b_nodes===========================
+            # print node,'corner: ', node.corner, ', regular_corner = ',node.regular_corner, ',  Len:exterior_corners =',len(exterior_corners)
+
+            # ===CORNERSTYLE 0======
+            if len(exterior_corners) == 0 and node.corner == False:
                 node.cornerstyle = 0
-                #TODO: a more robust possibilit is to use a bisector vres               
+                # TODO: a more robust possibilit is to use a bisector vres
 
-                if pIdx[0] == pIdx[1]:#
-                    v = gp_Vec2d(pPnts[0],pPnts[1])
+                if pIdx[0] == pIdx[1]:  #
+                    v = gp_Vec2d(pPnts[0], pPnts[1])
                     cP = pPnts[0].Translated(v.Multiplied(0.5))
-                    p2 = ProjectPointOnBSplineLst(b_BSplineLst,cP,1)
+                    p2 = ProjectPointOnBSplineLst(b_BSplineLst, cP, 1)
                     newPnt = p2[0]
-                    newPara = [LayerID,p2[1],p2[2]]
-                    b_nodes.append(Node(newPnt,newPara))
-                    
-                elif node.regular_corner == False:
-                    print('WARNING: cornerstyle 0: this possibility has not been implemented yet.')
-                    b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
-                
-                else:
-                    if pPnts[0].IsEqual(pPnts[1],1e-7*refL):
-                        b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
-                    else:
-                        print('ERROR: cornerstyle 0: this possibility has not been implemented yet. pIdx[0] != pIdx[0]. Create Bisector and intersect with bsplinelist!')                     
-                    
-            #===CORNERSTYLE 1======     
-            elif len(exterior_corners) == 1 and node.corner==False:
-                node.cornerstyle = 1
-                #print('Node ID: ',node.id,', Len(exterior_corners):', len(exterior_corners))
-                b_nodes.append(Node(exterior_corners[0],exterior_corners_para[0]))
-            
+                    newPara = [LayerID, p2[1], p2[2]]
+                    b_nodes.append(Node(newPnt, newPara))
 
-            #===CORNERSTYLE 2======
-            elif len(exterior_corners) == 0 and node.corner==True:
+                elif node.regular_corner == False:
+                    print("WARNING: cornerstyle 0: this possibility has not been implemented yet.")
+                    b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
+
+                else:
+                    if pPnts[0].IsEqual(pPnts[1], 1e-7 * refL):
+                        b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
+                    else:
+                        print("ERROR: cornerstyle 0: this possibility has not been implemented yet. pIdx[0] != pIdx[0]. Create Bisector and intersect with bsplinelist!")
+
+            # ===CORNERSTYLE 1======
+            elif len(exterior_corners) == 1 and node.corner == False:
+                node.cornerstyle = 1
+                # print('Node ID: ',node.id,', Len(exterior_corners):', len(exterior_corners))
+                b_nodes.append(Node(exterior_corners[0], exterior_corners_para[0]))
+
+            # ===CORNERSTYLE 2======
+            elif len(exterior_corners) == 0 and node.corner == True:
                 node.cornerstyle = 2
-                v = gp_Vec2d(pPnts[0],pPnts[1])
+                v = gp_Vec2d(pPnts[0], pPnts[1])
                 mid_Pnt = pPnts[0].Translated(v.Multiplied(0.5))
-                v2 = gp_Vec2d(node.Pnt2d,mid_Pnt)
+                v2 = gp_Vec2d(node.Pnt2d, mid_Pnt)
                 v2.Normalize()
                 far_Pnt = node.Pnt2d.Translated(v2.Multiplied(10))
 
-                straigh_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([node.Pnt2d,far_Pnt])).Curve()
-                (iPnts, iPnts_Pnt2d) = intersect_BSplineLst_with_BSpline(b_BSplineLst,straigh_bspline)
+                straigh_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([node.Pnt2d, far_Pnt])).Curve()
+                (iPnts, iPnts_Pnt2d) = intersect_BSplineLst_with_BSpline(b_BSplineLst, straigh_bspline)
 
                 newPara = iPnts[0]
-                newPnt = iPnts_Pnt2d[0]  
+                newPnt = iPnts_Pnt2d[0]
 
                 if node.regular_corner:
-                    b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
-                    b_nodes.append(Node(newPnt,[LayerID,newPara[0],newPara[1]]))
-                    b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
+                    b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
+                    b_nodes.append(Node(newPnt, [LayerID, newPara[0], newPara[1]]))
+                    b_nodes.append(Node(pPnts[1], [LayerID, pIdx[1], pPara[1]]))
 
                 else:
-                    b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
-                    b_nodes.append(Node(newPnt,[LayerID,newPara[0],newPara[1]]))
-                    b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
-                    
-                    
-            #===CORNERSTYLE 3======        
-            elif len(exterior_corners) == 1 and node.corner==True:
+                    b_nodes.append(Node(pPnts[1], [LayerID, pIdx[1], pPara[1]]))
+                    b_nodes.append(Node(newPnt, [LayerID, newPara[0], newPara[1]]))
+                    b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
+
+            # ===CORNERSTYLE 3======
+            elif len(exterior_corners) == 1 and node.corner == True:
                 node.cornerstyle = 3
-                #print 'node.cornerstyle = 3 @', node 
+                # print 'node.cornerstyle = 3 @', node
                 if node.regular_corner == True:
-                    b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
-                    b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
+                    b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
+                    b_nodes.append(Node(exterior_corners[0], [exterior_corners_para[0][0], exterior_corners_para[0][1], exterior_corners_para[0][2]]))
                     b_nodes[-1].corner = True
-                    b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
-                
+                    b_nodes.append(Node(pPnts[1], [LayerID, pIdx[1], pPara[1]]))
+
                 else:
-                    b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
-                    b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
+                    b_nodes.append(Node(pPnts[1], [LayerID, pIdx[1], pPara[1]]))
+                    b_nodes.append(Node(exterior_corners[0], [exterior_corners_para[0][0], exterior_corners_para[0][1], exterior_corners_para[0][2]]))
                     b_nodes[-1].corner = True
-                    b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
-                
-                
-             #===CORNERSTYLE 4======    
-            elif len(exterior_corners) == 2 and node.corner==True:
+                    b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
+
+            # ===CORNERSTYLE 4======
+            elif len(exterior_corners) == 2 and node.corner == True:
                 node.cornerstyle = 4
-                #print node, Angle
-#                display.DisplayShape(node.Pnt2d)
-#                display.DisplayShape(pPnts[0], color='GREEN')
-#                display.DisplayShape(pPnts[1], color='ORANGE')
-#                display.DisplayShape(exterior_corners[0],color='RED')
-#                display.DisplayShape(exterior_corners[1],color='CYAN')
-                #print 'exterior_corners_para0:', exterior_corners_para[0]
-                #print 'exterior_corners_para1:', exterior_corners_para[1]
-                #print ' pIdx[0]:', pIdx[0],pPara[0]
-                #print ' pIdx[1]:', pIdx[1],pPara[1]
-                
+                # print node, Angle
+                #                display.DisplayShape(node.Pnt2d)
+                #                display.DisplayShape(pPnts[0], color='GREEN')
+                #                display.DisplayShape(pPnts[1], color='ORANGE')
+                #                display.DisplayShape(exterior_corners[0],color='RED')
+                #                display.DisplayShape(exterior_corners[1],color='CYAN')
+                # print 'exterior_corners_para0:', exterior_corners_para[0]
+                # print 'exterior_corners_para1:', exterior_corners_para[1]
+                # print ' pIdx[0]:', pIdx[0],pPara[0]
+                # print ' pIdx[1]:', pIdx[1],pPara[1]
+
                 if node.regular_corner == True:
-                    #print 'R',[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]
-                    b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
-                    b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
+                    # print 'R',[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]
+                    b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
+                    b_nodes.append(Node(exterior_corners[0], [exterior_corners_para[0][0], exterior_corners_para[0][1], exterior_corners_para[0][2]]))
                     b_nodes[-1].corner = True
-                    #Find Middle between the two exterior corners on b_BsplineLst
+                    # Find Middle between the two exterior corners on b_BsplineLst
                     newPnt = gp_Pnt2d()
-                    c_BSplineLst = b_BSplineLst[exterior_corners_para[0][1]+1:exterior_corners_para[1][1]+1]
-                    [tmp_idx,tmp_u] =  find_BSplineLst_coordinate(c_BSplineLst,0.5,0,1)
-                    newIdx = exterior_corners_para[0][1]+1+tmp_idx
+                    c_BSplineLst = b_BSplineLst[exterior_corners_para[0][1] + 1 : exterior_corners_para[1][1] + 1]
+                    [tmp_idx, tmp_u] = find_BSplineLst_coordinate(c_BSplineLst, 0.5, 0, 1)
+                    newIdx = exterior_corners_para[0][1] + 1 + tmp_idx
                     newPara = tmp_u
-                    b_BSplineLst[newIdx].D0(newPara,newPnt)
-                    #display.DisplayShape(newPnt,color='RED')
-                    
-                    b_nodes.append(Node(newPnt,[LayerID,newIdx,newPara]))
-                    b_nodes.append(Node(exterior_corners[1],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]))
+                    b_BSplineLst[newIdx].D0(newPara, newPnt)
+                    # display.DisplayShape(newPnt,color='RED')
+
+                    b_nodes.append(Node(newPnt, [LayerID, newIdx, newPara]))
+                    b_nodes.append(Node(exterior_corners[1], [exterior_corners_para[1][0], exterior_corners_para[1][1], exterior_corners_para[1][2]]))
                     b_nodes[-1].corner = True
-                    b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
-                    
+                    b_nodes.append(Node(pPnts[1], [LayerID, pIdx[1], pPara[1]]))
+
                 else:
-                    #display.DisplayShape(node.Pnt2d)
-                    #print 'IR',[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]
-                    b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
-                    b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
+                    # display.DisplayShape(node.Pnt2d)
+                    # print 'IR',[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]
+                    b_nodes.append(Node(pPnts[1], [LayerID, pIdx[1], pPara[1]]))
+                    b_nodes.append(Node(exterior_corners[0], [exterior_corners_para[0][0], exterior_corners_para[0][1], exterior_corners_para[0][2]]))
                     b_nodes[-1].corner = True
-                    
-                    v = gp_Vec2d(exterior_corners[0],exterior_corners[1])
+
+                    v = gp_Vec2d(exterior_corners[0], exterior_corners[1])
                     cP = exterior_corners[0].Translated(v.Multiplied(0.5))
-                    p2 = ProjectPointOnBSplineLst(b_BSplineLst,cP,distance)
+                    p2 = ProjectPointOnBSplineLst(b_BSplineLst, cP, distance)
                     newPnt = p2[0]
-                    newPara = [LayerID,p2[1],p2[2]]
-                    
-                    b_nodes.append(Node(newPnt,newPara))
-                    b_nodes.append(Node(exterior_corners[1],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]))
+                    newPara = [LayerID, p2[1], p2[2]]
+
+                    b_nodes.append(Node(newPnt, newPara))
+                    b_nodes.append(Node(exterior_corners[1], [exterior_corners_para[1][0], exterior_corners_para[1][1], exterior_corners_para[1][2]]))
                     b_nodes[-1].corner = True
-                    b_nodes.append(Node(pPnts[0],[LayerID,pIdx[0],pPara[0]]))
-            
-            
-            #===CORNERSTYLE 5====== 
-            elif len(exterior_corners) > 2 and node.corner==True:
+                    b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
+
+            # ===CORNERSTYLE 5======
+            elif len(exterior_corners) > 2 and node.corner == True:
                 node.cornerstyle = 5
-                print('WARNING: cornerstyle 5 has not been implemented yet.')
-                
-#                display.DisplayShape(pPnts[0], color='BLUE')
-#                display.DisplayShape(pPnts[1], color='RED')
-                #TODO: 
-                  #for p in exterior_corners:
-                        #display.DisplayShape(p,color='RED')
-                #b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))  
-                #b_nodes.append(Node(b_BSplineLst[pIdx[0]].EndPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].LastParameter()]))
-                #b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))    
-                
-            #===CORNERSTYLE 6====== 
-            elif len(exterior_corners) == 4 and node.corner==True:
+                print("WARNING: cornerstyle 5 has not been implemented yet.")
+
+            #                display.DisplayShape(pPnts[0], color='BLUE')
+            #                display.DisplayShape(pPnts[1], color='RED')
+            # TODO:
+            # for p in exterior_corners:
+            # display.DisplayShape(p,color='RED')
+            # b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
+            # b_nodes.append(Node(b_BSplineLst[pIdx[0]].EndPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].LastParameter()]))
+            # b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
+
+            # ===CORNERSTYLE 6======
+            elif len(exterior_corners) == 4 and node.corner == True:
                 node.cornerstyle = 6
-                print('WARNING: cornerstyle 6 has not been implemented yet.')
-                #TODO: 
-                  #for p in exterior_corners:
-                        #display.DisplayShape(p,color='RED')
-                #b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))  
-                #b_nodes.append(Node(b_BSplineLst[pIdx[0]].EndPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].LastParameter()]))
-                #b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))    
-            
+                print("WARNING: cornerstyle 6 has not been implemented yet.")
+                # TODO:
+                # for p in exterior_corners:
+                # display.DisplayShape(p,color='RED')
+                # b_nodes.append(Node(exterior_corners[0],[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]]))
+                # b_nodes.append(Node(b_BSplineLst[pIdx[0]].EndPoint(),[LayerID,pIdx[0],b_BSplineLst[pIdx[0]].LastParameter()]))
+                # b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
+
         else:
-            print('Projection Error, number of projection points: ', len(pPnts))
-            
-            
-    
-    #==============integrate_leftover_interior_nodes=========================================
-    #determin_leftover_pnts
+            print("Projection Error, number of projection points: ", len(pPnts))
+
+    # ==============integrate_leftover_interior_nodes=========================================
+    # determin_leftover_pnts
     if flag_integrate_leftover_interior_nodes:
         new_b_node = None
         new_a_node = None
         aglTol = 5.0
-        linTol = 1e-9*refL
-        prjTol = 1e-5*refL
+        linTol = 1e-9 * refL
+        prjTol = 1e-5 * refL
         new_b_node = None
         insert_idx = None
         leftover_exterior_corners = []
-        for i,item in enumerate(b_BSplineLst[:-1]):
+        for i, item in enumerate(b_BSplineLst[:-1]):
             spline1 = item
-            spline2 = b_BSplineLst[i+1]
-            u1,p1,v1 = spline1.LastParameter(),gp_Pnt2d(),gp_Vec2d()
-            u2,p2,v2  = spline2.FirstParameter(),gp_Pnt2d(),gp_Vec2d()
-            spline1.D1(u1,p1,v1)
-            spline2.D1(u2,p2,v2)
-            
-            Angle = abs(v1.Angle(v2))*180/np.pi       
-            if Angle>aglTol and not any(n.Pnt2d.IsEqual(item.EndPoint(), linTol) for n in b_nodes):
-                leftover_exterior_corners.append((item.EndPoint(),[LayerID,i,u1]))
-                    
-        #reversed projection and insert them into a_nodes and b_nodes
+            spline2 = b_BSplineLst[i + 1]
+            u1, p1, v1 = spline1.LastParameter(), gp_Pnt2d(), gp_Vec2d()
+            u2, p2, v2 = spline2.FirstParameter(), gp_Pnt2d(), gp_Vec2d()
+            spline1.D1(u1, p1, v1)
+            spline2.D1(u2, p2, v2)
+
+            Angle = abs(v1.Angle(v2)) * 180 / np.pi
+            if Angle > aglTol and not any(n.Pnt2d.IsEqual(item.EndPoint(), linTol) for n in b_nodes):
+                leftover_exterior_corners.append((item.EndPoint(), [LayerID, i, u1]))
+
+        # reversed projection and insert them into a_nodes and b_nodes
         for p1 in leftover_exterior_corners:
-            p2 = ProjectPointOnBSplineLst(a_BSplineLst, p1[0], (1+prjTol)*layer_thickness)
-            if len(p2)>0:
-                #print 'WARNING: integrating leftover interior node.'
+            p2 = ProjectPointOnBSplineLst(a_BSplineLst, p1[0], (1 + prjTol) * layer_thickness)
+            if len(p2) > 0:
+                # print 'WARNING: integrating leftover interior node.'
                 new_b_node = Node(p1[0], p1[1])
-                #display.DisplayShape(new_b_node.Pnt2d, color='RED')
+                # display.DisplayShape(new_b_node.Pnt2d, color='RED')
                 new_a_node = Node(p2[0], [LayerID, p2[1], p2[2]])
-                #display.DisplayShape(new_a_node.Pnt2d, color='GREEN')
-            
-                #print 'new_a_node.parameters:',new_a_node.parameters,'a_nodes[0].parameters', a_nodes[0].parameters
-                for i,n in enumerate(a_nodes):
-                    if n.parameters[0] == new_a_node.parameters[0] and n.parameters[1] == new_a_node.parameters[1] and new_a_node.parameters[2]>=n.parameters[2]:        
+                # display.DisplayShape(new_a_node.Pnt2d, color='GREEN')
+
+                # print 'new_a_node.parameters:',new_a_node.parameters,'a_nodes[0].parameters', a_nodes[0].parameters
+                for i, n in enumerate(a_nodes):
+                    if n.parameters[0] == new_a_node.parameters[0] and n.parameters[1] == new_a_node.parameters[1] and new_a_node.parameters[2] >= n.parameters[2]:
                         insert_idx = i
                         break
-                
-                if insert_idx!=None:
+
+                if insert_idx != None:
                     b_nodes.append(new_b_node)
-                    print('hello',new_b_node)
-                    a_nodes.insert(insert_idx+1,new_a_node)
-           
+                    print("hello", new_b_node)
+                    a_nodes.insert(insert_idx + 1, new_a_node)
+
         if new_b_node:
             print(new_b_node)
-            #display.DisplayShape(new_b_node.Pnt2d, color='RED')
-            #print(b_nodes[0].parameters[1], b_nodes[0].parameters[2])
-            #b_nodes =  sorted(b_nodes, key=lambda n: (n.parameters[1], n.parameters[2]) )
+            # display.DisplayShape(new_b_node.Pnt2d, color='RED')
+            # print(b_nodes[0].parameters[1], b_nodes[0].parameters[2])
+            # b_nodes =  sorted(b_nodes, key=lambda n: (n.parameters[1], n.parameters[2]) )
             b_nodes = sorted(b_nodes)
 
-    #==============CREATE CELLS PROJECTION=========================================
-    
-    b = 0   #b_nodes idx
+    # ==============CREATE CELLS PROJECTION=========================================
+
+    b = 0  # b_nodes idx
     if closed_a == True:
         start = 0
         end = len(a_nodes)
-    else: 
+    else:
         start = 1
-        end = len(a_nodes)-1
+        end = len(a_nodes) - 1
 
-    #for a,node in enumerate(a_nodes[1:-1], start=beginning):
-    for a in range(start,end):
+    # for a,node in enumerate(a_nodes[1:-1], start=beginning):
+    for a in range(start, end):
         try:
-            #print 'Closed_a: ', closed_a, ', a: ', a, ', len(a_nodes): ', len(a_nodes),', b: ', b, ', len(b_nodes):', len(b_nodes), '\n',  
-            if closed_a == False and a == 1: #Start Triangle
-                cellLst.append(Cell([a_nodes[a],a_nodes[a-1],b_nodes[b]]))
-            
-            elif closed_a == False and a == len(a_nodes)-2: #End Triangle
-                cellLst.append(Cell([a_nodes[a-1],b_nodes[b-1],b_nodes[b],a_nodes[a]]))
-                cellLst.append(Cell([a_nodes[a],b_nodes[b],a_nodes[a+1]]))
-                #print cellLst[-1]
-    
-            else: #Regular Cell Creation
-                if a_nodes[a].cornerstyle == 2 or a_nodes[a].cornerstyle==3:
-                    #print a, a_nodes[a], a_nodes[a].cornerstyle
-                    cellLst.append(Cell([a_nodes[a-1],b_nodes[b-1],b_nodes[b],a_nodes[a]]))
+            # print 'Closed_a: ', closed_a, ', a: ', a, ', len(a_nodes): ', len(a_nodes),', b: ', b, ', len(b_nodes):', len(b_nodes), '\n',
+            if closed_a == False and a == 1:  # Start Triangle
+                cellLst.append(Cell([a_nodes[a], a_nodes[a - 1], b_nodes[b]]))
+
+            elif closed_a == False and a == len(a_nodes) - 2:  # End Triangle
+                cellLst.append(Cell([a_nodes[a - 1], b_nodes[b - 1], b_nodes[b], a_nodes[a]]))
+                cellLst.append(Cell([a_nodes[a], b_nodes[b], a_nodes[a + 1]]))
+                # print cellLst[-1]
+
+            else:  # Regular Cell Creation
+                if a_nodes[a].cornerstyle == 2 or a_nodes[a].cornerstyle == 3:
+                    # print a, a_nodes[a], a_nodes[a].cornerstyle
+                    cellLst.append(Cell([a_nodes[a - 1], b_nodes[b - 1], b_nodes[b], a_nodes[a]]))
                     b += 2
-                    cellLst.append(Cell([a_nodes[a],b_nodes[b-2],b_nodes[b-1],b_nodes[b]]))
-                
+                    cellLst.append(Cell([a_nodes[a], b_nodes[b - 2], b_nodes[b - 1], b_nodes[b]]))
+
                 elif a_nodes[a].cornerstyle == 4:
-                    cellLst.append(Cell([a_nodes[a-1],b_nodes[b-1],b_nodes[b],a_nodes[a]]))
+                    cellLst.append(Cell([a_nodes[a - 1], b_nodes[b - 1], b_nodes[b], a_nodes[a]]))
                     b += 2
-                    cellLst.append(Cell([a_nodes[a],b_nodes[b-2],b_nodes[b-1],b_nodes[b]]))
+                    cellLst.append(Cell([a_nodes[a], b_nodes[b - 2], b_nodes[b - 1], b_nodes[b]]))
                     b += 2
-                    cellLst.append(Cell([a_nodes[a],b_nodes[b-2],b_nodes[b-1],b_nodes[b]]))
-                
+                    cellLst.append(Cell([a_nodes[a], b_nodes[b - 2], b_nodes[b - 1], b_nodes[b]]))
+
                 else:
-                    cellLst.append(Cell([a_nodes[a-1],b_nodes[b-1],b_nodes[b],a_nodes[a]]))
+                    cellLst.append(Cell([a_nodes[a - 1], b_nodes[b - 1], b_nodes[b], a_nodes[a]]))
 
         except (IndexError):
-             print('ERROR:\t IndexError: list index out of range', a_nodes[a])
-             pass
-         
+            print("ERROR:\t IndexError: list index out of range", a_nodes[a])
+            pass
+
         b += 1
-        
-    #==============OCC3DVIEWER========================================
-    if kw.get('display') !=  None:
-        
+
+    # ==============OCC3DVIEWER========================================
+    if kw.get("display") != None:
+
         flag_display_a_nodes = True
         flag_display_b_nodes = True
         flag_display_a_BSplineLst = True
         flag_display_b_BSplineLst = True
         flag_display_cells = False
-        
+
         if flag_display_a_nodes:
-            for i,a in enumerate(a_nodes):
-                    if a.corner == True:
-                        display.DisplayShape(a.Pnt,color='WHITE')  
-                        string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
-                        #display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
-                        
-                    elif a.cornerstyle == 1 or a.cornerstyle == 0 :
-                        display.DisplayShape(a.Pnt,color='WHITE')  
-                        string = str(a.id)+' (cs='+str(a.cornerstyle)+', rg='+str(a.regular_corner)+')'
-                        #display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
-                        
-                    else: 
-                        display.DisplayShape(a.Pnt,color='WHITE')  
-                        #display.DisplayMessage(a.Pnt,str(a.id))
-                    
-                    
-        if flag_display_b_nodes:           
-            for i,b in enumerate(b_nodes):
-                    display.DisplayShape(b.Pnt,color='GREEN')  
-                    #display.DisplayMessage(b.Pnt,str(b.id),message_color=(1.0,0.5,0.0))
-    
-        if flag_display_a_BSplineLst: 
-            for i,a_spline in enumerate(a_BSplineLst):
-                #display_custome_shape(display,a_spline,1.0,0.0,[0.2,0.9,0.8])
-                display.DisplayShape(a_spline,color='CYAN')
+            for i, a in enumerate(a_nodes):
+                if a.corner == True:
+                    display.DisplayShape(a.Pnt, color="WHITE")
+                    string = str(a.id) + " (cs=" + str(a.cornerstyle) + ", rg=" + str(a.regular_corner) + ")"
+                    # display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
+
+                elif a.cornerstyle == 1 or a.cornerstyle == 0:
+                    display.DisplayShape(a.Pnt, color="WHITE")
+                    string = str(a.id) + " (cs=" + str(a.cornerstyle) + ", rg=" + str(a.regular_corner) + ")"
+                    # display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
+
+                else:
+                    display.DisplayShape(a.Pnt, color="WHITE")
+                    # display.DisplayMessage(a.Pnt,str(a.id))
+
+        if flag_display_b_nodes:
+            for i, b in enumerate(b_nodes):
+                display.DisplayShape(b.Pnt, color="GREEN")
+                # display.DisplayMessage(b.Pnt,str(b.id),message_color=(1.0,0.5,0.0))
+
+        if flag_display_a_BSplineLst:
+            for i, a_spline in enumerate(a_BSplineLst):
+                # display_custome_shape(display,a_spline,1.0,0.0,[0.2,0.9,0.8])
+                display.DisplayShape(a_spline, color="CYAN")
                 p = gp_Pnt2d()
                 v = gp_Vec2d()
-                u = (a_spline.LastParameter()-a_spline.FirstParameter())/2+a_spline.FirstParameter()
-                a_spline.D1(u,p,v)
-                #display.DisplayMessage(p,str(i),height=30,message_color=(0,1,1))
-                #display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
-            
-        if flag_display_b_BSplineLst: 
-            for i,b_spline in enumerate(b_BSplineLst):
-                #display_custome_shape(display,b_spline,1.0,0.0,[0.1,0.5,1.0 ])
-                display.DisplayShape(b_spline,color='BLUE')
+                u = (a_spline.LastParameter() - a_spline.FirstParameter()) / 2 + a_spline.FirstParameter()
+                a_spline.D1(u, p, v)
+                # display.DisplayMessage(p,str(i),height=30,message_color=(0,1,1))
+                # display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
+
+        if flag_display_b_BSplineLst:
+            for i, b_spline in enumerate(b_BSplineLst):
+                # display_custome_shape(display,b_spline,1.0,0.0,[0.1,0.5,1.0 ])
+                display.DisplayShape(b_spline, color="BLUE")
                 p = gp_Pnt2d()
                 v = gp_Vec2d()
-                u = (b_spline.LastParameter()-b_spline.FirstParameter())/2+b_spline.FirstParameter()
-                b_spline.D1(u,p,v)
-                #display.DisplayMessage(p,str(i),height=30,message_color=(0,0,1))    
-                #display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
-     
+                u = (b_spline.LastParameter() - b_spline.FirstParameter()) / 2 + b_spline.FirstParameter()
+                b_spline.D1(u, p, v)
+                # display.DisplayMessage(p,str(i),height=30,message_color=(0,0,1))
+                # display.DisplayVector(gp_Vec(v.X(),v.Y(),0), gp_Pnt(p.X(),p.Y(),0))
+
         if flag_display_cells:
             for c in cellLst:
-                display.DisplayShape(c.wire,color='BLACK')
-        
+                display.DisplayShape(c.wire, color="BLACK")
+
         display.View_Top()
         display.FitAll()
-        
+
     return a_nodes, b_nodes, cellLst

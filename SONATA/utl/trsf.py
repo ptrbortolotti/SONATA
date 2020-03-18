@@ -5,8 +5,10 @@ Created on Wed May 15 09:48:14 2019
 
 @author: gu32kij
 """
+# Third party modules
 import numpy as np
-from OCC.Core.gp import gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec2d, gp_Ax3, gp_Ax1, gp_Dir, gp_Ax2
+from OCC.Core.gp import (gp_Ax1, gp_Ax2, gp_Ax3, gp_Dir,
+                         gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec2d,)
 
 
 def trsf_blfr_to_cbm(Ax2_blfr, Ax2_befr):
@@ -30,12 +32,12 @@ def trsf_blfr_to_cbm(Ax2_blfr, Ax2_befr):
     
     """
     Ax2_cbm = gp_Ax2(Ax2_befr.Location(), Ax2_befr.XDirection(), Ax2_befr.YDirection())
-    #print('Ax2_cbm.Direction:', Ax2_cbm.XDirection().Coord(), Ax2_cbm.YDirection().Coord())
+    # print('Ax2_cbm.Direction:', Ax2_cbm.XDirection().Coord(), Ax2_cbm.YDirection().Coord())
     trsf1 = gp_Trsf()
     trsf2 = gp_Trsf()
 
-    trsf1.SetTransformation(gp_Ax3(Ax2_blfr),gp_Ax3(Ax2_befr))
-    trsf2.SetTransformation(gp_Ax3(Ax2_befr),gp_Ax3(Ax2_cbm))
+    trsf1.SetTransformation(gp_Ax3(Ax2_blfr), gp_Ax3(Ax2_befr))
+    trsf2.SetTransformation(gp_Ax3(Ax2_befr), gp_Ax3(Ax2_cbm))
 
     Trsf = gp_Trsf()
     Trsf.Multiply(trsf2)
@@ -64,13 +66,13 @@ def trsf_cbm_to_blfr(Ax2_blfr, Ax2_befr):
     
     """
     Ax2_cbm = gp_Ax2(Ax2_befr.Location(), Ax2_befr.XDirection(), Ax2_befr.YDirection())
-    #print('Ax2_cbm.Direction:', Ax2_cbm.XDirection().Coord(), Ax2_cbm.YDirection().Coord())
+    # print('Ax2_cbm.Direction:', Ax2_cbm.XDirection().Coord(), Ax2_cbm.YDirection().Coord())
 
     trsf1 = gp_Trsf()
     trsf2 = gp_Trsf()
 
-    trsf1.SetTransformation(gp_Ax3(Ax2_cbm),gp_Ax3(Ax2_befr))
-    trsf2.SetTransformation(gp_Ax3(Ax2_befr),gp_Ax3(Ax2_blfr))
+    trsf1.SetTransformation(gp_Ax3(Ax2_cbm), gp_Ax3(Ax2_befr))
+    trsf2.SetTransformation(gp_Ax3(Ax2_befr), gp_Ax3(Ax2_blfr))
 
     Trsf = gp_Trsf()
     Trsf.Multiply(trsf2)
@@ -79,7 +81,7 @@ def trsf_cbm_to_blfr(Ax2_blfr, Ax2_befr):
     return Trsf
 
 
-def trsf_af_to_blfr(loc, pa_loc, chord, twist, deformation = None):
+def trsf_af_to_blfr(loc, pa_loc, chord, twist, deformation=None):
     """
     Defines the transformation in 3D space to the blade reference frame location
     and pitch-axis information, scales it with chord information and rotates 
@@ -114,25 +116,24 @@ def trsf_af_to_blfr(loc, pa_loc, chord, twist, deformation = None):
     trsf_trans1 = gp_Trsf()
     trsf_trans2 = gp_Trsf()
     trsf_scale = gp_Trsf()
-    
-    trsf_rot1.SetRotation(gp_Ax1(gp_Pnt(pa_loc,0,0), gp_Dir(0,0,1)), -twist)
-    trsf_trans1.SetTranslation(gp_Pnt(pa_loc,0,0), gp_Pnt(0,0,0))
-    trsf_scale.SetScale(gp_Pnt(0,0,0), chord)
-    trsf_rot2.SetRotation(gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,0,1)), -np.pi/2)
-    trsf_rot3.SetRotation(gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,1,0)), -np.pi/2)
-    trsf_trans2.SetTranslation(gp_Pnt(0,0,0), gp_Pnt(loc[0],loc[1],loc[2]))
-    
-    if deformation: 
+
+    trsf_rot1.SetRotation(gp_Ax1(gp_Pnt(pa_loc, 0, 0), gp_Dir(0, 0, 1)), -twist)
+    trsf_trans1.SetTranslation(gp_Pnt(pa_loc, 0, 0), gp_Pnt(0, 0, 0))
+    trsf_scale.SetScale(gp_Pnt(0, 0, 0), chord)
+    trsf_rot2.SetRotation(gp_Ax1(gp_Pnt(0, 0, 0), gp_Dir(0, 0, 1)), -np.pi / 2)
+    trsf_rot3.SetRotation(gp_Ax1(gp_Pnt(0, 0, 0), gp_Dir(0, 1, 0)), -np.pi / 2)
+    trsf_trans2.SetTranslation(gp_Pnt(0, 0, 0), gp_Pnt(loc[0], loc[1], loc[2]))
+
+    if deformation:
         trsf_trans2 = gp_Trsf()
         trsf_deform_rot1 = gp_Trsf()
         trsf_deform_rot2 = gp_Trsf()
-        trsf_deform_rot3 =  gp_Trsf()
-        
-        trsf_trans2.SetTranslation(gp_Pnt(0,0,0), gp_Pnt(deformation[0],deformation[1],deformation[2]))
-        trsf_deform_rot1.SetRotation(gp_Ax1(gp_Pnt(loc[0],loc[1],loc[2]), gp_Dir(1,0,0)), deformation[3])
-        trsf_deform_rot2.SetRotation(gp_Ax1(gp_Pnt(loc[0],loc[1],loc[2]), gp_Dir(0,1,0)), deformation[4])
-        trsf_deform_rot3.SetRotation(gp_Ax1(gp_Pnt(loc[0],loc[1],loc[2]), gp_Dir(0,0,1)), deformation[5])
+        trsf_deform_rot3 = gp_Trsf()
 
+        trsf_trans2.SetTranslation(gp_Pnt(0, 0, 0), gp_Pnt(deformation[0], deformation[1], deformation[2]))
+        trsf_deform_rot1.SetRotation(gp_Ax1(gp_Pnt(loc[0], loc[1], loc[2]), gp_Dir(1, 0, 0)), deformation[3])
+        trsf_deform_rot2.SetRotation(gp_Ax1(gp_Pnt(loc[0], loc[1], loc[2]), gp_Dir(0, 1, 0)), deformation[4])
+        trsf_deform_rot3.SetRotation(gp_Ax1(gp_Pnt(loc[0], loc[1], loc[2]), gp_Dir(0, 0, 1)), deformation[5])
 
     Trsf = gp_Trsf()
     Trsf.Multiply(trsf_trans2)
@@ -148,9 +149,9 @@ def trsf_af_to_blfr(loc, pa_loc, chord, twist, deformation = None):
     return Trsf
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Ax2_1 = gp_Ax2()
     Ax2_2 = gp_Ax2()
-    
+
     trfs1 = trsf_cbm_to_blfr(Ax2_1, Ax2_2)
     trfs2 = trsf_blfr_to_cbm(Ax2_1, Ax2_2)

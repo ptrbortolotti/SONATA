@@ -1,14 +1,17 @@
+# Third party modules
 from OCC.Core.BRepTools import BRepTools_WireExplorer
-from OCC.Core.TopTools import TopTools_ListOfShape,TopTools_ListIteratorOfListOfShape
 from OCC.Core.TopoDS import TopoDS_Wire, topods_Edge, topods_Vertex
+from OCC.Core.TopTools import (TopTools_ListIteratorOfListOfShape,
+                               TopTools_ListOfShape,)
 
 
 class WireExplorer(object):
-    '''
+    """
     Wire traversal
-    '''
+    """
+
     def __init__(self, wire):
-        assert isinstance(wire, TopoDS_Wire), 'not a TopoDS_Wire'
+        assert isinstance(wire, TopoDS_Wire), "not a TopoDS_Wire"
         self.wire = wire
         self.wire_explorer = BRepTools_WireExplorer(self.wire)
         self.done = False
