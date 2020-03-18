@@ -51,6 +51,7 @@ license
 
 #ignored folders#
 /.eggs/
+/conda.bld/
 /*.egg-info/
 jobs/VariSpeed
 jobs/PBortolotti
@@ -71,5 +72,4 @@ jobs/JSirohi
 jobs/MonteCarlo
 jobs/img
 /scratch/
-/docs/source/
 /docs/build/
