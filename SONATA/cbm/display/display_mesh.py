@@ -8,6 +8,7 @@ import scipy.io
 import numpy as np
 import math
 import datetime
+import os
 
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
@@ -15,6 +16,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.colors import LinearSegmentedColormap
 from SONATA.openmdao_utl.doe_utl import filename_generator
+
 
 def centroid(points):
     x = [p[0] for p in points]
@@ -33,8 +35,8 @@ def plot_nodes(nodes):
     plt.show()
 
 
-def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProperties=None, 
-              show_element_number=False, show_node_number=False, invert_xaxis = True, lfactor=0.5e-3, **kw):
+def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None, VABSProperties=None, 
+              show_element_number=False, show_node_number=False, invert_xaxis = True, lfactor=0.5e-2, **kw):
     
     """
     To be continued...
@@ -61,13 +63,16 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
         #cmap.set_under(color='k')
         
     elif data_name == 'MatID':
-        cmap = plt.cm.get_cmap()
+        # cmap = a=plt.cm.get_cmap()
+        cmap = plt.cm.get_cmap('cividis')
         # extract all colors from the .jet map
         cmaplist = [cmap(i) for i in range(cmap.N)]
         # force the first color entry to be grey
         #cmaplist[0] = (.5, .5, .5, 1.0)
         # create the new map
+        # cmap = LinearSegmentedColormap.from_list('Custom cmap', cmaplist, max(data))
         cmap = LinearSegmentedColormap.from_list('Custom cmap', cmaplist, max(data))
+        # cmap = 'viridis'
         
     else:
         cmap = plt.cm.get_cmap()
@@ -96,7 +101,8 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
         polygon = Polygon(array, True, edgecolor='k')
         patches.append(polygon)
     
-    p = PatchCollection(patches, alpha=alpha, cmap=cmap, edgecolors = 'k')
+    # p = PatchCollection(patches, alpha=alpha, cmap=cmap, edgecolors = 'k')
+    p = PatchCollection(patches, alpha=alpha, cmap=cmap, edgecolors = 'k', linewidths=0.2)
     p.set_array(data)
     p.set_clim(vmin, vmax)
     _ = ax.add_collection(p)
@@ -107,7 +113,12 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
     
     if data_name == 'MatID':
         cbar.set_ticks(np.linspace(1, max(data), max(data)))
-        cbar.set_ticklabels(np.linspace(1, max(data), max(data)))
+        # cbar.set_ticklabels(np.linspace(1, max(data), max(data)))
+        cbar_label = []
+        for cbar_label_index in range(max(data)):
+            cbar_label.append(materials[cbar_label_index+1].name)
+        cbar.set_ticklabels(cbar_label)
+        # cbar.set_ticklabels(['mat1', 'mat2', 'mat3', 'mat4', 'mat5', 'mat6'])
         p.set_clim(0.5, max(data)+0.5)
     if data_name == 'sf':
          p.set_clim(0, 3)
@@ -117,22 +128,23 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
             
             dx = lfactor*math.cos(math.radians(theta_11[i]))
             dy = lfactor*math.sin(math.radians(theta_11[i]))
-            ax.arrow(cent[0], cent[1], dx, dy, width = 0.001e-3, head_width=0.05e-3, head_length=0.1e-3, fc='k', ec='k') 
+            ax.arrow(cent[0], cent[1], dx, dy, width = 0.01e-2, head_width=0.1e-2, head_length=0.1e-2, fc='k', ec='k')
         
     #ax.scatter(nodes[:,0],nodes[:,1],c='k',)
     plt.axis('equal')
     if title!=None:
         ax.set_title(title)
-    ax.set_xlabel(r'$x_2$ in m')
-    ax.set_ylabel(r'$x_3$ in m')
+    ax.set_xlabel(r'$x_2$, m')
+    ax.set_ylabel(r'$x_3$, m')
     
     #plot coordinate system.
-    cslength=0.015
-    ax.arrow(0, 0, cslength, 0, color='lime')
-    ax.arrow(0, 0, 0, cslength, color='deepskyblue')
+    # cslength=0.015
+    # ax.arrow(0, 0, cslength, 0, color='lime')
+    # ax.arrow(0, 0, 0, cslength, color='deepskyblue')
 
-    ax.annotate(r'$x_2$', (cslength,0),fontsize=10, color = 'lime')
-    ax.annotate(r'$x_3$', (0,cslength),fontsize=10, color='deepskyblue')
+    # ax.annotate(r'$x_2$', (cslength,0),fontsize=10, color = 'lime')
+    # ax.annotate(r'$x_3$', (0,cslength),fontsize=10, color='deepskyblue')
+
     ##display element number
     if show_element_number == True:
         for i, item in enumerate(centroids):
@@ -181,7 +193,7 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
     return (fig,ax)
     
 
-def plot_cells(cells,nodes,attr1, VABSProperties=None, title='None', plotTheta11=False, plotDisplacement=False, **kw):
+def plot_cells(cells,nodes,attr1, materials, VABSProperties=None, title='None', plotTheta11=False, plotDisplacement=False, **kw):
     nodes_array = []
     for n in nodes:
         if plotDisplacement:
@@ -241,7 +253,7 @@ def plot_cells(cells,nodes,attr1, VABSProperties=None, title='None', plotTheta11
         #tmp_fig.set_size_inches(11.69, 8.27)    #a4 landscape
         tmp_fig.set_size_inches(40, 20)    
         tmp_fig.savefig(fname, dpi=300, orientation='landscape', papertype='a4')
-   
+
     return (fig, ax)
 
 

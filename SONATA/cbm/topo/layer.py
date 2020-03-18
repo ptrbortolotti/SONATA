@@ -240,7 +240,7 @@ class Layer(object):
         determined with the determine_a_nodes procedure. Subsequently the 
         a_nodes are projected onto the b_BsplineLst. The following functions 
         (modify_cornerstyle_one, modify_sharp_corners and
-        second_stage_improvements) try to imporve the quality of the mesh. 
+        second_stage_improvements) try to improve the quality of the mesh.
         everything is stored in the layer.cells and is returned
         
         Parameters

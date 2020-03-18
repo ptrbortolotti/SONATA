@@ -86,7 +86,7 @@ def interp_airfoil_position(airfoil_position, airfoils, grid_loc):
     
     iv_val = tuple(airfoil_position[0][iv_idx[0]:iv_idx[1]+1])
     iv_af = tuple(airfoil_position[1][iv_idx[0]:iv_idx[1]+1])
-    k = (grid_loc-iv_val[0]) / (iv_val[1]-iv_val[0])
+    k = (grid_loc-iv_val[0]) / (iv_val[1]-iv_val[0])  
     
     #select af from airfoils
     af1 = next((x for x in airfoils if x.name == iv_af[0]), None)
@@ -120,7 +120,7 @@ def make_loft(elements, ruled=False, tolerance=1e-6, continuity=4, check_compati
     loft : TopoDS_Shape
         surface of the ThruSections Loft
     """
-    
+
     sections = BRepOffsetAPI_ThruSections(False, ruled, tolerance)
     for i in elements:
         if isinstance(i, TopoDS_Wire):
@@ -134,7 +134,7 @@ def make_loft(elements, ruled=False, tolerance=1e-6, continuity=4, check_compati
     sections.SetContinuity(continuity)
     sections.Build()
     loft = sections.Shape()
-    
+
     return loft
     
 

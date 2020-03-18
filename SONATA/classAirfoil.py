@@ -19,8 +19,10 @@ from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_Make
 from OCC.Core.GeomAPI import GeomAPI_Interpolate
 from OCC.Core.Geom2dAPI import Geom2dAPI_Interpolate
 from OCC.Core.Geom import Geom_BezierCurve, Geom_Plane
-from OCC.Display.SimpleGui import init_display
-
+try:
+    from OCC.Display.SimpleGui import init_display
+except:
+    pass
 
 #SONATA modules:
 if __name__ == '__main__':

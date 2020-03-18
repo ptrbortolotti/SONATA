@@ -8,8 +8,11 @@ import matplotlib as plt
 import math
 import numpy as np
 
-from OCC.Display.SimpleGui import init_display
-from OCC.Display.backend import get_qt_modules
+try:
+    from OCC.Display.SimpleGui import init_display
+    from OCC.Display.backend import get_qt_modules
+except:
+    pass
 from OCC.Core.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax3,gp_Ax1
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
 

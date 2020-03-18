@@ -11,7 +11,10 @@ from OCC.Core.GCPnts import GCPnts_QuasiUniformAbscissa, GCPnts_AbscissaPoint
 from OCC.Core.Geom2d import Geom2d_Line
 from OCC.Core.Geom2dAdaptor import Geom2dAdaptor_Curve
 from OCC.Core.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
-from OCC.Display.SimpleGui import init_display
+try:
+    from OCC.Display.SimpleGui import init_display
+except:
+    pass
 from OCC.Core.Quantity import Quantity_Color
 from OCC.Core.BRepLib import breplib_BuildCurves3d
 from OCC.Core.TopoDS import TopoDS_Compound, topods_Face, topods_Edge
@@ -53,7 +56,8 @@ def sort_and_reassignID(mesh):
     mesh = sorted(mesh, key=lambda Cell: (Cell.id))    
     for i,c in enumerate(mesh):
         c.id = i+1
-    
+
+
     return mesh, nodes
 
 

@@ -243,7 +243,7 @@ class Segment(object):
                 lid = int((self.ID*1000)+i)
                 tmp_Layer = Layer(lid,relevant_boundary_BSplineLst, self.Layup[i-1][0], 
                                   self.Layup[i-1][1],self.Layup[i-1][2],self.Layup[i-1][3],
-                                  self.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')   
+                                  self.Layup[i-1][4],cutoff_style= 2, join_style=1, name = 'test')
                 
                 tmp_Layer.build_layer(l0) 
                 tmp_Layer.ivLst = ivLst

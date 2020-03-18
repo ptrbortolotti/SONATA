@@ -12,7 +12,10 @@ from scipy.interpolate import interp1d
 import math
 
 #PythonOCC Libraries
-from OCC.Display.SimpleGui import init_display
+try:
+    from OCC.Display.SimpleGui import init_display
+except:
+    pass
 from OCC.Core.gp import gp_Pnt, gp_Dir, gp_Ax1
 
 #SONATA Modules

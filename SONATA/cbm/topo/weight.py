@@ -10,8 +10,10 @@ import os
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeEdge
 from OCC.Core.gp import gp_Circ2d, gp_Pnt2d, gp_Ax2d, gp_Dir2d, gp_Vec2d, gp_Ax2, gp_Dir,gp_Circ, gp_Pnt
 from OCC.Core.Geom2d import Geom2d_Circle, Geom2d_BezierCurve
-from OCC.Display.SimpleGui import init_display
-
+try:
+    from OCC.Display.SimpleGui import init_display
+except:
+    pass
 if __name__ == '__main__':
     os.chdir('../../..')
 

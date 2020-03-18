@@ -17,8 +17,10 @@ import matplotlib.pyplot as plt
 
 from OCC.Core.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1, gp_Vec, gp_Ax3, gp_Pln, gp_Trsf, gp_Pnt2d
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
-from OCC.Display.SimpleGui import init_display
-
+try:
+    from OCC.Display.SimpleGui import init_display
+except:
+    pass
 if __name__ == '__main__':
     os.chdir('..')
     
@@ -37,7 +39,7 @@ from SONATA.utl.blade_utl import interp_airfoil_position, make_loft, interp_load
 from SONATA.utl.plot import plot_beam_properties
 from SONATA.utl.converter import iea37_converter
 from SONATA.utl.interpBSplineLst import interpBSplineLst
-from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire, discretize_wire, get_wire_length, equidistant_Points_on_wire
+from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, scale_wire, discretize_wire, get_wire_Pnt, get_wire_length, equidistant_Points_on_wire
 from SONATA.cbm.fileIO.CADinput import intersect_shape_pln
 from SONATA.cbm.topo.BSplineLst_utils import BSplineLst_from_dct, get_BSplineLst_D2, set_BSplineLst_to_Origin, set_BSplineLst_to_Origin2
 from SONATA.cbm.topo.utils import PntLst_to_npArray, lin_pln_intersect, Array_to_PntLst
@@ -47,6 +49,9 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, \
                                         show_coordinate_system, display_SONATA_SegmentLst,\
                                         display_custome_shape, transform_wire_2to3d, display_config, \
                                         display_Ax2, display_cbm_SegmentLst
+
+
+from SONATA.utl_openmdao.utl_openmdao import utl_openmdao_apply_gains_web_placement, utl_openmdao_apply_gains_mat_thickness
 
 class Blade(Component):
     """
@@ -125,14 +130,14 @@ class Blade(Component):
 
     """ 
     
-    __slots__ = ('blade_ref_axis', 'chord', 'twist','curvature', 'pitch_axis', 'airfoils',  \
-                 'sections', 'beam_properties', 'beam_ref_axis', \
-                 'f_chord', 'f_twist', 'materials', \
+    __slots__ = ('blade_ref_axis', 'chord', 'twist','curvature', 'pitch_axis', 'airfoils',
+                 'sections', 'beam_properties', 'beam_ref_axis',
+                 'f_chord', 'f_twist', 'materials',
                  'blade_ref_axis_BSplineLst', 'f_blade_ref_axis',
                  'beam_ref_axis_BSplineLst', 'f_beam_ref_axis', 
                  'f_pa', 'f_curvature_k1', 'anba_beam_properties',  \
                  'wopwop_bsplinelst', 'wopwop_pnts', 'wopwop_vecs', \
-                 'display', 'start_display', 'add_menu', 'add_function_to_menu' )
+                 'display', 'start_display', 'add_menu', 'add_function_to_menu', 'yml')
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
@@ -144,26 +149,38 @@ class Blade(Component):
             with open(filename, 'r') as myfile:
                 inputs  = myfile.read()
                 yml = yaml.load(inputs, Loader = yaml.FullLoader)
+                self.yml = yml
+
             
             airfoils = [Airfoil(af) for af in yml.get('airfoils')]
             self.materials = read_IEA37_materials(yml.get('materials'))
             
             self.read_IEA37(yml.get('components').get('blade'), airfoils, **kwargs)
-            
+
             
 #    def __repr__(self):
 #        """__repr__ is the built-in function used to compute the "official" 
 #        string reputation of an object, """
 #        return 'Blade: '+ str(self.name)
     
-    def _read_ref_axes(self, yml_ra):
+    def _read_ref_axes(self, yml_ra, flag_ref_axes_wt):
         """
         
         """
-        tmp_ra = {} 
-        tmp_ra['x'] = np.asarray((yml_ra.get('x').get('grid'),yml_ra.get('x').get('values'))).T
-        tmp_ra['y'] = np.asarray((yml_ra.get('y').get('grid'),yml_ra.get('y').get('values'))).T
-        tmp_ra['z'] = np.asarray((yml_ra.get('z').get('grid'),yml_ra.get('z').get('values'))).T
+        tmp_ra = {}
+
+        if flag_ref_axes_wt:
+            # adapt reference axis provided in yaml file to match with SONATA (equiv. rotorcraft) format
+            # x_SONATA equiv. to z_wind
+            # y_SONATA equiv. to -y_wind
+            # z_SONATA equiv. to x_wind
+            tmp_ra['x'] = np.asarray((yml_ra.get('z').get('grid'), yml_ra.get('z').get('values'))).T
+            tmp_ra['y'] = np.asarray((yml_ra.get('y').get('grid'), np.negative(yml_ra.get('y').get('values')))).T
+            tmp_ra['z'] = np.asarray((yml_ra.get('x').get('grid'), yml_ra.get('x').get('values'))).T
+        else:
+            tmp_ra['x'] = np.asarray((yml_ra.get('x').get('grid'),yml_ra.get('x').get('values'))).T
+            tmp_ra['y'] = np.asarray((yml_ra.get('y').get('grid'),yml_ra.get('y').get('values'))).T
+            tmp_ra['z'] = np.asarray((yml_ra.get('z').get('grid'),yml_ra.get('z').get('values'))).T
         
         f_ref_axis_x = interp1d(tmp_ra['x'][:,0], tmp_ra['x'][:,1], bounds_error=False, fill_value='extrapolate')
         f_ref_axis_y = interp1d(tmp_ra['y'][:,0], tmp_ra['y'][:,1], bounds_error=False, fill_value='extrapolate')
@@ -311,39 +328,51 @@ class Blade(Component):
             Is the database of airfoils
         
         """
-        self.name = yml.get('name')
+        self.name = self.yml.get('name')
         print('STATUS:\t Reading IAE37 Definition for Blade: %s' % (self.name))
         
         #Read blade & beam reference axis and create BSplineLst & interpolation instance
-        (self.blade_ref_axis_BSplineLst, self.f_blade_ref_axis, tmp_blra) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'))
-        (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('beam_reference_axis'))
+        (self.blade_ref_axis_BSplineLst, self.f_blade_ref_axis, tmp_blra) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags').get('flag_ref_axes_wt'))
+
+        if not yml.get('outer_shape_bem').get('beam_reference_axis'):
+            #  In case beam reference axis is not defined in yaml file, use identical coordinates for beam reference and reference axis
+            (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags').get('flag_ref_axes_wt'))
+        else:
+            (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('beam_reference_axis'), flag_ref_axes_wt=kwargs.get('flags').get('flag_ref_axes_wt'))
         
         #Read chord, twist and nondim. pitch axis location and create interpolation
         tmp_chord = np.asarray((yml.get('outer_shape_bem').get('chord').get('grid'),yml.get('outer_shape_bem').get('chord').get('values'))).T
         tmp_tw = np.asarray((yml.get('outer_shape_bem').get('twist').get('grid'),yml.get('outer_shape_bem').get('twist').get('values'))).T
         tmp_pa = np.asarray((yml.get('outer_shape_bem').get('pitch_axis').get('grid'),yml.get('outer_shape_bem').get('pitch_axis').get('values'))).T
-        
+
         self.f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1], bounds_error=False, fill_value='extrapolate')
-        self.f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
+
+        if kwargs['flags']['flag_wt_ontology']:  # correct twist rate sign as yaml twist is defined according to BeamDyn Definition (WTF)
+            self.f_twist = interp1d(tmp_tw[:,0], -tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
+        else:
+            self.f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
         self.f_pa = interp1d(tmp_pa[:,0], tmp_pa[:,1], bounds_error=False, fill_value='extrapolate')
         
-        #Read chord, twist and nondim. pitch axis location and create interpolation
+        #Read airfoil information 
         airfoil_position = (yml.get('outer_shape_bem').get('airfoil_position').get('grid'),yml.get('outer_shape_bem').get('airfoil_position').get('labels'))
         tmp = []
         for an in airfoil_position[1]: 
             tmp.append(next((x for x in airfoils if x.name == an), None).id)
         arr = np.asarray([airfoil_position[0],tmp]).T
-            
+
         #Read CBM Positions
-        if wt_flag:
+        if kwargs.get('flags').get('flag_wt_ontology'):
             if stations: 
                 cs_pos = stations
             else:
                 cs_pos = np.linspace(0.0, 1.0, npts)
         else:
-            cs_pos = np.asarray([cs.get('position') for cs in yml.get('internal_structure_2d_fem').get('sections')])
+            if stations is None:
+                cs_pos = np.asarray([cs.get('position') for cs in yml.get('internal_structure_2d_fem').get('sections')])
+            else:
+                cs_pos = stations
             
-        x = np.unique(np.sort(np.hstack((tmp_chord[:,0], tmp_tw[:,0], \
+        x = np.unique(np.sort(np.hstack((kwargs.get('stations_add'), tmp_chord[:,0], tmp_tw[:,0], \
                                          tmp_blra[:,0], tmp_bera[:,0], \
                                          tmp_pa[:,0], arr[:,0], cs_pos))))
 
@@ -355,17 +384,42 @@ class Blade(Component):
         self.chord = np.vstack((x, self.f_chord(x))).T
         self.twist = np.vstack((x, self.f_twist(x))).T
         self.pitch_axis = np.vstack((x, self.f_pa(x))).T
-        self.f_curvature_k1 = interp1d(x, np.gradient(self.twist[:,1],self.beam_ref_axis[:,1]))
-        
+        self.f_curvature_k1 = interp1d(x, np.gradient(self.twist[:,1],self.beam_ref_axis[:,1]))  # determine twist per unit length, i.e. the twist gradient at a respective location
+
+
+        # =============================== #
+        # openMDAO wrapper (ongoing work)
+        # =============================== #
+        # Apply gains from design variables during openmdao analysis
+
+        if kwargs.get('flag_opt'):
+            opt_vars = kwargs['opt_vars']
+            # yml = utl_openmdao_apply_gains_web_placement(self, yml, opt_vars)
+            yml = utl_openmdao_apply_gains_mat_thickness(self, yml, opt_vars)
+        # else:
+        #     opt_vars = 0.
+        #     yml = utls_openmdao_apply_gains_web_placement(self, yml, opt_vars)
+
+        # =============================== #
+
+
+
         #Generate CBMConfigs
-        if wt_flag:
-            cbmconfigs = iea37_converter(self, cs_pos, yml, self.materials)
-                        
+        if kwargs.get('flags').get('flag_wt_ontology'):
+            cbmconfigs = iea37_converter(self, cs_pos, yml, self.materials, mesh_resolution = kwargs.get('flags').get('mesh_resolution'))
+            
         else:
             lst = [[cs.get('position'), CBMConfig(cs, self.materials, iea37=True)] for cs in yml.get('internal_structure_2d_fem').get('sections')]
             cbmconfigs = np.asarray(lst)
- 
-        #Generate CBM - move functionality to gen_sections
+
+        # # Apply gains from design variables during openmdao analysis
+        # if kwargs.get('flag_opt'):
+        #     opt_vars = kwargs['opt_vars']
+        #     cbmconfigs = utl_openmdao_apply_gains_web_placement(self, cs_pos, yml, cbmconfigs, opt_vars)
+
+
+
+        #Generate CBMs
         tmp = []
         for x, cfg in cbmconfigs:
             #get local beam coordinate system, and local cbm_boundary
@@ -484,7 +538,8 @@ class Blade(Component):
             print('STATUS:\t Running ANBAX at grid location %s' % (x))
             cs.cbm_run_anbax(**kwargs)
             lst.append([x, cs.AnbaBeamProperties])
-        self.anba_beam_properties = np.asarray(lst)
+        # self.anba_beam_properties = np.asarray(lst)
+        self.beam_properties = np.asarray(lst)
         return None      
         
         
@@ -721,8 +776,9 @@ class Blade(Component):
         plots the different sections of the blade
         """      
         for (x,cs) in self.sections:
+            print('STATUS:\t Plotting section at grid location %s' % x)
             string = 'Blade: '+ str(self.name) + '; Section : '+str(x)
-            cs.cbm_post_2dmesh(title=string, **kwargs)
+            cs.cbm_post_2dmesh(title=string, section = str(x), **kwargs)
         return None    
     
     
@@ -760,13 +816,21 @@ class Blade(Component):
                 (wire, te_pnt) = afl.trsf_to_blfr(bm[1:4], bm[6], bm[4], bm[5])
                 wireframe.append(wire)
                 self.display.DisplayShape(wire, color='BLACK')
-                #self.display.DisplayShape(te_pnt, color='WHITE', transparency=0.7)
-                
+
+
         if flag_lft:
+            # # step/iges file export
+            # from jobs.RFeil.utls.import_export_step_files import STEPExporter
+            # AP214_stepExporter = STEPExporter('loft_AP214.step', schema='AP214CD')  # init for writing step file; alternatively: schema='AP203'
+
             for i in range(len(wireframe)-1):
-                loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-2, continuity=1, check_compatibility=True)
+                # loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-2, continuity=1, check_compatibility=True)
+                loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-6, continuity=1, check_compatibility=True)
                 self.display.DisplayShape(loft, transparency=0.5, update=True)
-        
+            #     AP214_stepExporter.add_shape(loft)  # add each lofted shape to the AP203_stepExporter component to generate full blade
+            # AP214_stepExporter.write_file()  # write step file
+
+
         if flag_topo:
             for (x,cs) in self.sections:
                 #display sections

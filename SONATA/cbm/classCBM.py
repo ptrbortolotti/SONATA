@@ -20,8 +20,14 @@ import time
 import copy
 
 
+from SONATA.utl.converter import anbax_converter
+
+
 #PythonOCC Modules
-from OCC.Display.SimpleGui import init_display
+try:
+    from OCC.Display.SimpleGui import init_display
+except:
+    pass
 from OCC.Core.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1, gp_Trsf, gp_Ax3 
 
 if __name__ == '__main__':
@@ -67,9 +73,15 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, \
 
 
 try:
-    from SONATA.anbax.anbax_utl import build_dolfin_mesh 
-    from anba4 import anbax
-    #from SONATA.anbax.anba_v4.anba4.anbax import anbax
+    from SONATA.anbax.anbax_utl.anbax_utl import build_dolfin_mesh
+    # from SONATA.anbax.anbax_v4.anba4 import anbax
+    import sys
+    # from anba4.anbax import anbax
+    from anba4.anbax_MMtest import anbax
+
+
+
+
 except:
     pass
 
@@ -512,7 +524,7 @@ class CBM(object):
         if len(self.config.webs) > 0:
             for k, w in self.config.webs.items(): 
                 print('STATUS:\t Building Web %s' %(k+1))
-                self.WebLst.append(Web(k, w['Pos1'], w['Pos2'], self.SegmentLst))
+                self.WebLst.append(Web(k, w['Pos1'], w['Pos2'], w['curvature'], self.SegmentLst))
             sorted(self.SegmentLst, key=getID)  
             
         #Build remaining Segments:
@@ -598,9 +610,12 @@ class CBM(object):
             print('STATUS:\t Consolidate Mesh on Web Interface', web.ID)  
             (web.wl_nodes, web.wl_cells) = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID].cells, web.BSplineLst)            
             (web.wr_nodes, web.wr_cells) = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID+1].cells, web.BSplineLst)
-                      
-            newcells = consolidate_mesh_on_web(web, web_consolidate_tol, self.display)
-            self.mesh.extend(newcells)
+
+            if not web.wl_nodes or not web.wl_cells or not web.wr_nodes or not web.wr_cells:  # in case there was no mesh in a segment
+                print('STATUS:\t No mesh on Web Interface ' + str(web.ID) + ' to be consolodated')
+            else:
+                newcells = consolidate_mesh_on_web(web, web_consolidate_tol, self.display)
+                self.mesh.extend(newcells)
         
         #=====================split quad cells into trias:
         if split_quads == True:
@@ -719,8 +734,7 @@ class CBM(object):
             print('config_filename')
             vabs_filename = self.config.filename.replace('.yml', fstring)
         
-
-        print('STATUS:\t Running VABS for Constitutive modeling:')
+        print('STATUS:\t Running VABS for constitutive modeling:')
         
         if platform.system() == 'Linux':
             #executable = 'SONATA/vabs/bin/VABSIII'
@@ -730,7 +744,11 @@ class CBM(object):
             cmd = ['VABSIII', vabs_filename]
             
         elif platform.system == 'Windows':
-            cmd = ['SONATA/vabs/bin/VABSIII.exe', vabs_filename]
+            cmd = ['VABS/bin/VABSIII.exe', vabs_filename]
+
+        # Mac
+        elif  platform.system() == 'Darwin':
+            cmd = ['wine', '/Users/rfeil/work/8_VABS/vabs_WIN/AnalySwift/VABS/VABSIII.exe', vabs_filename]
             
         #print('vabs_fname',vabs_filename)
         result = None
@@ -751,7 +769,8 @@ class CBM(object):
                 else:
                     export_cells_for_VABS(self.mesh, nodes, vabs_filename, self.config.vabs_cfg, self.materials)
                     stdout = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
-                
+                    subprocess.call(cmd, shell=True)
+
                 stdout = stdout.replace('\r\n\r\n','\n\t   -')
                 stdout = stdout.replace('\r\n','\n\t   -')
                 stdout = stdout.replace('\n\n','\n\t   -')
@@ -775,7 +794,7 @@ class CBM(object):
                         break
                     
         self.BeamProperties = result
-        print('self.BeamProperties',self.BeamProperties)
+        
         if self.config.vabs_cfg.recover_flag == 1:
             self.BeamProperties.read_all_VABS_Results()
             #ASSIGN Stress and strains to elements:
@@ -817,18 +836,45 @@ class CBM(object):
         Notes
         ----------
         To be defined.
-        
+
         """
+
+
+
         self.mesh, nodes = sort_and_reassignID(self.mesh)
+
+        # # plot before conversion
+        # x_coord_sonata = np.zeros(len(nodes))
+        # y_coord_sonata = np.zeros(len(nodes))
+        # for i in range(len(nodes)):
+        #     x_coord_sonata[i] = nodes[i].coordinates[0]  # x1
+        #     y_coord_sonata[i] = nodes[i].coordinates[1]  # x2
+        #
+        # plt.plot(x_coord_sonata, y_coord_sonata)
+
+
+        # for i in range(len(nodes)):
+        #     plt.plot(nodes[i].coordinates[0], nodes[i].coordinates[1], '.k')
+
+        # nodes = anbax_converter(nodes_SONATA=nodes)
+
+
+
         try:
-            (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = \
-                build_dolfin_mesh(self.mesh, nodes, self.materials)
+            (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = build_dolfin_mesh(self.mesh, nodes, self.materials)
         except:
             print('\n')
             print('==========================================\n\n')
             print('Error, Anba4 wrapper called, but ')
             print('Anba4 _or_ Dolfin are not installed\n\n')
             print('==========================================\n\n')
+
+        # for c in self.mesh:
+        #     plane_orientations[c.id - 1] = c.theta_1[0]
+        #     fiber_orientations[c.id - 1] = c.theta_3
+        #
+        # mesh.rotate(rotation_angle)
+
         #TBD: pass it to anbax and run it!
         anba = anbax(mesh, 1, matLibrary, materials, plane_orientations, fiber_orientations, maxE)
    
@@ -837,6 +883,8 @@ class CBM(object):
         
         #Define transformation T (from ANBA to SONATA/VABS coordinates)
         B = np.array([[0,0,1],[1,0,0],[0,1,0]])
+        # B = np.array([[0,0,-1],[-1,0,0],[0,1,0]])  # new
+
         T = np.dot(np.identity(3),np.linalg.inv(B))
         
         self.AnbaBeamProperties = BeamSectionalProps()
@@ -900,14 +948,14 @@ class CBM(object):
             Uses the string to look for the cell attributes. 
             The default attribute is MatID. Possible other attributes can be 
             fiber orientation (theta_3) or strains and stresses. 
-            If BeamProperties are allready calculated by VABS or something 
+            If BeamProperties are already calculated by VABS or something
             similar, elastic-axis, center-of-gravity... are displayed.
         title : string, optional
             Title to be placed over the plot.
         **kw : keyword arguments, optional
             are passed to the lower "plot_cells" function. Such options are: 
             VABSProperties=None, title='None', plotTheta11=False, 
-            plotDisplacement=False
+            plotDisplacement=False, savepath
             
         Returns
         ----------
@@ -920,7 +968,7 @@ class CBM(object):
 
         '''
         mesh,nodes = sort_and_reassignID(self.mesh)
-        fig,ax = plot_cells(self.mesh, nodes, attribute, self.BeamProperties, title, **kw)
+        fig,ax = plot_cells(self.mesh, nodes, attribute, self.materials, self.BeamProperties, title, **kw)
         return fig,ax
     
     def cbm_post_3dtopo(self):
