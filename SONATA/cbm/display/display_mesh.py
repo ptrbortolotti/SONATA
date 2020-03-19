@@ -15,7 +15,7 @@ from matplotlib.collections import PatchCollection
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.colors import LinearSegmentedColormap
-from SONATA.openmdao_utl.doe_utl import filename_generator
+from SONATA.utl_openmdao.doe_utl import filename_generator
 
 
 def centroid(points):
@@ -63,8 +63,8 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
         #cmap.set_under(color='k')
         
     elif data_name == 'MatID':
-        # cmap = a=plt.cm.get_cmap()
-        cmap = plt.cm.get_cmap('cividis')
+        cmap = a=plt.cm.get_cmap()
+        #cmap = plt.cm.get_cmap('cividis')
         # extract all colors from the .jet map
         cmaplist = [cmap(i) for i in range(cmap.N)]
         # force the first color entry to be grey
@@ -231,7 +231,7 @@ def plot_cells(cells,nodes,attr1, materials, VABSProperties=None, title='None', 
         theta_11 = np.asarray(theta_11)
     
     
-    fig,ax = plot_mesh(nodes_array,element_array,theta_11,data,data_name,title, VABSProperties, **kw)    
+    fig,ax = plot_mesh(nodes_array, element_array, theta_11, data, data_name, materials, title, VABSProperties, **kw)    
    
     if 'savepath' in kw:
         #savepath = 'jobs/VHeuschneider/figures/R90_config.svg'

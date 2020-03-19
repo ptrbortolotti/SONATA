@@ -53,7 +53,7 @@ from OCC.Core.Interface import Interface_Static_SetCVal
 from OCC.Core.IFSelect import IFSelect_RetDone
 from OCC.Core.TDF import TDF_LabelSequence
 from OCC.Core.TCollection import TCollection_ExtendedString
-from OCC.Core.TDocStd import Handle_TDocStd_Document
+from OCC.Core.TDocStd import TDocStd_Document
 from OCC.Core.XCAFApp import XCAFApp_Application
 from OCC.Core.XCAFDoc import (XCAFDoc_DocumentTool_ShapeTool,
                          XCAFDoc_DocumentTool_ColorTool,
@@ -568,7 +568,7 @@ def export_STEPFile_Airconics(AirconicsShapes, filename):
     """
     print("This function is a work in progress. For now, use export_STEPFile")
     # create an handle to a document
-    h_doc = Handle_TDocStd_Document()
+    h_doc = TDocStd_Document().Downcast()
 
     # Create the application
     app = XCAFApp_Application.GetApplication().GetObject()

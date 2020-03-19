@@ -6,9 +6,10 @@ CLI driver for generating wind turbine CAD models
 """
 
 import os
+import sys
 import argparse
-from .airfoil_cst import TurbineCAD
-from .airconics.liftingSurface import LiftingSurface
+from SONATA.airconics_blade_cad.airfoil_cst import TurbineCAD
+from SONATA.airconics_blade_cad.airconics.liftingSurface import LiftingSurface
 
 class TurbineCLI:
     """Entry point for the command-line driver for CAD generation"""
