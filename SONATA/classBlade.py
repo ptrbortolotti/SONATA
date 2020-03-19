@@ -17,13 +17,8 @@ import matplotlib.pyplot as plt
 
 from OCC.Core.gp import gp_Ax2, gp_Pnt, gp_Dir, gp_Ax1, gp_Vec, gp_Ax3, gp_Pln, gp_Trsf, gp_Pnt2d
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
-try:
-    from OCC.Display.SimpleGui import init_display
-except:
-    pass
-if __name__ == '__main__':
-    os.chdir('..')
-    
+from OCC.Display.SimpleGui import init_display
+
 import SONATA.utl.logging    
 from SONATA.classComponent import Component
 from SONATA.classAirfoil import Airfoil
@@ -49,7 +44,6 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, \
                                         show_coordinate_system, display_SONATA_SegmentLst,\
                                         display_custome_shape, transform_wire_2to3d, display_config, \
                                         display_Ax2, display_cbm_SegmentLst
-
 
 from SONATA.utl_openmdao.utl_openmdao import utl_openmdao_apply_gains_web_placement, utl_openmdao_apply_gains_mat_thickness
 
@@ -163,7 +157,7 @@ class Blade(Component):
 #        string reputation of an object, """
 #        return 'Blade: '+ str(self.name)
     
-    def _read_ref_axes(self, yml_ra, flag_ref_axes_wt):
+    def _read_ref_axes(self, yml_ra, flag_ref_axes_wt=False):
         """
         
         """
@@ -332,13 +326,13 @@ class Blade(Component):
         print('STATUS:\t Reading IAE37 Definition for Blade: %s' % (self.name))
         
         #Read blade & beam reference axis and create BSplineLst & interpolation instance
-        (self.blade_ref_axis_BSplineLst, self.f_blade_ref_axis, tmp_blra) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags').get('flag_ref_axes_wt'))
+        (self.blade_ref_axis_BSplineLst, self.f_blade_ref_axis, tmp_blra) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'))
 
         if not yml.get('outer_shape_bem').get('beam_reference_axis'):
             #  In case beam reference axis is not defined in yaml file, use identical coordinates for beam reference and reference axis
-            (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags').get('flag_ref_axes_wt'))
+            (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'))
         else:
-            (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('beam_reference_axis'), flag_ref_axes_wt=kwargs.get('flags').get('flag_ref_axes_wt'))
+            (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('beam_reference_axis'), flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'))
         
         #Read chord, twist and nondim. pitch axis location and create interpolation
         tmp_chord = np.asarray((yml.get('outer_shape_bem').get('chord').get('grid'),yml.get('outer_shape_bem').get('chord').get('values'))).T
@@ -347,7 +341,7 @@ class Blade(Component):
 
         self.f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1], bounds_error=False, fill_value='extrapolate')
 
-        if kwargs['flags']['flag_wt_ontology']:  # correct twist rate sign as yaml twist is defined according to BeamDyn Definition (WTF)
+        if kwargs.get('flags',{}).get('flag_wt_ontology'):  # correct twist rate sign as yaml twist is defined according to BeamDyn Definition (WTF)
             self.f_twist = interp1d(tmp_tw[:,0], -tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
         else:
             self.f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
@@ -361,7 +355,7 @@ class Blade(Component):
         arr = np.asarray([airfoil_position[0],tmp]).T
 
         #Read CBM Positions
-        if kwargs.get('flags').get('flag_wt_ontology'):
+        if kwargs.get('flags',{}).get('flag_wt_ontology'):
             if stations: 
                 cs_pos = stations
             else:
@@ -372,7 +366,7 @@ class Blade(Component):
             else:
                 cs_pos = stations
             
-        x = np.unique(np.sort(np.hstack((kwargs.get('stations_add'), tmp_chord[:,0], tmp_tw[:,0], \
+        x = np.unique(np.sort(np.hstack( (tmp_chord[:,0], tmp_tw[:,0], \
                                          tmp_blra[:,0], tmp_bera[:,0], \
                                          tmp_pa[:,0], arr[:,0], cs_pos))))
 
@@ -405,7 +399,7 @@ class Blade(Component):
 
 
         #Generate CBMConfigs
-        if kwargs.get('flags').get('flag_wt_ontology'):
+        if kwargs.get('flags',{}).get('flag_wt_ontology'):
             cbmconfigs = iea37_converter(self, cs_pos, yml, self.materials, mesh_resolution = kwargs.get('flags').get('mesh_resolution'))
             
         else:
