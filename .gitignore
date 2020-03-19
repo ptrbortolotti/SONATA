@@ -55,6 +55,7 @@ license
 /.eggs/
 /.idea/
 /*.egg-info/
+/conda.bld/
 jobs/VariSpeed
 jobs/RFeil
 SNOPT_*
