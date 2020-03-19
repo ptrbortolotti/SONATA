@@ -22,7 +22,6 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 from OCC.Core.gp import gp_Ax1, gp_Ax2, gp_Ax3, gp_Dir, gp_Pnt, gp_Trsf
-# PythonOCC Modules
 from OCC.Display.SimpleGui import init_display
 
 # First party modules
@@ -40,7 +39,6 @@ from SONATA.cbm.display.display_utils import (display_config,
                                               show_coordinate_system,
                                               transform_wire_2to3d,)
 from SONATA.cbm.fileIO.CADinput import import_2d_stp, import_3d_stp, load_3D
-# SONATA modules:
 from SONATA.cbm.fileIO.CADoutput import export_to_step
 from SONATA.cbm.mesh.cell import Cell
 from SONATA.cbm.mesh.consolidate_mesh import consolidate_mesh_on_web
@@ -67,18 +65,6 @@ from SONATA.vabs.classVABSConfig import VABSConfig
 from SONATA.vabs.failure_criteria import (hashin_2D, maxstrain_2D,
                                           maxstress_2D, tsaiwu_2D, von_Mises,)
 from SONATA.vabs.vabs_utl import export_cells_for_VABS
-
-if __name__ == "__main__":
-    os.chdir("../..")
-
-
-
-
-
-
-
-
-
 
 try:
     from SONATA.anbax.anbax_utl import build_dolfin_mesh

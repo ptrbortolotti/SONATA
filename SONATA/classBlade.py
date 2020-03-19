@@ -17,11 +17,9 @@ from jsonschema import validate
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
 from OCC.Core.gp import (gp_Ax1, gp_Ax2, gp_Ax3, gp_Dir, gp_Pln,
                          gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec,)
-from OCC.Display.SimpleGui import init_display
 from scipy.interpolate import interp1d
 
 # First party modules
-import SONATA.utl.logging
 from SONATA.cbm.classCBM import CBM
 from SONATA.cbm.classCBMConfig import CBMConfig
 from SONATA.cbm.display.display_utils import (display_Ax2,
@@ -29,10 +27,9 @@ from SONATA.cbm.display.display_utils import (display_Ax2,
                                               display_config,
                                               display_custome_shape,
                                               display_SONATA_SegmentLst,
-                                              export_to_BMP, export_to_JPEG,
-                                              export_to_TEX, export_to_TIFF,
                                               show_coordinate_system,
                                               transform_wire_2to3d,)
+
 from SONATA.cbm.fileIO.CADinput import intersect_shape_pln
 from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_from_dct,
                                               get_BSplineLst_D2,
@@ -56,13 +53,6 @@ from SONATA.utl.interpBSplineLst import interpBSplineLst
 from SONATA.utl.plot import plot_beam_properties
 from SONATA.utl.trsf import trsf_af_to_blfr, trsf_blfr_to_cbm, trsf_cbm_to_blfr
 from SONATA.vabs.classVABSConfig import VABSConfig
-
-if __name__ == "__main__":
-    os.chdir("..")
-
-
-
-
 
 
 class Blade(Component):
@@ -915,9 +905,9 @@ if __name__ == "__main__":
     plt.close("all")
 
     #% ====== WindTurbine ==============
-    with open("./jobs/PBortolotti/IEAonshoreWT.yaml", "r") as myfile:
+    with open("../jobs/PBortolotti/IEAonshoreWT.yaml", "r") as myfile:
         inputs = myfile.read()
-    with open("jobs/PBortolotti/IEAontology_schema.yaml", "r") as myfile:
+    with open("../jobs/PBortolotti/IEAontology_schema.yaml", "r") as myfile:
         schema = myfile.read()
     validate(yaml.load(inputs), yaml.load(schema))
     yml = yaml.load(inputs)

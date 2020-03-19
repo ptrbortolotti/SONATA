@@ -21,9 +21,6 @@ requirements:
     - intervaltree
     - shapely
 
-  imports:
-    - SONATA
-
 extra:
   recipe-maintainers:
     - tpflumm
