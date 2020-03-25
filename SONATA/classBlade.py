@@ -246,7 +246,7 @@ class Blade(Component):
 
         # determine local the local cbm coordinate system Ax2
         self.beam_ref_axis_BSplineLst[int(resCoords[0, 0])].D2(resCoords[0, 1], p, vx, v2)
-        vz = gp_Vec(vx.Z(), 0, vx.X()).Normalized()
+        vz = gp_Vec(-vx.Z(), 0, vx.X()).Normalized()
         tmp_Ax2 = gp_Ax2(p, gp_Dir(vz), gp_Dir(vx))
         local_Ax2 = tmp_Ax2.Rotated(gp_Ax1(p, gp_Dir(vx)), float(self.f_twist(x)))
         return local_Ax2
@@ -358,7 +358,8 @@ class Blade(Component):
             Is the database of airfoils
         
         """
-        self.name = yml.get("name")
+        if yml.get("name"):
+            self.name = yml.get("name")
         print("STATUS:\t Reading IAE37 Definition for Blade: %s" % (self.name))
 
         # Read blade & beam reference axis and create BSplineLst & interpolation instance
@@ -413,11 +414,13 @@ class Blade(Component):
         # Generate CBM - move functionality to gen_sections
         tmp = []
         for x, cfg in cbmconfigs:
+            print(self.name, x)
             # get local beam coordinate system, and local cbm_boundary
             tmp_Ax2 = self._get_local_Ax2(x)
             tmp_blra = self.f_beam_ref_axis.interpolate(x)[0][0]
             BoundaryBSplineLst = self._interpolate_cbm_boundary(x)
-            tmp.append([x, CBM(cfg, materials=self.materials, Ax2=tmp_Ax2, BSplineLst=BoundaryBSplineLst)])
+            cs_name = self.name + '_section_R'+ ("%.3f" % x).replace('.','')
+            tmp.append([x, CBM(cfg, materials=self.materials, name=cs_name, Ax2=tmp_Ax2, BSplineLst=BoundaryBSplineLst)])
         self.sections = np.asarray(tmp)
 
         return None
