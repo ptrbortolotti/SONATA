@@ -113,28 +113,58 @@ def convert_structdef_SONATA_to_beamdyn(cs_pos, SONATA_beam_prop):
 
 
 # --- Write BeamDyn file with blade reference line locations ---#
-def write_beamdyn_axis(folder, wt_name, byml, refine):
-    yaml_ref_axis = byml.get('internal_structure_2d_fem').get('reference_axis')
-    yaml_twist = byml.get('outer_shape_bem').get('twist')
+def write_beamdyn_axis(folder, flags_dict, wt_name, byml, refine):
 
-    n_pts = 50
-    grid = np.linspace(0, 1, n_pts)
+    if flags_dict['flag_wt_ontology']:  # in case WT onology is used
+        yaml_ref_axis = byml.get('internal_structure_2d_fem').get('reference_axis')
+        yaml_twist = byml.get('outer_shape_bem').get('twist')
+
+        n_pts = 50
+        grid = np.linspace(0, 1, n_pts)
+
+        # >>> The following is defined correctly when WT definition is used within yaml file <<<
+        # The x of yaml corresponds to x in BeamDyn
+        f_interp = interp1d(yaml_ref_axis.get('x').get('grid'), yaml_ref_axis.get('x').get('values'))
+        kp_xr = f_interp(grid)
+        # The y of yaml corresponds to y in BeamDyn
+        f_interp = interp1d(yaml_ref_axis.get('y').get('grid'), yaml_ref_axis.get('y').get('values'))
+        kp_yr = f_interp(grid)
+        # The z of yaml corresponds to z in BeamDyn
+        f_interp = interp1d(yaml_ref_axis.get('z').get('grid'), yaml_ref_axis.get('z').get('values'))
+        kp_zr = f_interp(grid)
+        # Twist
+        f_interp = interp1d(yaml_twist.get('grid'), yaml_twist.get('values'))
+        twist    = f_interp(grid)*180./np.pi
+        # twist = np.zeros_like(kp_yr)  # twist defined to zero
+
+    elif not flags_dict['flag_wt_ontology']:  # in case HT ontology is used
+        yaml_ref_axis = byml.get('outer_shape_bem').get('reference_axis')
+        yaml_twist = byml.get('outer_shape_bem').get('twist')
+
+        n_pts = 50
+        grid = np.linspace(0, 1, n_pts)
+
+        # >>> The following is defined correctly when HT definition is used within yaml file <<<
+        # The z of yaml corresponds to x in BeamDyn
+        f_interp = interp1d(yaml_ref_axis.get('z').get('grid'), yaml_ref_axis.get('z').get('values'))
+        kp_xr = f_interp(grid)
+        # The -y of yaml corresponds to y in BeamDyn
+        f_interp = interp1d(yaml_ref_axis.get('y').get('grid'), yaml_ref_axis.get('y').get('values'))
+        kp_yr = -f_interp(grid)
+        # The x of yaml corresponds to z in BeamDyn
+        f_interp = interp1d(yaml_ref_axis.get('x').get('grid'), yaml_ref_axis.get('x').get('values'))
+        kp_zr = f_interp(grid)
+        # Twist
+        f_interp = interp1d(yaml_twist.get('grid'), yaml_twist.get('values'))
+        twist    = f_interp(grid)*180./np.pi
+        # twist = np.zeros_like(kp_yr)  # twist defined to zero
+
+    else:
+        print('Can not export BeamDyn properties')
 
 
-    # >>> The following is defined correctly when WT definition is used within yaml file <<<
-    # The x of yaml corresponds to x in BeamDyn
-    f_interp = interp1d(yaml_ref_axis.get('x').get('grid'), yaml_ref_axis.get('x').get('values'))
-    kp_xr = f_interp(grid)
-    # The y of yaml corresponds to y in BeamDyn
-    f_interp = interp1d(yaml_ref_axis.get('y').get('grid'), yaml_ref_axis.get('y').get('values'))
-    kp_yr = f_interp(grid)
-    # The z of yaml corresponds to z in BeamDyn
-    f_interp = interp1d(yaml_ref_axis.get('z').get('grid'), yaml_ref_axis.get('z').get('values'))
-    kp_zr = f_interp(grid)
-    # Twist
-    f_interp = interp1d(yaml_twist.get('grid'), yaml_twist.get('values'))
-    twist    = f_interp(grid)*180./np.pi
-    # twist = np.zeros_like(kp_yr)  # twist defined to zero
+
+
 
     data = np.vstack((kp_xr, kp_yr, kp_zr, twist)).T
 
@@ -164,8 +194,14 @@ def write_beamdyn_axis(folder, wt_name, byml, refine):
     file.write('     1     %u                 - Member number; Number of key points in this member\n' % (n_pts))
     file.write('\t\t kp_xr \t\t\t kp_yr \t\t\t kp_zr \t\t initial_twist\n')
     file.write('\t\t  (m)  \t\t\t  (m)  \t\t\t  (m)  \t\t   (deg)\n')
-    for i in range(n_pts):
-        file.write('\t %.5e \t %.5e \t %.5e \t %.5e \n' % (data[i, 0], data[i, 1], data[i, 2], data[i, 3]))
+    if flags_dict['flag_write_BeamDyn_unit_convert'] == 'mm_to_m':  # convert units from mm (yaml input) to m
+        for i in range(n_pts):
+            file.write('\t %.5e \t %.5e \t %.5e \t %.5e \n' % (1.e-3*data[i, 0], 1.e-3*data[i, 1], 1.e-3*data[i, 2], 1.e-3*data[i, 3]))
+        print('STATUS: converted from mm to m for export to BeamDyn.dat file')
+    else:  # no unit or scaling conversion
+        for i in range(n_pts):
+            file.write('\t %.5e \t %.5e \t %.5e \t %.5e \n' % (data[i, 0], data[i, 1], data[i, 2], data[i, 3]))
+
     file.write('---------------------- MESH PARAMETER ------------------------------------------\n')
     file.write('          5   order_elem     - Order of interpolation (basis) function (-)\n')
     file.write('---------------------- MATERIAL PARAMETER --------------------------------------\n')
@@ -183,10 +219,10 @@ def write_beamdyn_axis(folder, wt_name, byml, refine):
     file.write('          OutList            - The next line(s) contains a list of output parameters. See OutListParameters.xlsx for a listing of available output channels, (-)\n')
     file.write('"RootFxr, RootFyr, RootFzr"\n')
     file.write('"RootMxr, RootMyr, RootMzr"\n')
-    file.write('"N1Fxl, N1Fyl, N1Fzl"\n')
-    file.write('"N1Mxl, N1Myl, N1Mzl"\n')
+    # file.write('"N1Fxl, N1Fyl, N1Fzl"\n')
+    # file.write('"N1Mxl, N1Myl, N1Mzl"\n')
     file.write('"TipTDxr, TipTDyr, TipTDzr"\n')
-    file.write('"TipRDxr, TipRDyr, TipRDzr"\n')
+    # file.write('"TipRDxr, TipRDyr, TipRDzr"\n')
     file.write('END of input file (the word "END" must appear in the first 3 columns of this last OutList line)\n')
     file.write('---------------------------------------------------------------------------------------\n')
 
@@ -197,7 +233,7 @@ def write_beamdyn_axis(folder, wt_name, byml, refine):
     return None
 
 # --- Write BeamDyn_Blade file with blade properties ---#
-def write_beamdyn_prop(folder, wt_name, radial_stations, beam_stiff, beam_inertia):
+def write_beamdyn_prop(folder, flags_dict, wt_name, radial_stations, beam_stiff, beam_inertia):
     n_pts = len(radial_stations)
 
     # file = open(folder + '00_analysis/analysis/' + wt_name + '_BeamDyn_Blade.dat', 'w')
@@ -212,13 +248,24 @@ def write_beamdyn_prop(folder, wt_name, radial_stations, beam_stiff, beam_inerti
     file.write('   (-)        (-)        (-)        (-)        (-)        (-)\n')
     file.write('1.0E-02    1.0E-02    1.0E-02    1.0E-02    1.0E-02    1.0E-02\n')
     file.write(' ---------------------- DISTRIBUTED PROPERTIES---------------------------------\n')
+
+
+    if flags_dict['flag_write_BeamDyn_unit_convert'] == 'mm_to_m':  # convert units from mm (yaml input) to m
+        beam_stiff = convert_stiff_matrix(beam_stiff, flags_dict)
+        beam_inertia = convert_inertia_matrix(beam_inertia, flags_dict)
+        print('STATUS: converted from mm to m for export to BeamDyn_Blade.dat file')
+
+
     for i in range(n_pts):
         file.write('\t %.6f \n' % (radial_stations[i]))
+        # write stiffness matrices
         for j in range(6):
             file.write('\t %.16e \t %.16e \t %.16e \t %.16e \t %.16e \t %.16e\n' % (
             beam_stiff[i, j, 0], beam_stiff[i, j, 1], beam_stiff[i, j, 2], beam_stiff[i, j, 3], beam_stiff[i, j, 4],
             beam_stiff[i, j, 5]))
         file.write('\n')
+
+        # write inertia properties
         for j in range(6):
             file.write('\t %.16e \t %.16e \t %.16e \t %.16e \t %.16e \t %.16e\n' % (
             beam_inertia[i, j, 0], beam_inertia[i, j, 1], beam_inertia[i, j, 2], beam_inertia[i, j, 3],
@@ -230,6 +277,35 @@ def write_beamdyn_prop(folder, wt_name, radial_stations, beam_stiff, beam_inerti
     print('Finished writing BeamDyn_Blade File')
 
     return None
+
+
+def convert_stiff_matrix(beam_stiff, flags_dict):
+    if flags_dict['flag_write_BeamDyn_unit_convert'] == 'mm_to_m':
+        for j in range(6):  # row
+            for k in range(6):  # column
+                if j <= 2 and k <= 2:  # axial stiffness, EA
+                    beam_stiff[:, j,k] = beam_stiff[:, j,k]  # N (left top part of matrix)
+                elif j <= 2 and k > 2:  # extension & trans-shear to EI $ GJ coupling (right top part of matrix)
+                    beam_stiff[:, j,k] = beam_stiff[:, j,k] * 1e-3  # Nmm to Nm
+                elif j > 2 and k <= 2:  # extension & trans-shear to EI $ GJ coupling (left bottom part of matrix)
+                    beam_stiff[:, j, k] = beam_stiff[:, j, k] * 1e-3  # Nmm to Nm
+                elif j > 2 and k > 2 :  # EI and GJ coupling terms
+                    beam_stiff[:, j,k] = beam_stiff[:, j,k] * 1e-6  # Nmm2 to Nm2
+
+    return beam_stiff
+
+def convert_inertia_matrix(beam_inertia, flags_dict):
+    if flags_dict['flag_write_BeamDyn_unit_convert'] == 'mm_to_m':
+        for j in range(6):  # row
+            for k in range(6):  # column
+                if (j == 0 and k == 0) or (j == 1 and k == 1) or (j == 2 and k == 2):  # mass per unit length
+                    beam_inertia[:, j,k] = beam_inertia[:, j,k] * 1e3  # kg/mm -> kg/m
+                elif (j == 3 and k == 3) or (j == 4 and k == 4) or (j == 5 and k == 5):  # mass moments of inertia
+                    beam_inertia[:, j, k] = beam_inertia[:, j, k] * 1e-6  # kg mm2 -> kg m2
+                elif (j == 3 and k == 4) or (j == 4 and k == 3):  # mass moments of inertia
+                    beam_inertia[:, j, k] = beam_inertia[:, j, k] * 1e-6  # kg mm2 -> kg m2
+
+    return beam_inertia
 
 
 # ==============

@@ -81,7 +81,8 @@ try:
     # from anba4.anbax import anbax
 
     sys.path.append('/Users/rfeil/work/7_anbax/anba_v4_revised')  # revised anbax v4 version from Marco Morandini (2019-11-27)
-    from anba4.anbax_MMtest import anbax
+    # from anba4.anbax_MMtest import anbax  # <<<working version until Feb 2020
+    from anba4.anbax_2020_03_23 import anbax
 
 
 
@@ -793,7 +794,7 @@ class CBM(object):
         self.BeamProperties = result
         
         if self.config.vabs_cfg.recover_flag == 1:
-            self.BeamProperties.read_all_VABS_Results()
+            self.BeamProperties.read_all_VABS_Results(filename=vabs_filename)
             #ASSIGN Stress and strains to elements:
             for i,c in enumerate(self.mesh):
                 c.strain = Strain(self.BeamProperties.ELE[i][1:7])
@@ -806,7 +807,7 @@ class CBM(object):
                 n.displacement = self.BeamProperties.U[i][3:6]
             
             #Calculate standart failure criterias
-            self.cbm_calc_failurecriteria()
+            # self.cbm_calc_failurecriteria()
         
         #print(vabs_filename)
         #REMOVE VABS FILES:
@@ -875,9 +876,13 @@ class CBM(object):
         #TBD: pass it to anbax and run it!
         anba = anbax(mesh, 1, matLibrary, materials, plane_orientations, fiber_orientations, maxE)
    
-        tmp_TS = anba.compute().getValues(range(6),range(6))
-        tmp_MM = anba.inertia().getValues(range(6),range(6))
-        
+        tmp_TS = anba.compute().getValues(range(6),range(6))    # get stiffness matrix
+        tmp_MM = anba.inertia().getValues(range(6),range(6))    # get mass matrix
+
+        # force = [0,0,10]
+        # moment = [0,10,0]
+        # tmp_SF = anba.stress_field(force, moment, reference = "global", voigt_convention = "anba")    # get stress field
+
         #Define transformation T (from ANBA to SONATA/VABS coordinates)
         B = np.array([[0,0,1],[1,0,0],[0,1,0]])
         # B = np.array([[0,0,-1],[-1,0,0],[0,1,0]])  # new

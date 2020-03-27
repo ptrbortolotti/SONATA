@@ -437,7 +437,7 @@ class AirconicsShape(AirconicsBase):
             ext = '.stp'
 
         status = []
-        print('Writing to extension {}'.format(ext))
+        # print('Writing to extension {}'.format(ext))
         print('Writing to file {}'.format(filename))
 
         if ext == '.stl':

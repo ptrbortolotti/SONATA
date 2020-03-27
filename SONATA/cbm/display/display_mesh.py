@@ -120,7 +120,13 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
         cbar.set_ticklabels(cbar_label)
         # cbar.set_ticklabels(['mat1', 'mat2', 'mat3', 'mat4', 'mat5', 'mat6'])
         p.set_clim(0.5, max(data)+0.5)
-    
+
+    elif data_name[0:6] == 'stress':
+        cbar.ax.set_ylabel('Stress, $\mathrm{Nm^2}$')
+
+    elif data_name[0:6] == 'strain':
+        cbar.ax.set_ylabel('Strain, m/m')
+
     if len(theta_11)==len(elements):
         for i,cent in enumerate(centroids):
             
@@ -132,8 +138,8 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
     plt.axis('equal')
     if title!=None:
         ax.set_title(title)
-    ax.set_xlabel(r'$x_2$, m')
-    ax.set_ylabel(r'$x_3$, m')
+    ax.set_xlabel(r'$x_2$, mm')
+    ax.set_ylabel(r'$x_3$, mm')
     
     #plot coordinate system.
     # cslength=0.015
@@ -195,7 +201,7 @@ def plot_cells(cells,nodes,attr1, materials, VABSProperties=None, title='None', 
     nodes_array = []
     for n in nodes:
         if plotDisplacement:
-            nodes_array.append([[n.coordinates[0]+n.displacement[1],n.coordinates[1]+n.displacement[2]]])
+            nodes_array.append([[n.coordinates[0]+n.displacement[1]-1,n.coordinates[1]+n.displacement[2]-1]])
         else:
             nodes_array.append([n.coordinates[0],n.coordinates[1]])
     nodes_array = np.asarray(nodes_array)   

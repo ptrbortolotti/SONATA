@@ -53,6 +53,10 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
 
 from SONATA.utl_openmdao.utl_openmdao import utl_openmdao_apply_gains_web_placement, utl_openmdao_apply_gains_mat_thickness
 
+
+from SONATA.airconics_blade_cad.blade_cst import blade_cst
+import SONATA.airconics_blade_cad.airconics.liftingSurface as liftingSurface
+
 class Blade(Component):
     """
     SONATA Blade component object.
@@ -213,7 +217,7 @@ class Blade(Component):
         
         #determine local the local cbm coordinate system Ax2
         self.beam_ref_axis_BSplineLst[int(resCoords[0,0])].D2(resCoords[0,1],p,vx,v2)
-        vz = gp_Vec(vx.Z(),0,vx.X()).Normalized()
+        vz = gp_Vec(-vx.Z(),0,vx.X()).Normalized()
         tmp_Ax2 = gp_Ax2(p, gp_Dir(vz), gp_Dir(vx))
         local_Ax2 = tmp_Ax2.Rotated(gp_Ax1(p,gp_Dir(vx)),float(self.f_twist(x)))
         return local_Ax2
@@ -490,7 +494,7 @@ class Blade(Component):
                 load = interp_loads(loads, x)
                 for k,v in load.items():
                     setattr(vc,k,v)
-            
+
             #set initial twist and curvature
             vc.curve_flag = 1
             vc.k1 = float(self.f_curvature_k1(x))
@@ -767,6 +771,31 @@ class Blade(Component):
         self.display.View_Iso()
         self.display.FitAll()
         self.start_display()
+
+
+    def blade_airconics_iges(self, job_str, flags_dict):
+        """
+        exports lofted blade based on airconics package
+
+        Stand-alone package that simply reads a yaml input file
+        """
+
+        CAD_shape = blade_cst(self.yml, flags_dict)
+        CAD_shape.create_blade_cst()
+
+        NSegments = 100
+        blade = liftingSurface.LiftingSurface(CAD_shape.airfoil_func, NSegments=NSegments)
+        print(["Finished creating loft using " + str(NSegments) + " segments"])
+        blade.Write(job_str[:-5] + '.iges')  # writes step, stl, igs, or iges files depending on chosen extension
+
+        # optional plot that shows wires
+        # fig, ax = plt.subplots()
+        # # ax = fig.gca(projection='3d')
+        # for eta in np.arange(0.0, 1.01, 0.05):
+        #     CAD_shape.blade_af(eta, ax=ax)
+        # plt.show()
+
+        return None
 
 
 

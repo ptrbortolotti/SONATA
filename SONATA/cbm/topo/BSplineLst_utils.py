@@ -896,7 +896,7 @@ def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_inter
         print('INFO:\t Closing open discrete definition')
         DCT_data = np.concatenate((DCT_data,DCT_data[0:1,:]),axis=0)   
 
-    DCT_data = fuse_rows(DCT_data, 1e-6) #check all datapoints and merge if allclose is true 
+    DCT_data = fuse_rows(DCT_data, 1e-6) #check all datapoints and merge if allclose is true
     
     #Find corners and edges of data
     #print(DCT_data)

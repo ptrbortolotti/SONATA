@@ -39,9 +39,6 @@ components:
                     values: [0.0, 1.9999253561681682, 3.9998507123363365, 5.999776068504504, 7.999701424672673, 9.999626780840842, 11.999552137009008, 13.999477493177178, 15.999402849345346, 17.99932820551351, 19.937942683339866, 21.876557161166218, 23.81517163899257, 25.753786116818922, 27.69240059464527, 29.631015072471627, 31.491870519188982, 33.35272596590634, 35.2135814126237, 37.07443685934105, 38.93529230605841, 40.79614775277577, 42.657003199493126, 44.51785864621048, 46.37871409292784, 48.23956953964519, 50.25503560149709, 52.27050166334898, 54.28596772520088, 56.30143378705277, 58.316899848904676, 60.332365910756565, 62.34783197260846, 64.36329803446036, 66.37876409631225, 68.39423015816413, 70.40969622001603, 72.42516228186794, 74.44062834371984, 76.45609440557173, 79.99701424672674, 82.40861190458908, 84.82020956245144, 87.2318072203138, 89.17296901973235, 91.11413081915089, 93.05529261856942, 94.99645441798798, 97.49636111319819, 99.9962678084084]
             webs:
                -  name: fore_web
-                  curvature:
-                      grid: [0.1, 0.95]
-                      values: [-0.3, -0.3]
                   rotation:
                       fixed: twist
                       grid: [0.0, 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.19938686833333333, 0.21877373666666666, 0.238160605, 0.25754747333333333, 0.27693434166666664, 0.29632121, 0.314930459, 0.333539708, 0.352148957, 0.370758206, 0.38936745500000003, 0.407976704, 0.426585953, 0.445195202, 0.463804451, 0.4824137, 0.5025691128571429, 0.5227245257142857, 0.5428799385714286, 0.5630353514285714, 0.5831907642857144, 0.6033461771428572, 0.62350159, 0.6436570028571429, 0.6638124157142857, 0.6839678285714286, 0.7041232414285714, 0.7242786542857144, 0.7444340671428572, 0.76458948, 0.8, 0.8241168766666667, 0.8482337533333334, 0.87235063, 0.8917629725, 0.9111753149999999, 0.9305876574999999, 0.95, 0.975, 1.0]
@@ -281,8 +278,6 @@ components:
                   material: medium_density_foam
                   web: fore_web
                   thickness:
-#                      grid: [0.1, 0.95]
-#                      values: [0.1, 0.1]
                       grid: [0.1, 0.12, 0.14, 0.16, 0.18, 0.19938686833333333, 0.21877373666666666, 0.238160605, 0.25754747333333333, 0.27693434166666664, 0.29632121, 0.314930459, 0.333539708, 0.352148957, 0.370758206, 0.38936745500000003, 0.407976704, 0.426585953, 0.445195202, 0.463804451, 0.4824137, 0.5025691128571429, 0.5227245257142857, 0.5428799385714286, 0.5630353514285714, 0.5831907642857144, 0.6033461771428572, 0.62350159, 0.6436570028571429, 0.6638124157142857, 0.6839678285714286, 0.7041232414285714, 0.7242786542857144, 0.7444340671428572, 0.76458948, 0.8, 0.8241168766666667, 0.8482337533333334, 0.87235063, 0.8917629725, 0.9111753149999999, 0.9305876574999999, 0.95]
                       values: [0.043, 0.04210588235294117, 0.04121176470588235, 0.04031764705882352, 0.0394235294117647, 0.03855682235686274, 0.037690115301960786, 0.03682340824705882, 0.03595670119215687, 0.0350899941372549, 0.03422328708235294, 0.033391344185882355, 0.03255940128941177, 0.031727458392941166, 0.030895515496470585, 0.03006357259999999, 0.029231629703529403, 0.02839968680705882, 0.027567743910588235, 0.026735801014117655, 0.02590385811764706, 0.025002792601680666, 0.024101727085714286, 0.0232006615697479, 0.02229959605378151, 0.021398530537815118, 0.020497465021848734, 0.01959639950588235, 0.01869533398991596, 0.017794268473949576, 0.016893202957983196, 0.01599213744201681, 0.015091071926050414, 0.014190006410084029, 0.013288940894117644, 0.011705882352941174, 0.010627716101960786, 0.01000000000000000, 0.01000000000000000, 0.01000000000000000, 0.01000000000000000, 0.01000000000000000, 0.01000000000000000]
                   fiber_orientation:
@@ -482,9 +477,12 @@ materials:
       G: 1.323e+009
       nu: 0.300
       alpha: 0.0
-      Xt: 74.e+006
-      Xc: 87.e+006
-
+      Xt: 4.253E7
+      Xc: 5.0E7
+      # S: 2.126E7
+      # ply_t: 5.0E-4
+      # waste: 0.25
+      # unit_cost: 7.23
    -  name: glass_uni
       description: Vectorply E-LT-5500, Epikote MGS RIMR 135/Epicure MGS RIMH 1366 epoxy
       source: MSU composites database 3D property tests, Engineering Mechanics of Composite Materials, Daniel, I & Ishai, O., 1994, pg. 34
@@ -494,19 +492,16 @@ materials:
       G: [3.27e+009, 3.48e+009, 3.50e+009]
       nu: [0.262, 0.350, 0.264]
       # alpha:[7    21  21]
-      Xt: [1060.0e+006, 66.3e+006, 26.6e+006]
-      Xc: [826.0e+006, 196.0e+006, 197.0e+006]
-      S: [32.9e+006, 30.0e+006, 22.9e+006]
+      Xt: [6.092E8, 3.81E7, 1.529E7]
+      Xc: [4.7471E8, 1.1264E8, 1.1322E8]
+      S: [1.891E7, 1.724E7, 1.316E7]
       fvf: 0.57
-
-    # - name: carbon_uni
-      # source: MSU composites database 3D property tests, Engineering Mechanics of Composite Materials, Daniel, I & Ishai, O., 1994, pg. 34
-      # orth: 1
-      # rho:  1630.0
-      # E:    [150.2e+009, 9.1e+009, 9.1e+009]
-      # # Xt:   [2236.0e+006, 0.00, 0.00]
-      # # Xc:   [1528.0e+006, 0.00, 0.00]
-
+      # fwf: 0.7450682696347697
+      # ply_t: 0.005
+      # unit_cost: 1.87
+      # waste: 0.05
+      # fiber_density: 2535.5
+      # area_density_dry: 7.227162215457267
    -  name: glass_biax
       description: Vectorply E-LT-5500, Epikote MGS RIMR 135/Epicure MGS RIMH 1366 epoxy
       source: MSU composites database 3D property tests, Engineering Mechanics of Composite Materials, Daniel, I & Ishai, O., 1994, pg. 34
@@ -515,12 +510,18 @@ materials:
       E: [11.1e+009, 11.1e+009, 16.7e+009]
       G: [13.53e+009, 3.49e+009, 3.49e+009]
       nu: [0.500, 0.000, 0.066]
-      # alpha:  [14 14  21]
-      Xt: [54.47e+006, 54.47e+006, 26.6e+006]
-      Xc: [74.1e+006, 74.1e+006, 197.0e+006]
-      S: [180.0e+006, 30.0e+006, 22.9e+006]
+      # alpha:  [14, 14, 21]
+      Xt: [4.29E7, 4.26E7, 1.53E7]
+      Xc: [7.07E7, 7.07E7, 1.132E8]
+      S: [1.034E8, 1.72E7, 1.32E7]
       fvf: 0.57
-
+#      fwf: 0.7450682696347697
+#      ply_t: 0.001
+#      waste: 0.15
+#      unit_cost: 3.00
+#      fiber_density: 2535.5
+#      area_density_dry: 1.4454324430914534
+#      roll_mass: 181.4368
    -  name: glass_triax
       description: Vectorply E-LT-5500, Epikote MGS RIMR 135/Epicure MGS RIMH 1366 epoxy
       source: MSU composites database 3D property tests, Engineering Mechanics of Composite Materials, Daniel, I & Ishai, O., 1994, pg. 34
@@ -529,36 +530,49 @@ materials:
       E: [28.7e+009, 16.6e+009, 16.7e+009]
       G: [8.40e+009, 3.49e+009, 3.49e+009]
       nu: [0.500, 0.000, 0.170]
-      # alpha:  [11 18  21]
-      Xt: [54.5e+006, 54.5e+006, 26.6e+006]
-      Xc: [74.1e+006, 74.1e+006, 197.0e+006]
-      S: [32.9e+006, 30.0e+006, 22.9e+006]
+#      alpha:  [11, 18, 21]
+      Xt: [3.96E8, 7.64E7, 1.53E7]
+      Xc: [4.489E8, 1.747E8, 1.132E8]
+      S: [1.034E8, 1.72E7, 1.32E7]
       fvf: 0.57
-
-    # - name: low_density_foam
-      # description: Airex C70.40 PVC Foam
-      # source: https://www.3accorematerials.com/uploads/documents/TDS-AIREX-C70-E_1106.pdf
-      # orth: 0
-      # rho:  40.0
-      # E:    123.125e+006
-      # nu:   0.32
-      # # alpha: 2.5
-      # Xt:   0.7e+006
-      # Xc:   0.45e+006
-      # S:    0.5e+006
+#      fwf: 0.7450682696347697
+#      ply_t: 0.001
+#      unit_cost: 2.86
+#      waste: 0.15
+#      fiber_density: 2535.5
+#      area_density_dry: 1.4454324430914534
+#      roll_mass: 181.4368
    -  name: medium_density_foam
       description: Airex C70.130 PVC Foam
       source: https://www.3accorematerials.com/uploads/documents/TDS-AIREX-C70-E_1106.pdf
       orth: 0
       rho: 130.0
-      E: 129.20e+006
+      E: 1.292E8
+      G: 4.8946969696969695E7
       nu: 0.32
       # alpha: 2.5
-      Xt: 4.0e+006
-      Xc: 3.0e+006
-      S: 2.4e+006
+      Xt: 2083000.0
+      Xc: 1563000.0
+      S: 1250000.0
+#      waste: 0.2
+#      unit_cost: 13
+#   -  name: resin
+#      description: epoxy
+#      E: 1.e+6
+#      rho: 1150.
+#      orth: 0
+#   -  name: steel
+#      description: Steel of the tower
+#      source: Standard steel with higher density to account for auxiliary systems of the tower (elevator, stairs, etc)
+#      orth: 0
+#      rho: 8500
+#      E: 210.e+006
+#      nu: 0.3
+#      alpha: 0.0
+#      Xt: 360.e+006
+#      Xc: 360.e+006
+#      sigma_y: 450.e+6
 
-      G: 48946969.696969695
     # - name: high_density_foam
       # description: Airex C70.250 PVC Foam    
       # source: https://www.3accorematerials.com/uploads/documents/TDS-AIREX-C70-E_1106.pdf
@@ -579,38 +593,48 @@ materials:
       # Xt:   61.51e+006
       # Xc:   65.36e+006
       # S:    36.61e+006
+
 assembly:
-    global:
-        rating: 5e6
-        turbine_class: III
-        turbulence_class: A
-        drivetrain: Constant_eff
-        cone_angle: 4.0
-        tilt_angle: 6.0
-        number_of_blades: 3
-        hub_height: 140.0
-        hubD: 6.0
-    control:
-        Vin: 3.0
-        Vout: 25.0
-        minOmega: 3.0
-        maxOmega: 10.0
-        tsr: 10.5
-        pitch: 0.
-        maxTS: 85.
+    turbine_class: III
+    turbulence_class: A
+    drivetrain: Constant_eff
+    rotor_orientation: Upwind
+    number_of_blades: 3
+control:
+    rated_power: 5.e+6
+    Vin: 4.0
+    Vout: 25.0
+    minOmega: 0.0
+    maxOmega: 2.0
+    tsr: 10.5
+    pitch: 0.
+    maxTS: 85.
+    max_pitch_rate: 0.03488888888888889 # 2 deg/s
+    max_torque_rate: 1500000.
+    # Controller parameters 
+    PC_zeta: 0.7                      # Pitch controller desired damping ratio [-]
+    PC_omega: 0.5                     # Pitch controller desired natural frequency [rad/s]
+    VS_zeta: 0.7                      # Torque controller desired damping ratio [-]
+    VS_omega: 0.2                     # Torque controller desired natural frequency [rad/s]
+    max_pitch: 90                     # Maximum pitch angle [rad], {default = 90 degrees}
+    min_pitch: 0                      # Minimum pitch angle [rad], {default = 0 degrees}
+    vs_minspd: 0                      # Minimum rotor speed [rad/s], {default = 0 rad/s}
+    ss_vsgain: 1                      # Torque controller setpoint smoother gain bias percentage [%, <= 1 ], {default = 100%}
+    ss_pcgain: .01                    # Pitch controller setpoint smoother gain bias percentage  [%, <= 1 ], {default = 0.1%}
+    ps_percent: 0.8                   # Percent peak shaving  [%, <= 1 ], {default = 80%}
 environment:
-    # air data at normal atmospheric conditions and sea level (0 m MSL; 15 degC)
-    air_data:
-        density: 1.225
-        DynVisc: 0.00001802
-        KinVisc: 0.0000147
-        SpdSound: 340.0
-
-
-
-
-
-
-
-
-
+    air_density: 1.225
+    air_dyn_viscosity: 1.81e-5
+    weib_shape_parameter: 2.
+    air_speed_sound: 340.
+    shear_exp: 0.2
+    water_density: 1025.0
+    water_dyn_viscosity: 1.3351e-3
+    soil_shear_modulus: 140e6
+    soil_poisson: 0.4
+costs:
+    wake_loss_factor: 0.15
+    fixed_charge_rate: 0.075
+    bos_per_kW: 459.
+    opex_per_kW: 44.
+    turbine_number: 120

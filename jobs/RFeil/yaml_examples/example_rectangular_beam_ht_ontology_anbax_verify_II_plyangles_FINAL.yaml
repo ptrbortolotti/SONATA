@@ -1,0 +1,245 @@
+name: Rectangular_Beam
+description: Example test case - rectangular beam
+
+components:
+#==================== B L A D E ====================================
+    blade:
+        outer_shape_bem:
+            airfoil_position:
+                grid: [0.0, 1.0]
+                labels: [rectangular, rectangular]
+            chord:
+                grid: [0.0, 1.0]
+                values: [1., 1.]  # normalized chord
+            twist:
+                grid: [0.0, 1.0]
+                values: [0.0, 0.0]
+            pitch_axis:
+                grid: [0.0, 1.0]
+                values: [0., 0.]
+                # values: [0.15, 0.3]
+            reference_axis:
+                x:
+                    grid: [0.0, 1.0]
+                    values: [0.0, 0.1]
+                y:
+                    grid: [0.0, 1.0]
+                    values: [0.0, 0.0]
+                z:
+                    grid: [0.0, 1.0]
+                    values: [0.0, 0.0]
+            beam_reference_axis:
+                x:
+                    grid: [0.0, 1.0]
+                    values: [0.0, 0.1]
+                y:
+                    grid: [0.0, 1.0]
+                    values: [0.0, 0.0]
+                z:
+                    grid: [0.0, 1.0]
+                    values: [0.0, 0.0]
+
+#-------------------- C B M ------------------------------------
+        internal_structure_2d_fem:
+            sections:
+              # --- r/R = 0.0 ---
+              - position: 0.0
+                trim_mass: False
+                mesh_resolution: 400 # ca 450 punkte auf der aeusseren Kurve. - von innen nach aussen.
+                segments:
+                  - id: 0
+                    filler: Null
+                    layup: 
+                        #-[Start[-], End[-], thickness[m], Orientation [deg], MatID[int], 'name'[str]]
+                        - [0., 1., 0.005,   23, 1, 'Outer_skin']
+                        - [0., 1., 0.005,   -23, 2, 'Outer_skin']
+                        - [0., 1., 0.005,   46, 3, 'Outer_skin']
+                        - [0., 1., 0.005,   -46, 4, 'Outer_skin']
+                        - [0., 1., 0.005,   23, 5, 'Outer_skin']
+                        - [0., 1., 0.005,   -23, 6, 'Outer_skin']
+                        - [0., 1., 0.005,   46, 1, 'Outer_skin']
+                        - [0., 1., 0.005,   -46, 2, 'Outer_skin']
+                        - [0., 1., 0.005,   23, 3, 'Outer_skin']
+                        - [0., 1., 0.005,   -23, 4, 'Outer_skin']
+              # --- r/R = 1.0 ---
+              - position: 1.0
+                trim_mass: False
+                mesh_resolution: 400 # ca 450 punkte auf der aeusseren Kurve. - von innen nach aussen.
+                segments:
+                  - id: 0
+                    filler: Null
+                    layup: 
+                        #-[Start[-], End[-], thickness[m], Orientation [deg], MatID[int], 'name'[str]]
+                      - [0., 1., 0.005,   23, 1, 'Outer_skin']
+                      - [0., 1., 0.005,   -23, 2, 'Outer_skin']
+                      - [0., 1., 0.005,   46, 3, 'Outer_skin']
+                      - [0., 1., 0.005,   -46, 4, 'Outer_skin']
+                      - [0., 1., 0.005,   23, 5, 'Outer_skin']
+                      - [0., 1., 0.005,   -23, 6, 'Outer_skin']
+                      - [0., 1., 0.005,   46, 1, 'Outer_skin']
+                      - [0., 1., 0.005,   -46, 2, 'Outer_skin']
+                      - [0., 1., 0.005,   23, 3, 'Outer_skin']
+                      - [0., 1., 0.005,   -23, 4, 'Outer_skin']
+
+
+#==================== A I R F O I L S ==================================
+airfoils:
+   -  name: rectangular
+      coordinates:
+           x: [0.24, 0.24, -0.24, -0.24,  0.24, 0.24]  # orig - follow s-coordinate along the outer profile of the structure
+           y: [0.0, 0.12,  0.12, -0.12, -0.12, 0.0]
+#          x: [0.10, 0.10, -0.38, -0.38,  0.10, 0.10]  # translated by -0.14
+#          y: [0.0, 0.06,  0.06, -0.18, -0.18, 0.0]  # translated by -0.06
+        #   x: [0.20784609690826528, 0.14784609690826528, -0.2678460969082653, -0.14784609690826528,  0.2678460969082653, 0.20784609690826528]  # orig rotated by 30 deg
+        #   y: [0.11999999999999998, 0.22392304845413263,  -0.016076951545867343, -0.22392304845413263, 0.016076951545867343, 0.11999999999999998]  # orig rotated by 30 deg
+        #   x: [0.08660254037844388, 0.05660254037844388, -0.3590896534380867, -0.23908965343808675,  0.17660254037844386, 0.08660254037844388]  # rotated by 30 deg and translated by -0.14
+        #   y: [0.049999999999999996, 0.10196152422706631,  -0.13803847577293366, -0.34588457268119893, -0.10588457268119897, 0.049999999999999996]  # rotated by 30 deg and translated by -0.06
+
+#           x: [0.5, 0.5, -0.5, -0.5,  0.5, 0.5]  # follow s-coordinate along the outer profile of the structure
+#           y: [0.0, 0.5,  0.5, -0.5, -0.5, 0.0]
+      relative_thickness: 1.0000
+      aerodynamic_center: 0.5000
+      polars:  # dummy 2pi polars (not used in example)
+         -  configuration: Default
+            re: 3.00E+06
+            c_m:
+                grid: [-3.141592653589793, 3.141592653589793]
+                values: [0.0, 0.0]
+            c_l:
+                grid: [-3.141592653589793, 3.141592653589793]
+                values: [0.0, 0.0]
+            c_d:
+                grid: [-3.141592653589793, 3.141592653589793]
+                values: [0.5, 0.5]
+   -  name: circular
+      coordinates:
+          x: [1.00000, 0.99901, 0.99606, 0.99114, 0.98429, 0.97553, 0.96489, 0.95241, 0.93815, 0.92216, 0.90451, 0.88526, 0.86448, 0.84227, 0.81871, 0.79389, 0.76791, 0.74088, 0.71289, 0.68406, 0.65451, 0.62434, 0.59369, 0.56267, 0.53140, 0.50000, 0.46860, 0.43733, 0.40631, 0.37566, 0.34549, 0.31594, 0.28711, 0.25912, 0.23209, 0.20611, 0.18129, 0.15773, 0.13552, 0.11474, 0.09549, 0.07784, 0.06185, 0.04759, 0.03511, 0.02447, 0.01571, 0.00886, 0.00394, 0.00099, 0.00000, 0.00099, 0.00394, 0.00886, 0.01571, 0.02447, 0.03511, 0.04759, 0.06185, 0.07784, 0.09549, 0.11474, 0.13552, 0.15773, 0.18129, 0.20611, 0.23209, 0.25912, 0.28711, 0.31594, 0.34549, 0.37566, 0.40631, 0.43733, 0.46860, 0.50000, 0.53140, 0.56267, 0.59369, 0.62434, 0.65451, 0.68406, 0.71289, 0.74088, 0.76791, 0.79389, 0.81871, 0.84227, 0.86448, 0.88526, 0.90451, 0.92216, 0.93815, 0.95241, 0.96489, 0.97553, 0.98429, 0.99114, 0.99606, 0.99901, 1.00000]
+          y: [0.00000, 0.03140, 0.06267, 0.09369, 0.12434, 0.15451, 0.18406, 0.21289, 0.24088, 0.26791, 0.29389, 0.31871, 0.34227, 0.36448, 0.38526, 0.40451, 0.42216, 0.43815, 0.45241, 0.46489, 0.47553, 0.48429, 0.49114, 0.49606, 0.49901, 0.50000, 0.49901, 0.49606, 0.49114, 0.48429, 0.47553, 0.46489, 0.45241, 0.43815, 0.42216, 0.40451, 0.38526, 0.36448, 0.34227, 0.31871, 0.29389, 0.26791, 0.24088, 0.21289, 0.18406, 0.15451, 0.12434, 0.09369, 0.06267, 0.03140, 0.00000, -0.03140, -0.06267, -0.09369, -0.12434, -0.15451, -0.18406, -0.21289, -0.24088, -0.26791, -0.29389, -0.31871, -0.34227, -0.36448, -0.38526, -0.40451, -0.42216, -0.43815, -0.45241, -0.46489, -0.47553, -0.48429, -0.49114, -0.49606, -0.49901, -0.50000, -0.49901, -0.49606, -0.49114, -0.48429, -0.47553, -0.46489, -0.45241, -0.43815, -0.42216, -0.40451, -0.38526, -0.36448, -0.34227, -0.31871, -0.29389, -0.26791, -0.24088, -0.21289, -0.18406, -0.15451, -0.12434, -0.09369, -0.06267, -0.03140, 0.00000]
+      relative_thickness: 1.0000
+      aerodynamic_center: 0.5000
+      polars:  # dummy 2pi polars (not used in example)
+         -  configuration: Default
+            re: 3.00E+06
+            c_m:
+                grid: [-3.141592653589793, 3.141592653589793]
+                values: [0.0, 0.0]
+            c_l:
+                grid: [-3.141592653589793, 3.141592653589793]
+                values: [0.0, 0.0]
+            c_d:
+                grid: [-3.141592653589793, 3.141592653589793]
+                values: [0.5, 0.5]
+materials:
+  - id: 1
+    name: anbax_ortho_test_material
+    description: same as the anbax and analytical material
+    orth: 1
+    rho: 1.0e3                         #kg/m**3
+    E_1: 1.42e11                       #N/m**2, 0° Tensile Modulus
+    E_2: 9.8e9                        #N/m**2, 90° Tensile Modulus
+    E_3: 9.8e9                        #N/m**2, E_3 = E_2
+    G_12: 6.0e9                         #N/m**2, G_ij, is the shear modulus in direction j on the plane whose normal is in direction  i,
+    G_13: 6.0e9                        #N/m**2, G_13 = G_12
+    G_23: 4.8e9                       #N/m**2,
+    nu_12: 0.3                         #-, nu_ij is the Poisson's ratio that corresponds to a contraction in direction j when an extension is applied in direction i.
+    nu_13: 0.3                         #-, nu_13 = nu_12
+    nu_23: 0.34                         #-,
+
+#    alpha_11:  Null                      #1/K Coefficient of thermal expansion
+#    alpha_22:  Null                      #1/K alpha_22 = alpha_33
+#    alpha_33:  Null                      #1/K
+#    Xt: 1800e6                           #N/m**2,, 0° tensile strengh
+#    Xc: 1200e6                           #N/m**2,, 0° compressive strenght
+#    Yt: 60e6                             #N/m**2,, 90° tensile strenght
+#    Yc: 200e6                            #N/m**2,, 90° compressive strenght
+#    S21: 90e6                            #N/m**2,, in-/out of plane shear strength
+
+
+
+
+
+  - id: 2
+    name: anbax_test_material
+    description: same as the anbax and analytical material (close to aluminium)
+    source: Marco Morandini scripts
+    orth: 0
+    rho: 2.70e3
+    E: 73.8e9
+    nu: 0.33
+
+#...............composites..............
+  - id: 3
+    name: ud_cf_ht_ep_060
+    description: basic unidirektional ht-carbon fiber composite with epoxy matrix (FVC of 60%)
+    source: elasitc properties derived from Schuermann, (p.184, 417) with a semi-empiric Puck approach
+    orth: 1
+    rho: 1.536e3                         #kg/m**3
+    E_1: 139.360e9                       #N/m**2, 0° Tensile Modulus
+    E_2: 12.615e9                        #N/m**2, 90° Tensile Modulus
+    E_3: 12.615e9                        #N/m**2, E_3 = E_2
+    G_12: 5.892e9                        #N/m**2, G_ij, is the shear modulus in direction j on the plane whose normal is in direction  i,
+    G_13: 5.892e9                        #N/m**2, G_13 = G_12
+    G_23: 9.332e9                        #N/m**2,
+    nu_12: 0.025                         #-, nu_ij is the Poisson's ratio that corresponds to a contraction in direction j when an extension is applied in direction i.
+    nu_13: 0.025                         #-, nu_13 = nu_12
+    nu_23: 0.352                         #-,
+    alpha_11:  Null                      #1/K Coefficient of thermal expansion
+    alpha_22:  Null                      #1/K alpha_22 = alpha_33
+    alpha_33:  Null                      #1/K
+    Xt: 1800e6                           #N/m**2,, 0° tensile strengh
+    Xc: 1200e6                           #N/m**2,, 0° compressive strenght
+    Yt: 60e6                             #N/m**2,, 90° tensile strenght
+    Yc: 200e6                            #N/m**2,, 90° compressive strenght
+    S21: 90e6                            #N/m**2,, in-/out of plane shear strength
+
+#...............metals..............
+  - id: 4
+    name: steel
+    description: 25CrMo4
+    source:
+    orth: 0
+    rho: 7.75e3
+    E: 210e9
+    nu: 0.3
+    alpha: 11.5e-6
+    YS: 700e6
+    UTS: 900e6
+
+  - id: 5
+    name: aluminium
+    description: EN AW 7075
+    source: gleich.de technical data sheet
+    orth: 0
+    rho: 2.80e3
+    E: 71e9
+    nu: 0.33
+    alpha: 23.4e-6
+    YS: 470e6
+    UTS: 540e6
+
+#...............filler..............
+  - id: 6
+    name: medium_density_foam
+    description: Airex C70.130 PVC Foam
+    source: https://www.3accorematerials.com/uploads/documents/TDS-AIREX-C70-E_1106.pdf
+    orth: 0
+    rho: 130.0
+    E: 129.20e+006
+    nu: 0.32
+    # alpha: 2.5
+    Xt: 4.0e+006
+    Xc: 3.0e+006
+    S: 2.4e+006
+    G: 48946969.696969695
+
+
+
+
+
+
+
+
+
+
+
+

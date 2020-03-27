@@ -126,7 +126,7 @@ class BeamSectionalProps(object):
     """    
     
     __slots__ = ('TS', 'MM', 'Xg', 'Xt', 'Xs', 'PIA', 'VS', 'Ag', \
-                 'Bk', 'Ck', 'Dk')
+                 'Bk', 'Ck', 'Dk', 'ELE', 'U')
     
 
     def __init__(self, fname=None):
@@ -141,7 +141,10 @@ class BeamSectionalProps(object):
         self.Bk = None
         self.Ck = None
         self.Dk = None
-        
+
+        self.ELE = None
+        self.U = None
+
         if fname:
             self.read_vabs_K(fname)
 
@@ -317,12 +320,14 @@ class BeamSectionalProps(object):
             self.Dk=None
             
 
-    def read_all_VABS_Results(self):
+    def read_all_VABS_Results(self, filename='vabs_filename'):
         """
         reads the strains, stresses and displacements from VABS result files
         """
-        self.ELE = read_VABS_Results(self.filename.replace('.K','.ELE'))
-        self.U = read_VABS_Results(self.filename.replace('.K','.U'))
+        # self.ELE = read_VABS_Results(self.filename.replace('.K','.ELE'))
+        # self.U = read_VABS_Results(self.filename.replace('.K','.U'))
+        self.ELE = read_VABS_Results(filename+'.ELE')
+        self.U = read_VABS_Results(filename+'.U')
 
     
     def MM_convert_units(self,in_dct = {'mass': 'kg', 'length': 'm'},out_dct = {'mass':'kg', 'length':'m'}):

@@ -89,13 +89,13 @@ def build_dolfin_mesh(cbm_mesh, cbm_nodes, cbm_materials):
     plane_orientations = dolfin.MeshFunction("double", mesh, mesh.topology().dim())
     
     materials.set_all(0)
-    fiber_orientations.set_all(0.0)
     plane_orientations.set_all(0.0)
+    fiber_orientations.set_all(0.0)
     
     for c in cbm_mesh:
         materials[c.id-1] = matdict[c.MatID]
-        plane_orientations[c.id-1] = c.theta_1[0]  # rotation around x1-axis (equiv. to beam axis) in SONATA/VABS coordinates
-        fiber_orientations[c.id-1] = c.theta_3     # rotation around x3-axis in SONATA/VABS coordinates
+        plane_orientations[c.id-1] = c.theta_1[0]  # rotation around x1-axis (equiv. to beam axis) in SONATA/VABS coordinates; Theta_11
+        fiber_orientations[c.id-1] = c.theta_3     # rotation around x3-axis in SONATA/VABS coordinates; Theta_3
 
 
     return mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE

@@ -19,7 +19,7 @@ components:
             reference_axis:
                 x:
                     grid: [0.0, 1.0]
-                    values: [0.0, 0.0]
+                    values: [0.0, -3.0]
                 y:
                     grid: [0.0, 1.0]
                     values: [0.0, 0.0]
@@ -30,13 +30,13 @@ components:
             reference_axis:
               x:
                 grid: [0.0, 1.0]
-                values: [0.0, 10.0]
+                values: [0.0, -3.0]
                 y:
                   grid: [0.0, 1.0]
                   values: [0.0, 0.0]
                 z:
                   grid: [0.0, 1.0]
-                  values: [0.0, 0.0]
+                  values: [0.0, 10.0]
             layers:
               - name: Shell_skin_outer
                 material: glass_biax
@@ -65,9 +65,8 @@ components:
                   values: [0.625, 0.625]
                 fiber_orientation:  # in deg for SONATA!!!
                   grid: [0.0, 1.0]
-                  values: [0.0, 0.0]
-#                  values: [0.35, 0.35]
-#                  values: [0.78, 0.78]
+#                  values: [0.0, 0.0]
+                  values: [0.35, 0.35]
               - name: Shell_skin_inner_II
                 material: glass_triax
                 thickness:
@@ -81,7 +80,8 @@ components:
                   values: [1.0, 1.0]
                 fiber_orientation:
                   grid: [0.0, 1.0]
-                  values: [0.0, 0.0]
+#                  values: [0.0, 0.0]
+                  values: [-0.23, -0.23]
 airfoils:
    -  name: rectangular
       coordinates:

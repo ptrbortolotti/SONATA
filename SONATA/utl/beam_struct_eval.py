@@ -28,7 +28,7 @@ def beam_struct_eval(flags_dict, cs_pos, job, folder_str, job_str):
     Functions:
     beam_struct_eval    - parent function (retrieve & transform data, structure of data evaluation)
     plot_vabs_anbax     - child function to plot the 6x6 stiffness and mass matrices 
-    export_beam_struct_properties - csv export of structural beam properties
+    vabs_export_beam_struct_properties - csv export of structural beam properties
 
     Inputs:
     flags_dict          - dictionary containing relevant flags
@@ -42,12 +42,32 @@ def beam_struct_eval(flags_dict, cs_pos, job, folder_str, job_str):
 
     """
 
+    # --- VABS --- #
     if flags_dict['flag_run_vabs']:
-        # ------------------------ #
-        # runs both VABS & ANBAX and conducts a verification/ comparison of the results
 
-        # --- VABS --- #
-        job.blade_run_vabs()  # run VABS
+        if flags_dict['flag_recovery'] == True:
+            # Note: first element if grid location ToDo: change setup of loads input to yaml format
+            # [gid location, x1-component, x2-component, x3-component]
+            loads = {
+                "u":    np.array([[0, 1, 1, 1],    [1, 1, 1, 1]]),      # displacement dof
+                "Ci1":  np.array([[0, 1, 0, 0],  [1, 1, 0, 0]]),        # direction cosine matrix
+                "Ci2":  np.array([[0, 0, 1, 0],  [1, 0, 1, 0]]),        # direction cosine matrix
+                "Ci3":  np.array([[0, 0, 0, 1],  [1, 0, 0, 1]]),        # direction cosine matrix
+                "F":    np.array([[0, 0, 0, 0],    [1, 0, 0, 0]]),      # forces, N (F1: axial force; F2,F3: sectional transverse shear forces)
+                "M":    np.array([[0, 0, 5000000, 0],    [1, 0, 0, 5000000]]),    # moments, Nm
+                "f":    np.array([[0, 0, 0, 0],    [1, 0, 0, 0]]),      # distributed forces, N/m (including both applied forces and inertial forces)
+                "df":   np.array([[0, 0, 0, 0],    [1, 0, 0, 0]]),      # first derivative
+                "ddf":  np.array([[0, 0, 0, 0],    [1, 0, 0, 0]]),      # second derivative
+                "dddf": np.array([[0, 0, 0, 0],    [1, 0, 0, 0]]),      # third derivative
+                "m":    np.array([[0, 0, 0, 0],    [1, 0, 0, 0]]),      # distributed moments, Nm/m (including both applied forces and inertial moments)
+                "dm":   np.array([[0, 0, 0, 0],    [1, 0, 0, 0]]),      # first derivative
+                "ddm":  np.array([[0, 0, 0, 0],    [1, 0, 0, 0]]),      # second derivative
+                "dddm": np.array([[0, 0, 0, 0],    [1, 0, 0, 0]])}      # third derivative
+
+            job.blade_run_vabs(loads)  # run VABS
+        else:
+            job.blade_run_vabs()  # run VABS
+
 
         if flags_dict['flag_DeamDyn_def_transform']:
             beam_prop = convert_structdef_SONATA_to_beamdyn(cs_pos, job.beam_properties)  # convert to BeamDyn coord sys def
@@ -81,7 +101,7 @@ def beam_struct_eval(flags_dict, cs_pos, job, folder_str, job_str):
         # Export beam structural properties to csv file
         if flags_dict['flag_csv_export']:
             print('STATUS:\t Export csv files with structural blade characeristics from VABS to: ' + folder_str + 'csv_export/')
-            export_beam_struct_properties(folder_str, job_str, cs_pos, coordsys=coordsys, solver='vabs', beam_stiff=beam_prop['beam_stiff'], 
+            vabs_export_beam_struct_properties(folder_str, job_str, cs_pos, coordsys=coordsys, solver='vabs', beam_stiff=beam_prop['beam_stiff'],
                                           beam_inertia=beam_prop['beam_inertia'], beam_mass_per_length=beam_prop['beam_section_mass'],
                                           beam_mass_center=beam_prop['beam_mass_center'], beam_neutral_axes=beam_prop['beam_neutral_axes'],
                                           beam_geometric_center=beam_prop['beam_geometric_center'], beam_shear_center=beam_prop['beam_shear_center'])
@@ -91,8 +111,8 @@ def beam_struct_eval(flags_dict, cs_pos, job, folder_str, job_str):
         if flags_dict['flag_write_BeamDyn'] & flags_dict['flag_DeamDyn_def_transform']:
             print('STATUS:\t Write BeamDyn input files')
             refine = int(30/len(cs_pos))  # initiate node refinement parameter
-            write_beamdyn_axis(folder_str, job.yml.get('name'), job.yml.get('components').get('blade'), refine)
-            write_beamdyn_prop(folder_str, job.yml.get('name'), cs_pos, beam_prop['beam_stiff'], beam_prop['beam_inertia'])
+            write_beamdyn_axis(folder_str, flags_dict, job.yml.get('name'), job.yml.get('components').get('blade'), refine)
+            write_beamdyn_prop(folder_str, flags_dict, job.yml.get('name'), cs_pos, beam_prop['beam_stiff'], beam_prop['beam_inertia'])
 
         # --- Plot VABS 6x6 stiffness and mass matrices --- #
         if flags_dict['flag_plot_vabs_struct_characteristics']:
@@ -153,15 +173,22 @@ def beam_struct_eval(flags_dict, cs_pos, job, folder_str, job_str):
                 anbax_beam_stiff[n_sec, :, :] = trsf_sixbysix(anbax_beam_stiff_init[n_sec, :, :], T)
                 anbax_beam_inertia[n_sec, :, :] = trsf_sixbysix(anbax_beam_inertia_init[n_sec, :, :], T)
             str_ext = '_BeamDyn_def'
+            coordsys = 'BeamDyn'
 
             print('STATUS:\t Structural characteristics of ANBAX converted from SONATA/VABS to BeamDyn coordinate system definition!')
         else:
             anbax_beam_stiff = anbax_beam_stiff_init
             anbax_beam_inertia = anbax_beam_inertia_init
             str_ext = ''
+            coordsys = 'VABS/SONATA'
 
-        # np.set_printoptions(precision=3)
-        # print(anbax_beam_stiff[0])
+
+        # --------------------------------------- #
+        # Export beam structural properties to csv file
+        if flags_dict['flag_csv_export']:
+            print('STATUS:\t Export csv files with structural blade characeristics from ANBAX to: ' + folder_str + 'csv_export/')
+            anbax_export_beam_struct_properties(folder_str, job_str, cs_pos, coordsys=coordsys, solver='anbax', beam_stiff=anbax_beam_stiff,
+                                          beam_inertia=anbax_beam_inertia, beam_mass_per_length=anbax_beam_section_mass)
 
 
 
@@ -299,17 +326,13 @@ def plot_vabs_anbax(cs_pos, vabs_data, anbax_data, fig_title, save_path):
 
 
 # ============================================= #
-def export_beam_struct_properties(folder_str, job_str, radial_stations, coordsys, solver, beam_stiff, beam_inertia, beam_mass_per_length,
+def vabs_export_beam_struct_properties(folder_str, job_str, radial_stations, coordsys, solver, beam_stiff, beam_inertia, beam_mass_per_length,
                                   beam_mass_center, beam_neutral_axes, beam_geometric_center, beam_shear_center):
 
     if solver=='vabs':
         export_name_general = 'vabs_beam_properties_general.csv'
         export_name_stiff = 'vabs_beam_properties_stiff_matrices.csv'
         export_name_mass = 'vabs_beam_properties_mass_matrices.csv'
-    elif solver=='anbax':
-        export_name_general = 'anbax_beam_properties_general.csv'
-        export_name_stiff = 'anbax_beam_properties_stiff_matrices.csv'
-        export_name_mass = 'anbax_beam_properties_mass_matrices.csv'
     else:
         print('Define correct solver name (vabs or anbax) when calling export_beam_struct_properties')
 
@@ -329,7 +352,7 @@ def export_beam_struct_properties(folder_str, job_str, radial_stations, coordsys
                                       'Neutral axes (chordwise), m', 'Neutral axes (thickness), m',
                                       'Geometric center (chordwise), m', 'Geometric center (thickness), m',
                                       'Shear center (chordwise), m', 'Shear center (thickness), m'])
-        for i in range(len(beam_mass_per_length)):  # recieve number of radial sections
+        for i in range(len(beam_mass_per_length)):  # receive number of radial sections
             beam_prop_writer.writerow([str(radial_stations[i]), str(beam_mass_per_length[i,0]),
                                        str(beam_mass_center[i,0]), str(beam_mass_center[i,1]),
                                        str(beam_neutral_axes[i,0]), str(beam_neutral_axes[i,1]),
@@ -369,3 +392,61 @@ def export_beam_struct_properties(folder_str, job_str, radial_stations, coordsys
     return None
 
 
+
+def anbax_export_beam_struct_properties(folder_str, job_str, radial_stations, coordsys, solver, beam_stiff, beam_inertia, beam_mass_per_length):
+
+    if solver=='anbax':
+        export_name_general = 'anbax_beam_properties_general.csv'
+        export_name_stiff = 'anbax_beam_properties_stiff_matrices.csv'
+        export_name_mass = 'ambax_beam_properties_mass_matrices.csv'
+    else:
+        print('Define correct solver name (vabs or anbax) when calling export_beam_struct_properties')
+
+    # -------------------------------------------------- #
+    # Export mass per unit length for the defined radial stations
+    with open(''.join([folder_str + 'csv_export/' + job_str[0:-5] + '_' + export_name_general]), mode='w') as csv_file:
+        beam_prop_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        if coordsys == 'BeamDyn':
+            beam_prop_writer.writerow(['Coordinate system:', 'Beamdyn coordinates'])
+        elif coordsys == 'VABS/SONATA':
+            beam_prop_writer.writerow(['Coordinate system:', 'VABS/SONATA coordinates'])
+        elif coordsys == 'ANBAX':
+            beam_prop_writer.writerow(['Coordinate system:', 'VABS/SONATA coordinates'])
+        else:
+            beam_prop_writer.writerow(['Coordinate system:', 'to be verified'])
+
+        beam_prop_writer.writerow(['section in r/R', 'Mass per unit length [kg/m]'])
+        for i in range(len(beam_mass_per_length)):  # receive number of radial sections
+            beam_prop_writer.writerow([str(radial_stations[i]), str(beam_mass_per_length[i,0])])
+
+    csv_file.close()
+    # -------------------------------------------------- #
+
+    # Export stiffness matrices for the defined radial stations
+    with open(''.join([folder_str + 'csv_export/' + job_str[0:-5] + '_' + export_name_stiff]), mode='w') as csv_file:
+        beam_prop_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+        for i in range(len(beam_stiff)):  # receive number of radial sections
+            beam_prop_writer.writerow(' ')
+            beam_prop_writer.writerow(['section in r/R', str(radial_stations[i])])
+
+            for j in range(6):  # number of rows for each matrix
+                beam_prop_writer.writerow(beam_stiff[i, j, :])
+                # beam_prop_writer.writerow(job.beam_properties[i, 1].TS[j, :])  # can eventually be called as a standalone via the job.beam_properties object
+    csv_file.close()
+
+    # -------------------------------------------------- #
+    # Export mass matrices for the defined radial stations
+    with open(''.join([folder_str + 'csv_export/' + job_str[0:-5] + '_' + export_name_mass]), mode='w') as csv_file:
+        beam_prop_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+        for i in range(len(beam_inertia)):  # receive number of radial sections
+            beam_prop_writer.writerow(' ')
+            beam_prop_writer.writerow(['section in r/R', str(radial_stations[i])])
+
+            for j in range(6):  # number of rows for each matrix
+                beam_prop_writer.writerow(beam_inertia[i, j, :])
+                # beam_prop_writer.writerow(job.beam_properties[i, 1].TS[j, :])  # can eventually be called as a standalone via the job.beam_properties object
+    csv_file.close()
+    # -------------------------------------------------- #
+    return None
