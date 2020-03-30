@@ -38,6 +38,7 @@ from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_from_dct,
 from SONATA.cbm.topo.to3d import bsplinelst_to3d, pnt_to3d, vec_to3d
 from SONATA.cbm.topo.utils import (Array_to_PntLst, PntLst_to_npArray,
                                    lin_pln_intersect,)
+from SONATA.cbm.fileIO.CADoutput import export_shape
 from SONATA.cbm.topo.wire_utils import (discretize_wire,
                                         equidistant_Points_on_wire,
                                         get_wire_length, rotate_wire,
@@ -161,6 +162,8 @@ class Blade(Component):
         "start_display",
         "add_menu",
         "add_function_to_menu",
+        "yml",
+        "loft"
     )
 
     def __init__(self, *args, **kwargs):
@@ -408,7 +411,7 @@ class Blade(Component):
 
         #Read CBM Positions
         if kwargs.get('flags',{}).get('flag_wt_ontology'):
-            if stations: 
+            if stations is not None:
                 cs_pos = stations
             else:
                 cs_pos = np.linspace(0.0, 1.0, npts)
@@ -507,6 +510,8 @@ class Blade(Component):
         """
         return self.blade_ref_axis[:, 0]
 
+
+
     def blade_gen_section(self, topo_flag=True, mesh_flag=True, **kwargs):
         """
         generates and meshes all cross-sections of the blade
@@ -535,6 +540,39 @@ class Blade(Component):
             if mesh_flag:
                 print("STATUS:\t Meshing Section at grid location %s" % (x))
                 cs.cbm_gen_mesh(**kwargs)
+        return None
+
+
+    def blade_gen_loft(self, **kwargs):
+        """
+        generates the blade lofting surface. Multiple options can be passed 
+        down to the make_loft functioon such as 
+        ruled=False, tolerance=1e-6, max_degree=16, continuity=1.
+        If a filename="wt.iges" is passed, this is used to save the surface as
+        step, iges oder stl.
+
+        Returns
+        -------
+        None.
+
+        """        
+    
+        self.loft=None
+        wireframe = []
+        
+        for bm, afl in zip(self.blade_matrix, self.airfoils[:, 1]):
+            afl.gen_OCCtopo(angular_deflection=160)
+            (wire, te_pnt) = afl.trsf_to_blfr(bm[1:4], bm[6], bm[4], bm[5])
+            wireframe.append(wire)
+            
+        self.loft = make_loft(wireframe,  **kwargs)
+        
+        kwargs2 = {}
+        if "filename" in kwargs:
+            kwargs2["filename"]  = kwargs.get("filename")
+        export_shape([self.loft], **kwargs2)
+            #self.display.DisplayShape(loft, transparency=0.5, update=True)
+
         return None
 
     def blade_run_vabs(self, loads=None, **kwargs):
@@ -880,7 +918,8 @@ class Blade(Component):
         return None    
     
     
-    def blade_post_3dtopo(self, flag_wf = True, flag_lft = False, flag_topo = False, flag_mesh = False, flag_wopwop=False):
+    def blade_post_3dtopo(self, flag_wf = True, flag_lft = False, flag_topo = False, flag_mesh = False, flag_wopwop=False, **kwargs):
+        """
         plots the cross-sections of the blade with matplotlib 
 
         Parameters
@@ -898,6 +937,8 @@ class Blade(Component):
             string = "Blade: " + str(self.name) + "; Section : " + str(x)
             cs.cbm_post_2dmesh(title=string, **kwargs)
         return None
+
+
 
     def blade_post_3dtopo(self, flag_wf=True, flag_lft=False, flag_topo=False, flag_mesh=False, flag_wopwop=False):
         """
@@ -944,6 +985,7 @@ class Blade(Component):
                 # loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-2, continuity=1, check_compatibility=True)
                 loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-6, continuity=1, check_compatibility=True)
                 self.display.DisplayShape(loft, transparency=0.5, update=True)
+                self.display.DisplayShape(self.loft, transparency=0.2, update=True, color="GREEN")
             #     AP214_stepExporter.add_shape(loft)  # add each lofted shape to the AP203_stepExporter component to generate full blade
             # AP214_stepExporter.write_file()  # write step file
 
