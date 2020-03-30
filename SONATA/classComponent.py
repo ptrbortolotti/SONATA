@@ -26,8 +26,8 @@ class Component(object):
 
     __slots__ = ("name", "Ax2")
 
-    def __init__(self, *args, **kwargs):
-        self.name = kwargs.get("name")
+    def __init__(self, name="NONAME", *args, **kwargs):
+        self.name = name
         self.Ax2 = gp_Ax2(*args)
         # self.units = {'mass': 'g', 'length': 'mm', 'force' : 'N'}
         # TODO: How to define Units in the global SONATA context
