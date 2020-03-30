@@ -7,15 +7,37 @@ Created on Mon Jan 21 10:20:51 2019
 """
 # Third party modules
 import numpy as np
-from OCC.Core.BRepOffsetAPI import BRepOffsetAPI_ThruSections
-# PythonOCC Libraries
-from OCC.Core.TopoDS import TopoDS_Vertex, TopoDS_Wire
 from scipy.interpolate import interp1d
+
+# PythonOCC Libraries
+from OCC.Core.BRepOffsetAPI import BRepOffsetAPI_ThruSections
+from OCC.Core.TopoDS import TopoDS_Vertex, TopoDS_Wire
+from OCC.Core.GeomAbs import GeomAbs_C2
+from OCC.Core.Approx import Approx_ChordLength
 
 # First party modules
 from SONATA.cbm.topo.utils import (Array_to_PntLst, PntLst_to_npArray,
                                    lin_pln_intersect,)
 
+
+class assert_isdone(object):
+    '''
+    raises an assertion error when IsDone() returns false, with the error
+    specified in error_statement
+    -> this is from the pythonocc-utils utility-may not use it?
+    '''
+    def __init__(self, to_check, error_statement):
+        self.to_check = to_check
+        self.error_statement = error_statement
+
+    def __enter__(self, ):
+        if self.to_check.IsDone():
+            pass
+        else:
+            raise AssertionError(self.error_statement)
+
+    def __exit__(self, type, value, traceback):
+        pass
 
 def interp_loads(loads, grid_loc):
     """
@@ -102,44 +124,66 @@ def interp_airfoil_position(airfoil_position, airfoils, grid_loc):
     return af1.transformed(af2, k, 200)
 
 
-def make_loft(elements, ruled=False, tolerance=1e-6, continuity=4, check_compatibility=True):
+def make_loft(elements, solid=False, ruled=False, tolerance=1e-6, 
+              continuity=GeomAbs_C2, max_degree=8, check_compatibility=True, **kwargs):
     """
     A set of sections that are used to generate a surface with the 
         BRepOffsetAPI_ThruSections function from OCC
         
+
     Parameters
     ----------
-    elements : list of OCC.TopoDS_Wire or TopoDS_Vertex
+    elements : list
+        list of OCC.TopoDS_Wire or TopoDS_Vertex
         A set of sections that are used to generate a surface with the 
-        BRepOffsetAPI_ThruSections function from OCC
-        
-    ruled : bool
-    tolerance : float
-    continuity : int
-    check_compatibility : bool
-    
-    Returns:
-    ----------
+        BRepOffsetAPI_ThruSections function from OCC.
+    solid : bool, optional
+        solid or surface. The default is False.
+    ruled : bool, optional
+        linear are nurbs surface. The default is False.
+    tolerance : float, optional
+        tolerance. The default is 1e-6.
+    continuity : int, optional
+        DESCRIPTION. The default is 4 (GeomAbs_C2).
+    max_degree : int, optional
+             The order of the fitted NURBS surface. The default is 8.
+    check_compatibility : TYPE, optional
+        DESCRIPTION. The default is True.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+
+    Raises
+    ------
+    TypeError
+        DESCRIPTION.
+
+    Returns
+    -------
     loft : TopoDS_Shape
         surface of the ThruSections Loft
-    """
 
-    sections = BRepOffsetAPI_ThruSections(False, ruled, tolerance)
+    """
+    
+    generator = BRepOffsetAPI_ThruSections(solid, ruled, tolerance)
+    generator.SetMaxDegree(max_degree)
+    generator.SetParType(Approx_ChordLength)
     for i in elements:
         if isinstance(i, TopoDS_Wire):
-            sections.AddWire(i)
+            generator.AddWire(i)
         elif isinstance(i, TopoDS_Vertex):
-            sections.AddVertex(i)
+            generator.AddVertex(i)
         else:
             raise TypeError("elements is a list of TopoDS_Wire or TopoDS_Vertex, found a %s fool" % i.__class__)
 
-    sections.CheckCompatibility(check_compatibility)
-    sections.SetContinuity(continuity)
-    sections.Build()
-    loft = sections.Shape()
-
-    return loft
-
+    generator.CheckCompatibility(check_compatibility)
+    generator.SetContinuity(continuity)
+    generator.Build()
+    
+    with assert_isdone(generator, 'failed lofting'):
+        loft = generator.Shape() 
+        return loft
+        
 
 def check_uniformity(grid, values, tol=1e-6):
     """

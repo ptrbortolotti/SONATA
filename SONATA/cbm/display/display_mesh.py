@@ -7,7 +7,7 @@ Created on Thu Jan 19 11:01:06 2017
 # Core Library modules
 import datetime
 import math
-
+import logging
 # Third party modules
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,9 +17,13 @@ from matplotlib.collections import PatchCollection
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Polygon
 
-# First party modules
-from SONATA.openmdao_utl.doe_utl import filename_generator
 
+# First party modules
+from SONATA.utl_openmdao.doe_utl import filename_generator
+
+
+mpl_logger = logging.getLogger("matplotlib")
+mpl_logger.setLevel(logging.WARNING)
 
 def centroid(points):
     x = [p[0] for p in points]
@@ -39,8 +43,9 @@ def plot_nodes(nodes):
     plt.show()
 
 
-def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProperties=None, show_element_number=False, show_node_number=False, invert_xaxis=True, lfactor=0.5e-3, **kw):
-
+def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None, VABSProperties=None, 
+              show_element_number=False, show_node_number=False, invert_xaxis = True, lfactor=0.5e-2, **kw):
+    
     """
     To be continued...
     
@@ -59,20 +64,24 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
 
     elif data_name == "sf":
         colors = [(0.6, 0, 0), (1, 1, 0), (0, 0.5, 0)]  # R -> G -> B
-        cmap_name = "my_list"
-        cmap = LinearSegmentedColormap.from_list(cmap_name, colors, N=6)
-        # cmap.set_over(color='white')
-        # cmap.set_under(color='k')
-
-    elif data_name == "MatID":
-        cmap = plt.cm.get_cmap()
+        cmap_name = 'my_list'
+        cmap = LinearSegmentedColormap.from_list(
+        cmap_name, colors, N=6)
+        #cmap.set_over(color='white')
+        #cmap.set_under(color='k')
+        
+    elif data_name == 'MatID':
+        cmap = a=plt.cm.get_cmap()
+        #cmap = plt.cm.get_cmap('cividis')
         # extract all colors from the .jet map
         cmaplist = [cmap(i) for i in range(cmap.N)]
         # force the first color entry to be grey
         # cmaplist[0] = (.5, .5, .5, 1.0)
         # create the new map
-        cmap = LinearSegmentedColormap.from_list("Custom cmap", cmaplist, max(data))
-
+        # cmap = LinearSegmentedColormap.from_list('Custom cmap', cmaplist, max(data))
+        cmap = LinearSegmentedColormap.from_list('Custom cmap', cmaplist, max(data))
+        # cmap = 'viridis'
+        
     else:
         cmap = plt.cm.get_cmap()
 
@@ -99,8 +108,9 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
             centroids.append(centroid(array))
         polygon = Polygon(array, True, edgecolor="k")
         patches.append(polygon)
-
-    p = PatchCollection(patches, alpha=alpha, cmap=cmap, edgecolors="k")
+    
+    # p = PatchCollection(patches, alpha=alpha, cmap=cmap, edgecolors = 'k')
+    p = PatchCollection(patches, alpha=alpha, cmap=cmap, edgecolors = 'k', linewidths=0.2)
     p.set_array(data)
     p.set_clim(vmin, vmax)
     _ = ax.add_collection(p)
@@ -110,32 +120,38 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
 
     if data_name == "MatID":
         cbar.set_ticks(np.linspace(1, max(data), max(data)))
-        cbar.set_ticklabels(np.linspace(1, max(data), max(data)))
-        p.set_clim(0.5, max(data) + 0.5)
-    if data_name == "sf":
-        p.set_clim(0, 3)
-
-    if len(theta_11) == len(elements):
-        for i, cent in enumerate(centroids):
-
-            dx = lfactor * math.cos(math.radians(theta_11[i]))
-            dy = lfactor * math.sin(math.radians(theta_11[i]))
-            ax.arrow(cent[0], cent[1], dx, dy, width=0.001e-3, head_width=0.05e-3, head_length=0.1e-3, fc="k", ec="k")
-
-    # ax.scatter(nodes[:,0],nodes[:,1],c='k',)
-    plt.axis("equal")
-    if title != None:
+        # cbar.set_ticklabels(np.linspace(1, max(data), max(data)))
+        cbar_label = []
+        for cbar_label_index in range(max(data)):
+            cbar_label.append(materials[cbar_label_index+1].name)
+        cbar.set_ticklabels(cbar_label)
+        # cbar.set_ticklabels(['mat1', 'mat2', 'mat3', 'mat4', 'mat5', 'mat6'])
+        p.set_clim(0.5, max(data)+0.5)
+    if data_name == 'sf':
+         p.set_clim(0, 3)
+    
+    if len(theta_11)==len(elements):
+        for i,cent in enumerate(centroids):
+            
+            dx = lfactor*math.cos(math.radians(theta_11[i]))
+            dy = lfactor*math.sin(math.radians(theta_11[i]))
+            ax.arrow(cent[0], cent[1], dx, dy, width = 0.01e-2, head_width=0.1e-2, head_length=0.1e-2, fc='k', ec='k')
+        
+    #ax.scatter(nodes[:,0],nodes[:,1],c='k',)
+    plt.axis('equal')
+    if title!=None:
         ax.set_title(title)
-    ax.set_xlabel(r"$x_2$ in m")
-    ax.set_ylabel(r"$x_3$ in m")
+    ax.set_xlabel(r'$x_2$, m')
+    ax.set_ylabel(r'$x_3$, m')
+    
+    #plot coordinate system.
+    # cslength=0.015
+    # ax.arrow(0, 0, cslength, 0, color='lime')
+    # ax.arrow(0, 0, 0, cslength, color='deepskyblue')
 
-    # plot coordinate system.
-    cslength = 0.015
-    ax.arrow(0, 0, cslength, 0, color="lime")
-    ax.arrow(0, 0, 0, cslength, color="deepskyblue")
+    # ax.annotate(r'$x_2$', (cslength,0),fontsize=10, color = 'lime')
+    # ax.annotate(r'$x_3$', (0,cslength),fontsize=10, color='deepskyblue')
 
-    ax.annotate(r"$x_2$", (cslength, 0), fontsize=10, color="lime")
-    ax.annotate(r"$x_3$", (0, cslength), fontsize=10, color="deepskyblue")
     ##display element number
     if show_element_number == True:
         for i, item in enumerate(centroids):
@@ -181,7 +197,42 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, title=None, VABSProper
     return (fig, ax)
 
 
-def plot_cells(cells, nodes, attr1, VABSProperties=None, title="None", plotTheta11=False, plotDisplacement=False, **kw):
+    return (fig,ax)
+    
+
+def plot_cells(cells,nodes, attr1, materials, VABSProperties=None, title='None', plotTheta11=False, plotDisplacement=False, **kw):
+    """
+    
+
+    Parameters
+    ----------
+    cells : TYPE
+        DESCRIPTION.
+    nodes : TYPE
+        DESCRIPTION.
+    attr1 : TYPE
+        DESCRIPTION.
+    materials : TYPE
+        DESCRIPTION.
+    VABSProperties : TYPE, optional
+        DESCRIPTION. The default is None.
+    title : TYPE, optional
+        DESCRIPTION. The default is 'None'.
+    plotTheta11 : TYPE, optional
+        DESCRIPTION. The default is False.
+    plotDisplacement : TYPE, optional
+        DESCRIPTION. The default is False.
+    **kw : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    fig : TYPE
+        DESCRIPTION.
+    ax : TYPE
+        DESCRIPTION.
+
+    """
     nodes_array = []
     for n in nodes:
         if plotDisplacement:
@@ -217,16 +268,17 @@ def plot_cells(cells, nodes, attr1, VABSProperties=None, title="None", plotTheta
         for c in cells:
             theta_11.append(getattr(c, "theta_11"))
         theta_11 = np.asarray(theta_11)
+    
+    
+    fig,ax = plot_mesh(nodes_array, element_array, theta_11, data, data_name, materials, title, VABSProperties, **kw)    
+   
+    if 'savepath' in kw:
+        #savepath = 'jobs/VHeuschneider/figures/R90_config.svg'
+        s = kw['savepath']
+        file_extension ='.'+ s.split('.')[-1]
 
-    fig, ax = plot_mesh(nodes_array, element_array, theta_11, data, data_name, title, VABSProperties, **kw)
-
-    if "savepath" in kw:
-        # savepath = 'jobs/VHeuschneider/figures/R90_config.svg'
-        s = kw["savepath"]
-        file_extension = "." + s.split(".")[-1]
-
-        if s.find("/") != -1:
-            idx = [i for i, v in enumerate(s) if v == "/"][-1]
+        if s.find('/') != -1:
+            idx = [i for i, v in enumerate(s) if v == '/'][-1]
             directory = s[:idx]
             string = s[idx + 1 : s.find(".")]
 
@@ -237,9 +289,9 @@ def plot_cells(cells, nodes, attr1, VABSProperties=None, title="None", plotTheta
         # fname = kw['savepath'].split('.')[0]+'_'+datestr+'.'+kw['savepath'].split('.')[1]
         print(fname)
         tmp_fig = plt.gcf()
-        # tmp_fig.set_size_inches(11.69, 8.27)    #a4 landscape
-        tmp_fig.set_size_inches(40, 20)
-        tmp_fig.savefig(fname, dpi=300, orientation="landscape", papertype="a4")
+        #tmp_fig.set_size_inches(11.69, 8.27)    #a4 landscape
+        tmp_fig.set_size_inches(40, 20)    
+        tmp_fig.savefig(fname, dpi=300, orientation='landscape', papertype='a4')
 
     return (fig, ax)
 
