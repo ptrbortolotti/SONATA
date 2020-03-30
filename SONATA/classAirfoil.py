@@ -34,7 +34,8 @@ from SONATA.cbm.display.display_utils import (display_config,
                                               transform_wire_2to3d,)
 from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_from_dct,
                                               copy_BSplineLst,
-                                              equidistant_D1_on_BSplineLst,)
+                                              equidistant_D1_on_BSplineLst,
+                                              BSplineLst_Orientation,)
 from SONATA.cbm.topo.utils import (PntLst_to_npArray,
                                    TColgp_HArray1OfPnt2d_from_nparray,
                                    TColgp_HArray1OfPnt_from_nparray,
@@ -44,6 +45,8 @@ from SONATA.cbm.topo.wire_utils import (build_wire_from_BSplineLst,
                                         equidistant_Points_on_wire,
                                         get_wire_length, rotate_wire,
                                         scale_wire, translate_wire, trsf_wire,)
+
+from SONATA.cbm.fileIO.CADinput import Check_BSplineLst_Head2Tail
 from SONATA.classPolar import Polar
 from SONATA.utl.trsf import trsf_af_to_blfr
 
@@ -165,7 +168,7 @@ class Airfoil(object):
             tmp["polars"] = None
         return tmp
 
-    def gen_OCCtopo(self):
+    def gen_OCCtopo(self, angular_deflection = 30 ):
         """
         generates a Opencascade TopoDS_Wire and BSplineLst from the airfoil coordinates.
         This can be used for interpolation and surface generation
@@ -178,7 +181,10 @@ class Airfoil(object):
         
         """
         data = np.hstack((self.coordinates, np.zeros((self.coordinates.shape[0], 1))))
-        self.BSplineLst = BSplineLst_from_dct(data, angular_deflection=30, closed=True, tol_interp=1e-5, twoD=False)
+        self.BSplineLst = BSplineLst_from_dct(data, angular_deflection=angular_deflection, closed=True, tol_interp=1e-5, twoD=False)
+        # print("STATUS:\t CHECK Head2Tail: \t\t ", Check_BSplineLst_Head2Tail(self.BSplineLst))
+        # print("STATUS:\t CHECK Counterclockwise: \t ", BSplineLst_Orientation(self.BSplineLst, 11))
+        
         self.wire = build_wire_from_BSplineLst(self.BSplineLst, twoD=False)
         return self.wire
 
