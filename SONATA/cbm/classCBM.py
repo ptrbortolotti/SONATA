@@ -74,6 +74,7 @@ from SONATA.cbm.display.display_utils import export_to_JPEG, export_to_PNG, expo
 
 
 try:
+    import dolfin as do
     from SONATA.anbax.anbax_utl.anbax_utl import build_dolfin_mesh
     # from SONATA.anbax.anbax_v4.anba4 import anbax
     import sys
@@ -879,9 +880,36 @@ class CBM(object):
         tmp_TS = anba.compute().getValues(range(6),range(6))    # get stiffness matrix
         tmp_MM = anba.inertia().getValues(range(6),range(6))    # get mass matrix
 
-        # force = [0,0,10]
-        # moment = [0,10,0]
-        # tmp_SF = anba.stress_field(force, moment, reference = "global", voigt_convention = "anba")    # get stress field
+        # Forces and Moments in ANBAX coordinates
+        force = [2.2, 3.4, 1.1]
+        moment = [4.2, 5.7, 6.2]
+        ref_sys = "local"  # "local" (in material sys) or "global" (in beam coords)
+        voigt_convention = "anba"  # "anbax"  or "paraview"
+        anba.stress_field(force, moment, reference = ref_sys, voigt_convention = voigt_convention)    # get stress field
+        tmp_SF_orig = anba.STRESS.vector()  # get stress field
+        tmp_SF = np.array(tmp_SF_orig.vec()) # convert from dolfin vector to numpy array
+        n_el = len(self.mesh)
+        if voigt_convention == "anba":  # [s_xx, s_yy, s_zz, s_yz, s_xz, s_xy]
+            s_11 = tmp_SF[0:n_el]
+            s_22 = tmp_SF[n_el:2*n_el]
+            s_33 = tmp_SF[2*n_el:3*n_el]
+            s_23 = tmp_SF[3*n_el:4*n_el]
+            s_13 = tmp_SF[4*n_el:5*n_el]
+            s_12 = tmp_SF[5*n_el:6*n_el]
+        elif voigt_convention == "paraview":  # [s_xx, s_yy, s_zz, s_xy, s_yz, s_xz]
+            s_11 = tmp_SF[0:n_el]
+            s_22 = tmp_SF[n_el:2*n_el]
+            s_33 = tmp_SF[2*n_el:3*n_el]
+            s_12 = tmp_SF[3*n_el:4*n_el]
+            s_23 = tmp_SF[4*n_el:5*n_el]
+            s_13 = tmp_SF[5*n_el:6*n_el]
+
+        # Export to Paraview format (to be tested!)
+        # file_res = do.XDMFFile('output_filename.xdmf')
+        # file_res.parameters['functions_share_mesh'] = True
+        # file_res.parameters['rewrite_function_mesh'] = False
+        # file_res.parameters["flush_output"] = True
+        # file_res.write(anba.STRESS, t=2)  # t=unique_number
 
         #Define transformation T (from ANBA to SONATA/VABS coordinates)
         B = np.array([[0,0,1],[1,0,0],[0,1,0]])
