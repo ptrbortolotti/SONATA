@@ -929,7 +929,7 @@ class CBM(object):
 
         """
         mesh, nodes = sort_and_reassignID(self.mesh)
-        fig, ax = plot_cells(self.mesh, nodes, attribute, self.BeamProperties, title, **kw)
+        fig, ax = plot_cells(self.mesh, nodes, attribute, self.materials, self.BeamProperties, title, **kw)
         return fig, ax
 
     def cbm_post_3dtopo(self):
