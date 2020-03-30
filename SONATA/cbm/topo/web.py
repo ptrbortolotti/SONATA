@@ -40,7 +40,11 @@ class Web(object):
         self.ID = ID
         self.Pos1 = Pos1
         self.Pos2 = Pos2
-        self.curvature = curvature
+        
+        if curvature is None:
+            self.curvature = 0
+        else: self.curvature = curvature
+        
         self.Pos1_Pnt2d = SegmentLst[0].get_Pnt2d(self.Pos1, SegmentLst)    # p1 - start point at arc
         self.Pos2_Pnt2d = SegmentLst[0].get_Pnt2d(self.Pos2, SegmentLst)    # p2 - end point at arc
 
@@ -77,7 +81,7 @@ class Web(object):
         self.Pos2_Pnt2d = gp_Pnt2d(self.Pos2_coordinates[0],self.Pos2_coordinates[1])
         
 
-def bend_web_BSplineLst(BSplineLst_straight, Pos1_Pnt2d, Pos2_Pnt2d, curvature=0):
+def bend_web_BSplineLst(BSplineLst_straight, Pos1_Pnt2d, Pos2_Pnt2d, curvature=0.0):
     """
     
 

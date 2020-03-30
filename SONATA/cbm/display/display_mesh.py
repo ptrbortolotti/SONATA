@@ -18,7 +18,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Polygon
 
 # First party modules
-from SONATA.openmdao_utl.doe_utl import filename_generator
+from SONATA.utl_openmdao.doe_utl import filename_generator
 
 
 def centroid(points):
