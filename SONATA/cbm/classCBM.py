@@ -642,7 +642,7 @@ class CBM(object):
 
         return None
 
-    def cbm_run_vabs(self, jobid=None, rm_vabfiles=True, ramdisk=False):
+    def cbm_run_vabs(self, jobid=None, rm_vabfiles=True, ramdisk=False, vabs_path = 'VABSIII'):
         """CBM method to run the solver VABS (Variational Asymptotic Beam 
         Sectional Analysis). Note that this method is designed to work if 
         VABSIII is set in the PATH variable. For Users at the TUM-HT please load 
@@ -707,20 +707,11 @@ class CBM(object):
             vabs_filename = self.config.filename.replace('.yml', fstring)
         
         print('STATUS:\t Running VABS for constitutive modeling:')
-        
-        if platform.system() == 'Linux':
-            #executable = 'SONATA/vabs/bin/VABSIII'
-            #check if module vabs is loaded, if not load it!
-            #vabs_cmd = 'VABSIII '+vabs_filename
-            #cmd = ['/bin/bash', '-i', '-c', vabs_cmd]
-            cmd = ['VABSIII', vabs_filename]
+        if platform.system() == 'Linux' or platform.system() == 'Windows':
+            cmd = [vabs_path, vabs_filename]
             
-        elif platform.system == 'Windows':
-            cmd = ['VABS/bin/VABSIII.exe', vabs_filename]
-
-        # Mac
         elif  platform.system() == 'Darwin':
-            cmd = ['wine', '/Users/rfeil/work/8_VABS/vabs_WIN/AnalySwift/VABS/VABSIII.exe', vabs_filename]
+            cmd = ['wine', vabs_path, vabs_filename]
             
         #print('vabs_fname',vabs_filename)
         result = None
