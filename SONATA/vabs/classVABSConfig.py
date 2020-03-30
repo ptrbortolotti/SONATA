@@ -3,10 +3,12 @@ Created on Mon Mar 20 14:15:44 2017
 
 @author: TPflumm
 """
+# Third party modules
 import numpy as np
 
+
 class VABSConfig(object):
-    
+
     """
     this class contains the Configuration for a VABS (Variational Asymptotic 
     Beam Sectional Analysis) for detaile information please read the VABS user 
@@ -137,54 +139,62 @@ class VABSConfig(object):
         The primes denotes the second derivative with respect to beam axis x1 
         of the twist measure     
     """
-    
+
     def __init__(self, **kw):
-        self.format_flag = 0     
-        self.nlayer = 0          
-        self.Timoshenko_flag = 1 
-        self.recover_flag = 0    
-        self.thermal_flag = 0    
-        self.curve_flag = 0     
-        self.trapeze_flag = 0    
-        self.Vlasov_flag = 0     
+        self.format_flag = 0
+        self.nlayer = 0
+        self.Timoshenko_flag = 1
+        self.recover_flag = 0
+        self.thermal_flag = 0
+        self.curve_flag = 0
+        self.trapeze_flag = 0
+        self.Vlasov_flag = 0
         self.oblique_flag = 0
-        
-        if 'format_flag' in kw:     self.format_flag = kw['format_flag']  #Currently no need to use this!
-        if 'nlayer' in kw:          self.nlayer = kw['nlayer']  
-        if 'Timoshenko_flag' in kw: self.Timoshenko_flag = kw['Timoshenko_flag']
-        if 'recover_flag' in kw:    self.recover_flag = kw['recover_flag']
-        if 'thermal_flag' in kw:    self.thermal_flag = kw['thermal_flag']
-        if 'trapeze_flag' in kw:    self.trapeze_flag = kw.get('trapeze_flag')
-        if 'Vlasov_flag'  in kw:    self.Vlasov_flag = kw['Vlasov_flag']
-        
-        if 'curve_flag' in kw:      
-            self.curve_flag = kw['curve_flag']
-            self.k1 = kw['k1']
-            self.k2 = kw['k2']
-            self.k3 = kw['k3']
-            
-        if 'oblique_flags' in kw:
-            self.oblique_flag = kw['oblique_flag']     #to model oblique cross sections. See VABS USER MANUAL
-            self.oblique_cosine1 = kw['oblique_cosine1']             #Angle between beam axis x1 and and oblique axis y1. See VABS USER MANUAL Figure 6
-            self.oblique_cosine2 = kw['oblique_cosine2']             #Angle between beam axis x1 and and oblique axis y2. See VABS USER MANUAL Figure 6
+
+        if "format_flag" in kw:
+            self.format_flag = kw["format_flag"]  # Currently no need to use this!
+        if "nlayer" in kw:
+            self.nlayer = kw["nlayer"]
+        if "Timoshenko_flag" in kw:
+            self.Timoshenko_flag = kw["Timoshenko_flag"]
+        if "recover_flag" in kw:
+            self.recover_flag = kw["recover_flag"]
+        if "thermal_flag" in kw:
+            self.thermal_flag = kw["thermal_flag"]
+        if "trapeze_flag" in kw:
+            self.trapeze_flag = kw.get("trapeze_flag")
+        if "Vlasov_flag" in kw:
+            self.Vlasov_flag = kw["Vlasov_flag"]
+
+        if "curve_flag" in kw:
+            self.curve_flag = kw["curve_flag"]
+            self.k1 = kw["k1"]
+            self.k2 = kw["k2"]
+            self.k3 = kw["k3"]
+
+        if "oblique_flags" in kw:
+            self.oblique_flag = kw["oblique_flag"]  # to model oblique cross sections. See VABS USER MANUAL
+            self.oblique_cosine1 = kw["oblique_cosine1"]  # Angle between beam axis x1 and and oblique axis y1. See VABS USER MANUAL Figure 6
+            self.oblique_cosine2 = kw["oblique_cosine2"]  # Angle between beam axis x1 and and oblique axis y2. See VABS USER MANUAL Figure 6
             self.Timoshenko_flag = 0
-            
-        self.u = [0,0,0]                                    
-        self.Cij = np.array([[0,0,0],[0,0,0],[0,0,0]])
-        self.F = np.array([0,0,0])                #Timoshenko_flag == 0 -> F = [0]    
-        self.M = np.array([0,0,0])
-        self.f = np.array([0,0,0])                #Timoshenko_flag == 1:
-        self.df = np.array([0,0,0])               #Timoshenko_flag == 1:
-        self.ddf = np.array([0,0,0])               #Timoshenko_flag == 1:
-        self.dddf = np.array([0,0,0])               #Timoshenko_flag == 1:
-        self.m = np.array([0,0,0])                #Timoshenko_flag == 1:
-        self.dm = np.array([0,0,0])               #Timoshenko_flag == 1:
-        self.ddm = np.array([0,0,0])               #Timoshenko_flag == 1:
-        self.dddm = np.array([0,0,0])               #Timoshenko_flag == 1:
-        self.gamma11 = 0              #Vlasov_flag == 1:
-        self.kappa = [0,0,0]            #Vlasov_flag == 1:
-        self.dkappa1 = 0                #Vlasov_flag == 1:
-        self.ddkappa1 = 0                #Vlasov_flag == 1:
-        
-if __name__ == '__main__':
+
+        self.u = [0, 0, 0]
+        self.Cij = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+        self.F = np.array([0, 0, 0])  # Timoshenko_flag == 0 -> F = [0]
+        self.M = np.array([0, 0, 0])
+        self.f = np.array([0, 0, 0])  # Timoshenko_flag == 1:
+        self.df = np.array([0, 0, 0])  # Timoshenko_flag == 1:
+        self.ddf = np.array([0, 0, 0])  # Timoshenko_flag == 1:
+        self.dddf = np.array([0, 0, 0])  # Timoshenko_flag == 1:
+        self.m = np.array([0, 0, 0])  # Timoshenko_flag == 1:
+        self.dm = np.array([0, 0, 0])  # Timoshenko_flag == 1:
+        self.ddm = np.array([0, 0, 0])  # Timoshenko_flag == 1:
+        self.dddm = np.array([0, 0, 0])  # Timoshenko_flag == 1:
+        self.gamma11 = 0  # Vlasov_flag == 1:
+        self.kappa = [0, 0, 0]  # Vlasov_flag == 1:
+        self.dkappa1 = 0  # Vlasov_flag == 1:
+        self.ddkappa1 = 0  # Vlasov_flag == 1:
+
+
+if __name__ == "__main__":
     test = VABSConfig(recover_flag=1)

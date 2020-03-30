@@ -5,13 +5,15 @@ Created on Wed Dec 19 09:38:33 2018
 
 @author: Tobias Pflumm
 """
+# Core Library modules
 import os
-import yaml
-import numpy as np
 from collections import OrderedDict
 
-if __name__ == '__main__':
-    os.chdir('..')
+# Third party modules
+import numpy as np
+import yaml
+
+# First party modules
 from SONATA.cbm.fileIO.read_yaml_input import clean_filestring
 
 
@@ -45,10 +47,9 @@ class Material(object):
     
     """
 
-    __slots__ = ('id', 'name', 'description', 'source', 'orth', 'rho')
+    __slots__ = ("id", "name", "description", "source", "orth", "rho")
 
-    def __init__(self, ID='NOID', name='noname', description='nodescription', source='nosource', orth=None, rho=0,
-                 **kwargs):
+    def __init__(self, ID="NOID", name="noname", description="nodescription", source="nosource", orth=None, rho=0, **kwargs):
         self.id = ID
         self.name = name
         self.description = description
@@ -58,13 +59,13 @@ class Material(object):
 
     def __repr__(self):
         if self.orth == 0:
-            return str('%s: IsotropicMaterial: %s' % (self.id, self.name))
+            return str("%s: IsotropicMaterial: %s" % (self.id, self.name))
         elif self.orth == 1:
-            return str('%s: OrthotropicMaterial: %s' % (self.id, self.name))
+            return str("%s: OrthotropicMaterial: %s" % (self.id, self.name))
         elif self.orth == 2:
-            return str('%s: OrthotropicMaterial: %s' % (self.id, self.name))
+            return str("%s: OrthotropicMaterial: %s" % (self.id, self.name))
         else:
-            return str('%s: UndefinedMaterial: %s' % (self.id, self.name))
+            return str("%s: UndefinedMaterial: %s" % (self.id, self.name))
 
 
 class IsotropicMaterial(Material):
@@ -89,10 +90,10 @@ class IsotropicMaterial(Material):
         in N/m**2; Ultimate Tensile Strenght (Zugfestigkeit)
     """
 
-    __slots__ = ('E', 'nu', 'alpha', 'YS', 'UTS')
+    __slots__ = ("E", "nu", "alpha", "YS", "UTS")
 
     def __init__(self, **kw):
-        kw['orth'] = 0
+        kw["orth"] = 0
         Material.__init__(self, **kw)
         self.E = None
         self.nu = None
@@ -100,20 +101,20 @@ class IsotropicMaterial(Material):
         self.YS = None
         self.UTS = None
 
-        if not kw.get('E') is None:
-            self.E = float(kw.get('E'))
+        if not kw.get("E") is None:
+            self.E = float(kw.get("E"))
 
-        if not kw.get('nu') is None:
-            self.nu = float(kw.get('nu'))
+        if not kw.get("nu") is None:
+            self.nu = float(kw.get("nu"))
 
-        if not kw.get('alpha') is None:
-            self.alpha = float(kw.get('alpha'))
+        if not kw.get("alpha") is None:
+            self.alpha = float(kw.get("alpha"))
 
-        if not kw.get('YS') is None:
-            self.YS = float(kw.get('YS'))
+        if not kw.get("YS") is None:
+            self.YS = float(kw.get("YS"))
 
-        if not kw.get('UTS') is None:
-            self.UTS = float(kw.get('UTS'))
+        if not kw.get("UTS") is None:
+            self.UTS = float(kw.get("UTS"))
 
 
 class OrthotropicMaterial(Material):
@@ -232,7 +233,7 @@ class AnisotropicMaterial(Material):
     __slots__ = ('C', 'alpha')
 
     def __init__(self, **kw):
-        kw['orth'] = 2
+        kw["orth"] = 2
         Material.__init__(self, **kw)
 
         self.C = np.asarray(kw.get('C')).astype(float)
