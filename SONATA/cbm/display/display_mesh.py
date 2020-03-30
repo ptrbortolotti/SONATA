@@ -7,7 +7,7 @@ Created on Thu Jan 19 11:01:06 2017
 # Core Library modules
 import datetime
 import math
-
+import logging
 # Third party modules
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,9 +17,13 @@ from matplotlib.collections import PatchCollection
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Polygon
 
+
 # First party modules
 from SONATA.utl_openmdao.doe_utl import filename_generator
 
+
+mpl_logger = logging.getLogger("matplotlib")
+mpl_logger.setLevel(logging.WARNING)
 
 def centroid(points):
     x = [p[0] for p in points]
@@ -196,7 +200,39 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
     return (fig,ax)
     
 
-def plot_cells(cells,nodes,attr1, materials, VABSProperties=None, title='None', plotTheta11=False, plotDisplacement=False, **kw):
+def plot_cells(cells,nodes, attr1, materials, VABSProperties=None, title='None', plotTheta11=False, plotDisplacement=False, **kw):
+    """
+    
+
+    Parameters
+    ----------
+    cells : TYPE
+        DESCRIPTION.
+    nodes : TYPE
+        DESCRIPTION.
+    attr1 : TYPE
+        DESCRIPTION.
+    materials : TYPE
+        DESCRIPTION.
+    VABSProperties : TYPE, optional
+        DESCRIPTION. The default is None.
+    title : TYPE, optional
+        DESCRIPTION. The default is 'None'.
+    plotTheta11 : TYPE, optional
+        DESCRIPTION. The default is False.
+    plotDisplacement : TYPE, optional
+        DESCRIPTION. The default is False.
+    **kw : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    fig : TYPE
+        DESCRIPTION.
+    ax : TYPE
+        DESCRIPTION.
+
+    """
     nodes_array = []
     for n in nodes:
         if plotDisplacement:

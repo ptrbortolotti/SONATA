@@ -169,7 +169,7 @@ class Blade(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.beam_properties = None
-
+        self.loft=None
         
         if 'filename' in kwargs:
             filename = kwargs.get('filename')
@@ -575,6 +575,76 @@ class Blade(Component):
 
         return None
 
+    def blade_gen_wopwop_mesh(self, xres, cres, deformation=None, normals="2d", minset=False):
+            """
+            method that generates a mesh of the surface that is necessary for 
+            PSU Wopwop. It is a structured mesh of points and their normals. 
+            The normals are currently only impemented that they are within the 
+            crosssectional plane (normals = '2d') and theirfore not normal to the 
+            surface. 
+            
+            Parameters
+            ----------
+            xres : array 
+                radial resolution in the form of an array that specifies the radial 
+                locations
+                
+            cres : int
+                chordwise resolution, how many points per cross-section
+                
+            deformation : array, optional
+                in the futur it shall be possible pass a deformation vector of 3 
+                displacements and 3 rotations to get the mesh of the deformed 
+                rotor-blade. This function is carried out in the trsf_af_to_blfr
+            
+            normals : str, optional
+                currently only '2d' normal vectors are implemented that are in the
+                yz plane.
+                
+            minset : bool, otional
+                if true the minimum set of radial values are superimposed with the 
+                xres array.
+                
+            Returns
+            -------
+            wopwop_bsplinelst : [[Geom_BSplineLst]]
+            wopwop_pnts : [[gp_Pnt]]
+            wopwop_vecs : [[gp_Vec]]
+                
+            """
+    
+            x = xres
+            if minset:
+                minx = self.blade_ref_axis[:, 0]
+                x = np.unique(np.sort(np.hstack((xres, minx))))
+    
+            # BSplineLst, PntLst =self._interpolate_cbm_boundary(x,nPoints=50,return_Pnts = True) #Old
+            airfoil_position = (list(self.airfoils[:, 0]), [af.name for af in self.airfoils[:, 1]])
+            airfoils = list(self.airfoils[:, 1])
+            wopafls = np.asarray([[x, interp_airfoil_position(airfoil_position, airfoils, x)] for x in x])
+    
+            self.wopwop_bsplinelst = []
+            self.wopwop_pnts = []
+            self.wopwop_vecs = []
+    
+            for x, af in wopafls:
+                (BSplineLst2d, pnts2d, vecs2d) = af.gen_wopwop_dist(cres)
+    
+                Pnts = [pnt_to3d(p) for p in pnts2d]
+                Vecs = [vec_to3d(v) for v in vecs2d]
+                BSplineLst = bsplinelst_to3d(BSplineLst2d, gp_Pln(gp_Pnt(0, 0, 0), gp_Dir(0, 0, 1)))
+    
+                Trsf = trsf_af_to_blfr(self.f_blade_ref_axis.interpolate(x)[0][0], float(self.f_pa(x)), float(self.f_chord(x)), float(self.f_twist(x)), deformation=deformation)
+                [s.Transform(Trsf) for s in BSplineLst]
+                Pnts = [p.Transformed(Trsf) for p in Pnts]
+                Vecs = [v.Transformed(Trsf) for v in Vecs]
+    
+                self.wopwop_bsplinelst.append(BSplineLst)
+                self.wopwop_pnts.append(Pnts)
+                self.wopwop_vecs.append(Vecs)
+    
+            return self.wopwop_bsplinelst, self.wopwop_pnts, self.wopwop_vecs
+
     def blade_run_vabs(self, loads=None, **kwargs):
         """
         runs vabs for every section
@@ -623,6 +693,7 @@ class Blade(Component):
             lst.append([x, cs.BeamProperties])
         self.beam_properties = np.asarray(lst)
         return None
+
 
     def blade_run_anbax(self, loads=None, **kwargs):
         """
@@ -782,75 +853,7 @@ class Blade(Component):
 
         return dym_inpt
 
-    def blade_gen_wopwop_mesh(self, xres, cres, deformation=None, normals="2d", minset=False):
-        """
-        method that generates a mesh of the surface that is necessary for 
-        PSU Wopwop. It is a structured mesh of points and their normals. 
-        The normals are currently only impemented that they are within the 
-        crosssectional plane (normals = '2d') and theirfore not normal to the 
-        surface. 
-        
-        Parameters
-        ----------
-        xres : array 
-            radial resolution in the form of an array that specifies the radial 
-            locations
-            
-        cres : int
-            chordwise resolution, how many points per cross-section
-            
-        deformation : array, optional
-            in the futur it shall be possible pass a deformation vector of 3 
-            displacements and 3 rotations to get the mesh of the deformed 
-            rotor-blade. This function is carried out in the trsf_af_to_blfr
-        
-        normals : str, optional
-            currently only '2d' normal vectors are implemented that are in the
-            yz plane.
-            
-        minset : bool, otional
-            if true the minimum set of radial values are superimposed with the 
-            xres array.
-            
-        Returns
-        -------
-        wopwop_bsplinelst : [[Geom_BSplineLst]]
-        wopwop_pnts : [[gp_Pnt]]
-        wopwop_vecs : [[gp_Vec]]
-            
-        """
-
-        x = xres
-        if minset:
-            minx = self.blade_ref_axis[:, 0]
-            x = np.unique(np.sort(np.hstack((xres, minx))))
-
-        # BSplineLst, PntLst =self._interpolate_cbm_boundary(x,nPoints=50,return_Pnts = True) #Old
-        airfoil_position = (list(self.airfoils[:, 0]), [af.name for af in self.airfoils[:, 1]])
-        airfoils = list(self.airfoils[:, 1])
-        wopafls = np.asarray([[x, interp_airfoil_position(airfoil_position, airfoils, x)] for x in x])
-
-        self.wopwop_bsplinelst = []
-        self.wopwop_pnts = []
-        self.wopwop_vecs = []
-
-        for x, af in wopafls:
-            (BSplineLst2d, pnts2d, vecs2d) = af.gen_wopwop_dist(cres)
-
-            Pnts = [pnt_to3d(p) for p in pnts2d]
-            Vecs = [vec_to3d(v) for v in vecs2d]
-            BSplineLst = bsplinelst_to3d(BSplineLst2d, gp_Pln(gp_Pnt(0, 0, 0), gp_Dir(0, 0, 1)))
-
-            Trsf = trsf_af_to_blfr(self.f_blade_ref_axis.interpolate(x)[0][0], float(self.f_pa(x)), float(self.f_chord(x)), float(self.f_twist(x)), deformation=deformation)
-            [s.Transform(Trsf) for s in BSplineLst]
-            Pnts = [p.Transformed(Trsf) for p in Pnts]
-            Vecs = [v.Transformed(Trsf) for v in Vecs]
-
-            self.wopwop_bsplinelst.append(BSplineLst)
-            self.wopwop_pnts.append(Pnts)
-            self.wopwop_vecs.append(Vecs)
-
-        return self.wopwop_bsplinelst, self.wopwop_pnts, self.wopwop_vecs
+    
 
     def blade_plot_attributes(self):
         """
@@ -985,7 +988,8 @@ class Blade(Component):
                 # loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-2, continuity=1, check_compatibility=True)
                 loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-6, continuity=1, check_compatibility=True)
                 self.display.DisplayShape(loft, transparency=0.5, update=True)
-                self.display.DisplayShape(self.loft, transparency=0.2, update=True, color="GREEN")
+                if self.loft is not None:
+                    self.display.DisplayShape(self.loft, transparency=0.2, update=True, color="GREEN")
             #     AP214_stepExporter.add_shape(loft)  # add each lofted shape to the AP203_stepExporter component to generate full blade
             # AP214_stepExporter.write_file()  # write step file
 
