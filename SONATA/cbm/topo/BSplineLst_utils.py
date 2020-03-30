@@ -502,6 +502,20 @@ def intersect_BSplineLst_with_plane(BSplineLst, plane):
 
 
 def BSplineLst_Orientation(BSplineLst, NbPoints=31):
+    
+    if isinstance(BSplineLst[0], Geom_BSplineCurve):
+        twoD = False
+    elif isinstance(BSplineLst[0], Geom2d_BSplineCurve):
+        twoD = True    
+
+    if twoD:
+         P = gp_Pnt2d()
+         V1 = gp_Vec2d()
+         V2 = gp_Vec2d()
+    else:
+        P = gp_Pnt()
+        V1 = gp_Vec()
+        V2 = gp_Vec()
 
     # FASTER BUT NOT EQUIDISTANT APPROACH!
     Pnt2dLst = []
@@ -512,10 +526,16 @@ def BSplineLst_Orientation(BSplineLst, NbPoints=31):
         inc = (Last - First) / NbPoints
         para = First + inc
         while para <= Last:
-            p = gp_Pnt2d()
+            if twoD:
+                p = gp_Pnt2d()
+            else:
+                p = gp_Pnt()
+            
             item.D0(para, p)
             Pnt2dLst.append(p)
             para += inc
+            
+            
     b = Pnt2dLst_to_npArray(Pnt2dLst)
 
     #   Place Equidistant Points on BSplineLst:                             #THIS APPROACH WAS SUPER SLOW!
