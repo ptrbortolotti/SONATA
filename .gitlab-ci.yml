@@ -1,0 +1,13 @@
+image: python:3.7-alpine  
+  
+pages:
+  stage: deploy
+  script:
+  - pip install -U sphinx
+  - mv docs/build/html/ public/
+  - sphinx-build -b html . public
+  artifacts:
+    paths:
+    - public
+  only:
+  - master

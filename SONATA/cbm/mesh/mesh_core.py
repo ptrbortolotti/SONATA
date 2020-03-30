@@ -7,22 +7,26 @@ Created on Thu Nov 02 10:46:29 2017
 @author: TPflumm
 """
 
-import numpy as np
+# Core Library modules
 import pickle
+
+# Third party modules
 import matplotlib.pyplot as plt
-
+import numpy as np
 from OCC.Core.gp import gp_Pnt2d
-from triangle import triangulate, plot
+from triangle import plot, triangulate
 
-from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length
-from SONATA.cbm.mesh.mesh_utils import equidistant_nodes_on_BSplineLst                   
-from SONATA.cbm.mesh.node import Node
+# First party modules
 from SONATA.cbm.mesh.cell import Cell
+from SONATA.cbm.mesh.mesh_utils import equidistant_nodes_on_BSplineLst
+from SONATA.cbm.mesh.node import Node
+from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length
 
-#===================FUNCTIONALITIES==========================================
+# ===================FUNCTIONALITIES==========================================
+
 
 def triangle_mesh(array, options):
-    '''The triangle_mesh function generates the triagular mesh within the 
+    """The triangle_mesh function generates the triagular mesh within the 
     a_nodes polygon. It uses the Python Triangle module, which is a python 
     wrapper around Jonathan Richard Shewchuks two-dimensional quality mesh
     generator and delaunay triangulator library, available here.  
@@ -41,26 +45,27 @@ def triangle_mesh(array, options):
    Returns: 
         mesh: a dictionary with 'vertices', 'segments', 'holes' and 'regions'
             as keys
-    '''
-    
+    """
+
     tmp = []
-    for i,v in enumerate(array):  
-        if i == len(array)-1:
-            tmp.append([i,0])
-        else: tmp.append([i,i+1])
+    for i, v in enumerate(array):
+        if i == len(array) - 1:
+            tmp.append([i, 0])
+        else:
+            tmp.append([i, i + 1])
     segments_core = np.asarray(tmp)
-        
-    poly = {'vertices': None, 'segments': None}
-    poly['vertices'] = array
-    poly['segments'] = segments_core
-    #plt.plot(old_vertices[:,0],old_vertices[:,1],'.-')
-    mesh =  triangulate(poly, options)
-    #plot.compare(plt, poly, mesh)
+
+    poly = {"vertices": None, "segments": None}
+    poly["vertices"] = array
+    poly["segments"] = segments_core
+    # plt.plot(old_vertices[:,0],old_vertices[:,1],'.-')
+    mesh = triangulate(poly, options)
+    # plot.compare(plt, poly, mesh)
     return mesh
 
 
-def find_node(nodeLst,ID):
-    '''finds the node in the list of nodes (nodeLst) that has the id == ID
+def find_node(nodeLst, ID):
+    """finds the node in the list of nodes (nodeLst) that has the id == ID
         Args:
             nodeLst: (list of nodes) this list of objects to search
             ID: (int) the ID that is to be found
@@ -70,18 +75,18 @@ def find_node(nodeLst,ID):
         
         TODO: There might be a quicker way to search for it. 
                 With dictionarys...?
-        '''
+        """
     for n in nodeLst:
         if n.id == ID:
             tmp = n
             break
         else:
-            tmp = None       
+            tmp = None
     return tmp
 
 
-def gen_core_cells(a_nodes, area=1.0,**kwargs):
-    '''The gen_core_cells function generates the triagular mesh within the 
+def gen_core_cells(a_nodes, area=1.0, **kwargs):
+    """The gen_core_cells function generates the triagular mesh within the 
     a_nodes polygon.        
     
     Args:
@@ -99,93 +104,91 @@ def gen_core_cells(a_nodes, area=1.0,**kwargs):
         [c_cells,c_nodes]: c_cells is a list of the newly generated cell 
             objects, while c_nodes is a list of the newly generated node 
             objects.              
-    '''
-    
-    #KWARGS:
-    if kwargs.get('options') !=  None:
-        options = kwargs.get('options')
+    """
+
+    # KWARGS:
+    if kwargs.get("options") != None:
+        options = kwargs.get("options")
     else:
-        if area<1.0:  
-            #options = 'pq'   
-            scalefactor = np.sqrt(1/area)+0.1
-            area = area * scalefactor**2
-            #print('area:', area, 'scalefactor:', scalefactor)
-            options = 'pa%f' % (area)   #Somehow crashing!?
-        
+        if area < 1.0:
+            # options = 'pq'
+            scalefactor = np.sqrt(1 / area) + 0.1
+            area = area * scalefactor ** 2
+            # print('area:', area, 'scalefactor:', scalefactor)
+            options = "pa%f" % (area)  # Somehow crashing!?
+
         else:
-             scalefactor = 1
-             options = 'pa%f' % (area)   #Somehow crashing!?
-    
-    old_vertices = np.asarray([[n.Pnt2d.X(),n.Pnt2d.Y(), n.id] for n in a_nodes])
-    mesh = triangle_mesh(old_vertices[:,:2]*scalefactor, options)  
-  
+            scalefactor = 1
+            options = "pa%f" % (area)  # Somehow crashing!?
+
+    old_vertices = np.asarray([[n.Pnt2d.X(), n.Pnt2d.Y(), n.id] for n in a_nodes])
+    mesh = triangle_mesh(old_vertices[:, :2] * scalefactor, options)
+
     c_nodes = []
-    connector = []      #connector stores the information [tri_vertex_id, old_node_id]
-    for tri_id,v in enumerate(mesh['vertices']):
-        #print(type(v))
-        v = v/scalefactor
-        vec = np.linalg.norm(old_vertices[:,:2]-v,axis=1)
+    connector = []  # connector stores the information [tri_vertex_id, old_node_id]
+    for tri_id, v in enumerate(mesh["vertices"]):
+        # print(type(v))
+        v = v / scalefactor
+        vec = np.linalg.norm(old_vertices[:, :2] - v, axis=1)
         idx = np.argmin(vec)
         value = vec[idx]
-        if value<=1e-5:
-             #checks if the vertex exists allready in the a_nodes list
-             connector.append([tri_id,old_vertices[idx,2]])
-        else: 
-            #create new node for every new vertice that is not in a_nodes:
-            tmp_node = Node(gp_Pnt2d(v[0],v[1]))
-            connector.append([tri_id,tmp_node.id])
+        if value <= 1e-5:
+            # checks if the vertex exists allready in the a_nodes list
+            connector.append([tri_id, old_vertices[idx, 2]])
+        else:
+            # create new node for every new vertice that is not in a_nodes:
+            tmp_node = Node(gp_Pnt2d(v[0], v[1]))
+            connector.append([tri_id, tmp_node.id])
             c_nodes.append(tmp_node)
-                
+
     connector = np.asarray(connector)
-    nodes = a_nodes+c_nodes
-    
-    #create cells from connector array
-    c_cells =[]
-    for ele in mesh['triangles']:
-        nodeLst = []
-        for tri_id in ele: 
-            NodeID = connector[tri_id,1]
-            nodeLst.append(find_node(nodes,NodeID))
-    
+    nodes = a_nodes + c_nodes
+
+    # create cells from connector array
+    c_cells = []
+    for ele in mesh["triangles"]:
+        nodeids = [connector[tri_id, 1] for tri_id in ele]
+        nodedict = {n.id: n for n in nodes}
+        nodeLst = [nodedict[i] for i in nodeids]
         c_cells.append(Cell(nodeLst))
-            
-    return [c_cells,nodes]
+
+    return [c_cells, nodes]
 
 
-#===================MAIN==========================================
-if __name__ == '__main__':   
-    #LOAD .pkl data with SegmentLst
-    filename = 'C:\TPflumm_local\work\SONATA\sec_config.pkl'
-    with open(filename, 'rb') as handle:
+# ===================MAIN==========================================
+if __name__ == "__main__":
+    # LOAD .pkl data with SegmentLst
+    filename = "C:\TPflumm_local\work\SONATA\sec_config.pkl"
+    with open(filename, "rb") as handle:
         SegmentLst = pickle.load(handle)
-        
-    #Build wires for each layer and segment
+
+    # Build wires for each layer and segment
     for seg in SegmentLst:
         seg.build_wire()
         for layer in seg.LayerLst:
             layer.build_wire()
-    
-    
+
     layer = SegmentLst[-1].LayerLst[-1]
-    Resolution = 100 # Nb of Points on Segment0
+    Resolution = 100  # Nb of Points on Segment0
     length = get_BSplineLst_length(SegmentLst[0].BSplineLst)
-    global_minLen = round(length/Resolution,5)
-    
-    a_nodes = equidistant_nodes_on_BSplineLst(layer.Boundary_BSplineLst, True, True, True, minLen = global_minLen, LayerID = layer.ID[0])
-    [c_cells,c_nodes] = gen_core_cells(a_nodes,2)
-    
+    global_minLen = round(length / Resolution, 5)
+
+    a_nodes = equidistant_nodes_on_BSplineLst(layer.Boundary_BSplineLst, True, True, True, minLen=global_minLen, LayerID=layer.ID[0])
+    [c_cells, c_nodes] = gen_core_cells(a_nodes, 2)
+
     for c in c_cells:
         c.structured = False
         c.theta_3 = 0
         c.MatID = int(seg.CoreMaterial)
         c.calc_theta_1()
-    
+
     from SONATA.display.display_mesh import plot_cells
-    plot_cells(c_cells, c_nodes, 'MatID')
-    
+
+    plot_cells(c_cells, c_nodes, "MatID")
+
 #    from OCC.Display.SimpleGui import init_display
 #    display, start_display, add_menu, add_function_to_menu = init_display()
 #    display.Context.SetDeviationAngle(1e-6)       # 0.001 default. Be careful to scale it to the problem.
-#    display.Context.SetDeviationCoefficient(1e-6) # 0.001 default. Be careful to scale it to the problem. 
+#    display.Context.SetDeviationCoefficient(1e-6) # 0.001 default. Be careful to scale it to the problem.
 #    for n in c_nodes:
-#        display.DisplayColoredShape(n.Pnt2d, 'BLACK')    
+#        display.DisplayColoredShape(n.Pnt2d, 'BLACK')

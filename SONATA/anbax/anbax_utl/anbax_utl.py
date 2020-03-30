@@ -1,7 +1,15 @@
-import dolfin
+
+# Third party modules
 import numpy as np
 
-from anba4 import material
+try
+    import dolfin
+    from anba4 import material
+except ImportError as error:
+    print(error.__class__.__name__ + ": " + error.message)
+except Exception as exception:
+    print(exception, False)
+
 
 def build_mat_library(cbm_materials):
 
@@ -99,4 +107,3 @@ def build_dolfin_mesh(cbm_mesh, cbm_nodes, cbm_materials):
 
 
     return mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE
-
