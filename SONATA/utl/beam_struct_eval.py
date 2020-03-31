@@ -20,7 +20,7 @@ from SONATA.utl.analytical_rectangle.utls_analytical_rectangle import utls_analy
 
 
 
-def beam_struct_eval(flags_dict, cs_pos, job, folder_str, job_str):
+def beam_struct_eval(flags_dict, vabs_path, cs_pos, job, folder_str, job_str):
 
     """
     Analyse, transform, evaluate and plot structural results
@@ -64,9 +64,9 @@ def beam_struct_eval(flags_dict, cs_pos, job, folder_str, job_str):
                 "ddm":  np.array([[0, 0, 0, 0],    [1, 0, 0, 0]]),      # second derivative
                 "dddm": np.array([[0, 0, 0, 0],    [1, 0, 0, 0]])}      # third derivative
 
-            job.blade_run_vabs(loads)  # run VABS
+            job.blade_run_vabs(loads, vabs_path=vabs_path)  # run VABS
         else:
-            job.blade_run_vabs()  # run VABS
+            job.blade_run_vabs(vabs_path=vabs_path)  # run VABS
 
 
         if flags_dict['flag_DeamDyn_def_transform']:

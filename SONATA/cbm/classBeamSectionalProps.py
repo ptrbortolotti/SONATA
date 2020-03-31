@@ -130,17 +130,11 @@ class BeamSectionalProps(object):
     - Implement function to rotate the Vlasov Stiffness matrix and the Trapez 
         Effect related terms
     - Make one unit convertion method that converts the complete instance
-<<<<<<< HEAD
     """    
     
     __slots__ = ('TS', 'MM', 'Xg', 'Xt', 'Xs', 'PIA', 'VS', 'Ag', \
                  'Bk', 'Ck', 'Dk', 'ELE', 'U')
     
-=======
-    """
-
-    __slots__ = ("TS", "MM", "Xg", "Xt", "Xs", "PIA", "VS", "Ag", "Bk", "Ck", "Dk", "fname", "ELE", "U")
->>>>>>> b8005f40107d6e7c5762b9b19741098744a7f7cd
 
     def __init__(self, fname=None):
         self.TS = None
@@ -154,14 +148,10 @@ class BeamSectionalProps(object):
         self.Bk = None
         self.Ck = None
         self.Dk = None
-<<<<<<< HEAD
 
         self.ELE = None
         self.U = None
 
-=======
-        self.fname = fname
->>>>>>> b8005f40107d6e7c5762b9b19741098744a7f7cd
         if fname:
             self.read_vabs_K(fname)
 
@@ -330,15 +320,10 @@ class BeamSectionalProps(object):
         """
         reads the strains, stresses and displacements from VABS result files
         """
-<<<<<<< HEAD
         # self.ELE = read_VABS_Results(self.filename.replace('.K','.ELE'))
         # self.U = read_VABS_Results(self.filename.replace('.K','.U'))
         self.ELE = read_VABS_Results(filename+'.ELE')
         self.U = read_VABS_Results(filename+'.U')
-=======
-        self.ELE = read_VABS_Results(self.fname.replace(".K", ".ELE"))
-        self.U = read_VABS_Results(self.fname.replace(".K", ".U"))
->>>>>>> b8005f40107d6e7c5762b9b19741098744a7f7cd
 
     def MM_convert_units(self, in_dct={"mass": "kg", "length": "m"}, out_dct={"mass": "kg", "length": "m"}):
         """

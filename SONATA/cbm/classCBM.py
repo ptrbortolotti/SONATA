@@ -67,7 +67,6 @@ from SONATA.vabs.failure_criteria import (hashin_2D, maxstrain_2D,
 from SONATA.vabs.vabs_utl import export_cells_for_VABS
 
 try:
-<<<<<<< HEAD
     import dolfin as do
     from SONATA.anbax.anbax_utl.anbax_utl import build_dolfin_mesh
     # from SONATA.anbax.anbax_v4.anba4 import anbax
@@ -75,16 +74,12 @@ try:
     # sys.path.append('/Users/rfeil/work/7_anbax/anba_v4')  # orig anbax v4
     # from anba4.anbax import anbax
 
-    sys.path.append('/Users/rfeil/work/7_anbax/anba_v4_revised')  # revised anbax v4 version from Marco Morandini (2019-11-27)
+    sys.path.append('/Users/rfeil/work/6_SONATA_new/anba_v4')  # revised anbax v4 version from Marco Morandini (2019-11-27)
     # from anba4.anbax_MMtest import anbax  # <<<working version until Feb 2020
-    from anba4.anbax_2020_03_23 import anbax
+    # from anba4.anbax_2020_03_23 import anbax
+    from anba4.anbax import anbax
 
 
-
-=======
-    from SONATA.anbax.anbax_utl import build_dolfin_mesh
-    from anba4 import anbax
->>>>>>> b8005f40107d6e7c5762b9b19741098744a7f7cd
 
     # from SONATA.anbax.anba_v4.anba4.anbax import anbax
 except:
@@ -775,15 +770,9 @@ class CBM(object):
         self.BeamProperties = result
         
         if self.config.vabs_cfg.recover_flag == 1:
-<<<<<<< HEAD
             self.BeamProperties.read_all_VABS_Results(filename=vabs_filename)
             #ASSIGN Stress and strains to elements:
             for i,c in enumerate(self.mesh):
-=======
-            self.BeamProperties.read_all_VABS_Results()
-            # ASSIGN Stress and strains to elements:
-            for i, c in enumerate(self.mesh):
->>>>>>> b8005f40107d6e7c5762b9b19741098744a7f7cd
                 c.strain = Strain(self.BeamProperties.ELE[i][1:7])
                 c.stress = Stress(self.BeamProperties.ELE[i][7:13])
                 c.strainM = Strain(self.BeamProperties.ELE[i][13:19])
@@ -792,21 +781,12 @@ class CBM(object):
             # ASSIGN Displacement U to nodes:
             for i, n in enumerate(nodes):
                 n.displacement = self.BeamProperties.U[i][3:6]
-<<<<<<< HEAD
             
             #Calculate standart failure criterias
             # self.cbm_calc_failurecriteria()
         
         #print(vabs_filename)
         #REMOVE VABS FILES:
-=======
-
-            # Calculate standart failure criterias
-            self.cbm_calc_failurecriteria()
-
-        # print(vabs_filename)
-        # REMOVE VABS FILES:
->>>>>>> b8005f40107d6e7c5762b9b19741098744a7f7cd
         if rm_vabfiles:
             folder = "/".join(vabs_filename.split("/")[:-1])
             fstring = vabs_filename.split("/")[-1]

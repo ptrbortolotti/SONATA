@@ -6,13 +6,12 @@ Created on Mo Oct 07 11:18:28 2019
 """
 
 import os, sys
-sys.path.insert(0,'/Users/rfeil/work/6_SONATA_new/SONATA')  # import sys path to import 'SONATA' & 'job' modules
+# sys.path.insert(0,'/Users/rfeil/work/6_SONATA_new/SONATA')  # import sys path to import 'SONATA' & 'job' modules
 
 import time
 
 import subprocess
 import matplotlib.pyplot as plt
-
 
 # import SONATA.SONATA.classBlade as Blade
 from SONATA.classBlade import Blade
@@ -33,10 +32,10 @@ print('Current working directory is:', os.getcwd())
 plt.close('all')  # close existing plots
 
 # ===== Provide Path Directory & Yaml Filename ===== #
-# folder_str = '/Users/rfeil/work/6_SONATA_new/SONATA/jobs/RFeil/'
-# folder_str = '/Users/rfeil/work/6_SONATA_new/SONATA/jobs/RFeil/HFM/'
-folder_str = '/Users/rfeil/work/6_SONATA_new/SONATA/jobs/RFeil/yaml_examples/'
-# folder_str = '/Users/rfeil/work/6_SONATA_new/SONATA/jobs/RFeil/inflatable_blade_studies/'
+# folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/'
+# folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/HFM/'
+folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/yaml_examples/'
+# folder_str = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/inflatable_blade_studies/'
 
 # job_str = 'BAR0010n.yaml' # baseline
 # job_str = 'IEA-15-240-RWT_TipShape_V1.yaml'
@@ -58,8 +57,6 @@ job_str = 'example_rectangular_beam_ht_ontology_anbax_verify_II_plyangles.yaml'
 job_name = 'SONATA_job'  # can also be more specified, e.g. 'BAR_005a', 'example_rectangular_beam_ht_ontology' or else
 filename_str = folder_str + job_str
 
-vabs_path = "/Users/rfeil/work/8_VABS/vabs_WIN/AnalySwift/VABS/VABSIII.exe"
-
 # ===== Define flags ===== #
 # --- numerical flags ---
 flag_wt_ontology        = False      # if true, use ontology definition of wind turbines for yaml files
@@ -69,7 +66,7 @@ flag_ref_axes_wt        = False      # if true, rotate reference axes from wind 
 # Define mesh resolution, i.e. the number of points along the profile that is used for out-to-inboard meshing of a 2D blade cross section
 mesh_resolution = 200
 # For plots within blade_plot_sections
-attribute_str           = 'MatID'  # default: 'MatID' (theta_3 - fiber orientation angle)
+attribute_str           = 'stress.sigma11'  # default: 'MatID' (theta_3 - fiber orientation angle)
                                             # others:  'theta_3' - fiber orientation angle
                                             #          'stress.sigma11' (use sigma_ij to address specific component)
                                             #          'stressM.sigma11'
@@ -78,8 +75,8 @@ attribute_str           = 'MatID'  # default: 'MatID' (theta_3 - fiber orientati
 
 # 2D cross sectional plots (blade_plot_sections)
 flag_plotTheta11        = False      # plane orientation angle
-flag_recovery           = False
-flag_plotDisplacement   = False     # description ? ToDO
+flag_recovery           = True
+flag_plotDisplacement   = True     # description ? ToDO
 # 3D plots (blade_post_3dtopo)
 flag_wf                 = True      # plot wire-frame
 flag_lft                = True      # plot lofted shape of blade surface (flag_wf=True obligatory); Note: create loft with grid refinement without too many radial_stations; can also export step file of lofted shape
@@ -137,13 +134,13 @@ job.blade_gen_section(topo_flag=True, mesh_flag = True, split_quads=True)  # spl
 
 
 # ===== VABS / ANBAX individually ===== #
-# job.blade_run_vabs(vabs_path=vabs_path)
+# job.blade_run_vabs()
 # job.blade_run_anbax()
 
 # ===== VABS / ANBAX combination/verification ===== #
 # Define flags
-flag_run_vabs = True
-flag_run_anbax = False
+flag_run_vabs = False
+flag_run_anbax = True
 flag_verify_vabs_anbax = False                  # needs flag_run_vabs & flag_run_anbax set to True to be valid!
 flag_DeamDyn_def_transform = False               # transform from SONATA to BeamDyn coordinate system
 flag_plot_vabs_struct_characteristics = False   # plots and saves figures of structural characteristics of respective analysis for the range of defined radial stations
@@ -160,17 +157,16 @@ flags_dict['flag_csv_export'] = flag_csv_export
 flags_dict['flag_write_BeamDyn'] = flag_write_BeamDyn
 flags_dict['flag_write_BeamDyn_unit_convert'] = flag_write_BeamDyn_unit_convert
 
-
 # run evalutation
-beam_struct_eval(flags_dict, vabs_path, radial_stations, job, folder_str, job_str)
+beam_struct_eval(flags_dict, radial_stations, job, folder_str, job_str)
 
 # ===== PLOTS ===== #
 # saves figures in folder_str/figures if savepath is provided:
-# job.blade_plot_sections(attribute=attribute_str, plotTheta11=flag_plotTheta11, plotDisplacement=flag_plotDisplacement, savepath=folder_str)
+job.blade_plot_sections(attribute=attribute_str, plotTheta11=flag_plotTheta11, plotDisplacement=flag_plotDisplacement, savepath=folder_str)
 
-job.blade_post_3dtopo(flag_wf=flags_dict['flag_wf'], flag_lft=flags_dict['flag_lft'], flag_topo=flags_dict['flag_topo'])
+# job.blade_post_3dtopo(flag_wf=flags_dict['flag_wf'], flag_lft=flags_dict['flag_lft'], flag_topo=flags_dict['flag_topo'])
 
-# job.blade_airconics_iges(job_str, flags_dict)
+job.blade_airconics_iges(job_str, flags_dict)
 
 
 

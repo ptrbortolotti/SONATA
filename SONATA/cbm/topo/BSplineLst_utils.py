@@ -954,12 +954,7 @@ def discretize_BSplineLst(BSplineLst, Deflection=2e-4, AngularDeflection=0.02, C
     #            Refinement = False
     return npArray
 
-<<<<<<< HEAD
-    DCT_data = fuse_rows(DCT_data, 1e-6) #check all datapoints and merge if allclose is true
-    
-    #Find corners and edges of data
-    #print(DCT_data)
-=======
+
 
 # return data
 
@@ -974,7 +969,6 @@ def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_inter
 
     # Find corners and edges of data
     # print(DCT_data)
->>>>>>> b8005f40107d6e7c5762b9b19741098744a7f7cd
     DCT_angles = calc_DCT_angles(DCT_data)
     # print(DCT_angles)
     corners = []

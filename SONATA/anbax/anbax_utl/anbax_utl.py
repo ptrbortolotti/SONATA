@@ -2,7 +2,7 @@
 # Third party modules
 import numpy as np
 
-try
+try:
     import dolfin
     from anba4 import material
 except ImportError as error:

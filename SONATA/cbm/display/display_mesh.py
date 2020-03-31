@@ -5,6 +5,7 @@ Created on Thu Jan 19 11:01:06 2017
 @author: TPflumm
 """
 # Core Library modules
+import os
 import datetime
 import math
 import logging
@@ -19,11 +20,11 @@ from matplotlib.patches import Polygon
 
 
 # First party modules
-from SONATA.utl_openmdao.doe_utl import filename_generator
+# from SONATA.utl_openmdao.doe_utl import filename_generator
 
 
-mpl_logger = logging.getLogger("matplotlib")
-mpl_logger.setLevel(logging.WARNING)
+# mpl_logger = logging.getLogger("matplotlib")
+# mpl_logger.setLevel(logging.WARNING)
 
 def centroid(points):
     x = [p[0] for p in points]
@@ -127,7 +128,6 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
         cbar.set_ticklabels(cbar_label)
         # cbar.set_ticklabels(['mat1', 'mat2', 'mat3', 'mat4', 'mat5', 'mat6'])
         p.set_clim(0.5, max(data)+0.5)
-<<<<<<< HEAD
 
     elif data_name[0:6] == 'stress':
         cbar.ax.set_ylabel('Stress, $\mathrm{Nm^2}$')
@@ -135,11 +135,6 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
     elif data_name[0:6] == 'strain':
         cbar.ax.set_ylabel('Strain, m/m')
 
-=======
-    if data_name == 'sf':
-         p.set_clim(0, 3)
-    
->>>>>>> b8005f40107d6e7c5762b9b19741098744a7f7cd
     if len(theta_11)==len(elements):
         for i,cent in enumerate(centroids):
             
@@ -245,12 +240,8 @@ def plot_cells(cells,nodes, attr1, materials, VABSProperties=None, title='None',
     """
     nodes_array = []
     for n in nodes:
-        if plotDisplacement:
-<<<<<<< HEAD
+        if plotDisplacement and n.displacement[0] is not None:
             nodes_array.append([[n.coordinates[0]+n.displacement[1]-1,n.coordinates[1]+n.displacement[2]-1]])
-=======
-            nodes_array.append([[n.coordinates[0] + n.displacement[1], n.coordinates[1] + n.displacement[2]]])
->>>>>>> b8005f40107d6e7c5762b9b19741098744a7f7cd
         else:
             nodes_array.append([n.coordinates[0], n.coordinates[1]])
     nodes_array = np.asarray(nodes_array)
@@ -287,24 +278,22 @@ def plot_cells(cells,nodes, attr1, materials, VABSProperties=None, title='None',
     fig,ax = plot_mesh(nodes_array, element_array, theta_11, data, data_name, materials, title, VABSProperties, **kw)    
    
     if 'savepath' in kw:
-        #savepath = 'jobs/VHeuschneider/figures/R90_config.svg'
-        s = kw['savepath']
-        file_extension ='.'+ s.split('.')[-1]
 
-        if s.find('/') != -1:
-            idx = [i for i, v in enumerate(s) if v == '/'][-1]
-            directory = s[:idx]
-            string = s[idx + 1 : s.find(".")]
+        if not os.path.exists(kw['savepath']+'figures'):  # create 'figures' Folder if not already existing
+            os.mkdir(kw['savepath']+'figures')
 
-        else:
-            directory = ""
-            string = s[: s.find(".")]
-        fname = filename_generator(directory, string, file_extension)
+        # datestr = datetime.datetime.now().strftime("%Y%m%d_%H%M")
         # fname = kw['savepath'].split('.')[0]+'_'+datestr+'.'+kw['savepath'].split('.')[1]
-        print(fname)
-        tmp_fig = plt.gcf()
-        #tmp_fig.set_size_inches(11.69, 8.27)    #a4 landscape
-        tmp_fig.set_size_inches(40, 20)    
+
+        if 'opt_var' in kw:
+            fname = kw['savepath'] + '/figures/blade_section_' + kw['section'] + '_optvar_' + kw['opt_var'] + '.png'
+        else:
+            fname = kw['savepath']+'/figures/blade_section_'+kw['section']+'.png'
+        # print(fname)
+        # tmp_fig = plt.gcf()
+        tmp_fig = fig
+        # tmp_fig.set_size_inches(11.69, 8.27)    #a4 landscape
+        tmp_fig.set_size_inches(10, 5)    #a4 landscape
         tmp_fig.savefig(fname, dpi=300, orientation='landscape', papertype='a4')
 
     return (fig, ax)

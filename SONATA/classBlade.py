@@ -13,7 +13,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
-from jsonschema import validate
+# from jsonschema import validate
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
 from OCC.Core.gp import (gp_Ax1, gp_Ax2, gp_Ax3, gp_Dir, gp_Pln,
                          gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec,)
@@ -266,17 +266,10 @@ class Blade(Component):
         p = gp_Pnt()
         vx = gp_Vec()
         v2 = gp_Vec()
-<<<<<<< HEAD
         
         #determine local the local cbm coordinate system Ax2
         self.beam_ref_axis_BSplineLst[int(resCoords[0,0])].D2(resCoords[0,1],p,vx,v2)
         vz = gp_Vec(-vx.Z(),0,vx.X()).Normalized()
-=======
-
-        # determine local the local cbm coordinate system Ax2
-        self.beam_ref_axis_BSplineLst[int(resCoords[0, 0])].D2(resCoords[0, 1], p, vx, v2)
-        vz = gp_Vec(-vx.Z(), 0, vx.X()).Normalized()
->>>>>>> b8005f40107d6e7c5762b9b19741098744a7f7cd
         tmp_Ax2 = gp_Ax2(p, gp_Dir(vz), gp_Dir(vx))
         local_Ax2 = tmp_Ax2.Rotated(gp_Ax1(p, gp_Dir(vx)), float(self.f_twist(x)))
         return local_Ax2
@@ -432,12 +425,10 @@ class Blade(Component):
             else:
                 cs_pos = stations
             
-        x = np.unique(np.sort(np.hstack( (tmp_chord[:,0], tmp_tw[:,0], \
+        x = np.unique(np.sort(np.hstack((kwargs.get('stations_add'), tmp_chord[:,0], tmp_tw[:,0], \
                                          tmp_blra[:,0], tmp_bera[:,0], \
                                          tmp_pa[:,0], arr[:,0], cs_pos))))
 
-        #        print(type(airfoil_position),airfoil_position)
-        #        print(airfoils)
         self.airfoils = np.asarray([[x, interp_airfoil_position(airfoil_position, airfoils, x)] for x in x])
         self.blade_ref_axis = np.hstack((np.expand_dims(x, axis=1), self.f_blade_ref_axis.interpolate(x)[0]))
         self.beam_ref_axis = np.hstack((np.expand_dims(x, axis=1), self.f_beam_ref_axis.interpolate(x)[0]))
@@ -690,17 +681,10 @@ class Blade(Component):
             if loads:
                 vc.recover_flag = 1
                 load = interp_loads(loads, x)
-<<<<<<< HEAD
                 for k,v in load.items():
                     setattr(vc,k,v)
 
             #set initial twist and curvature
-=======
-                for k, v in load.items():
-                    setattr(vc, k, v)
-
-            # set initial twist and curvature
->>>>>>> b8005f40107d6e7c5762b9b19741098744a7f7cd
             vc.curve_flag = 1
             vc.k1 = float(self.f_curvature_k1(x))
             (vc.k2, vc.k3) = self.f_beam_ref_axis.interpolate_curvature(x)
@@ -939,25 +923,25 @@ class Blade(Component):
         return None    
     
     
-    def blade_post_3dtopo(self, flag_wf = True, flag_lft = False, flag_topo = False, flag_mesh = False, flag_wopwop=False, **kwargs):
-        """
-        plots the cross-sections of the blade with matplotlib 
-
-        Parameters
-        ----------
-        **kwargs : TYPE
-            multiple keyword arguments can be passed down to the 
-            cbm_post_2dmesh method. 
-
-        Returns
-        -------
-        None.
-
-        """
-        for (x, cs) in self.sections:
-            string = "Blade: " + str(self.name) + "; Section : " + str(x)
-            cs.cbm_post_2dmesh(title=string, **kwargs)
-        return None
+    # def blade_post_3dtopo(self, flag_wf = True, flag_lft = False, flag_topo = False, flag_mesh = False, flag_wopwop=False, **kwargs):
+    #     """
+    #     plots the cross-sections of the blade with matplotlib
+    #
+    #     Parameters
+    #     ----------
+    #     **kwargs : TYPE
+    #         multiple keyword arguments can be passed down to the
+    #         cbm_post_2dmesh method.
+    #
+    #     Returns
+    #     -------
+    #     None.
+    #
+    #     """
+    #     for (x, cs) in self.sections:
+    #         string = "Blade: " + str(self.name) + "; Section : " + str(x)
+    #         cs.cbm_post_2dmesh(title=string, **kwargs)
+    #     return None
 
 
 
@@ -1006,8 +990,8 @@ class Blade(Component):
                 # loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-2, continuity=1, check_compatibility=True)
                 loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-6, continuity=1, check_compatibility=True)
                 self.display.DisplayShape(loft, transparency=0.5, update=True)
-                if self.loft is not None:
-                    self.display.DisplayShape(self.loft, transparency=0.2, update=True, color="GREEN")
+                # if self.loft is not None:
+                #     self.display.DisplayShape(self.loft, transparency=0.2, update=True, color="GREEN")
             #     AP214_stepExporter.add_shape(loft)  # add each lofted shape to the AP203_stepExporter component to generate full blade
             # AP214_stepExporter.write_file()  # write step file
 
@@ -1032,7 +1016,10 @@ class Blade(Component):
                     v3 = v1.Added(v2)
                     p2 = gp_Pnt(v3.XYZ())
 
-<<<<<<< HEAD
+        self.display.View_Iso()
+        self.display.FitAll()
+        self.start_display()
+
     def blade_airconics_iges(self, job_str, flags_dict):
         """
         exports lofted blade based on airconics package
@@ -1058,16 +1045,6 @@ class Blade(Component):
         return None
 
 
-=======
-                    self.display.DisplayShape(p1, color="RED")
-                    h1 = BRepBuilderAPI_MakeEdge(p1, p2).Shape()
-                    self.display.DisplayShape(h1, color="WHITE")
-
-        self.display.View_Iso()
-        self.display.FitAll()
-        # self.start_display()
-        return None
->>>>>>> b8005f40107d6e7c5762b9b19741098744a7f7cd
 
 
 # ====== M A I N ==============
