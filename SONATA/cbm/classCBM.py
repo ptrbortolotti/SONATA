@@ -69,19 +69,10 @@ from SONATA.vabs.vabs_utl import export_cells_for_VABS
 try:
     import dolfin as do
     from SONATA.anbax.anbax_utl.anbax_utl import build_dolfin_mesh
-    # from SONATA.anbax.anbax_v4.anba4 import anbax
     import sys
-    # sys.path.append('/Users/rfeil/work/7_anbax/anba_v4')  # orig anbax v4
-    # from anba4.anbax import anbax
 
-    sys.path.append('/Users/rfeil/work/6_SONATA_new/anba_v4')  # revised anbax v4 version from Marco Morandini (2019-11-27)
-    # from anba4.anbax_MMtest import anbax  # <<<working version until Feb 2020
-    # from anba4.anbax_2020_03_23 import anbax
     from anba4.anbax import anbax
 
-
-
-    # from SONATA.anbax.anba_v4.anba4.anbax import anbax
 except:
     pass
 
