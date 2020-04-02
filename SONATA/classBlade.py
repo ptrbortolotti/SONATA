@@ -563,7 +563,7 @@ class Blade(Component):
         wireframe = []
         
         for bm, afl in zip(self.blade_matrix, self.airfoils[:, 1]):
-            afl.gen_OCCtopo(angular_deflection=160)
+            afl.gen_OCCtopo(angular_deflection=20)  # 160
             (wire, te_pnt) = afl.trsf_to_blfr(bm[1:4], bm[6], bm[4], bm[5])
             wireframe.append(wire)
             

@@ -35,15 +35,24 @@ def utl_openmdao_apply_gains_mat_thickness(blade, yml, opt_vars):
     ply_orientation_I = yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][0][3]
     ply_orientation_II = yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][1][3]
 
+    web1_start = yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][0]['position'][0]
+    web1_start = yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][0]['position'][1]
+    web2_start = yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][1]['position'][0]
+    web2_start = yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][1]['position'][1]
+
     # replace with optimization variable
     # yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][0][2] = float(opt_vars[0])  # split elliplis plies in two for better meshing
-    yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][2][2] = float(opt_vars[0])  # split elliplis plies in two for better meshing
+    yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][1][2] = float(opt_vars[0])  # split elliplis plies in two for better meshing
     yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][0]['curvature'] = -float(opt_vars[1])
     yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][1]['curvature'] =  float(opt_vars[1])
     yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][0][3] = float(opt_vars[2])
     yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][1][3] = float(opt_vars[2])
-    yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][2][3] = float(opt_vars[2])
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][2][3] = float(opt_vars[2])
 
+    yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][0]['position'][0] = 0.33763813598041315 + float(opt_vars[3])
+    yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][0]['position'][1] = 0.6603507085422332 - float(opt_vars[3])
+    yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][1]['position'][0] = 0.33763813598041315 - float(opt_vars[3])
+    yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][1]['position'][1] = 0.6603507085422332 + float(opt_vars[3])
 
     # yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][0][3] = float(opt_vars[0])
     # yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][1][3] = float(opt_vars[0])

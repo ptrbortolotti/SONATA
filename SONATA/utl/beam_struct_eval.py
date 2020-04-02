@@ -398,7 +398,7 @@ def anbax_export_beam_struct_properties(folder_str, job_str, radial_stations, co
     if solver=='anbax':
         export_name_general = 'anbax_beam_properties_general.csv'
         export_name_stiff = 'anbax_beam_properties_stiff_matrices.csv'
-        export_name_mass = 'ambax_beam_properties_mass_matrices.csv'
+        export_name_mass = 'anbax_beam_properties_mass_matrices.csv'
     else:
         print('Define correct solver name (vabs or anbax) when calling export_beam_struct_properties')
 
