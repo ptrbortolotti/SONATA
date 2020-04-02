@@ -54,6 +54,7 @@ from SONATA.utl.interpBSplineLst import interpBSplineLst
 from SONATA.utl.plot import plot_beam_properties
 from SONATA.utl.trsf import trsf_af_to_blfr, trsf_blfr_to_cbm, trsf_cbm_to_blfr
 from SONATA.vabs.classVABSConfig import VABSConfig
+from SONATA.anbax.classANBAXConfig import ANBAXConfig
 
 
 from SONATA.utl_openmdao.utl_openmdao import utl_openmdao_apply_gains_web_placement, utl_openmdao_apply_gains_mat_thickness
@@ -649,16 +650,16 @@ class Blade(Component):
 
     def blade_run_vabs(self, loads=None, **kwargs):
         """
-        runs vabs for every section
-        
+        Determines initial twist and curvatures and runs vabs for every section
+
         Parameters
         ----------
         loads : dict, optional
             dictionary of the following keys and values, (default=None)
-            for detailed information see the VABSConfig documentation or the 
+            for detailed information see the VABSConfig documentation or the
             VABS user manual
-            F : nparray([[grid, F1, F2, F3]]) 
-            M : nparray([[grid, M1, M2, M3]]) 
+            F : nparray([[grid, F1, F2, F3]])
+            M : nparray([[grid, M1, M2, M3]])
             f : nparray([[grid, f1, f2, f2]])
             df : nparray([[grid, f1', f2', f3']])
             dm :  nparray([[grid, m1', m2', m3']])
@@ -666,13 +667,7 @@ class Blade(Component):
             ddm : nparray([[grid, m1'', m2'', m3'']])
             dddf : nparray([[grid, f1''', f2''', f3''']])
             dddm : nparray([[grid, m1''', m2''', m3''']])
-        
-        ToDo
-        ----------
-            To model initially curved and twisted beams, curve flag is 1, and three real numbers for the
-            twist (k1) and curvatures (k2 and k3) should be provided in the vabs config
-            Be Careful to define the curvature measures in the local Ax2 frame!
-        
+
         """
 
         vc = VABSConfig()
@@ -700,31 +695,25 @@ class Blade(Component):
     def blade_run_anbax(self, loads=None, **kwargs):
         """
         runs anbax for every section
-        
+
         Parameters
         ----------
         loads : dict, optional
             dictionary of the following keys and values, (default=None)
-            for detailed information see the VABSConfig documentation or the 
-            VABS user manual
-            F : nparray([[grid, F1, F2, F3]]) 
-            M : nparray([[grid, M1, M2, M3]]) 
-            f : nparray([[grid, f1, f2, f2]])
-            df : nparray([[grid, f1', f2', f3']])
-            dm :  nparray([[grid, m1', m2', m3']])
-            ddf : nparray([[grid, f1'', f2'', f3'']])
-            ddm : nparray([[grid, m1'', m2'', m3'']])
-            dddf : nparray([[grid, f1''', f2''', f3''']])
-            dddm : nparray([[grid, m1''', m2''', m3''']])
-        
-        ToDo
-        ----------
-            To model initially curved and twisted beams, curve flag is 1, and three real numbers for the
-            twist (k1) and curvatures (k2 and k3) should be provided in the vabs config!!!!
-                
+            F : nparray([[grid, F1, F2, F3]])
+            M : nparray([[grid, M1, M2, M3]])
+
         """
+
+        ac = ANBAXConfig()
         lst = []
         for (x, cs) in self.sections:
+            if loads:
+                load = interp_loads(loads, x)
+                for k,v in load.items():
+                    setattr(ac,k,v)
+
+            cs.config.anbax_cfg = ac
             print("STATUS:\t Running ANBAX at grid location %s" % (x))
             cs.cbm_run_anbax(**kwargs)
             lst.append([x, cs.AnbaBeamProperties])

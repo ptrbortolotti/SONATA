@@ -11,7 +11,7 @@ class VABSConfig(object):
 
     """
     this class contains the Configuration for a VABS (Variational Asymptotic 
-    Beam Sectional Analysis) for detaile information please read the VABS user 
+    Beam Sectional Analysis) for detailed information please read the VABS user
     manual
     
     Attributes:

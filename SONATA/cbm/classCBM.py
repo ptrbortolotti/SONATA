@@ -61,19 +61,19 @@ from SONATA.cbm.topo.wire_utils import (discretize_wire, get_wire_length,
 from SONATA.classMaterial import read_yml_materials
 from SONATA.vabs.classStrain import Strain
 from SONATA.vabs.classStress import Stress
-from SONATA.vabs.classVABSConfig import VABSConfig
+# from SONATA.vabs.classVABSConfig import VABSConfig
 from SONATA.vabs.failure_criteria import (hashin_2D, maxstrain_2D,
                                           maxstress_2D, tsaiwu_2D, von_Mises,)
 from SONATA.vabs.vabs_utl import export_cells_for_VABS
 
 try:
     import dolfin as do
-    from SONATA.anbax.anbax_utl.anbax_utl import build_dolfin_mesh
+    from SONATA.anbax.anbax_utl import build_dolfin_mesh
     import sys
-
     from anba4.anbax import anbax
 
 except:
+    print("dolfin and anbax could not be imported!")
     pass
 
 
@@ -846,10 +846,12 @@ class CBM(object):
         tmp_MM = anba.inertia().getValues(range(6),range(6))    # get mass matrix
 
         # Forces and Moments in ANBAX coordinates
-        force = [2.2, 3.4, 1.1]
-        moment = [4.2, 5.7, 6.2]
-        ref_sys = "local"  # "local" (in material sys) or "global" (in beam coords)
-        voigt_convention = "anba"  # "anbax"  or "paraview"
+        force = self.config.anbax_cfg.F.tolist()
+        moment = self.config.anbax_cfg.M.tolist()
+        # force = [2.2, 3.4, 1.1]
+        # moment = [4.2, 5.7, 6.2]
+        ref_sys = self.config.anbax_cfg.ref_sys   # inital: "local" (can be "local" (in material sys) or "global" (in beam coords))
+        voigt_convention = self.config.anbax_cfg.voigt_convention  # inital: "anbax" (can be "anbax"  or "paraview")
         anba.stress_field(force, moment, reference = ref_sys, voigt_convention = voigt_convention)    # get stress field
         tmp_SF_orig = anba.STRESS.vector()  # get stress field
         tmp_SF = np.array(tmp_SF_orig.vec()) # convert from dolfin vector to numpy array

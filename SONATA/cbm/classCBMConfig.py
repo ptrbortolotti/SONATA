@@ -16,6 +16,7 @@ import yaml
 from SONATA.cbm.fileIO.read_yaml_input import clean_filestring
 from SONATA.classMaterial import find_material, read_IEA37_materials
 from SONATA.vabs.classVABSConfig import VABSConfig
+from SONATA.anbax.classANBAXConfig import ANBAXConfig
 
 if __name__ == "__main__":
     os.chdir("/media/gu32kij/work/TPflumm/SONATA")
@@ -47,11 +48,12 @@ class CBMConfig(object):
     flags: dict
 
     vabs_cfg: VABSConfig
+    anbax_cfg: ANBAXConfig
 
     
     """
 
-    __slots__ = ("filename", "setup", "webs", "segments", "bw", "flags", "vabs_cfg")
+    __slots__ = ("filename", "setup", "webs", "segments", "bw", "flags", "vabs_cfg", "anbax_cfg")
 
     def __init__(self, inputdata=None, materials=None, iea37=False):
         self.setup, self.webs, self.segments, self.bw = {}, {}, {}, {}
@@ -66,6 +68,7 @@ class CBMConfig(object):
             self._read_IEA37(yml, materials)
 
         self.vabs_cfg = VABSConfig()
+        self.anbax_cfg = ANBAXConfig()
         self.flags = {"mesh_core": True}
 
     def _read_IEA37(self, yml, materials):

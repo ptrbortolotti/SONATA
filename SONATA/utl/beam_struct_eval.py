@@ -144,7 +144,14 @@ def beam_struct_eval(flags_dict, vabs_path, cs_pos, job, folder_str, job_str):
 
         # --------------------------------------- #
         # --- ANBAX --- #
-        job.blade_run_anbax()  # run anbax
+        if flags_dict['flag_recovery'] == True:
+            loads = {                                                           # in anbax coordinates
+                "F":    np.array([[0, 2.2, 3.4, 1.1],    [1, 2.2, 3.4, 1.1]]),  # forces, N (F1: shear force in x-direction; F2: shear force in y -direction; F3: axial force)
+                "M":    np.array([[0, 4.2, 5.7, 6.2],    [1, 4.2, 5.7, 6.2]])}  # moments, Nm (M1: bending moment around x; M2: bending moment around y; M3: torsional moment)
+
+            job.blade_run_anbax(loads)  # run anbax
+        else:
+            job.blade_run_anbax()  # run anbax
 
         # init used matrices and arrays
         anbax_beam_stiff_init = np.zeros([len(cs_pos), 6, 6])
