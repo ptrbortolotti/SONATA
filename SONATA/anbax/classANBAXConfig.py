@@ -28,7 +28,7 @@ class ANBAXConfig(object):
 
     def __init__(self, **kw):
         self.recover_flag = 0
-        self.ref_sys = "local"
+        self.ref_sys = "global"
         self.voigt_convention = "anba"
 
         if "recover_flag" in kw:
