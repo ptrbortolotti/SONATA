@@ -849,11 +849,10 @@ class CBM(object):
 
 
         # --- Stress recovery --- #
-        # Forces and Moments in ANBAX coordinates - ToDO convert input form SONATA to anbax coordinates
-        force = self.config.anbax_cfg.F.tolist()
-        moment = self.config.anbax_cfg.M.tolist()
-        # force = [2.2, 3.4, 1.1]
-        # moment = [4.2, 5.7, 6.2]
+        # Forces and Moments in ANBAX coordinates
+        force = self.config.anbax_cfg.F.tolist()  # force = [2.2, 3.4, 1.1]
+        moment = self.config.anbax_cfg.M.tolist()  # moment = [4.2, 5.7, 6.2]
+
         ref_sys = self.config.anbax_cfg.ref_sys   # inital: "local" (can be "local" (in material sys) or "global" (in beam coords))
         voigt_convention = self.config.anbax_cfg.voigt_convention  # initial: "anbax" ("anbax" or "paraview")
         anba.stress_field(force, moment, reference = "global", voigt_convention = voigt_convention)    # get stress field in global sys

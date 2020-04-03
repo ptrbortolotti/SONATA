@@ -14,24 +14,28 @@ import numpy as np
 import csv
 
 from SONATA.cbm.cbm_utl import trsf_sixbysix
-from SONATA.utl_openfast.utls_sonata2beamdyn import convert_structdef_SONATA_to_beamdyn, write_beamdyn_axis, write_beamdyn_prop
+from SONATA.utl_openfast.utl_sonata2beamdyn import convert_structdef_SONATA_to_beamdyn, write_beamdyn_axis, write_beamdyn_prop
 
 from SONATA.utl.analytical_rectangle.utls_analytical_rectangle import utls_analytical_rectangle
 
 
 
-def beam_struct_eval(flags_dict, vabs_path, cs_pos, job, folder_str, job_str):
+def beam_struct_eval(flags_dict, loads_dict, vabs_path, cs_pos, job, folder_str, job_str):
 
     """
-    Analyse, transform, evaluate and plot structural results
+    Analyse, transform, evaluate and plot structural results from VABS and/or ANBAX
 
     Functions:
-    beam_struct_eval    - parent function (retrieve & transform data, structure of data evaluation)
-    plot_vabs_anbax     - child function to plot the 6x6 stiffness and mass matrices 
-    vabs_export_beam_struct_properties - csv export of structural beam properties
+    beam_struct_eval                    - parent function (retrieve & transform data, structure of data evaluation)
+    plot_beam_props_6by6                - function to plot the 6x6 stiffness and mass matrices
+    plot_beam_mass_distribution         - function to plot the beam mass per unit length distribution
+    plot_vabs_anbax                     - function to plot the 6x6 stiffness and mass matrices from both VABS and ANBAX for code-to-code verification
+    vabs_export_beam_struct_properties  - csv export of structural beam properties
+    anbax_export_beam_struct_properties - csv export of structural beam properties
 
     Inputs:
     flags_dict          - dictionary containing relevant flags
+    loads_dict          - dictionary containing the applied loads for recovery analysis
     cs_pos              - radial station of blade cross sections
     job                 - contains the whole blade data (yaml file content, wires, mesh, etc.)
     folder_str          - name of operating folder
@@ -39,6 +43,15 @@ def beam_struct_eval(flags_dict, vabs_path, cs_pos, job, folder_str, job_str):
 
     Outputs: 
     - None -
+
+
+    Dictionary Examples:
+    flag_recovery           = True
+    flags_dict = {"flag_recovery": flag_recovery}
+
+    Forces =  np.array([0, 0, 0])  # forces, N (F1: axial force; F2,F3: sectional transverse shear forces)
+    Moments =  np.array([0, 5000000, 0])  # moments, Nm
+    loads_dict = {"Forces": Forces, "Moments": Moments}
 
     """
 
@@ -53,8 +66,8 @@ def beam_struct_eval(flags_dict, vabs_path, cs_pos, job, folder_str, job_str):
                 "Ci1":  np.array([[0, 1, 0, 0],  [1, 1, 0, 0]]),        # direction cosine matrix
                 "Ci2":  np.array([[0, 0, 1, 0],  [1, 0, 1, 0]]),        # direction cosine matrix
                 "Ci3":  np.array([[0, 0, 0, 1],  [1, 0, 0, 1]]),        # direction cosine matrix
-                "F":    np.array([[0, 0, 0, 0],    [1, 0, 0, 0]]),      # forces, N (F1: axial force; F2,F3: sectional transverse shear forces)
-                "M":    np.array([[0, 0, 5000000, 0],    [1, 0, 0, 5000000]]),    # moments, Nm
+                "F":    np.array([[0, float(loads_dict["Forces"][0]), float(loads_dict["Forces"][1]), float(loads_dict["Forces"][2])],    [1, float(loads_dict["Forces"][0]), float(loads_dict["Forces"][1]), float(loads_dict["Forces"][2])]]),      # forces, N (F1: axial force; F2,F3: sectional transverse shear forces)
+                "M":    np.array([[0, float(loads_dict["Moments"][0]), float(loads_dict["Moments"][1]), float(loads_dict["Moments"][2])],    [1, float(loads_dict["Moments"][0]), float(loads_dict["Moments"][1]), float(loads_dict["Moments"][2])]]),    # moments, Nm
                 "f":    np.array([[0, 0, 0, 0],    [1, 0, 0, 0]]),      # distributed forces, N/m (including both applied forces and inertial forces)
                 "df":   np.array([[0, 0, 0, 0],    [1, 0, 0, 0]]),      # first derivative
                 "ddf":  np.array([[0, 0, 0, 0],    [1, 0, 0, 0]]),      # second derivative
@@ -145,9 +158,9 @@ def beam_struct_eval(flags_dict, vabs_path, cs_pos, job, folder_str, job_str):
         # --------------------------------------- #
         # --- ANBAX --- #
         if flags_dict['flag_recovery'] == True:
-            loads = {                                                           # in anbax coordinates
-                "F":    np.array([[0, 2.2, 3.4, 1.1],    [1, 2.2, 3.4, 1.1]]),  # forces, N (F1: shear force in x-direction; F2: shear force in y -direction; F3: axial force)
-                "M":    np.array([[0, 4.2, 5.7, 6.2],    [1, 4.2, 5.7, 6.2]])}  # moments, Nm (M1: bending moment around x; M2: bending moment around y; M3: torsional moment)
+            loads = {  # sonata coord system input converted to anbax coordinates
+                "F":    np.array([[0, float(loads_dict["Forces"][1]), float(loads_dict["Forces"][2]), float(loads_dict["Forces"][0])],    [1, float(loads_dict["Forces"][1]), float(loads_dict["Forces"][2]), float(loads_dict["Forces"][0])]]),  # forces, N (F1: shear force in x-direction; F2: shear force in y -direction; F3: axial force)
+                "M":    np.array([[0, float(loads_dict["Moments"][1]), float(loads_dict["Moments"][2]), float(loads_dict["Moments"][0])],    [1, float(loads_dict["Moments"][1]), float(loads_dict["Moments"][2]), float(loads_dict["Moments"][0])]])}  # moments, Nm (M1: bending moment around x; M2: bending moment around y; M3: torsional moment)
 
             job.blade_run_anbax(loads)  # run anbax
         else:
@@ -287,10 +300,6 @@ def plot_beam_axes(cs_pos, vabs_beam_mass_center, vabs_beam_neutral_axes, vabs_b
 def plot_beam_mass_distribution(cs_pos, vabs_beam_mass_distribution, save_path):
 
     fig = plt.figure(tight_layout=True, figsize=(8, 5), dpi=80, facecolor='w', edgecolor='k')
-
-    # wisdem_grid = [0, 0.034482759, 0.068965517, 0.103448276, 0.137931034, 0.172413793, 0.206896552, 0.24137931, 0.275862069, 0.310344828, 0.344827586, 0.379310345, 0.413793103, 0.448275862, 0.482758621, 0.517241379, 0.551724138, 0.586206897, 0.620689655, 0.655172414, 0.689655172, 0.724137931, 0.75862069, 0.793103448, 0.827586207, 0.862068966, 0.896551724, 0.931034483, 0.965517241, 1]
-    # wisdem_mass = [2.75E+03, 2.24E+03, 1.74E+03, 1.49E+03, 1.08E+03, 7.87E+02, 6.56E+02, 6.31E+02, 6.48E+02, 6.60E+02, 6.71E+02, 6.68E+02, 6.52E+02, 6.33E+02, 6.20E+02, 5.97E+02, 5.78E+02, 5.43E+02, 5.16E+02, 4.72E+02, 4.42E+02, 4.07E+02, 3.62E+02, 3.24E+02, 2.66E+02, 2.02E+02, 1.55E+02, 1.11E+02, 9.97E+00, 4.69E+00]
-    # plt.plot(wisdem_grid, wisdem_mass)
 
     plt.plot(cs_pos, vabs_beam_mass_distribution[:,0])
     plt.xlabel('r/R')

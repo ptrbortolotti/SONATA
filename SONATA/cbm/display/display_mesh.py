@@ -146,8 +146,8 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
     plt.axis('equal')
     if title!=None:
         ax.set_title(title)
-    ax.set_xlabel(r'$x_2$, mm')
-    ax.set_ylabel(r'$x_3$, mm')
+    ax.set_xlabel(r'$x_2$, m')
+    ax.set_ylabel(r'$x_3$, m')
     
     #plot coordinate system.
     # cslength=0.015
