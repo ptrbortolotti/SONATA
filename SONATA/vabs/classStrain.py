@@ -46,7 +46,7 @@ class Strain(object):
 
     tensor = property(__getTensor, __setTensor)
 
-    @property  # getter method with the use of decorators
+    @property  # better method with the use of decorators
     def epsilon11(self):
         return self.tensor[0, 0]
 

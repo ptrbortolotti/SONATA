@@ -42,10 +42,11 @@ def cutoff_layer(Trimmed_BSplineLst, OffsetBSplineLst, S1, S2, cutoff_style=2):
     # check if OffsetBSplineLst is closed:
     if not Offset_StartPnt.IsEqual(Offset_EndPnt, 1e-4) and not (S1 == 0.0 and S2 == 1.0):
         if cutoff_style == 0:  # STEP-CUTOFF
+            OffsetBSplineLst = trim_BSplineLst(OffsetBSplineLst, S1 + 0.01*cutoff_depth, S2 - 0.01*cutoff_depth, S1, S2)  # quasi step approximation for better convergence
             Offset_StartPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst, S1, S1, S2)
             Offset_EndPnt = get_BSplineLst_Pnt2d(OffsetBSplineLst, S2, S1, S2)
 
-            Start_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d[Org_StartPnt, Offset_StartPnt]).Curve()
+            Start_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([Org_StartPnt, Offset_StartPnt])).Curve()
             End_bspline = Geom2dAPI_PointsToBSpline(point2d_list_to_TColgp_Array1OfPnt2d([Offset_EndPnt, Org_EndPnt])).Curve()
 
         elif cutoff_style == 1:  # LINEAR-CUTOFF

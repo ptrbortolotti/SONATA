@@ -68,7 +68,7 @@ from SONATA.vabs.vabs_utl import export_cells_for_VABS
 
 try:
     import dolfin as do
-    from SONATA.anbax.anbax_utl import build_dolfin_mesh
+    from SONATA.anbax.anbax_utl import build_dolfin_mesh, anbax_recovery
     import sys
     from anba4.anbax import anbax
 
@@ -817,12 +817,6 @@ class CBM(object):
         # plt.plot(x_coord_sonata, y_coord_sonata)
 
 
-        # for i in range(len(nodes)):
-        #     plt.plot(nodes[i].coordinates[0], nodes[i].coordinates[1], '.k')
-
-        # nodes = anbax_converter(nodes_SONATA=nodes)
-
-
 
         try:
             (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = build_dolfin_mesh(self.mesh, nodes, self.materials)
@@ -848,85 +842,23 @@ class CBM(object):
         self.AnbaBeamProperties.MM = trsf_sixbysix(tmp_MM, T)
 
 
-        # --- Stress recovery --- #
-        # Forces and Moments in ANBAX coordinates
-        force = self.config.anbax_cfg.F.tolist()  # force = [2.2, 3.4, 1.1]
-        moment = self.config.anbax_cfg.M.tolist()  # moment = [4.2, 5.7, 6.2]
+        # --- Stress & Strain recovery --- #
+        if  self.config.anbax_cfg.recover_flag == True:
+            print("STATUS:\t Running ANBAX Stress & Strain Recovery:")
+            [tmp_StressF_tran, tmp_StressF_M_tran, tmp_StrainF_tran, tmp_StrainF_M_tran] = \
+                anbax_recovery(anba, len(self.mesh), self.config.anbax_cfg.F.tolist(), self.config.anbax_cfg.M.tolist(), self.config.anbax_cfg.voigt_convention, T)
 
-        ref_sys = self.config.anbax_cfg.ref_sys   # inital: "local" (can be "local" (in material sys) or "global" (in beam coords))
-        voigt_convention = self.config.anbax_cfg.voigt_convention  # initial: "anbax" ("anbax" or "paraview")
-        anba.stress_field(force, moment, reference = "global", voigt_convention = voigt_convention)    # get stress field in global sys
-        tmp_SF_vec = np.array(anba.STRESS.vector().vec()) # global stress field
-        anba.stress_field(force, moment, reference = "local", voigt_convention = voigt_convention)    # get stress field in local sys (material coordinates)
-        tmp_SF_M_vec = np.array(anba.STRESS.vector().vec()) # global stress field
-
-
-        n_el = len(self.mesh)
-        cd = anba.STRESS.function_space().dofmap().cell_dofs  # index numbers of cells from dolfin mesh that was used for stress recovery (each cell has 6 dofs)
-
-        s_11 = np.zeros(n_el)
-        s_22 = np.zeros(n_el)
-        s_33 = np.zeros(n_el)
-        s_23 = np.zeros(n_el)
-        s_13 = np.zeros(n_el)
-        s_12 = np.zeros(n_el)
-        tmp_SF = np.zeros((n_el, 3, 3))
-        tmp_SF_tran = np.zeros((n_el, 3, 3))
-
-        s_11_M = np.zeros(n_el)
-        s_22_M = np.zeros(n_el)
-        s_33_M = np.zeros(n_el)
-        s_23_M = np.zeros(n_el)
-        s_13_M = np.zeros(n_el)
-        s_12_M = np.zeros(n_el)
-        tmp_SF_M = np.zeros((n_el, 3, 3))
-        tmp_SF_M_tran = np.zeros((n_el, 3, 3))
-
-        # cell_id = np.zeros((n_el, 6))
-
-        if voigt_convention == "anba":  # [s_xx, s_yy, s_zz, s_yz, s_xz, s_xy]
-            for i in range(n_el):
-                # stresses in "global" system
-                s_11[i] = tmp_SF_vec[i*6]
-                s_22[i] = tmp_SF_vec[i*6+1]
-                s_33[i] = tmp_SF_vec[i*6+2]
-                s_23[i] = tmp_SF_vec[i*6+3]  # equiv to s_23
-                s_13[i] = tmp_SF_vec[i*6+4]  # equiv to s_31
-                s_12[i] = tmp_SF_vec[i*6+5]  # equiv to s_21
-                tmp_SF[i, : ,:] = np.array([[s_11[i], s_12[i], s_13[i]], [s_12[i], s_22[i], s_23[i]], [s_13[i], s_23[i], s_33[i]]])
-                tmp_SF_tran[i, : ,:] = np.dot(np.dot(T.T, tmp_SF[i]), T)  # transform to sonata coordinate system
-
-                # stresses in "local" system
-                s_11_M[i] = tmp_SF_M_vec[i*6]
-                s_22_M[i] = tmp_SF_M_vec[i*6+1]
-                s_33_M[i] = tmp_SF_M_vec[i*6+2]
-                s_23_M[i] = tmp_SF_M_vec[i*6+3]  # equiv to s_23_M
-                s_13_M[i] = tmp_SF_M_vec[i*6+4]  # equiv to s_31_M
-                s_12_M[i] = tmp_SF_M_vec[i*6+5]  # equiv to s_21_M
-                tmp_SF_M[i, : ,:] = np.array([[s_11_M[i], s_12_M[i], s_13_M[i]], [s_12_M[i], s_22_M[i], s_23_M[i]], [s_13_M[i], s_23_M[i], s_33_M[i]]])
-                tmp_SF_M_tran[i, : ,:] = np.dot(np.dot(T.T, tmp_SF_M[i]), T)  # transform to sonata coordinate system
-
-                # cell_id[i, :] = cd(i)
-        elif voigt_convention == "paraview":  # different ordering compared to "anba"; "paraview" ordering: [s_xx, s_yy, s_zz, s_xy, s_yz, s_xz]
-            print("ToDo - Process to paraview output")
-
-        #ASSIGN Stress and strains to elements:
-        for i,c in enumerate(self.mesh):
-            #                  [s_11[i],              s_12[i],              s_13[i],              s_22[i],              s_23[i],              s_33[i]])
-            c.stress =  Stress([tmp_SF_tran[i,0,0],   tmp_SF_tran[i,0,1],   tmp_SF_tran[i,0,2],   tmp_SF_tran[i,1,1],   tmp_SF_tran[i,1,2],   tmp_SF_tran[i,2,2]])
-            c.stressM = Stress([tmp_SF_M_tran[i,0,0], tmp_SF_M_tran[i,0,1], tmp_SF_M_tran[i,0,2], tmp_SF_M_tran[i,1,1], tmp_SF_M_tran[i,1,2], tmp_SF_M_tran[i,2,2]])
+            # ASSIGN stresses and strains to mesh elements:
+            for i,c in enumerate(self.mesh):
+                #                  [s_11[i],                   s_12[i],                   s_13[i],                   s_22[i],                   s_23[i],                   s_33[i]])
+                c.stress =  Stress([tmp_StressF_tran[i,0,0],   tmp_StressF_tran[i,0,1],   tmp_StressF_tran[i,0,2],   tmp_StressF_tran[i,1,1],   tmp_StressF_tran[i,1,2],   tmp_StressF_tran[i,2,2]])
+                c.stressM = Stress([tmp_StressF_M_tran[i,0,0], tmp_StressF_M_tran[i,0,1], tmp_StressF_M_tran[i,0,2], tmp_StressF_M_tran[i,1,1], tmp_StressF_M_tran[i,1,2], tmp_StressF_M_tran[i,2,2]])
+                #                  [e_11[i],                   e_12[i],                   e_13[i],                   e_22[i],                   e_23[i],                   e_33[i]])
+                c.strain =  Strain([tmp_StrainF_tran[i,0,0],   tmp_StrainF_tran[i,0,1],   tmp_StrainF_tran[i,0,2],   tmp_StrainF_tran[i,1,1],   tmp_StrainF_tran[i,1,2],   tmp_StrainF_tran[i,2,2]])
+                c.strainM = Strain([tmp_StrainF_M_tran[i,0,0], tmp_StrainF_M_tran[i,0,1], tmp_StrainF_M_tran[i,0,2], tmp_StrainF_M_tran[i,1,1], tmp_StrainF_M_tran[i,1,2], tmp_StrainF_M_tran[i,2,2]])
 
 
-
-        # Export to Paraview format (to be tested!)
-        # file_res = do.XDMFFile('output_filename.xdmf')
-        # file_res.parameters['functions_share_mesh'] = True
-        # file_res.parameters['rewrite_function_mesh'] = False
-        # file_res.parameters["flush_output"] = True
-        # file_res.write(anba.STRESS, t=2)  # t=unique_number
-
-
-        return self.AnbaBeamProperties
+        return
 
     def cbm_calc_failurecriteria(self, criteria="tsaiwu_2D", iso_criteria="nocriteria"):
         """

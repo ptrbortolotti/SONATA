@@ -709,6 +709,7 @@ class Blade(Component):
         lst = []
         for (x, cs) in self.sections:
             if loads:
+                ac.recover_flag = 1
                 load = interp_loads(loads, x)
                 for k,v in load.items():
                     setattr(ac,k,v)
