@@ -426,8 +426,8 @@ class Blade(Component):
             else:
                 cs_pos = stations
             
-        x = np.unique(np.sort(np.hstack((kwargs.get('stations_add'), tmp_chord[:,0], tmp_tw[:,0], \
-                                         tmp_blra[:,0], tmp_bera[:,0], \
+        x = np.unique(np.sort(np.hstack((tmp_chord[:,0], tmp_tw[:,0],
+                                         tmp_blra[:,0], tmp_bera[:,0],
                                          tmp_pa[:,0], arr[:,0], cs_pos))))
 
         self.airfoils = np.asarray([[x, interp_airfoil_position(airfoil_position, airfoils, x)] for x in x])
