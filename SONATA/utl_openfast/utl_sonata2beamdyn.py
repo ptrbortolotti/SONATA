@@ -318,7 +318,7 @@ if __name__ == '__main__':
     #from SONATA.classBlade import Blade
 
     from SONATA.classAirfoil import Airfoil
-    from SONATA.classMaterial import read_IEA37_materials
+    from SONATA.classMaterial import read_materials
 
     # provide primary path; used for providing yaml input file as well as output directory
     folder = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/'
@@ -328,7 +328,7 @@ if __name__ == '__main__':
         yml = yaml.load(inputs, Loader=yaml.FullLoader)
 
     airfoils = [Airfoil(af) for af in yml.get('airfoils')]
-    materials = read_IEA37_materials(yml.get('materials'))
+    materials = read_materials(yml.get('materials'))
     # Blade.read_IEA37(yml.get('components').get('blade'), airfoils, **kwargs)
     wt_name = yml.get('name')
 

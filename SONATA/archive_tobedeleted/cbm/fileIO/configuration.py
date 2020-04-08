@@ -14,8 +14,8 @@ import yaml
 
 # First party modules
 from SONATA.cbm.fileIO.read_yaml_input import clean_filestring
-from SONATA.classMaterial import read_IEA37_materials
-from SONATA.vabs.VABS_interface import VABS_config
+from SONATA.classMaterial import read_materials
+from SONATA.vabs.classVABSConfig import VABSConfig
 
 if __name__ == "__main__":
     os.chdir("/media/gu32kij/work/TPflumm/SONATA")
@@ -40,7 +40,7 @@ class Configuration(object):
             yml = inputdata
             self._read_IEA37(yml, materials)
 
-        self.vabs_cfg = VABS_config()
+        self.vabs_cfg = VABSConfig()
         self.flags = {"mesh_core": True}
 
     def _read_IAE37(self, yml, materials):

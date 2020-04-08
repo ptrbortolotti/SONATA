@@ -58,7 +58,6 @@ from SONATA.cbm.topo.weight import Weight
 from SONATA.cbm.topo.wire_utils import (discretize_wire, get_wire_length,
                                         rotate_wire, scale_wire,
                                         translate_wire, trsf_wire,)
-from SONATA.classMaterial import read_yml_materials
 from SONATA.vabs.classStrain import Strain
 from SONATA.vabs.classStress import Stress
 # from SONATA.vabs.classVABSConfig import VABSConfig
@@ -202,7 +201,7 @@ class CBM(object):
         if isinstance(materials, dict):
             self.materials = materials
         else:
-            self.materials = read_yml_materials(self.config.setup["material_db"])
+            print("Materials not in dictionary format. Check yaml input file.")
 
         self.name = "cbm_noname"
         if kwargs.get("name"):
@@ -458,12 +457,8 @@ class CBM(object):
                     BSplineLst = self.blade.get_crosssection(self.config.setup["radial_station"], self.config.setup["scale_factor"])
                     self.SegmentLst.append(Segment(k, **seg, Theta=self.blade.get_Theta(self.config.setup["radial_station"]), OCC=True, Boundary=BSplineLst))
 
-                elif self.config.setup["input_type"] == 5:  # 5) IEA37 Formulation, everything is passed internally!
+                elif self.config.setup["input_type"] == 5:  # 5) yaml dictionary formulation, everything is passed internally!
                     self.SegmentLst.append(Segment(k, **seg, Theta=self.Theta, OCC=True, Boundary=self.BoundaryBSplineLst))
-
-                    # BSplineLst get BSplineLst from IEA37 definition of blade. By generating the crosssection in the blade class and passing the BSplineLst to the section!
-                    # Get Theta from the IEA37 definition of the blade !
-                    # self.SegmentLst.append()
 
                 else:
                     print("ERROR:\t WRONG input_type")

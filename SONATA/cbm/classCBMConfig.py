@@ -14,7 +14,7 @@ import yaml
 
 # First party modules
 from SONATA.cbm.fileIO.read_yaml_input import clean_filestring
-from SONATA.classMaterial import find_material, read_IEA37_materials
+from SONATA.classMaterial import find_material, read_materials
 from SONATA.vabs.classVABSConfig import VABSConfig
 from SONATA.anbax.classANBAXConfig import ANBAXConfig
 
@@ -55,30 +55,39 @@ class CBMConfig(object):
 
     __slots__ = ("filename", "setup", "webs", "segments", "bw", "flags", "vabs_cfg", "anbax_cfg")
 
-    def __init__(self, inputdata=None, materials=None, iea37=False):
+    def __init__(self, inputdata=None, materials=None):
         self.setup, self.webs, self.segments, self.bw = {}, {}, {}, {}
         self.filename = ""
 
-        if isinstance(inputdata, str) and iea37 == False:
-            self.filename = inputdata
-            self._read_yaml_config(self.filename)
+        # The following code is commented for cleanup and may be deleted later on if really not needed any longer
 
-        elif isinstance(inputdata, dict) and iea37 == True:
+        # if isinstance(inputdata, str) and iea37 == False:
+        #     self.filename = inputdata
+        #     self._read_yaml_config(self.filename)
+        #
+        # elif isinstance(inputdata, dict) and iea37 == True:
+        #     yml = inputdata
+        #     self.read_cbm_yaml(yml, materials)
+
+
+        if isinstance(inputdata, dict):
             yml = inputdata
-            self._read_IEA37(yml, materials)
+            self.read_yaml_cbm(yml, materials)
+        else:
+            print("Input data is not a dictionary. Check yaml input file.")
 
         self.vabs_cfg = VABSConfig()
         self.anbax_cfg = ANBAXConfig()
         self.flags = {"mesh_core": True}
 
-    def _read_IEA37(self, yml, materials):
-        """ read the IEA37 style yml dictionary of a section and assign class 
+    def read_yaml_cbm(self, yml, materials):
+        """ read the yml dictionary of a cross section and assign class
         attributes to this configuration object
         
         Parameters:
         ----------
         yml : dict
-           dictionary of the yaml style IEA37 section input    
+           dictionary of the yaml cross section beam model (cbm) input
         """
 
         # Setup:
@@ -142,39 +151,42 @@ class CBMConfig(object):
             self.bw = yml.get("trim_mass")  #
             self.setup["BalanceWeight"] = True
 
-    def _read_yaml_config(self, fname):
-        """ read the CBM config file and assign class attributes
-        
-        Parameters:
-        ----------
-        fname : str
-            filename of the yaml style cbm input configuration    
 
-        """
-        b_string = clean_filestring(fname, comments="#")
-        yDict = yaml.load(b_string)
-        self.setup = yDict["Setup"]
+# The following code is commented for cleanup and may be deleted later on if really not needed any longer
 
-        if "Webs" in yDict.keys():
-            D = {int(k.split()[-1]): v for (k, v) in yDict["Webs"].items()}
-            self.webs = OrderedDict(sorted(D.items()))
-
-        # print(self.setup['BalanceWeight'])
-        if self.setup["BalanceWeight"] == True:
-            self.bw = yDict["BalanceWeight"]
-
-        # read segments:
-        D = {int(k.split()[-1]): v for (k, v) in yDict["Segments"].items()}
-
-        for k in D:
-            if D[k]["Layup"] != None:
-                D[k]["Layup_names"] = np.asarray(D[k]["Layup"])[:, 5].tolist()
-                D[k]["Layup"] = np.asarray(D[k]["Layup"])[:, :5].astype(np.float)
-            else:
-                D[k]["Layup"] = np.empty((0, 0))
-                D[k]["Layup_names"] = np.empty((0, 0))
-
-        self.segments = OrderedDict(sorted(D.items()))
+    # def _read_yaml_config(self, fname):
+    #     """ read the CBM config file and assign class attributes
+    #
+    #     Parameters:
+    #     ----------
+    #     fname : str
+    #         filename of the yaml style cbm input configuration
+    #
+    #     """
+    #     b_string = clean_filestring(fname, comments="#")
+    #     yDict = yaml.load(b_string)
+    #     self.setup = yDict["Setup"]
+    #
+    #     if "Webs" in yDict.keys():
+    #         D = {int(k.split()[-1]): v for (k, v) in yDict["Webs"].items()}
+    #         self.webs = OrderedDict(sorted(D.items()))
+    #
+    #     # print(self.setup['BalanceWeight'])
+    #     if self.setup["BalanceWeight"] == True:
+    #         self.bw = yDict["BalanceWeight"]
+    #
+    #     # read segments:
+    #     D = {int(k.split()[-1]): v for (k, v) in yDict["Segments"].items()}
+    #
+    #     for k in D:
+    #         if D[k]["Layup"] != None:
+    #             D[k]["Layup_names"] = np.asarray(D[k]["Layup"])[:, 5].tolist()
+    #             D[k]["Layup"] = np.asarray(D[k]["Layup"])[:, :5].astype(np.float)
+    #         else:
+    #             D[k]["Layup"] = np.empty((0, 0))
+    #             D[k]["Layup_names"] = np.empty((0, 0))
+    #
+    #     self.segments = OrderedDict(sorted(D.items()))
 
 
 if __name__ == "__main__":
@@ -185,14 +197,10 @@ if __name__ == "__main__":
     fname = "examples/sec_config.yml"
     cfg = CBMConfig(fname)
 
-    # IEA37 Style configuration:
-    with open("jobs/PBortolotti/IEAonshoreWT.yaml", "r") as myfile:
-        inputs = myfile.read()
-
     with open("jobs/VariSpeed/UH-60A_adv.yml", "r") as myfile:
         inputs = myfile.read()
 
     yml = yaml.load(inputs)
-    materials = read_IEA37_materials(yml.get("materials"))
+    materials = read_materials(yml.get("materials"))
     yml = yml.get("components").get("blade").get("2d_fem").get("sections")[0]
-    wt_cfg = CBMConfig(yml, materials, iea37=True)
+    wt_cfg = CBMConfig(yml, materials)

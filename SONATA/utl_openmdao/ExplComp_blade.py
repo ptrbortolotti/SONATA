@@ -15,7 +15,7 @@ from openmdao.api import ExplicitComponent
 
 # First party modules
 # from SONATA.classAirfoil import Airfoil
-# from SONATA.classMaterial import read_IEA37_materials
+from SONATA.classMaterial import read_materials
 import Pymore.utl.coef as coef
 from SONATA.cbm.fileIO.hiddenprints import HiddenPrints
 from SONATA.classBlade import Blade

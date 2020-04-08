@@ -58,7 +58,7 @@ class Polar(object):
         self.configuration = ""
 
         if isinstance(yml, dict):
-            self.read_IEA37(yml)
+            self.read_yaml_polar(yml)
 
         if self._check_coefficients(c_l):
             self.c_l = c_l
@@ -78,9 +78,9 @@ class Polar(object):
         if isinstance(configuration, str):
             self.configuration = configuration
 
-    def read_IEA37(self, yml):
+    def read_yaml_polar(self, yml):
         """
-        procedure that reads the IEA Wind Task 37 style Polar dictionary and assigns them to
+        procedure that reads the yaml Polar dictionary and assigns them to
         the class attributes
         """
         self.configuration = yml.get("configuration")
@@ -90,7 +90,7 @@ class Polar(object):
         self.c_d = np.asarray([yml["c_d"]["grid"], yml["c_d"]["values"]]).T
         self.c_m = np.asarray([yml["c_m"]["grid"], yml["c_m"]["values"]]).T
 
-    def write_IEA37(self):
+    def write_yaml_polar(self):
         tmp = {}
         tmp["configuration"] = self.configuration
         tmp["re"] = self.re

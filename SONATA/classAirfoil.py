@@ -99,7 +99,7 @@ class Airfoil(object):
         self.BSplineLst = None
 
         if isinstance(yml, dict):
-            self.read_IEA37(yml)
+            self.read_yaml_airfoil(yml)
 
         if isinstance(name, str) and not "NONAME":
             self.name = name
@@ -127,9 +127,9 @@ class Airfoil(object):
         te = np.mean(np.vstack((self.coordinates[0], self.coordinates[-1])), axis=0)
         return te
 
-    def read_IEA37(self, yml):
+    def read_yaml_airfoil(self, yml):
         """
-        reads the IEA Wind Task 37 style Airfoil dictionary and assigns them to
+        reads the Airfoil dictionary from the yaml dictionary and assigns them to
         the class attributes
         """
         self.name = yml["name"]
@@ -153,17 +153,16 @@ class Airfoil(object):
         except:
             print("HTTPError: Not Found")
 
-    def write_IEA37(self):
+    def write_yaml_airfoil(self):
         """
-        writes the class attributes to a dictionary conform with the IEA Wind 
-        Task 37 style
+        writes the airfoil class attributes to a dictionary
         """
         tmp = {}
         tmp["name"] = self.name
         tmp["coordinates"] = dict(zip(("x", "y"), self.coordinates.T.tolist()))
         tmp["relative_thickness"] = self.relative_thickness
         if self.polars != None:
-            tmp["polars"] = [p.write_IEA37() for p in self.polars]
+            tmp["polars"] = [p.write_yaml_airfoil() for p in self.polars]
         else:
             tmp["polars"] = None
         return tmp
@@ -386,7 +385,6 @@ if __name__ == "__main__":
     plt.close("all")
     import yaml
 
-    # with open('jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as f:
     with open("jobs/VariSpeed/UH-60A_adv.yml", "r") as f:
         data = yaml.load(f.read())
 
@@ -401,7 +399,7 @@ if __name__ == "__main__":
     res.gen_OCCtopo()
 
     with open("data1.yml", "w") as outfile:
-        yaml.dump(af1.write_IEA37(), outfile)
+        yaml.dump(af1.write_yaml_airfoil(), outfile)
 
     with open("data2.yml", "w") as outfile:
-        yaml.dump(af2.write_IEA37(), outfile)
+        yaml.dump(af2.write_yaml_airfoil(), outfile)

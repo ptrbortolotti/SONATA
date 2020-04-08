@@ -45,11 +45,11 @@ from SONATA.cbm.topo.wire_utils import (discretize_wire,
                                         scale_wire, translate_wire,)
 from SONATA.classAirfoil import Airfoil
 from SONATA.classComponent import Component
-from SONATA.classMaterial import read_IEA37_materials
+from SONATA.classMaterial import read_materials
 from SONATA.utl.blade_utl import (array_pln_intersect, check_uniformity,
                                   interp_airfoil_position, interp_loads,
                                   make_loft,)
-from SONATA.utl.converter import iea37_converter
+from SONATA.utl.converter_WT import converter_WT
 from SONATA.utl.interpBSplineLst import interpBSplineLst
 from SONATA.utl.plot import plot_beam_properties
 from SONATA.utl.trsf import trsf_af_to_blfr, trsf_blfr_to_cbm, trsf_cbm_to_blfr
@@ -131,7 +131,7 @@ class Blade(Component):
     
     >>> job = Blade(name='UH-60A_adv')
     
-    >>> job.read_IEA37(yml.get('components').get('blade'), airfoils, materials)  
+    >>> job.read_yaml(yml.get('components').get('blade'), airfoils, materials)
     
     >>> job.blade_gen_section()
     >>> job.blade_run_vabs()
@@ -185,9 +185,9 @@ class Blade(Component):
 
             
             airfoils = [Airfoil(af) for af in yml.get('airfoils')]
-            self.materials = read_IEA37_materials(yml.get('materials'))
+            self.materials = read_materials(yml.get('materials'))
             
-            self.read_IEA37(yml.get('components').get('blade'), airfoils, **kwargs)
+            self.read_yaml(yml.get('components').get('blade'), airfoils, **kwargs)
 
             
 #    def __repr__(self):
@@ -367,14 +367,14 @@ class Blade(Component):
 
         return BoundaryBSplineLst
 
-    def read_IEA37(self, yml, airfoils, stations=None, npts=11, wt_flag=False, **kwargs):
+    def read_yaml(self, yml, airfoils, stations=None, npts=11, wt_flag=False, **kwargs):
         """
-        reads the IEA Wind Task 37 style Blade dictionary 
+        reads the Beam or Blade dictionary
         generates the blade matrix and airfoil to represent all given 
         information at every grid point by interpolating the input data 
-        and assigsn them to the class attribute twist, choord, coordinates 
+        and assign them to the class attribute twist, choord, coordinates
         and airfoil_positions with the first column representing the 
-        non-dimensional x-location  
+        non-dimensional radial location
 
         Parameters
         ----------
@@ -383,7 +383,7 @@ class Blade(Component):
         
         """
         self.name = self.yml.get('name')
-        print('STATUS:\t Reading IAE37 Definition for Blade: %s' % (self.name))
+        print('STATUS:\t Reading YAML Dictionary for Beam/Blade: %s' % (self.name))
         
         #Read blade & beam reference axis and create BSplineLst & interpolation instance
         (self.blade_ref_axis_BSplineLst, self.f_blade_ref_axis, tmp_blra) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'))
@@ -458,10 +458,10 @@ class Blade(Component):
 
         #Generate CBMConfigs
         if kwargs.get('flags',{}).get('flag_wt_ontology'):
-            cbmconfigs = iea37_converter(self, cs_pos, yml, self.materials, mesh_resolution = kwargs.get('flags').get('mesh_resolution'))
+            cbmconfigs = converter_WT(self, cs_pos, yml, self.materials, mesh_resolution = kwargs.get('flags').get('mesh_resolution'))
             
         else:
-            lst = [[cs.get("position"), CBMConfig(cs, self.materials, iea37=True)] for cs in yml.get("internal_structure_2d_fem").get("sections")]
+            lst = [[cs.get("position"), CBMConfig(cs, self.materials)] for cs in yml.get("internal_structure_2d_fem").get("sections")]
             cbmconfigs = np.asarray(lst)
 
         # # Apply gains from design variables during openmdao analysis
@@ -538,10 +538,10 @@ class Blade(Component):
         """
         for (x, cs) in self.sections:
             if topo_flag:
-                print("STATUS:\t Building Section at grid location %s" % (x))
+                print("STATUS:\t Building Section at grid location %s" % x)
                 cs.cbm_gen_topo()
             if mesh_flag:
-                print("STATUS:\t Meshing Section at grid location %s" % (x))
+                print("STATUS:\t Meshing Section at grid location %s" % x)
                 cs.cbm_gen_mesh(**kwargs)
         return None
 
@@ -1046,14 +1046,14 @@ if __name__ == "__main__":
         inputs = myfile.read()
     with open("../jobs/PBortolotti/IEAontology_schema.yaml", "r") as myfile:
         schema = myfile.read()
-    validate(yaml.load(inputs), yaml.load(schema))
+    # validate(yaml.load(inputs), yaml.load(schema))
     yml = yaml.load(inputs)
 
     airfoils = [Airfoil(af) for af in yml.get("airfoils")]
-    materials = read_IEA37_materials(yml.get("materials"))
+    materials = read_materials(yml.get("materials"))
 
     job = Blade(name="IEAonshoreWT")
-    job.read_IEA37(yml.get("components").get("blade"), airfoils, materials, wt_flag=True)
+    job.read_yaml(yml.get("components").get("blade"), airfoils, materials, wt_flag=True)
 
     # job.blade_gen_section(mesh_flag = True)
     # job.blade_run_vabs()

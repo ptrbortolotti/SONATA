@@ -22,6 +22,7 @@ from SONATA.utl_openmdao.utl_openmdao import calc_axis_intersection
 
 # from jobs.RFeil.utls.utls_openmdao import calc_axis_intersection
 
+
 def arc_length(x, y):
     """
     Small routine that for given x and y of a profile compute the arc length positions
@@ -49,7 +50,7 @@ def arc_length(x, y):
 
     return arc
 
-def iea37_converter(blade, cs_pos, byml, materials, mesh_resolution):
+def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
     """
     Converts the 
     @author: Pietro Bortolotti, Roland Feil
@@ -391,89 +392,28 @@ def iea37_converter(blade, cs_pos, byml, materials, mesh_resolution):
 
     for (seg,w,x) in zip(tmp2, webs, x):
         tmp = {'webs':list(w.values()), 'segments':seg['segments'], 'position':x, 'mesh_resolution':mesh_resolution}
-        lst.append([x, CBMConfig(tmp, materials, iea37=True)])
+        lst.append([x, CBMConfig(tmp, materials)])
 
     return np.asarray(lst)
 
 
-def anbax_converter(nodes_SONATA):
-    """
-    Converts the sign of the x2 axis from SONATA/VABS definitions to anbax requirements
-    @author: Roland Feil
-
-    Inputs from SONATA definition
-    ----------
-    x-coordinates of points defined positive to leading edge
-    y-coordinates of points defined positive to suction side of the blade
-
-
-
-    Definitions of anbax
-    ----------
-    x-coordinates of points defined trailing to leading edge (different sign as SONATA def.)
-    y-coordinates of points defined positive to suction side of the blade (same as SONATA def.)
-
-
-    Parameters
-    ----------
-    nodes of mesh
-
-    Returns
-    ----------
-    nodes of mesh
-    """
-
-    nodes = nodes_SONATA
-
-    # coord_anba=np.zeros([len(nodes_SONATA),2])
-
-    for node_index in range(len(nodes_SONATA)):
-        # for j in range(2):
-        #     coord_anba[node_index,j] = -nodes_SONATA[node_index].coordinates[j]
-        #
-        #     print(coord_anba)
-        nodes[node_index].coordinates[0] = -nodes_SONATA[node_index].coordinates[0] # change sign of chordwise coordinate, i.e. the first value in the point coordinates
-
-
-
-        nodes[node_index] = nodes[node_index].replace(coordinates=[-nodes_SONATA[node_index].coordinates[0], nodes_SONATA[node_index].coordinates[1]])
-
-
-
-        nodes[node_index] = nodes[node_index]._replace(coordinates=[-nodes_SONATA[node_index].coordinates[0], nodes_SONATA[node_index].coordinates[1]])
-
-
-
-        # # nodes[node_index].coord = coord_anba[node_index,:]
-        # # nodes[i].coordinates = [-nodes_SONATA[i].coordinates[0], nodes_SONATA[i].coordinates[1]]
-        # nodes[node_index] = nodes[node_index]._replace(coordinates=[-nodes_SONATA[node_index].coordinates[0], nodes_SONATA[node_index].coordinates[1]])
-        #
-        # items[node.ind].v = node.v
-        # items[node.ind] = items[node.ind]._replace(v=node.v)
-        #
-        # # nodes[i].coordinates[0] = n
-        # print(nodes_SONATA[i].coordinates[0])
-        # # print(n)
-        # print(nodes[i].coordinates)
-
-    return nodes
 
 
 #%% MAIN
 if __name__ == '__main__':
     from SONATA.classAirfoil import Airfoil
     from SONATA.classBlade import Blade
-    from SONATA.classMaterial import read_IEA37_materials
+    from SONATA.classMaterial import read_materials
 
     with open('./jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
         inputs  = myfile.read()
     with open('jobs/PBortolotti/IEAontology_schema.yaml', 'r') as myfile:
         schema  = myfile.read()
-    validate(yaml.load(inputs), yaml.load(schema))
+    # validate(yaml.load(inputs), yaml.load(schema))
     yml = yaml.load(inputs)
 
     airfoils = [Airfoil(af) for af in yml.get('airfoils')]
-    materials = read_IEA37_materials(yml.get('materials'))
+    materials = read_materials(yml.get('materials'))
 
     job = Blade(name='IEAonshoreWT')
-    job.iea37_converter(yml.get('components').get('blade'), airfoils, materials, wt_flag=True)
+    job.converter_WT(yml.get('components').get('blade'), airfoils, materials, wt_flag=True)
