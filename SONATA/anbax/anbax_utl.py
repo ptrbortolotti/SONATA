@@ -241,3 +241,26 @@ def anbax_recovery(anba, n_el, force, moment, voigt_convention, T):
 
     return tmp_StressF_tran, tmp_StressF_M_tran, tmp_StrainF_tran, tmp_StrainF_M_tran
 
+
+
+def ComputeShearCenter(stiff_matrix):  # shear center equiv. to elastic axes
+    K1 = np.array([[stiff_matrix[i, j] for j in range(3)] for i in range(3)])
+    K3 = np.array([[stiff_matrix[i, j+3] for j in range(3)] for i in range(3)])
+    Y = np.linalg.solve(K1, -K3)
+    return [-Y[2, 0], Y[0, 2]]
+    # return [-Y[1,2], Y[0,2]]
+
+def ComputeTensionCenter(stiff_matrix):  # tension center equiv. to neutral axes
+    K1 = np.array([[stiff_matrix[i, j] for j in range(3)] for i in range(3)])
+    K3 = np.array([[stiff_matrix[i, j+3] for j in range(3)] for i in range(3)])
+    Y = np.linalg.solve(K1, -K3)
+    return [Y[0, 2], -Y[0, 1]]
+    # return [Y[2,1], -Y[2,0]]
+
+def ComputeMassCenter(mass_matrix):
+    M1 = np.array([[mass_matrix[i, j] for j in range(3)] for i in range(3)])
+    M3 = np.array([[mass_matrix[i, j+3] for j in range(3)] for i in range(3)])
+    Y = np.linalg.solve(M1, -M3)
+    return [Y[0,2], Y[1,0]]
+    # return [Y[2,1], -Y[2,0]]
+

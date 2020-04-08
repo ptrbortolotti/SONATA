@@ -717,7 +717,7 @@ class Blade(Component):
             cs.config.anbax_cfg = ac
             print("STATUS:\t Running ANBAX at grid location %s" % (x))
             cs.cbm_run_anbax(**kwargs)
-            lst.append([x, cs.AnbaBeamProperties])
+            lst.append([x, cs.BeamProperties])
         # self.anba_beam_properties = np.asarray(lst)
         self.beam_properties = np.asarray(lst)
         return None      

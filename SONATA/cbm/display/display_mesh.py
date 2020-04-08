@@ -171,11 +171,15 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
         pass
         (CG,) = plt.plot(VABSProperties.Xm[0], VABSProperties.Xm[1], "ro", label="CG: Mass Center")
         # ax.annotate('CG', (VABSProperties.Xm2,VABSProperties.Xm3),fontsize=20)
-        (GC,) = plt.plot(VABSProperties.Xg[0], VABSProperties.Xg[1], "b^", label="GC: Geometric Center")
-        # ax.annotate('GC', (VABSProperties.Xg2,VABSProperties.Xg3),fontsize=20)
         (NA,) = plt.plot(VABSProperties.Xt[0], VABSProperties.Xt[1], "gs", label="NA: Neutral Axes")
         # ax.annotate('NA', (VABSProperties.Xt2,VABSProperties.Xt3),fontsize=20)
-        plt.legend(handles=[CG, GC, NA])
+        try:
+            (GC,) = plt.plot(VABSProperties.Xg[0], VABSProperties.Xg[1], "b^", label="GC: Geometric Center")
+            # ax.annotate('GC', (VABSProperties.Xg2,VABSProperties.Xg3),fontsize=20)
+            plt.legend(handles=[CG, GC, NA])
+        except:
+            plt.legend(handles=[CG, NA])
+
 
         #        #place a text box in upper left in axes coords
         #        textstr = 'mass per unit span \t\t\t\t\t = $%.2f$ [g/mm]\nmass moments of intertia about x1 axis \t= $%.2f$ [g/mm2]'%(VABSProperties.MpUS,VABSProperties.I1)
@@ -193,7 +197,10 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
         if isinstance(VABSProperties.Xs, np.ndarray):
             (SC,) = plt.plot(VABSProperties.Xs[0], VABSProperties.Xs[1], "kD", label="SC: Generalized Shear Center")
             # ax.annotate('SC', (VABSProperties.Xs2,VABSProperties.Xs3),fontsize=20)
-            plt.legend(handles=[CG, GC, NA, SC])
+            try:
+                plt.legend(handles=[CG, GC, NA, SC])
+            except:
+                plt.legend(handles=[CG, NA, SC])
 
     if invert_xaxis:
         ax.invert_xaxis()

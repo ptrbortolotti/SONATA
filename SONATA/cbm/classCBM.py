@@ -67,9 +67,10 @@ from SONATA.vabs.vabs_utl import export_cells_for_VABS
 
 try:
     import dolfin as do
-    from SONATA.anbax.anbax_utl import build_dolfin_mesh, anbax_recovery
+    from SONATA.anbax.anbax_utl import build_dolfin_mesh, anbax_recovery, ComputeShearCenter, ComputeTensionCenter, ComputeMassCenter
     import sys
     from anba4.anbax import anbax
+
 
 except:
     print("dolfin and anbax could not be imported!")
@@ -832,9 +833,13 @@ class CBM(object):
         B = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
         T = np.dot(np.identity(3), np.linalg.inv(B))
 
-        self.AnbaBeamProperties = BeamSectionalProps()
-        self.AnbaBeamProperties.TS = trsf_sixbysix(tmp_TS, T)
-        self.AnbaBeamProperties.MM = trsf_sixbysix(tmp_MM, T)
+        self.BeamProperties = BeamSectionalProps()
+        self.BeamProperties.TS = trsf_sixbysix(tmp_TS, T)
+        self.BeamProperties.MM = trsf_sixbysix(tmp_MM, T)
+
+        # self.BeamProperties.Xm = np.array(ComputeMassCenter(self.BeamProperties.MM))  # mass center - is already allocated from mass matrix
+        self.BeamProperties.Xt = np.array(ComputeTensionCenter(self.BeamProperties.TS)) # tension center
+        self.BeamProperties.Xs = np.array(ComputeShearCenter(self.BeamProperties.TS))   # shear center
 
 
         # --- Stress & Strain recovery --- #
@@ -1015,17 +1020,15 @@ class CBM(object):
         - Unit Convertion takes sooo much time. Commented out for now!
         
         """
-        if solver == "vabs":
+        if solver == "vabs" or solver == "anbax":
             if Theta != 0:
                 tmp_bp = self.BeamProperties.rotate(Theta)
             else:
                 tmp_bp = self.BeamProperties
 
-        elif solver == "anbax":
-            if Theta != 0:
-                tmp_bp = self.AnbaBeamProperties.rotate(Theta)
-            else:
-                tmp_bp = self.AnbaBeamProperties
+        else:
+            print("Check solver for Dymore Beam Property input.")
+
 
         MM = tmp_bp.MM
         MASS = np.array([MM[0, 0], MM[2, 3], MM[0, 4], MM[5, 5], MM[4, 5], MM[4, 4]])
@@ -1069,17 +1072,14 @@ class CBM(object):
         
         
         """
-        if solver == "vabs":
+        if solver == "vabs" or solver == "anbax":
             if Theta != 0:
                 tmp_bp = self.BeamProperties.rotate(Theta)
             else:
                 tmp_bp = self.BeamProperties
 
-        elif solver == "anbax":
-            if Theta != 0:
-                tmp_bp = self.AnbaBeamProperties.rotate(Theta)
-            else:
-                tmp_bp = self.AnbaBeamProperties
+        else:
+            print("Check solver for BeamDyn Beam Property input.")
 
         tmp_bp = copy.deepcopy(tmp_bp)
 
