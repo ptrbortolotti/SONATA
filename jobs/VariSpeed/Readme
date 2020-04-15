@@ -1,9 +1,0 @@
-Name convention
-
-helicoptertype_jobpurpose_crosssectiontype_configurationnumber
-example: uh60a_mdao_advanced_1
-	 uh60a_mdao_advanced_2
-	 uh60a_cbm_advanced
-	 uh60a_cbm_simple
-	 uh60a_data
-	 uh60a_marc_fanplot

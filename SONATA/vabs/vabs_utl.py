@@ -85,7 +85,8 @@ def export_cells_for_VABS(cells, nodes, filename, VABSsetup, materials, rotation
             f.write("\n")
             # Element number, Layup orientation
             for c in cells:
-                f.write("%i\t\t%i\t%i\t" % (c.id, c.MatID, c.theta_3))
+                f.write('%i\t\t%i\t%.6f\t' % (c.id,c.MatID,c.theta_3))
+                # c.theta_1[0] = 0.0  # debugging -> change plane orientation to 0 deg
                 for t in c.theta_1:
                     f.write("%.2f\t" % (t))
                 f.write("\n")
@@ -133,25 +134,28 @@ def export_cells_for_VABS(cells, nodes, filename, VABSsetup, materials, rotation
                     f.write("%.2f %.2f %.2f %.2f\n" % (VABSsetup.F[0], VABSsetup.M[0], VABSsetup.M[1], VABSsetup.M[2]))
 
                 elif VABSsetup.Timoshenko_flag == 1:
-                    f.write("%.2f %.2f %.2f\n" % (VABSsetup.u[0], VABSsetup.u[1], VABSsetup.u[2]))
-                    f.write("%.2f %.2f %.2f\n" % (VABSsetup.Cij[0][0], VABSsetup.Cij[0][1], VABSsetup.Cij[0][2]))
-                    f.write("%.2f %.2f %.2f\n" % (VABSsetup.Cij[1][0], VABSsetup.Cij[1][1], VABSsetup.Cij[1][2]))
-                    f.write("%.2f %.2f %.2f\n" % (VABSsetup.Cij[2][0], VABSsetup.Cij[2][1], VABSsetup.Cij[2][2]))
-                    f.write("%.2f %.2f %.2f %.2f\n" % (VABSsetup.F[0], VABSsetup.M[0], VABSsetup.M[1], VABSsetup.M[2]))
-                    f.write("%.2f %.2f\n" % (VABSsetup.F[1], VABSsetup.F[2]))
-                    f.write("%.2f %.2f %.2f %.2f %.2f %.2f\n" % (VABSsetup.f[0], VABSsetup.f[1], VABSsetup.f[2], VABSsetup.m[0], VABSsetup.m[1], VABSsetup.m[2]))
-                    f.write("%.2f %.2f %.2f %.2f %.2f %.2f\n" % (VABSsetup.df[0], VABSsetup.df[1], VABSsetup.df[2], VABSsetup.dm[0], VABSsetup.dm[1], VABSsetup.dm[2]))
-                    f.write("%.2f %.2f %.2f %.2f %.2f %.2f\n" % (VABSsetup.ddf[0], VABSsetup.ddf[1], VABSsetup.ddf[2], VABSsetup.ddm[0], VABSsetup.ddm[1], VABSsetup.ddm[2]))
-                    f.write("%.2f %.2f %.2f %.2f %.2f %.2f\n" % (VABSsetup.dddf[0], VABSsetup.dddf[1], VABSsetup.dddf[2], VABSsetup.dddm[0], VABSsetup.dddm[1], VABSsetup.dddm[2]))
-
-                elif VABSsetup.Vlasov_flag == 1:
-                    f.write("%.2f %.2f %.2f\n" % (VABSsetup.u[0], VABSsetup.u[1], VABSsetup.u[2]))
-                    f.write("%.2f %.2f %.2f\n" % (VABSsetup.Cij[0][0], VABSsetup.Cij[0][1], VABSsetup.Cij[0][2]))
-                    f.write("%.2f %.2f %.2f\n" % (VABSsetup.Cij[1][0], VABSsetup.Cij[1][1], VABSsetup.Cij[1][2]))
-                    f.write("%.2f %.2f %.2f\n" % (VABSsetup.Cij[2][0], VABSsetup.Cij[2][1], VABSsetup.Cij[2][2]))
-                    f.write("%.2f %.2f %.2f %.2f\n" % (VABSsetup.F[0], VABSsetup.M[0], VABSsetup.M[1], VABSsetup.M[2]))
-
-            f.write("\n")
+                    f.write('%.2f %.2f %.2f\n' % (VABSsetup.u[0],VABSsetup.u[1],VABSsetup.u[2]))
+                    # f.write('%.2f %.2f %.2f\n' % (VABSsetup.Cij[0][0],VABSsetup.Cij[0][1],VABSsetup.Cij[0][2]))
+                    # f.write('%.2f %.2f %.2f\n' % (VABSsetup.Cij[1][0],VABSsetup.Cij[1][1],VABSsetup.Cij[1][2]))
+                    # f.write('%.2f %.2f %.2f\n' % (VABSsetup.Cij[2][0],VABSsetup.Cij[2][1],VABSsetup.Cij[2][2]))
+                    f.write('%.2f %.2f %.2f\n' % (VABSsetup.Ci1[0],VABSsetup.Ci1[1],VABSsetup.Ci1[2]))
+                    f.write('%.2f %.2f %.2f\n' % (VABSsetup.Ci2[0],VABSsetup.Ci2[1],VABSsetup.Ci2[2]))
+                    f.write('%.2f %.2f %.2f\n' % (VABSsetup.Ci3[0],VABSsetup.Ci3[1],VABSsetup.Ci3[2]))
+                    f.write('%.2f %.2f %.2f %.2f\n' % (VABSsetup.F[0],VABSsetup.M[0],VABSsetup.M[1],VABSsetup.M[2])) 
+                    f.write('%.2f %.2f\n' % (VABSsetup.F[1],VABSsetup.F[2]))
+                    f.write('%.2f %.2f %.2f %.2f %.2f %.2f\n' % (VABSsetup.f[0],VABSsetup.f[1],VABSsetup.f[2],VABSsetup.m[0],VABSsetup.m[1],VABSsetup.m[2]))
+                    f.write('%.2f %.2f %.2f %.2f %.2f %.2f\n' % (VABSsetup.df[0],VABSsetup.df[1],VABSsetup.df[2],VABSsetup.dm[0],VABSsetup.dm[1],VABSsetup.dm[2]))
+                    f.write('%.2f %.2f %.2f %.2f %.2f %.2f\n' % (VABSsetup.ddf[0],VABSsetup.ddf[1],VABSsetup.ddf[2],VABSsetup.ddm[0],VABSsetup.ddm[1],VABSsetup.ddm[2]))
+                    f.write('%.2f %.2f %.2f %.2f %.2f %.2f\n' % (VABSsetup.dddf[0],VABSsetup.dddf[1],VABSsetup.dddf[2],VABSsetup.dddm[0],VABSsetup.dddm[1],VABSsetup.dddm[2]))
+                    
+                elif VABSsetup.Vlasov_flag ==1:
+                    f.write('%.2f %.2f %.2f\n' % (VABSsetup.u[0],VABSsetup.u[1],VABSsetup.u[2]))
+                    f.write('%.2f %.2f %.2f\n' % (VABSsetup.Cij[0][0],VABSsetup.Cij[0][1],VABSsetup.Cij[0][2]))
+                    f.write('%.2f %.2f %.2f\n' % (VABSsetup.Cij[1][0],VABSsetup.Cij[1][1],VABSsetup.Cij[1][2]))
+                    f.write('%.2f %.2f %.2f\n' % (VABSsetup.Cij[2][0],VABSsetup.Cij[2][1],VABSsetup.Cij[2][2]))
+                    f.write('%.2f %.2f %.2f %.2f\n' % (VABSsetup.F[0],VABSsetup.M[0],VABSsetup.M[1],VABSsetup.M[2]))    
+                    
+            f.write('\n')
         except:
             print("ERROR in export_cells_for_VABS")
     return None

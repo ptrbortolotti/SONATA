@@ -13,13 +13,96 @@ def utl_openmdao_apply_gains_mat_thickness(blade, yml, opt_vars):
 
     # Optimize the thickness of the outer and the inner shell skins
 
-    # initial values are:
-    t_outer = yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][1][2]  # shell skin outer
-    t_inner = yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][10][2]  # shell skin inner
+    # ------------------------------------------- #
+    # (1) Shell skin optimization of Kevlar_10 - initial values are:
+    # ------------------------------------------- #
+    # t_outer = yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][1][2]  # shell skin outer
+    # t_inner = yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][6][2]  # shell skin inner  [10]
+    #
+    # # replace with optimization variable
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][1][2] = float(opt_vars[0])
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][6][2] = float(opt_vars[0])  # [10]
 
-    # replace with optimization variable
-    yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][1][2] = float(opt_vars[0])
-    yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][10][2] = float(opt_vars[0])
+
+
+
+    # ------------------------------------------- #
+    # (2) Filament wound optimization of Kevlar_11 - initial values are:
+    # ------------------------------------------- #
+    # thickness = yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][1][2]  # filament wound thickness  (split - but only optimize inner ply thickness)
+    # web1_curvature = yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][0]['curvature']  # web 1 curvature
+    # web2_curvature = yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][1]['curvature']  # web 2 curvature
+    # ply_orientation_I = yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][0][3]
+    # ply_orientation_II = yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][1][3]
+    #
+    # web1_start = yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][0]['position'][0]
+    # web1_start = yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][0]['position'][1]
+    # web2_start = yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][1]['position'][0]
+    # web2_start = yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][1]['position'][1]
+    #
+    # # replace with optimization variable
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][0][2] = float(opt_vars[0])  # split elliplis plies in two for better meshing
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][1][2] = float(opt_vars[0])  # split elliplis plies in two for better meshing
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][2][2] = float(opt_vars[0])
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][0]['curvature'] = -float(opt_vars[1])
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][1]['curvature'] =  float(opt_vars[1])
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][0][3] = float(opt_vars[2])
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][1][3] = float(opt_vars[2])
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][2]['layup'][2][3] = float(opt_vars[2])
+    #
+    # t_max_ss = 0.33763813598041315
+    # t_max_ps = 0.6603507085422332
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][0]['position'][0] = t_max_ss + float(opt_vars[3])
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][0]['position'][1] = t_max_ps - float(opt_vars[3])
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][1]['position'][0] = t_max_ss - float(opt_vars[3])
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][1]['position'][1] = t_max_ps + float(opt_vars[3])
+
+
+
+
+    # ------------------------------------------- #
+    # (3) Box Beam primary structure optimization - initial values are:
+    # ------------------------------------------- #
+    t_max_ss = 0.33763813598041315   # max thickness arc location at suction side
+    t_max_ps = 0.6603507085422332    # max thickness arc location at pressure side
+
+    # spar cap suction side
+    yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][4][0] = t_max_ss - float(opt_vars[0])
+    yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][4][1] = t_max_ss + float(opt_vars[0])
+    yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][4][2] = float(opt_vars[1])
+
+    # spar cap pressure side
+    yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][5][0] = t_max_ps - float(opt_vars[0])
+    yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][5][1] = t_max_ps + float(opt_vars[0])
+    yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][5][2] = float(opt_vars[1])
+
+    # foreweb
+    yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][0]['position'][0] = t_max_ss + float(opt_vars[0])
+    yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][0]['position'][1] = t_max_ps - float(opt_vars[0])
+    yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][1]['position'][0] = t_max_ss + float(opt_vars[0]) - float(opt_vars[2])
+    yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][1]['position'][1] = t_max_ps - float(opt_vars[0]) + float(opt_vars[2])
+
+    # aftweb
+    yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][3]['position'][0] = t_max_ss - float(opt_vars[0])
+    yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][3]['position'][1] = t_max_ps + float(opt_vars[0])
+    yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][2]['position'][0] = t_max_ss - float(opt_vars[0]) + float(opt_vars[2])
+    yml.get('internal_structure_2d_fem').get('sections')[0]['webs'][2]['position'][1] = t_max_ps + float(opt_vars[0]) - float(opt_vars[2])
+
+    # Segment 3 inner layer
+    yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][3]['layup'][0][2] = float(opt_vars[3])
+
+
+
+
+    # ------------------------------------------- #
+    # Spar caps thickness optimization - initial values are:
+    # ------------------------------------------- #
+    # t_ss = yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][2][2]  # spar cap suction side
+    # t_ps = yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][3][2]  # spar cap pressure side
+    #
+    # # replace with optimization variable
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][2][2] = float(opt_vars[0])
+    # yml.get('internal_structure_2d_fem').get('sections')[0]['segments'][0]['layup'][3][2] = float(opt_vars[0])
 
     return yml
 

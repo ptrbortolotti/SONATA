@@ -58,20 +58,22 @@ from SONATA.cbm.topo.weight import Weight
 from SONATA.cbm.topo.wire_utils import (discretize_wire, get_wire_length,
                                         rotate_wire, scale_wire,
                                         translate_wire, trsf_wire,)
-from SONATA.classMaterial import read_yml_materials
 from SONATA.vabs.classStrain import Strain
 from SONATA.vabs.classStress import Stress
-from SONATA.vabs.classVABSConfig import VABSConfig
+# from SONATA.vabs.classVABSConfig import VABSConfig
 from SONATA.vabs.failure_criteria import (hashin_2D, maxstrain_2D,
                                           maxstress_2D, tsaiwu_2D, von_Mises,)
 from SONATA.vabs.vabs_utl import export_cells_for_VABS
 
 try:
-    from SONATA.anbax.anbax_utl import build_dolfin_mesh
-    from anba4 import anbax
+    import dolfin as do
+    from SONATA.anbax.anbax_utl import build_dolfin_mesh, anbax_recovery, ComputeShearCenter, ComputeTensionCenter, ComputeMassCenter
+    import sys
+    from anba4.anbax import anbax
 
-    # from SONATA.anbax.anba_v4.anba4.anbax import anbax
+
 except:
+    print("dolfin and anbax could not be imported!")
     pass
 
 
@@ -200,7 +202,7 @@ class CBM(object):
         if isinstance(materials, dict):
             self.materials = materials
         else:
-            self.materials = read_yml_materials(self.config.setup["material_db"])
+            print("Materials not in dictionary format. Check yaml input file.")
 
         self.name = "cbm_noname"
         if kwargs.get("name"):
@@ -456,12 +458,8 @@ class CBM(object):
                     BSplineLst = self.blade.get_crosssection(self.config.setup["radial_station"], self.config.setup["scale_factor"])
                     self.SegmentLst.append(Segment(k, **seg, Theta=self.blade.get_Theta(self.config.setup["radial_station"]), OCC=True, Boundary=BSplineLst))
 
-                elif self.config.setup["input_type"] == 5:  # 5) IEA37 Formulation, everything is passed internally!
+                elif self.config.setup["input_type"] == 5:  # 5) yaml dictionary formulation, everything is passed internally!
                     self.SegmentLst.append(Segment(k, **seg, Theta=self.Theta, OCC=True, Boundary=self.BoundaryBSplineLst))
-
-                    # BSplineLst get BSplineLst from IEA37 definition of blade. By generating the crosssection in the blade class and passing the BSplineLst to the section!
-                    # Get Theta from the IEA37 definition of the blade !
-                    # self.SegmentLst.append()
 
                 else:
                     print("ERROR:\t WRONG input_type")
@@ -759,9 +757,9 @@ class CBM(object):
         self.BeamProperties = result
         
         if self.config.vabs_cfg.recover_flag == 1:
-            self.BeamProperties.read_all_VABS_Results()
-            # ASSIGN Stress and strains to elements:
-            for i, c in enumerate(self.mesh):
+            self.BeamProperties.read_all_VABS_Results(filename=vabs_filename)
+            #ASSIGN Stress and strains to elements:
+            for i,c in enumerate(self.mesh):
                 c.strain = Strain(self.BeamProperties.ELE[i][1:7])
                 c.stress = Stress(self.BeamProperties.ELE[i][7:13])
                 c.strainM = Strain(self.BeamProperties.ELE[i][13:19])
@@ -770,12 +768,12 @@ class CBM(object):
             # ASSIGN Displacement U to nodes:
             for i, n in enumerate(nodes):
                 n.displacement = self.BeamProperties.U[i][3:6]
-
-            # Calculate standart failure criterias
-            self.cbm_calc_failurecriteria()
-
-        # print(vabs_filename)
-        # REMOVE VABS FILES:
+            
+            #Calculate standart failure criterias
+            # self.cbm_calc_failurecriteria()
+        
+        #print(vabs_filename)
+        #REMOVE VABS FILES:
         if rm_vabfiles:
             folder = "/".join(vabs_filename.split("/")[:-1])
             fstring = vabs_filename.split("/")[-1]
@@ -815,12 +813,6 @@ class CBM(object):
         # plt.plot(x_coord_sonata, y_coord_sonata)
 
 
-        # for i in range(len(nodes)):
-        #     plt.plot(nodes[i].coordinates[0], nodes[i].coordinates[1], '.k')
-
-        # nodes = anbax_converter(nodes_SONATA=nodes)
-
-
 
         try:
             (mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE) = build_dolfin_mesh(self.mesh, nodes, self.materials)
@@ -831,28 +823,42 @@ class CBM(object):
             print('Anba4 _or_ Dolfin are not installed\n\n')
             print('==========================================\n\n')
 
-        # for c in self.mesh:
-        #     plane_orientations[c.id - 1] = c.theta_1[0]
-        #     fiber_orientations[c.id - 1] = c.theta_3
-        #
-        # mesh.rotate(rotation_angle)
 
         #TBD: pass it to anbax and run it!
         anba = anbax(mesh, 1, matLibrary, materials, plane_orientations, fiber_orientations, maxE)
-   
-        tmp_TS = anba.compute().getValues(range(6),range(6))
-        tmp_MM = anba.inertia().getValues(range(6),range(6))
-        
-        #Define transformation T (from ANBA to SONATA/VABS coordinates)
-        B = np.array([[0,0,1],[1,0,0],[0,1,0]])
-        # B = np.array([[0,0,-1],[-1,0,0],[0,1,0]])  # new
+        tmp_TS = anba.compute().getValues(range(6),range(6))    # get stiffness matrix
+        tmp_MM = anba.inertia().getValues(range(6),range(6))    # get mass matrix
 
-        T = np.dot(np.identity(3),np.linalg.inv(B))
-        
-        self.AnbaBeamProperties = BeamSectionalProps()
-        self.AnbaBeamProperties.TS = trsf_sixbysix(tmp_TS, T)
-        self.AnbaBeamProperties.MM = trsf_sixbysix(tmp_MM, T)
-        return self.AnbaBeamProperties
+        # Define transformation T (from ANBA to SONATA/VABS coordinates)
+        B = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
+        T = np.dot(np.identity(3), np.linalg.inv(B))
+
+        self.BeamProperties = BeamSectionalProps()
+        self.BeamProperties.TS = trsf_sixbysix(tmp_TS, T)
+        self.BeamProperties.MM = trsf_sixbysix(tmp_MM, T)
+
+        # self.BeamProperties.Xm = np.array(ComputeMassCenter(self.BeamProperties.MM))  # mass center - is already allocated from mass matrix
+        self.BeamProperties.Xt = np.array(ComputeTensionCenter(self.BeamProperties.TS)) # tension center
+        self.BeamProperties.Xs = np.array(ComputeShearCenter(self.BeamProperties.TS))   # shear center
+
+
+        # --- Stress & Strain recovery --- #
+        if  self.config.anbax_cfg.recover_flag == True:
+            print("STATUS:\t Running ANBAX Stress & Strain Recovery:")
+            [tmp_StressF_tran, tmp_StressF_M_tran, tmp_StrainF_tran, tmp_StrainF_M_tran] = \
+                anbax_recovery(anba, len(self.mesh), self.config.anbax_cfg.F.tolist(), self.config.anbax_cfg.M.tolist(), self.config.anbax_cfg.voigt_convention, T)
+
+            # ASSIGN stresses and strains to mesh elements:
+            for i,c in enumerate(self.mesh):
+                #                  [s_11[i],                   s_12[i],                   s_13[i],                   s_22[i],                   s_23[i],                   s_33[i]])
+                c.stress =  Stress([tmp_StressF_tran[i,0,0],   tmp_StressF_tran[i,0,1],   tmp_StressF_tran[i,0,2],   tmp_StressF_tran[i,1,1],   tmp_StressF_tran[i,1,2],   tmp_StressF_tran[i,2,2]])
+                c.stressM = Stress([tmp_StressF_M_tran[i,0,0], tmp_StressF_M_tran[i,0,1], tmp_StressF_M_tran[i,0,2], tmp_StressF_M_tran[i,1,1], tmp_StressF_M_tran[i,1,2], tmp_StressF_M_tran[i,2,2]])
+                #                  [e_11[i],                   e_12[i],                   e_13[i],                   e_22[i],                   e_23[i],                   e_33[i]])
+                c.strain =  Strain([tmp_StrainF_tran[i,0,0],   tmp_StrainF_tran[i,0,1],   tmp_StrainF_tran[i,0,2],   tmp_StrainF_tran[i,1,1],   tmp_StrainF_tran[i,1,2],   tmp_StrainF_tran[i,2,2]])
+                c.strainM = Strain([tmp_StrainF_M_tran[i,0,0], tmp_StrainF_M_tran[i,0,1], tmp_StrainF_M_tran[i,0,2], tmp_StrainF_M_tran[i,1,1], tmp_StrainF_M_tran[i,1,2], tmp_StrainF_M_tran[i,2,2]])
+
+
+        return
 
     def cbm_calc_failurecriteria(self, criteria="tsaiwu_2D", iso_criteria="nocriteria"):
         """
@@ -1014,17 +1020,15 @@ class CBM(object):
         - Unit Convertion takes sooo much time. Commented out for now!
         
         """
-        if solver == "vabs":
+        if solver == "vabs" or solver == "anbax":
             if Theta != 0:
                 tmp_bp = self.BeamProperties.rotate(Theta)
             else:
                 tmp_bp = self.BeamProperties
 
-        elif solver == "anbax":
-            if Theta != 0:
-                tmp_bp = self.AnbaBeamProperties.rotate(Theta)
-            else:
-                tmp_bp = self.AnbaBeamProperties
+        else:
+            print("Check solver for Dymore Beam Property input.")
+
 
         MM = tmp_bp.MM
         MASS = np.array([MM[0, 0], MM[2, 3], MM[0, 4], MM[5, 5], MM[4, 5], MM[4, 4]])
@@ -1068,17 +1072,14 @@ class CBM(object):
         
         
         """
-        if solver == "vabs":
+        if solver == "vabs" or solver == "anbax":
             if Theta != 0:
                 tmp_bp = self.BeamProperties.rotate(Theta)
             else:
                 tmp_bp = self.BeamProperties
 
-        elif solver == "anbax":
-            if Theta != 0:
-                tmp_bp = self.AnbaBeamProperties.rotate(Theta)
-            else:
-                tmp_bp = self.AnbaBeamProperties
+        else:
+            print("Check solver for BeamDyn Beam Property input.")
 
         tmp_bp = copy.deepcopy(tmp_bp)
 

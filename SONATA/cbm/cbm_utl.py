@@ -66,8 +66,14 @@ def dymore2sixbysix(arr):
     i33 = arr[3]
     i23 = arr[4]
     i22 = arr[5]
-
-    MM = np.array([[mu, 0, 0, 0, muXm3, -muXm2], [0, mu, 0, -muXm3, 0, 0], [0, 0, mu, muXm2, 0, 0], [0, -muXm3, muXm2, i22 + i33, 0, 0], [muXm3, 0, 0, 0, i22, i23], [-muXm2, 0, 0, 0, i23, i33]])
+    
+    MM = np.array([[mu  , 0   ,   0,      0, muXm3, -muXm2],
+                   [0   , mu  ,   0, -muXm3,     0,      0],
+                   [0   , 0  ,   mu,  muXm2,     0,      0],
+                   [0   , -muXm3,   muXm2,  i22+i33, 0,  0],
+                   [muXm3, 0  ,   0,  0,    i22,       i23],
+                   [-muXm2, 0  ,  0,  0,     i23,     i33]])
+    
 
     a = np.zeros((6, 6))
     for c, (i, j) in enumerate(zip(np.tril_indices(6)[1], np.tril_indices(6)[0])):

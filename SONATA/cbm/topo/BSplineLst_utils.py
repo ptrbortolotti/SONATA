@@ -955,6 +955,7 @@ def discretize_BSplineLst(BSplineLst, Deflection=2e-4, AngularDeflection=0.02, C
     return npArray
 
 
+
 # return data
 
 

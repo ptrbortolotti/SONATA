@@ -62,18 +62,16 @@ def display_config(DeviationAngle=1e-5, DeviationCoefficient=1e-5, bg_c=((20, 6,
         method
     """
 
-    def export_png():
-        return export_to_PNG(display)
+    def export_png(): return export_to_PNG(display)
 
-    def export_jpg():
-        return export_to_JPEG(display)
+    def export_jpg(): return export_to_JPEG(display)
 
     #    def export_pdf(): return export_to_PDF(display)
     #    def export_svg(): return export_to_SVG(display)
     #    def export_ps(): return export_to_PS(display)
 
     # ===========DISPLAY CONFIG:===============
-    display, start_display, add_menu, add_function_to_menu = init_display()
+    display, start_display, add_menu, add_function_to_menu = init_display()  # (backend_str='qt-pyqt5')
     display.Context.SetDeviationAngle(DeviationAngle)  # 0.001 default. Be careful to scale it to the problem.
     display.Context.SetDeviationCoefficient(DeviationCoefficient)  # 0.001 default. Be careful to scale it to the problem.
     display.set_bg_gradient_color([bg_c[0][0], bg_c[0][1], bg_c[0][2]], [bg_c[1][0], bg_c[1][1], bg_c[1][2]])

@@ -13,7 +13,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
-from jsonschema import validate
+# from jsonschema import validate
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
 from OCC.Core.gp import (gp_Ax1, gp_Ax2, gp_Ax3, gp_Dir, gp_Pln,
                          gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec,)
@@ -45,18 +45,23 @@ from SONATA.cbm.topo.wire_utils import (discretize_wire,
                                         scale_wire, translate_wire,)
 from SONATA.classAirfoil import Airfoil
 from SONATA.classComponent import Component
-from SONATA.classMaterial import read_IEA37_materials
+from SONATA.classMaterial import read_materials
 from SONATA.utl.blade_utl import (array_pln_intersect, check_uniformity,
                                   interp_airfoil_position, interp_loads,
                                   make_loft,)
-from SONATA.utl.converter import iea37_converter
+from SONATA.utl.converter_WT import converter_WT
 from SONATA.utl.interpBSplineLst import interpBSplineLst
 from SONATA.utl.plot import plot_beam_properties
 from SONATA.utl.trsf import trsf_af_to_blfr, trsf_blfr_to_cbm, trsf_cbm_to_blfr
 from SONATA.vabs.classVABSConfig import VABSConfig
+from SONATA.anbax.classANBAXConfig import ANBAXConfig
 
 
 from SONATA.utl_openmdao.utl_openmdao import utl_openmdao_apply_gains_web_placement, utl_openmdao_apply_gains_mat_thickness
+
+
+from SONATA.airconics_blade_cad.blade_cst import blade_cst
+import SONATA.airconics_blade_cad.airconics.liftingSurface as liftingSurface
 
 class Blade(Component):
     """
@@ -126,7 +131,7 @@ class Blade(Component):
     
     >>> job = Blade(name='UH-60A_adv')
     
-    >>> job.read_IEA37(yml.get('components').get('blade'), airfoils, materials)  
+    >>> job.read_yaml(yml.get('components').get('blade'), airfoils, materials)
     
     >>> job.blade_gen_section()
     >>> job.blade_run_vabs()
@@ -180,9 +185,9 @@ class Blade(Component):
 
             
             airfoils = [Airfoil(af) for af in yml.get('airfoils')]
-            self.materials = read_IEA37_materials(yml.get('materials'))
+            self.materials = read_materials(yml.get('materials'))
             
-            self.read_IEA37(yml.get('components').get('blade'), airfoils, **kwargs)
+            self.read_yaml(yml.get('components').get('blade'), airfoils, **kwargs)
 
             
 #    def __repr__(self):
@@ -262,10 +267,10 @@ class Blade(Component):
         p = gp_Pnt()
         vx = gp_Vec()
         v2 = gp_Vec()
-
-        # determine local the local cbm coordinate system Ax2
-        self.beam_ref_axis_BSplineLst[int(resCoords[0, 0])].D2(resCoords[0, 1], p, vx, v2)
-        vz = gp_Vec(-vx.Z(), 0, vx.X()).Normalized()
+        
+        #determine local the local cbm coordinate system Ax2
+        self.beam_ref_axis_BSplineLst[int(resCoords[0,0])].D2(resCoords[0,1],p,vx,v2)
+        vz = gp_Vec(-vx.Z(),0,vx.X()).Normalized()
         tmp_Ax2 = gp_Ax2(p, gp_Dir(vz), gp_Dir(vx))
         local_Ax2 = tmp_Ax2.Rotated(gp_Ax1(p, gp_Dir(vx)), float(self.f_twist(x)))
         return local_Ax2
@@ -362,14 +367,14 @@ class Blade(Component):
 
         return BoundaryBSplineLst
 
-    def read_IEA37(self, yml, airfoils, stations=None, npts=11, wt_flag=False, **kwargs):
+    def read_yaml(self, yml, airfoils, stations=None, npts=11, wt_flag=False, **kwargs):
         """
-        reads the IEA Wind Task 37 style Blade dictionary 
+        reads the Beam or Blade dictionary
         generates the blade matrix and airfoil to represent all given 
         information at every grid point by interpolating the input data 
-        and assigsn them to the class attribute twist, choord, coordinates 
+        and assign them to the class attribute twist, choord, coordinates
         and airfoil_positions with the first column representing the 
-        non-dimensional x-location  
+        non-dimensional radial location
 
         Parameters
         ----------
@@ -378,7 +383,7 @@ class Blade(Component):
         
         """
         self.name = self.yml.get('name')
-        print('STATUS:\t Reading IAE37 Definition for Blade: %s' % (self.name))
+        print('STATUS:\t Reading YAML Dictionary for Beam/Blade: %s' % (self.name))
         
         #Read blade & beam reference axis and create BSplineLst & interpolation instance
         (self.blade_ref_axis_BSplineLst, self.f_blade_ref_axis, tmp_blra) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'))
@@ -421,12 +426,10 @@ class Blade(Component):
             else:
                 cs_pos = stations
             
-        x = np.unique(np.sort(np.hstack( (tmp_chord[:,0], tmp_tw[:,0], \
-                                         tmp_blra[:,0], tmp_bera[:,0], \
+        x = np.unique(np.sort(np.hstack((tmp_chord[:,0], tmp_tw[:,0],
+                                         tmp_blra[:,0], tmp_bera[:,0],
                                          tmp_pa[:,0], arr[:,0], cs_pos))))
 
-        #        print(type(airfoil_position),airfoil_position)
-        #        print(airfoils)
         self.airfoils = np.asarray([[x, interp_airfoil_position(airfoil_position, airfoils, x)] for x in x])
         self.blade_ref_axis = np.hstack((np.expand_dims(x, axis=1), self.f_blade_ref_axis.interpolate(x)[0]))
         self.beam_ref_axis = np.hstack((np.expand_dims(x, axis=1), self.f_beam_ref_axis.interpolate(x)[0]))
@@ -455,10 +458,10 @@ class Blade(Component):
 
         #Generate CBMConfigs
         if kwargs.get('flags',{}).get('flag_wt_ontology'):
-            cbmconfigs = iea37_converter(self, cs_pos, yml, self.materials, mesh_resolution = kwargs.get('flags').get('mesh_resolution'))
+            cbmconfigs = converter_WT(self, cs_pos, yml, self.materials, mesh_resolution = kwargs.get('flags').get('mesh_resolution'))
             
         else:
-            lst = [[cs.get("position"), CBMConfig(cs, self.materials, iea37=True)] for cs in yml.get("internal_structure_2d_fem").get("sections")]
+            lst = [[cs.get("position"), CBMConfig(cs, self.materials)] for cs in yml.get("internal_structure_2d_fem").get("sections")]
             cbmconfigs = np.asarray(lst)
 
         # # Apply gains from design variables during openmdao analysis
@@ -535,10 +538,10 @@ class Blade(Component):
         """
         for (x, cs) in self.sections:
             if topo_flag:
-                print("STATUS:\t Building Section at grid location %s" % (x))
+                print("STATUS:\t Building Section at grid location %s" % x)
                 cs.cbm_gen_topo()
             if mesh_flag:
-                print("STATUS:\t Meshing Section at grid location %s" % (x))
+                print("STATUS:\t Meshing Section at grid location %s" % x)
                 cs.cbm_gen_mesh(**kwargs)
         return None
 
@@ -561,7 +564,7 @@ class Blade(Component):
         wireframe = []
         
         for bm, afl in zip(self.blade_matrix, self.airfoils[:, 1]):
-            afl.gen_OCCtopo(angular_deflection=160)
+            afl.gen_OCCtopo(angular_deflection=20)  # 160
             (wire, te_pnt) = afl.trsf_to_blfr(bm[1:4], bm[6], bm[4], bm[5])
             wireframe.append(wire)
             
@@ -647,16 +650,16 @@ class Blade(Component):
 
     def blade_run_vabs(self, loads=None, **kwargs):
         """
-        runs vabs for every section
-        
+        Determines initial twist and curvatures and runs vabs for every section
+
         Parameters
         ----------
         loads : dict, optional
             dictionary of the following keys and values, (default=None)
-            for detailed information see the VABSConfig documentation or the 
+            for detailed information see the VABSConfig documentation or the
             VABS user manual
-            F : nparray([[grid, F1, F2, F3]]) 
-            M : nparray([[grid, M1, M2, M3]]) 
+            F : nparray([[grid, F1, F2, F3]])
+            M : nparray([[grid, M1, M2, M3]])
             f : nparray([[grid, f1, f2, f2]])
             df : nparray([[grid, f1', f2', f3']])
             dm :  nparray([[grid, m1', m2', m3']])
@@ -664,13 +667,7 @@ class Blade(Component):
             ddm : nparray([[grid, m1'', m2'', m3'']])
             dddf : nparray([[grid, f1''', f2''', f3''']])
             dddm : nparray([[grid, m1''', m2''', m3''']])
-        
-        ToDo
-        ----------
-            To model initially curved and twisted beams, curve flag is 1, and three real numbers for the
-            twist (k1) and curvatures (k2 and k3) should be provided in the vabs config
-            Be Careful to define the curvature measures in the local Ax2 frame!
-        
+
         """
 
         vc = VABSConfig()
@@ -679,10 +676,10 @@ class Blade(Component):
             if loads:
                 vc.recover_flag = 1
                 load = interp_loads(loads, x)
-                for k, v in load.items():
-                    setattr(vc, k, v)
+                for k,v in load.items():
+                    setattr(vc,k,v)
 
-            # set initial twist and curvature
+            #set initial twist and curvature
             vc.curve_flag = 1
             vc.k1 = float(self.f_curvature_k1(x))
             (vc.k2, vc.k3) = self.f_beam_ref_axis.interpolate_curvature(x)
@@ -698,34 +695,29 @@ class Blade(Component):
     def blade_run_anbax(self, loads=None, **kwargs):
         """
         runs anbax for every section
-        
+
         Parameters
         ----------
         loads : dict, optional
             dictionary of the following keys and values, (default=None)
-            for detailed information see the VABSConfig documentation or the 
-            VABS user manual
-            F : nparray([[grid, F1, F2, F3]]) 
-            M : nparray([[grid, M1, M2, M3]]) 
-            f : nparray([[grid, f1, f2, f2]])
-            df : nparray([[grid, f1', f2', f3']])
-            dm :  nparray([[grid, m1', m2', m3']])
-            ddf : nparray([[grid, f1'', f2'', f3'']])
-            ddm : nparray([[grid, m1'', m2'', m3'']])
-            dddf : nparray([[grid, f1''', f2''', f3''']])
-            dddm : nparray([[grid, m1''', m2''', m3''']])
-        
-        ToDo
-        ----------
-            To model initially curved and twisted beams, curve flag is 1, and three real numbers for the
-            twist (k1) and curvatures (k2 and k3) should be provided in the vabs config!!!!
-                
+            F : nparray([[grid, F1, F2, F3]])
+            M : nparray([[grid, M1, M2, M3]])
+
         """
+
+        ac = ANBAXConfig()
         lst = []
         for (x, cs) in self.sections:
+            if loads:
+                ac.recover_flag = 1
+                load = interp_loads(loads, x)
+                for k,v in load.items():
+                    setattr(ac,k,v)
+
+            cs.config.anbax_cfg = ac
             print("STATUS:\t Running ANBAX at grid location %s" % (x))
             cs.cbm_run_anbax(**kwargs)
-            lst.append([x, cs.AnbaBeamProperties])
+            lst.append([x, cs.BeamProperties])
         # self.anba_beam_properties = np.asarray(lst)
         self.beam_properties = np.asarray(lst)
         return None      
@@ -921,25 +913,25 @@ class Blade(Component):
         return None    
     
     
-    def blade_post_3dtopo(self, flag_wf = True, flag_lft = False, flag_topo = False, flag_mesh = False, flag_wopwop=False, **kwargs):
-        """
-        plots the cross-sections of the blade with matplotlib 
-
-        Parameters
-        ----------
-        **kwargs : TYPE
-            multiple keyword arguments can be passed down to the 
-            cbm_post_2dmesh method. 
-
-        Returns
-        -------
-        None.
-
-        """
-        for (x, cs) in self.sections:
-            string = "Blade: " + str(self.name) + "; Section : " + str(x)
-            cs.cbm_post_2dmesh(title=string, **kwargs)
-        return None
+    # def blade_post_3dtopo(self, flag_wf = True, flag_lft = False, flag_topo = False, flag_mesh = False, flag_wopwop=False, **kwargs):
+    #     """
+    #     plots the cross-sections of the blade with matplotlib
+    #
+    #     Parameters
+    #     ----------
+    #     **kwargs : TYPE
+    #         multiple keyword arguments can be passed down to the
+    #         cbm_post_2dmesh method.
+    #
+    #     Returns
+    #     -------
+    #     None.
+    #
+    #     """
+    #     for (x, cs) in self.sections:
+    #         string = "Blade: " + str(self.name) + "; Section : " + str(x)
+    #         cs.cbm_post_2dmesh(title=string, **kwargs)
+    #     return None
 
 
 
@@ -988,8 +980,8 @@ class Blade(Component):
                 # loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-2, continuity=1, check_compatibility=True)
                 loft = make_loft(wireframe[i:i+2], ruled=True, tolerance=1e-6, continuity=1, check_compatibility=True)
                 self.display.DisplayShape(loft, transparency=0.5, update=True)
-                if self.loft is not None:
-                    self.display.DisplayShape(self.loft, transparency=0.2, update=True, color="GREEN")
+                # if self.loft is not None:
+                #     self.display.DisplayShape(self.loft, transparency=0.2, update=True, color="GREEN")
             #     AP214_stepExporter.add_shape(loft)  # add each lofted shape to the AP203_stepExporter component to generate full blade
             # AP214_stepExporter.write_file()  # write step file
 
@@ -1014,14 +1006,35 @@ class Blade(Component):
                     v3 = v1.Added(v2)
                     p2 = gp_Pnt(v3.XYZ())
 
-                    self.display.DisplayShape(p1, color="RED")
-                    h1 = BRepBuilderAPI_MakeEdge(p1, p2).Shape()
-                    self.display.DisplayShape(h1, color="WHITE")
-
         self.display.View_Iso()
         self.display.FitAll()
-        # self.start_display()
+        self.start_display()
+
+    def blade_airconics_iges(self, job_str, flags_dict):
+        """
+        exports lofted blade based on airconics package
+
+        Stand-alone package that simply reads a yaml input file
+        """
+
+        CAD_shape = blade_cst(self.yml, flags_dict)
+        CAD_shape.create_blade_cst()
+
+        NSegments = 100
+        blade = liftingSurface.LiftingSurface(CAD_shape.airfoil_func, NSegments=NSegments)
+        print(["Finished creating loft using " + str(NSegments) + " segments"])
+        blade.Write(job_str[:-5] + '.iges')  # writes step, stl, igs, or iges files depending on chosen extension
+
+        # optional plot that shows wires
+        # fig, ax = plt.subplots()
+        # # ax = fig.gca(projection='3d')
+        # for eta in np.arange(0.0, 1.01, 0.05):
+        #     CAD_shape.blade_af(eta, ax=ax)
+        # plt.show()
+
         return None
+
+
 
 
 # ====== M A I N ==============
@@ -1033,14 +1046,14 @@ if __name__ == "__main__":
         inputs = myfile.read()
     with open("../jobs/PBortolotti/IEAontology_schema.yaml", "r") as myfile:
         schema = myfile.read()
-    validate(yaml.load(inputs), yaml.load(schema))
+    # validate(yaml.load(inputs), yaml.load(schema))
     yml = yaml.load(inputs)
 
     airfoils = [Airfoil(af) for af in yml.get("airfoils")]
-    materials = read_IEA37_materials(yml.get("materials"))
+    materials = read_materials(yml.get("materials"))
 
     job = Blade(name="IEAonshoreWT")
-    job.read_IEA37(yml.get("components").get("blade"), airfoils, materials, wt_flag=True)
+    job.read_yaml(yml.get("components").get("blade"), airfoils, materials, wt_flag=True)
 
     # job.blade_gen_section(mesh_flag = True)
     # job.blade_run_vabs()

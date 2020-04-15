@@ -243,43 +243,27 @@ class AnisotropicMaterial(Material):
         # as second and forth order Strength Tensor Fij, and F
 
 
-def read_IEA37_materials(yml):
+def read_materials(yml):
     materials = OrderedDict()
     for i, mat in enumerate(yml):
         if 'id' in mat:
             ID = mat['id']
             # If no ID is issued for materials, automatically define the following flag to allocate wisdem specfic material definitions
-            auto_flag_wisdem_materials = False
+            flag_materials_vector_input = False
         else:
-            # print('No material IDs issued.')
+            # print('STATUS: issue material IDs.')
             ID = i + 1
-            auto_flag_wisdem_materials = True
+            flag_materials_vector_input = True  # use this in case no mat ID was issues ToDo: better create a user defined flag
 
 
         if mat.get('orth') == 0:
             materials[ID] = IsotropicMaterial(ID=ID, **mat)
         elif mat.get('orth') == 1:
-            materials[ID] = OrthotropicMaterial(ID=ID, flag_mat=auto_flag_wisdem_materials, **mat)
+            materials[ID] = OrthotropicMaterial(ID=ID, flag_mat=flag_materials_vector_input, **mat)
         elif mat.get('orth') == 2:
             materials[ID] = AnisotropicMaterial(ID=ID, **mat)
         
     materials = OrderedDict(sorted(materials.items()))
-    return materials
-
-
-def read_yml_materials(fname):
-    b_string = clean_filestring(fname, comments='#')
-    mdb = yaml.load(b_string)['Materials']
-
-    materials = OrderedDict()
-    for k, v in mdb.items():
-        ID = int(k.split()[-1])
-        if v['orth'] == 0:
-            materials[ID] = IsotropicMaterial(ID=ID, **v)
-        elif mdb[k]['orth'] == 1:
-            materials[ID] = OrthotropicMaterial(ID=ID, **v)
-        elif mdb[k]['orth'] == 2:
-            materials[ID] = AnisotropicMaterial(ID=ID, **v)
     return materials
 
 
@@ -297,9 +281,9 @@ if __name__ == '__main__':
     #    with open('jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
     #        inputs  = myfile.read()
     #    wt_data     = yaml.load(inputs)
-    #    materials2 = read_IEA37_materials(wt_data['materials'])
+    #    materials2 = read_materials(wt_data['materials'])
 
     with open('jobs/MonteCarlo/UH-60A_adv.yml', 'r') as myfile:
         inputs = myfile.read()
     data = yaml.load(inputs)['materials']
-    materials3 = read_IEA37_materials(data)
+    materials3 = read_materials(data)
