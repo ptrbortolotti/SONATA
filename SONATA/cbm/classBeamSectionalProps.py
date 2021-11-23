@@ -132,7 +132,7 @@ class BeamSectionalProps(object):
     - Make one unit convertion method that converts the complete instance
     """    
     
-    __slots__ = ('TS', 'MM', 'Xg', 'Xt', 'Xs', 'PIA', 'VS', 'Ag', \
+    __slots__ = ('TS', 'MM', 'Xg', 'Xt', 'Xs', 'Delta', 'PIA', 'VS', 'Ag', \
                  'Bk', 'Ck', 'Dk', 'ELE', 'U')
     
 
@@ -142,6 +142,7 @@ class BeamSectionalProps(object):
         self.Xg = None
         self.Xt = None
         self.Xs = None
+        self.Delta = None
         self.PIA = None
         self.VS = None
         self.Ag = None

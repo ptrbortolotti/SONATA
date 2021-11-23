@@ -59,7 +59,7 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
     
     """
     # print(data_name, max(data))
-    alpha = 0.7
+    alpha = 1.
     if "cmap" in kw:
         cmap = plt.cm.get_cmap(kw["cmap"])
 
@@ -95,8 +95,11 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
         vmax = kw["vmax"]
     else:
         vmax = None
+    from palettable.cartocolors.qualitative import Prism_9
+    from matplotlib.colors import ListedColormap
+    cmap = ListedColormap(Prism_9.mpl_colors)
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(1,1,figsize=(7.5, 6))
     patches = []
     centroids = []
     for i, ele in enumerate(elements):
@@ -144,11 +147,15 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
         
     #ax.scatter(nodes[:,0],nodes[:,1],c='k',)
     plt.axis('equal')
+    #ax.set_ylim(bottom=-3.5, top=3.5)
+    #ax.set_xlim(left=-3.5, right=3.5)
+
     if title!=None:
-        ax.set_title(title)
-    ax.set_xlabel(r'$x_2$, m')
-    ax.set_ylabel(r'$x_3$, m')
-    
+        ax.set_title(title, fontweight = 'bold')
+    ax.set_xlabel('x, m', fontweight = 'bold')
+    ax.set_ylabel('y, m', fontweight = 'bold')
+    plt.grid(color=[0.8,0.8,0.8], linestyle='--')
+
     #plot coordinate system.
     # cslength=0.015
     # ax.arrow(0, 0, cslength, 0, color='lime')
@@ -293,14 +300,14 @@ def plot_cells(cells,nodes, attr1, materials, VABSProperties=None, title='None',
         # fname = kw['savepath'].split('.')[0]+'_'+datestr+'.'+kw['savepath'].split('.')[1]
 
         if 'opt_var' in kw:
-            fname = kw['savepath'] + '/figures/blade_section_' + kw['section'] + '_optvar_' + kw['opt_var'] + '.png'
+            fname = kw['savepath'] + '/figures/blade_section_' + kw['section'] + '_optvar_' + kw['opt_var'] + '.pdf'
         else:
-            fname = kw['savepath']+'/figures/blade_section_'+kw['section']+'.png'
+            fname = kw['savepath']+'/figures/blade_section_'+kw['section']+'.pdf'
         # print(fname)
         # tmp_fig = plt.gcf()
         tmp_fig = fig
         # tmp_fig.set_size_inches(11.69, 8.27)    #a4 landscape
-        tmp_fig.set_size_inches(10, 5)    #a4 landscape
+        # tmp_fig.set_size_inches(10, 5)    #a4 landscape
         tmp_fig.savefig(fname, dpi=300, orientation='landscape', papertype='a4')
 
     return (fig, ax)

@@ -60,8 +60,15 @@ from SONATA.anbax.classANBAXConfig import ANBAXConfig
 from SONATA.utl_openmdao.utl_openmdao import utl_openmdao_apply_gains_web_placement, utl_openmdao_apply_gains_mat_thickness
 
 
-from SONATA.airconics_blade_cad.blade_cst import blade_cst
-import SONATA.airconics_blade_cad.airconics.liftingSurface as liftingSurface
+# from SONATA.airconics_blade_cad.blade_cst import blade_cst
+# import SONATA.airconics_blade_cad.airconics.liftingSurface as liftingSurface
+
+def rotate(xo, yo, xp, yp, angle):
+    ## Rotate a point clockwise by a given angle around a given origin.
+    # angle *= -1.
+    qx = xo + np.cos(angle) * (xp - xo) - np.sin(angle) * (yp - yo)
+    qy = yo + np.sin(angle) * (xp - xo) + np.cos(angle) * (yp - yo)
+    return qx, qy
 
 class Blade(Component):
     """
@@ -195,7 +202,7 @@ class Blade(Component):
 #        string reputation of an object, """
 #        return 'Blade: '+ str(self.name)
     
-    def _read_ref_axes(self, yml_ra, flag_ref_axes_wt=False):
+    def _read_ref_axes(self, yml_ra, flag_ref_axes_wt=False, c2_axis=False, tmp_chord = [], tmp_pa = [], tmp_tw=[]):
         """
         reads and determines interpolates function for the reference axis of 
         the blade
@@ -237,6 +244,20 @@ class Blade(Component):
         
         x_blra = np.unique(np.sort(np.hstack((tmp_ra['x'][:,0], tmp_ra['y'][:,0], tmp_ra['z'][:,0]))))
         tmp_ra = np.vstack((x_blra, f_ref_axis_x(x_blra), f_ref_axis_y(x_blra), f_ref_axis_z(x_blra))).T
+        
+        if c2_axis:
+            f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1], bounds_error=False, fill_value='extrapolate')
+            chord = f_chord(x_blra)
+            f_pitch_axis = interp1d(tmp_pa[:,0], tmp_pa[:,1], bounds_error=False, fill_value='extrapolate')
+            pitch_axis = f_pitch_axis(x_blra)
+            f_tw = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
+            twist_rad = f_tw(x_blra)
+            # Get the absolute offset between mid chord and pitch axis (rotation center)
+            ch_offset = chord * (0.5 - pitch_axis)
+            # Rotate it by the twist
+            z , y = rotate(0., 0., 0., ch_offset, -twist_rad)
+            tmp_ra[:,2] -= y
+            tmp_ra[:,3] += z
 
         if check_uniformity(tmp_ra[:, 0], tmp_ra[:, 1]) == False:
             print("WARNING:\t The blade beference axis is not uniformly defined along x")
@@ -384,27 +405,29 @@ class Blade(Component):
         """
         self.name = self.yml.get('name')
         print('STATUS:\t Reading YAML Dictionary for Beam/Blade: %s' % (self.name))
-        
-        #Read blade & beam reference axis and create BSplineLst & interpolation instance
-        (self.blade_ref_axis_BSplineLst, self.f_blade_ref_axis, tmp_blra) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'))
-
-        if not yml.get('outer_shape_bem').get('beam_reference_axis'):
-            #  In case beam reference axis is not defined in yaml file, use identical coordinates for beam reference and reference axis
-            (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'))
-        else:
-            (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('beam_reference_axis'), flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'))
-        
+        c2_axis = kwargs.get('flags',{}).get('c2_axis')
         #Read chord, twist and nondim. pitch axis location and create interpolation
         tmp_chord = np.asarray((yml.get('outer_shape_bem').get('chord').get('grid'),yml.get('outer_shape_bem').get('chord').get('values'))).T
         tmp_tw = np.asarray((yml.get('outer_shape_bem').get('twist').get('grid'),yml.get('outer_shape_bem').get('twist').get('values'))).T
         tmp_pa = np.asarray((yml.get('outer_shape_bem').get('pitch_axis').get('grid'),yml.get('outer_shape_bem').get('pitch_axis').get('values'))).T
+        
+        #Read blade & beam reference axis and create BSplineLst & interpolation instance
+        (self.blade_ref_axis_BSplineLst, self.f_blade_ref_axis, tmp_blra) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'), c2_axis=c2_axis, tmp_chord = tmp_chord, tmp_pa = tmp_pa, tmp_tw=tmp_tw)
 
+        if not yml.get('outer_shape_bem').get('beam_reference_axis'):
+            #  In case beam reference axis is not defined in yaml file, use identical coordinates for beam reference and reference axis
+            (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'), c2_axis=c2_axis, tmp_chord = tmp_chord, tmp_pa = tmp_pa, tmp_tw=tmp_tw)
+        else:
+            (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('beam_reference_axis'), flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'))
+        
+        if c2_axis:
+            tmp_pa[:,1]=0.5
         self.f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1], bounds_error=False, fill_value='extrapolate')
 
-        if kwargs.get('flags',{}).get('flag_wt_ontology'):  # correct twist rate sign as yaml twist is defined according to BeamDyn Definition (WTF)
-            self.f_twist = interp1d(tmp_tw[:,0], -tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
-        else:
-            self.f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
+        # if kwargs.get('flags',{}).get('flag_wt_ontology'):  # correct twist rate sign as yaml twist is defined according to BeamDyn Definition (WTF)
+        #     self.f_twist = interp1d(tmp_tw[:,0], -tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
+        # else:
+        self.f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
         self.f_pa = interp1d(tmp_pa[:,0], tmp_pa[:,1], bounds_error=False, fill_value='extrapolate')
         
         #Read airfoil information 
@@ -908,7 +931,7 @@ class Blade(Component):
         """      
         for (x,cs) in self.sections:
             print('STATUS:\t Plotting section at grid location %s' % x)
-            string = 'Blade: '+ str(self.name) + '; Section : '+str(x)
+            string = 'Blade: '+ str(self.name) + '; Section %.3f: ' % x
             cs.cbm_post_2dmesh(title=string, section = str(x), **kwargs)
         return None    
     

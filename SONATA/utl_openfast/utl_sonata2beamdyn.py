@@ -113,60 +113,21 @@ def convert_structdef_SONATA_to_beamdyn(cs_pos, SONATA_beam_prop):
 
 
 # --- Write BeamDyn file with blade reference line locations ---#
-def write_beamdyn_axis(folder, flags_dict, wt_name, byml, refine):
+def write_beamdyn_axis(folder, flags_dict, wt_name, ra, twist):
 
-    if flags_dict['flag_wt_ontology']:  # in case WT onology is used
-        yaml_ref_axis = byml.get('internal_structure_2d_fem').get('reference_axis')
-        yaml_twist = byml.get('outer_shape_bem').get('twist')
+    n_pts = 50
+    grid = np.linspace(0, 1, n_pts)
 
-        n_pts = 50
-        grid = np.linspace(0, 1, n_pts)
+    f_interp = interp1d(ra[:,0], ra[:,3])
+    kp_xr = f_interp(grid)
+    f_interp = interp1d(ra[:,0], -ra[:,2])
+    kp_yr = f_interp(grid)
+    f_interp = interp1d(ra[:,0], ra[:,1])
+    kp_zr = f_interp(grid)
+    f_interp = interp1d(twist[:,0], np.rad2deg(twist[:,1]))
+    twist_interp = f_interp(grid)
 
-        # >>> The following is defined correctly when WT definition is used within yaml file <<<
-        # The x of yaml corresponds to x in BeamDyn
-        f_interp = interp1d(yaml_ref_axis.get('x').get('grid'), yaml_ref_axis.get('x').get('values'))
-        kp_xr = f_interp(grid)
-        # The y of yaml corresponds to y in BeamDyn
-        f_interp = interp1d(yaml_ref_axis.get('y').get('grid'), yaml_ref_axis.get('y').get('values'))
-        kp_yr = f_interp(grid)
-        # The z of yaml corresponds to z in BeamDyn
-        f_interp = interp1d(yaml_ref_axis.get('z').get('grid'), yaml_ref_axis.get('z').get('values'))
-        kp_zr = f_interp(grid)
-        # Twist
-        f_interp = interp1d(yaml_twist.get('grid'), yaml_twist.get('values'))
-        twist    = f_interp(grid)*180./np.pi
-        # twist = np.zeros_like(kp_yr)  # twist defined to zero
-
-    elif not flags_dict['flag_wt_ontology']:  # in case HT ontology is used
-        yaml_ref_axis = byml.get('outer_shape_bem').get('reference_axis')
-        yaml_twist = byml.get('outer_shape_bem').get('twist')
-
-        n_pts = 50
-        grid = np.linspace(0, 1, n_pts)
-
-        # >>> The following is defined correctly when HT definition is used within yaml file <<<
-        # The z of yaml corresponds to x in BeamDyn
-        f_interp = interp1d(yaml_ref_axis.get('z').get('grid'), yaml_ref_axis.get('z').get('values'))
-        kp_xr = f_interp(grid)
-        # The -y of yaml corresponds to y in BeamDyn
-        f_interp = interp1d(yaml_ref_axis.get('y').get('grid'), yaml_ref_axis.get('y').get('values'))
-        kp_yr = -f_interp(grid)
-        # The x of yaml corresponds to z in BeamDyn
-        f_interp = interp1d(yaml_ref_axis.get('x').get('grid'), yaml_ref_axis.get('x').get('values'))
-        kp_zr = f_interp(grid)
-        # Twist
-        f_interp = interp1d(yaml_twist.get('grid'), yaml_twist.get('values'))
-        twist    = f_interp(grid)*180./np.pi
-        # twist = np.zeros_like(kp_yr)  # twist defined to zero
-
-    else:
-        print('Can not export BeamDyn properties')
-
-
-
-
-
-    data = np.vstack((kp_xr, kp_yr, kp_zr, twist)).T
+    data = np.vstack((kp_xr, kp_yr, kp_zr, twist_interp)).T
 
     # file = open(folder + '00_analysis/analysis/' + wt_name + '_BeamDyn.dat', 'w')
     file = open(folder + wt_name + '_BeamDyn.dat', 'w')
@@ -177,16 +138,16 @@ def write_beamdyn_axis(folder, flags_dict, wt_name, byml, refine):
     file.write('True          QuasiStaticInit - Use quasistatic pre-conditioning with centripetal accelerations in initialization (flag) [dynamic solve only]\n')
     file.write(' 0            rhoinf          - Numerical damping parameter for generalized-alpha integrator\n')
     file.write(' 2            quadrature      - Quadrature method: 1=Gaussian; 2=Trapezoidal (switch)\n')
-    file.write(' %d       refine          - Refinement factor for trapezoidal quadrature (-). DEFAULT = 1 [used only when quadrature=2]\n' % (refine))
-    file.write('DEFAULT       n_fact          - Factorization frequency (-). DEFAULT = 5\n')
-    file.write('DEFAULT       DTBeam          - Time step size (s).\n')
-    file.write('DEFAULT       load_retries    - Number of factored load retries before quitting the aimulation\n')
-    file.write('DEFAULT       NRMax           - Max number of iterations in Newton-Ralphson algorithm (-). DEFAULT = 10\n')
-    file.write('DEFAULT       stop_tol        - Tolerance for stopping criterion (-)\n')
-    file.write('DEFAULT       tngt_stf_fd     - Flag to use finite differenced tangent stiffness matrix (-)\n')
-    file.write('DEFAULT       tngt_stf_comp   - Flag to compare analytical finite differenced tangent stiffness matrix  (-)\n')
-    file.write('DEFAULT       tngt_stf_pert   - perturbation size for finite differencing (-)\n')
-    file.write('DEFAULT       tngt_stf_difftol- Maximum allowable relative difference between analytical and fd tangent stiffness (-)\n')
+    file.write('"DEFAULT"     refine          - Refinement factor for trapezoidal quadrature (-). DEFAULT = 1 [used only when quadrature=2]\n')
+    file.write('"DEFAULT"     n_fact          - Factorization frequency (-). DEFAULT = 5\n')
+    file.write('"DEFAULT"     DTBeam          - Time step size (s).\n')
+    file.write('"DEFAULT"     load_retries    - Number of factored load retries before quitting the aimulation\n')
+    file.write('"DEFAULT"     NRMax           - Max number of iterations in Newton-Ralphson algorithm (-). DEFAULT = 10\n')
+    file.write('"DEFAULT"     stop_tol        - Tolerance for stopping criterion (-)\n')
+    file.write('"DEFAULT"     tngt_stf_fd     - Flag to use finite differenced tangent stiffness matrix (-)\n')
+    file.write('"DEFAULT"     tngt_stf_comp   - Flag to compare analytical finite differenced tangent stiffness matrix  (-)\n')
+    file.write('"DEFAULT"     tngt_stf_pert   - perturbation size for finite differencing (-)\n')
+    file.write('"DEFAULT"     tngt_stf_difftol- Maximum allowable relative difference between analytical and fd tangent stiffness (-)\n')
     file.write('True          RotStates       - Orient states in the rotating frame during linearization? (flag) [used only when linearizing]\n')
     file.write('---------------------- GEOMETRY PARAMETER --------------------------------------\n')
     file.write('          1   member_total    - Total number of members (-)\n')
@@ -203,7 +164,7 @@ def write_beamdyn_axis(folder, flags_dict, wt_name, byml, refine):
             file.write('\t %.5e \t %.5e \t %.5e \t %.5e \n' % (data[i, 0], data[i, 1], data[i, 2], data[i, 3]))
 
     file.write('---------------------- MESH PARAMETER ------------------------------------------\n')
-    file.write('          5   order_elem     - Order of interpolation (basis) function (-)\n')
+    file.write('          7   order_elem     - Order of interpolation (basis) function (-)\n')
     file.write('---------------------- MATERIAL PARAMETER --------------------------------------\n')
     file.write('"%s"    BldFile - Name of file containing properties for blade (quoted string)\n' % (wt_name + '_BeamDyn_Blade.dat'))
     file.write('---------------------- PITCH ACTUATOR PARAMETERS -------------------------------\n')
@@ -212,7 +173,7 @@ def write_beamdyn_axis(folder, flags_dict, wt_name, byml, refine):
     file.write('      2E+07   PitchK      - Pitch actuator stiffness (kg-m^2/s^2) [used only when UsePitchAct is true]\n')
     file.write('     500000   PitchC      - Pitch actuator damping (kg-m^2/s) [used only when UsePitchAct is true]\n')
     file.write('---------------------- OUTPUTS -------------------------------------------------\n')
-    file.write('True          SumPrint       - Print summary data to "<RootName>.sum" (flag)\n')
+    file.write('False          SumPrint       - Print summary data to "<RootName>.sum" (flag)\n')
     file.write('"ES10.3E2"    OutFmt         - Format used for text tabular output, excluding the time channel.\n')
     file.write('          1   NNodeOuts      - Number of nodes to output to file [0 - 9] (-)\n')
     file.write('          1,          2,          3,          4,          5,          6    OutNd          - Nodes whose values will be output  (-)\n')
@@ -233,7 +194,7 @@ def write_beamdyn_axis(folder, flags_dict, wt_name, byml, refine):
     return None
 
 # --- Write BeamDyn_Blade file with blade properties ---#
-def write_beamdyn_prop(folder, flags_dict, wt_name, radial_stations, beam_stiff, beam_inertia):
+def write_beamdyn_prop(folder, flags_dict, wt_name, radial_stations, beam_stiff, beam_inertia, mu):
     n_pts = len(radial_stations)
 
     # file = open(folder + '00_analysis/analysis/' + wt_name + '_BeamDyn_Blade.dat', 'w')
@@ -246,7 +207,7 @@ def write_beamdyn_prop(folder, flags_dict, wt_name, radial_stations, beam_stiff,
     file.write('  ---------------------- DAMPING COEFFICIENT------------------------------------\n')
     file.write('   mu1        mu2        mu3        mu4        mu5        mu6\n')
     file.write('   (-)        (-)        (-)        (-)        (-)        (-)\n')
-    file.write('1.0E-02    1.0E-02    1.0E-02    1.0E-02    1.0E-02    1.0E-02\n')
+    file.write('\t %.5e \t %.5e \t %.5e \t %.5e \t %.5e \t %.5e\n' % (mu[0], mu[1], mu[2], mu[3], mu[4], mu[5])) 
     file.write(' ---------------------- DISTRIBUTED PROPERTIES---------------------------------\n')
 
 

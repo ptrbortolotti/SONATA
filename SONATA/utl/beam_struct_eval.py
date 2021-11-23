@@ -12,15 +12,16 @@ from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
+import os
 
 from SONATA.cbm.cbm_utl import trsf_sixbysix
 from SONATA.utl_openfast.utl_sonata2beamdyn import convert_structdef_SONATA_to_beamdyn, write_beamdyn_axis, write_beamdyn_prop
 
-from SONATA.utl.analytical_rectangle.utls_analytical_rectangle import utls_analytical_rectangle
+# from SONATA.utl.analytical_rectangle.utls_analytical_rectangle import utls_analytical_rectangle
 
 
 
-def beam_struct_eval(flags_dict, loads_dict, vabs_path, cs_pos, job, folder_str, job_str):
+def beam_struct_eval(flags_dict, loads_dict, vabs_path, cs_pos, job, folder_str, job_str, mu):
 
     """
     Analyse, transform, evaluate and plot structural results from VABS and/or ANBAX
@@ -219,7 +220,14 @@ def beam_struct_eval(flags_dict, loads_dict, vabs_path, cs_pos, job, folder_str,
         #     export_beam_struct_properties(folder_str, job_str, cs_pos, solver='anbax', beam_stiff=anbax_beam_stiff, beam_inertia=anbax_beam_inertia, beam_mass_per_length=anbax_beam_section_mass)
 
         # ToDo: also export BeamDyn files for results from anbax as soon as the verification is completed
-
+        # --------------------------------------- #
+        # write BeamDyn input files
+        np.savetxt('anbax_BAR00.txt', np.array([cs_pos, anbax_beam_stiff[:, 3, 3], anbax_beam_stiff[:, 4, 4], anbax_beam_stiff[:, 5, 5], anbax_beam_stiff[:, 2, 2], anbax_beam_inertia[:, 0, 0]]).T)
+        if flags_dict['flag_write_BeamDyn'] & flags_dict['flag_DeamDyn_def_transform']:
+            print('STATUS:\t Write BeamDyn input files')
+            refine = int(30/len(cs_pos))  # initiate node refinement parameter
+            write_beamdyn_axis(folder_str, flags_dict, job.yml.get('name'), job.blade_ref_axis, job.twist)
+            write_beamdyn_prop(folder_str, flags_dict, job.yml.get('name'), cs_pos, anbax_beam_stiff, anbax_beam_inertia, mu)
 
     # --------------------------------------- #
     # (Optional) - Analytical Rectangle   #
@@ -354,6 +362,8 @@ def vabs_export_beam_struct_properties(folder_str, job_str, radial_stations, coo
 
     # -------------------------------------------------- #
     # Export mass per unit length for the defined radial stations
+    if os.path.isdir(folder_str + 'csv_export/') == False:
+        os.mkdir(folder_str + 'csv_export/')
     with open(''.join([folder_str + 'csv_export/' + job_str[0:-5] + '_' + export_name_general]), mode='w') as csv_file:
         beam_prop_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         if coordsys == 'BeamDyn':
@@ -420,6 +430,8 @@ def anbax_export_beam_struct_properties(folder_str, job_str, radial_stations, co
 
     # -------------------------------------------------- #
     # Export mass per unit length for the defined radial stations
+    if os.path.isdir(folder_str + 'csv_export/') == False:
+        os.mkdir(folder_str + 'csv_export/')
     with open(''.join([folder_str + 'csv_export/' + job_str[0:-5] + '_' + export_name_general]), mode='w') as csv_file:
         beam_prop_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         if coordsys == 'BeamDyn':
