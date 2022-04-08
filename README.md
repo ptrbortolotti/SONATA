@@ -14,20 +14,20 @@ At NREL (and possibly at other institutes), first disconnect from vpn client dur
 First setup an anaconda environment, here named sonata-env, activate it, and add the pythonocc library
 
 ```
-conda create -n sonata-env -c conda-forge fenics python=3.7
+conda create -n sonata-env -c conda-forge -y fenics python=3.7
 conda activate sonata-env
-conda install -c tpaviot pythonocc-core
+conda install -c tpaviot -y pythonocc-core
 ```
 
 Note: python 3.8 is currently incompatible with PythonOCC-core
 
 Next, install further modules
 ```
-conda install -c conda-forge -y pint intervaltree matplotlib pyyaml git spyder
-pip install shapely triangle openmdao quadpy
+conda install -c conda-forge -y pint intervaltree matplotlib pyyaml git spyder palettable openmdao
+pip install shapely triangle quadpy
 ```
 
-Next, download the solvers VABS (commercial, use wine to run it on mac/linux systems) or in the same conda environemnt compile ANBA4 (open-source) following the instructions provided here https://github.com/ANBA4/anba4
+Next, download the solvers VABS (commercial, use wine to run it on mac/linux systems) or in the same conda environment compile ANBA4 (open-source) following the instructions provided here https://github.com/ANBA4/anba4
 
 
 Finally, go to the folder where you want to clone SONATA and type:
@@ -47,6 +47,12 @@ Navigate to examples/0_beams and run the example
 ```
 cd examples/0_beams
 python 0_SONATA_init_box_beam_HT_antisym_layup_(15)6_SI_SmithChopra91.py
+```
+
+Next try running the section at 30% along the blade span of the [IEA15MW refence wind turbine](https://github.com/IEAWindTask37/IEA-15-240-RWT)
+```
+cd ../examples/1_IEA15MW
+python 1_sonata_IEA15.py
 ```
 
 
