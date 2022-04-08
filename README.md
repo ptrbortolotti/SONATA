@@ -1,58 +1,59 @@
 # SONATA
-<img src="docs/img/logo_wframe.png" align="left"  width="150">
-'SONATA' is a toolbox for Multidiciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis.
-Structural helicopter rotor blade optimization comprises classical aeroelastic problems, where the aerodynamic behavior, the structural elasticity and vibrational dynamics have to be studied simultaneously. 
-Since the dynamic and modal behavior is strongly related to the structural properties of the rotor blades, adjusting these properties is essential for an effective optimization. 
-Nevertheless, identifying constraints based on elemental matrices to keep the solution within feasible boundaries is often a protracted and iterative task. 
-The herein presented definition of the rotor blade topology is deliberately associated to the production of composite rotor blades. 
-Thus, manufacturability is inherent from the geometric layup definition. Using orthogonal projection with corner-style differentiation the cross-section is discretized and processed by the Variational Asymptotic Beam Sectional Analysis (VABS) afterwards. [more](docs/intro.md)
+
+## Background
+SONATA is a toolbox for Multidiciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis. SONATA has originally been developed at the Helicopter Technology Institute of the Technical University of Munich (TUM), Germany. The original repository is available at https://gitlab.lrz.de/HTMWTUM/SONATA. The original work was supported by the German Federal Minister for Economic Affairs and Energy through the German Aation Research Program LuFo V-2 and the Austrian Rsearch Promotion Agency through the Austrian Research Program TAKE OFF in the project VARI-SPEED.
+
+SONATA has been adapted to wind energy applications thanks to work performed at the National Renewwable Energy Laboratory ([NREL](https://www.nrel.gov)) in Colorado, USA and funded by the US Department of Energy, Wind Energy Technology Office under the Big Adaptire Rotor program. This repository is managed by Pietro Bortolotti, researcher in the systems engineering group at NREL.
+
 
 ## Installation
-To use the full functionality of SONATA a bunch of dependecies are needed. Please look [here](docs/installation.md) for detailed instructions.
+SONATA can be run on mac and linux machines. No Windows installation is supported at the moment. We make use of Anaconda, which is a commonly used package manager. Download and install the latest anaconda version [here](https://docs.anaconda.com/anaconda/install/)
+
+At NREL (and possibly at other institutes), first disconnect from vpn client during installation in order to avoid remote server error when trying to retrieve URLs for installation.
+
+First setup an anaconda environment, here named sonata-env, activate it, and add the pythonocc library
 
 ```
-$ git clone https://gitlab.lrz.de/gu32kij/SONATA.git
-$ cd SONATA
-$ pip install .
+conda create -n sonata-env -c conda-forge fenics python=3.7
+conda activate sonata-env
+conda install -c tpaviot pythonocc-core
 ```
 
+Note: python 3.8 is currently incompatible with PythonOCC-core
+
+Next, install further modules
+```
+conda install -c conda-forge -y pint intervaltree matplotlib pyyaml git spyder
+pip install shapely triangle openmdao quadpy
+```
+
+Next, download the solvers VABS (commercial, use wine to run it on mac/linux systems) or in the same conda environemnt compile ANBA4 (open-source) following the instructions provided here https://github.com/ANBA4/anba4
+
+
+Finally, go to the folder where you want to clone SONATA and type:
+
+```
+git clone git@github.com:ptrbortolotti/SONATA.git
+cd SONATA
+pip install -e .
+```
+
+Done! now check your installation trying running an example
 
 ## Usage
 
-```
->>> from SONATA.classBlade import Blade
+Navigate to examples/0_beams and run the example
 
->>> job = Blade(filename='merit.yml')
->>> job.blade_gen_section()
+```
+cd examples/0_beams
+python 0_SONATA_init_box_beam_HT_antisym_layup_(15)6_SI_SmithChopra91.py
 ```
 
-### Plot the Mesh of Cross-section
-```
->>> job.blade_plot_sections()
-```
-<img src="docs/img/2dmesh.png" align="center"  width="500">
-
-
-### Show Results in the 3D-Viewer
-```
->>>job.blade_post_3dtopo(flag_lft = True, flag_topo = True, flag_mesh = False)
-```
-<img src="docs/img/post_3dtopo.png" align="center"  width="500">
-
-[getting-started](docs/getting_started.md)
-
-## Developers - Guide
-please read the [developers-guide](docs/developer-guide.md)
 
 ## Publications:
+
+**Feil, R., Pflumm, T., Bortolotti, P., Morandini, M.:** A cross-sectional aeroelastic analysis and structural optimization tool for slender composite structures. Composite Structures Volume 253, 1 December 2020, 112755.[[link]](https://www.sciencedirect.com/science/article/pii/S0263822320326817)
 
 **Pflumm, T., Garre, W., Hajek, M.:** A Preprocessor for Parametric Composite Rotor Blade Cross-Sections, 44th European Rotorcraft Forum, Delft, The Netherlands, 2018  [[pdf]](docs/Pflumm,%20T.%20-%20A%20Preprocessor%20for%20Parametric%20Composite%20Rotor%20Blade%20Cross-Sections%20(2018,%20ERF).pdf) [[more…\]](https://mediatum.ub.tum.de/604993?query=Pflumm&show_id=1455385) [[BibTeX\]](https://mediatum.ub.tum.de/export/1455385/bibtex)
 
 **Pflumm, T., Rex, W., Hajek, M.:** Propagation of Material and Manufacturing Uncertainties in Composite Helicopter Rotor Blades, 45th European Rotorcraft Forum, Warsaw, Poland, 2019 [[more…\]](https://mediatum.ub.tum.de/1520025) [BibTeX\]](https://mediatum.ub.tum.de/export/1520025/bibtex)
-
-
-## Acknowledgment:
-
-This work was supported by the German Federal Minisfor Economic Affairs and Energy through the German Aation Research Program LuFo V-2 and the Austrian Rsearch Promotion Agency through the Austrian Research Program TAKE OFF in the project VARI-SPEED.
-
-<img src="docs/img/acknowledgment.png" width="400">
