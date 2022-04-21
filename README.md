@@ -14,21 +14,27 @@ At NREL (and possibly at other institutes), first disconnect from vpn client dur
 First setup an anaconda environment, here named sonata-env, activate it, and add the pythonocc library
 
 ```
-conda create -n sonata-env -c conda-forge -y fenics python=3.7
+conda create -n sonata-env -c conda-forge -y fenics python=3.8
 conda activate sonata-env
 conda install -c tpaviot -y pythonocc-core
 ```
 
-Note: python 3.8 is currently incompatible with PythonOCC-core
-
 Next, install further modules
+
 ```
 conda install -c conda-forge -y pint intervaltree matplotlib pyyaml git spyder palettable openmdao
 pip install shapely triangle quadpy
 ```
 
-Next, download the solvers VABS (commercial, use wine to run it on mac/linux systems) or in the same conda environment compile ANBA4 (open-source) following the instructions provided here https://github.com/ANBA4/anba4
+Next, download the solvers VABS (commercial, use wine to run it on mac/linux systems) or in the same conda environment compile ANBA4 (open-source)
 
+```
+conda install -c conda-forge -y mshr
+git clone git@github.com:ANBA4/anba4.git # (or git clone https://github.com/ANBA4/anba4.git)
+cd anba_v4
+pip install -e .
+cd ..
+```
 
 Finally, go to the folder where you want to clone SONATA and type:
 
