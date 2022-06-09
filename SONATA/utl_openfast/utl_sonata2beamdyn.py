@@ -164,7 +164,7 @@ def write_beamdyn_axis(folder, flags_dict, wt_name, ra, twist):
             file.write('\t %.5e \t %.5e \t %.5e \t %.5e \n' % (data[i, 0], data[i, 1], data[i, 2], data[i, 3]))
 
     file.write('---------------------- MESH PARAMETER ------------------------------------------\n')
-    file.write('          7   order_elem     - Order of interpolation (basis) function (-)\n')
+    file.write('          10   order_elem     - Order of interpolation (basis) function (-)\n')
     file.write('---------------------- MATERIAL PARAMETER --------------------------------------\n')
     file.write('"%s"    BldFile - Name of file containing properties for blade (quoted string)\n' % (wt_name + '_BeamDyn_Blade.dat'))
     file.write('---------------------- PITCH ACTUATOR PARAMETERS -------------------------------\n')
