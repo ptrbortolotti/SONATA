@@ -84,12 +84,13 @@ flags_dict['flag_write_BeamDyn_unit_convert'] = flag_write_BeamDyn_unit_convert
 Loads_dict = {}
 
 # Set damping for BeamDyn input file
-delta = np.array([0.03, 0.03, 0.06787]) # logarithmic decrement, natural log of the ratio of the amplitudes of any two successive peaks. 3% flap and edge, 6.8% torsion
+delta = np.array([0.03, 0.03, 0.06787]) # logarithmic decrement, natural log of the ratio of the amplitudes of any two successive peaks. 3% flap and edge, 6% torsion
 zeta = 1. / np.sqrt(1.+(2.*np.pi / delta)**2.) # damping ratio,  dimensionless measure describing how oscillations in a system decay after a disturbance
-omega = np.array([0.5, 0.75])*2*np.pi # Frequency (rad/s), flap/edge
+omega = np.array([0.508286, 0.694685, 4.084712])*2*np.pi # Frequency (rad/s), flap/edge/torsion
 mu1 = 2*zeta[0]/omega[0]
 mu2 = 2*zeta[1]/omega[1]
-mu = np.array([mu1, mu2, mu2, mu2, mu1, mu2])
+mu3 = 2*zeta[2]/omega[2]
+mu = np.array([mu1, mu2, mu3, mu2, mu1, mu3])
 beam_struct_eval(flags_dict, Loads_dict, '', radial_stations, job, run_dir, job_str, mu)
 
 # ===== PLOTS ===== #
