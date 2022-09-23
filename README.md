@@ -11,12 +11,12 @@ SONATA can be run on mac and linux machines. No Windows installation is supporte
 
 At NREL (and possibly at other institutes), first disconnect from vpn client during installation in order to avoid remote server error when trying to retrieve URLs for installation.
 
-First setup an anaconda environment, here named sonata-env, activate it, and add the pythonocc library
+First setup an anaconda environment, here named sonata-env, activate it, and add the pythonocc library (v7.4.1)
 
 ```
 conda create -n sonata-env -c conda-forge -y fenics python=3.8
 conda activate sonata-env
-conda install -c tpaviot -y pythonocc-core
+conda install -c tpaviot -y pythonocc-core==7.4.1 
 ```
 
 Next, install further modules
