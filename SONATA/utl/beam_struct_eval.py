@@ -78,9 +78,9 @@ def beam_struct_eval(flags_dict, loads_dict, vabs_path, cs_pos, job, folder_str,
                 "ddm":  np.array([[0, 0, 0, 0],    [1, 0, 0, 0]]),      # second derivative
                 "dddm": np.array([[0, 0, 0, 0],    [1, 0, 0, 0]])}      # third derivative
 
-            job.blade_run_vabs(loads, vabs_path=vabs_path)  # run VABS
+            job.blade_run_vabs(loads, vabs_path=vabs_path, rm_vabfiles=flags_dict["rm_vabfiles"])  # run VABS
         else:
-            job.blade_run_vabs(vabs_path=vabs_path)  # run VABS
+            job.blade_run_vabs(vabs_path=vabs_path, rm_vabfiles=flags_dict["rm_vabfiles"])  # run VABS
 
 
         if flags_dict['flag_DeamDyn_def_transform']:

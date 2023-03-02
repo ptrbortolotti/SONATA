@@ -136,7 +136,7 @@ class Airfoil(object):
         self.relative_thickness = yml.get("relative_thickness")
 
         if yml["coordinates"]:
-            self.coordinates = np.asarray([yml["coordinates"]["x"], yml["coordinates"]["y"]]).T
+            self.coordinates = np.asarray([yml["coordinates"]["x"], yml["coordinates"]["y"]], dtype=float).T
         else:
             self.get_UIUCCoordinates()
 

@@ -24,7 +24,7 @@ def shp_parallel_offset(arrPts, dist, join_style=1, side="right", res=16):
         closed = True
         afpoly = shp.Polygon(arrPts)
         noffafpoly = afpoly.buffer(-dist)  # Inward offset
-        data = np.array(noffafpoly.exterior)
+        data = np.array(noffafpoly.exterior.xy).T
 
     else:
         closed = False

@@ -36,6 +36,7 @@ flag_wf                 = True      # plot wire-frame
 flag_lft                = True      # plot lofted shape of blade surface (flag_wf=True obligatory); Note: create loft with grid refinement without too many radial_stations; can also export step file of lofted shape
 flag_topo               = True      # plot mesh topology
 c2_axis                 = True
+rm_vabfiles             = False     # Remove or keep VABS input files once generated. It is possible to set the flag to True even without a valid installation of VABS
 
 
 # create flag dictionary
@@ -43,7 +44,7 @@ flags_dict = {"flag_wt_ontology": flag_wt_ontology, "flag_ref_axes_wt": flag_ref
               "attribute_str": attribute_str,
               "flag_plotDisplacement": flag_plotDisplacement, "flag_plotTheta11": flag_plotTheta11,
               "flag_wf": flag_wf, "flag_lft": flag_lft, "flag_topo": flag_topo, "mesh_resolution": mesh_resolution,
-              "flag_recovery": flag_recovery, "c2_axis": c2_axis}
+              "flag_recovery": flag_recovery, "c2_axis": c2_axis, "rm_vabfiles": rm_vabfiles}
 
 
 # ===== User defined radial stations ===== #
