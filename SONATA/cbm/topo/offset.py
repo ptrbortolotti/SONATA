@@ -50,13 +50,14 @@ def shp_parallel_offset(arrPts, dist, join_style=1, side="right", res=16):
     # ==============CHECK ORIENTATION if closed=================================
     # Check Orientation and reverse if neccessary
     # TODO: Be careful not to reverse Linestring!
+    
     if closed == True:
         Orientation = Polygon_orientation(data)
         if Orientation == True:
             data = np.flipud(data)
 
-    if closed == False:
-        data = np.flipud(data)
+    # if closed == False:
+    #     data = np.flipud(data)
     # ==============Interpolate large linear spaces=============================
     seg_P2Plength = []
     cumm_length = 0
