@@ -1,0 +1,20 @@
+channels:
+  - conda-forge
+  - defaults
+  - tpaviot
+
+dependencies:
+  - pythonocc-core==7.4.1 
+  - fenics
+  - pint 
+  - intervaltree 
+  - matplotlib 
+  - pyyaml 
+  - git 
+  - spyder 
+  - palettable 
+  - openmdao
+  - pip:
+    - shapely 
+    - triangle 
+    - quadpy
