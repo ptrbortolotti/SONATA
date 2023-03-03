@@ -22,7 +22,7 @@ print('Current working directory is:', os.getcwd())
 
 # ===== Provide Path Directory & Yaml Filename ===== #
 folder_str = os.getcwd() + '/'
-job_str = '0_box_beam_HT_antisym_layup_(15)6_SI_SmithChopra91.yaml'  # note: for better meshing convergence, units specified in yaml are in 'mm' instead of 'm'
+job_str = '0_box_beam_HT_antisym_layup_15_6_SI_SmithChopra91.yaml'  # note: for better meshing convergence, units specified in yaml are in 'mm' instead of 'm'
 job_name = 'box_beam_SmithChopra91'
 
 filename_str = folder_str + job_str
