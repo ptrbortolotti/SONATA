@@ -308,7 +308,7 @@ def plot_cells(cells,nodes, attr1, materials, VABSProperties=None, title='None',
         tmp_fig = fig
         # tmp_fig.set_size_inches(11.69, 8.27)    #a4 landscape
         # tmp_fig.set_size_inches(10, 5)    #a4 landscape
-        tmp_fig.savefig(fname, dpi=300, orientation='landscape', papertype='a4')
+        tmp_fig.savefig(fname, dpi=300, orientation='landscape')
 
     return (fig, ax)
 
