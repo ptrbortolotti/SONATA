@@ -39,10 +39,8 @@ jobs:
       - name: Download and install anba
         run: |
           git clone https://github.com/ANBA4/anba4.git
-          ls
-          cd anba_v4
+          cd anba4
           pip install -e .
-          cd ..
 
       - name: Install SONATA
         run: |
