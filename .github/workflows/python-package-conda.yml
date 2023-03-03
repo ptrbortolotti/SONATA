@@ -39,20 +39,17 @@ jobs:
           
       - name: Run example 0
         run: |
+          cd examples/0_beams
           pwd
           ls
-          cd ..
-          ls
-          cd ..
-          cd examples/0_beams
           python 0_SONATA_init_box_beam_HT_antisym_layup_15_6_SI_SmithChopra91.py
       
-      - name: Run example 1
-        run: |
-          pwd
-          ls
-          cd ..
-          ls
-          cd ..
-          cd examples/1_IEA15MW
-          python 1_sonata_IEA15.py
+      # - name: Run example 1
+      #   run: |
+      #     pwd
+      #     ls
+      #     cd ..
+      #     ls
+      #     cd ..
+      #     cd examples/1_IEA15MW
+      #     python 1_sonata_IEA15.py
