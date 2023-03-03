@@ -1,3 +1,5 @@
+[![Build Status](https://github.com/ptrbortolotti/SONATA/workflows/CI_SONATA/badge.svg?branch=master)](https://github.com/ptrbortolotti/SONATA/actions)
+
 # SONATA
 
 ## Background
