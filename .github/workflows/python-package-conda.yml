@@ -17,8 +17,8 @@ jobs:
     strategy:
       fail-fast: False
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        python-version: ["3.9", "3.10", "3.11"]
+        os: [ubuntu-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     steps:
       - name: checkout repository
@@ -37,8 +37,12 @@ jobs:
           activate-environment: test
           auto-activate-base: false
           
-      - name: Run examples
+      - name: Run example 0
         run: |
-          cd examples
-          cd 0_beams
-          python 0_SONATA_init_box_beam_HT_antisym_layup_(15)6_SI_SmithChopra91.py
+          cd SONATA/examples/0_beams
+          python 0_SONATA_init_box_beam_HT_antisym_layup_15_6_SI_SmithChopra91.py
+      
+      - name: Run example 1
+        run: |
+          cd SONATA/examples/1_IEA15MW
+          python 1_sonata_IEA15.py
