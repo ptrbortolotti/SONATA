@@ -29,6 +29,7 @@ filename_str = folder_str + job_str
 
 
 # ===== Define flags ===== #
+flag_generate_plots     = False
 flag_wt_ontology        = False
 flag_ref_axes_wt        = False
 attribute_str           = 'MatID'
@@ -58,8 +59,9 @@ job.blade_gen_section(topo_flag=True, mesh_flag = True, split_quads=True)
 job.blade_run_anbax()
 
 # ===== PLOTS ===== #
-job.blade_plot_sections(attribute=attribute_str, plotTheta11=flag_plotTheta11, plotDisplacement=flag_plotDisplacement) #, savepath=folder_str)
-job.blade_post_3dtopo(flag_wf=flags_dict['flag_wf'], flag_lft=flags_dict['flag_lft'], flag_topo=flags_dict['flag_topo'])
+if flag_generate_plots:
+    job.blade_plot_sections(attribute=attribute_str, plotTheta11=flag_plotTheta11, plotDisplacement=flag_plotDisplacement) #, savepath=folder_str)
+    job.blade_post_3dtopo(flag_wf=flags_dict['flag_wf'], flag_lft=flags_dict['flag_lft'], flag_topo=flags_dict['flag_topo'])
 
 print("--- Computational time: %s seconds ---" % (time.time() - start_time))
 
