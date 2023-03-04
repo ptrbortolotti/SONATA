@@ -15,6 +15,7 @@ dependencies:
   - palettable 
   - openmdao
   - mshr
+  - pip
   - pip:
     - shapely 
     - triangle 
