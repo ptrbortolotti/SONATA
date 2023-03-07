@@ -211,7 +211,7 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
                         # if tmp2[i]['segments'][0]['layup'][id_layer]['end'] < tmp2[i]['segments'][0]['layup'][id_layer]['start']:
                         #     exit('WARNING: Layer ' + tmp2[i]['segments'][0]['layup'][id_layer]['name'] + ' ends before it starts. Check the yaml input file!!')
                         ch = np.interp(x[i], blade.chord[:,0], blade.chord[:,1])
-                        adhesive_extent[i] = min([0.025, 0.05 / ch])
+                        adhesive_extent[i] = min([0.04, 0.1 / ch])
                         if x[i] > span_adhesive and tmp2[i]['segments'][0]['layup'][id_layer]['start'] < adhesive_extent[i] and tmp2[i]['segments'][0]['layup'][id_layer]['end'] < 0.5:
                             tmp2[i]['segments'][0]['layup'][id_layer]['start'] = adhesive_extent[i] 
                         elif x[i] > span_adhesive and tmp2[i]['segments'][0]['layup'][id_layer]['end'] > 1. - adhesive_extent[i] and tmp2[i]['segments'][0]['layup'][id_layer]['start'] > 0.5:
@@ -367,9 +367,9 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
         # if x[i] > span_adhesive and n_webs > 0:
         if x[i] > span_adhesive and len(tmp2[i]['segments']) > 1:
             # id_seg = n_webs*2 + 2
-            tmp2[i]['segments'][-1]['filler'] = 'glass_uni'
+            tmp2[i]['segments'][-1]['filler'] = 'Adhesive'
             tmp2[i]['segments'][-1]['layup'][0]['name'] = 'dummy'
-            tmp2[i]['segments'][-1]['layup'][0]['material_name'] = 'glass_uni'
+            tmp2[i]['segments'][-1]['layup'][0]['material_name'] = 'Adhesive'
             tmp2[i]['segments'][-1]['layup'][0]['thickness'] = 5.e-4
             tmp2[i]['segments'][-1]['layup'][0]['start'] = 0.0
             tmp2[i]['segments'][-1]['layup'][0]['end'] = 1.0
