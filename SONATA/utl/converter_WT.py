@@ -211,7 +211,7 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
                         # if tmp2[i]['segments'][0]['layup'][id_layer]['end'] < tmp2[i]['segments'][0]['layup'][id_layer]['start']:
                         #     exit('WARNING: Layer ' + tmp2[i]['segments'][0]['layup'][id_layer]['name'] + ' ends before it starts. Check the yaml input file!!')
                         ch = np.interp(x[i], blade.chord[:,0], blade.chord[:,1])
-                        adhesive_extent[i] = min([0.04, 0.1 / ch])
+                        adhesive_extent[i] = min([0.04, 0.04 / ch])
                         if x[i] > span_adhesive and tmp2[i]['segments'][0]['layup'][id_layer]['start'] < adhesive_extent[i] and tmp2[i]['segments'][0]['layup'][id_layer]['end'] < 0.5:
                             tmp2[i]['segments'][0]['layup'][id_layer]['start'] = adhesive_extent[i] 
                         elif x[i] > span_adhesive and tmp2[i]['segments'][0]['layup'][id_layer]['end'] > 1. - adhesive_extent[i] and tmp2[i]['segments'][0]['layup'][id_layer]['start'] > 0.5:
