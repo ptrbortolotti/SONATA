@@ -5,7 +5,7 @@
 ## Background
 SONATA is a toolbox for Multidiciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis. SONATA has originally been developed at the Helicopter Technology Institute of the Technical University of Munich (TUM), Germany. The original repository is available at https://gitlab.lrz.de/HTMWTUM/SONATA. The original work was supported by the German Federal Ministry for Economic Affairs and Energy through the German Aviation Research Program LuFo V-2 and the Austrian Research Promotion Agency through the Austrian Research Program TAKE OFF in the project VARI-SPEED.
 
-SONATA has been adapted to wind energy applications thanks to work performed at the National Renewwable Energy Laboratory ([NREL](https://www.nrel.gov)) in Colorado, USA and funded by the US Department of Energy, Wind Energy Technology Office under the Big Adaptive Rotor program. This repository is managed by Pietro Bortolotti, researcher in the systems engineering group at NREL.
+SONATA has been adapted to wind energy applications thanks to work performed at the National Renewable Energy Laboratory ([NREL](https://www.nrel.gov)) in Colorado, USA and funded by the US Department of Energy, Wind Energy Technology Office under the Big Adaptive Rotor program. This repository is managed by Pietro Bortolotti, researcher in the systems engineering group at NREL.
 
 
 ## Installation
