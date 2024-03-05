@@ -35,8 +35,7 @@ flag_plotDisplacement   = True     # Needs recovery flag to be activated - shows
 flag_wf                 = True      # plot wire-frame
 flag_lft                = True      # plot lofted shape of blade surface (flag_wf=True obligatory); Note: create loft with grid refinement without too many radial_stations; can also export step file of lofted shape
 flag_topo               = True      # plot mesh topology
-c2_axis                 = True
-rm_vabfiles             = False     # Remove or keep VABS input files once generated. It is possible to set the flag to True even without a valid installation of VABS
+c2_axis                 = False
 
 
 # create flag dictionary
@@ -44,13 +43,12 @@ flags_dict = {"flag_wt_ontology": flag_wt_ontology, "flag_ref_axes_wt": flag_ref
               "attribute_str": attribute_str,
               "flag_plotDisplacement": flag_plotDisplacement, "flag_plotTheta11": flag_plotTheta11,
               "flag_wf": flag_wf, "flag_lft": flag_lft, "flag_topo": flag_topo, "mesh_resolution": mesh_resolution,
-              "flag_recovery": flag_recovery, "c2_axis": c2_axis, "rm_vabfiles": rm_vabfiles}
+              "flag_recovery": flag_recovery, "c2_axis": c2_axis}
 
 
 # ===== User defined radial stations ===== #
 # Define the radial stations for cross sectional analysis (only used for flag_wt_ontology = True -> otherwise, sections from yaml file are used!)
-radial_stations = [0.  , 0.05, 0.1 ,   0.15, 0.2 , 0.25, 0.3 , 0.35, 0.4, 0.45, 0.5 , 0.55, 0.6 , 0.65, 0.7 , 0.75, 0.8 , 0.85, 0.9 , 0.95, 1.]
-# radial_stations = [0.3]
+radial_stations =  [0.  , 0.01, 0.02, 0.03, 0.04, 0.05, 0.075, 0.1 ,   0.15, 0.2 , 0.25, 0.3 , 0.35, 0.4, 0.45, 0.5 , 0.55, 0.6 , 0.65, 0.7 , 0.75, 0.8 , 0.85, 0.9 , 0.95, 1.]
 
 # ===== Execute SONATA Blade Component Object ===== #
 # name          - job name of current task
