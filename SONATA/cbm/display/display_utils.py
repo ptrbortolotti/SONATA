@@ -16,10 +16,9 @@ try:
     from OCC.Display.backend import get_qt_modules
 except:
     pass
-from OCC.Core.gp import gp_Pnt2d, gp_Pnt, gp_Pln, gp_Dir, gp_Vec, gp_Trsf, gp_Ax3,gp_Ax1
+from OCC.Core.gp import gp_Pnt, gp_Dir, gp_Vec, gp_Ax1
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
-from OCC.Core.gp import (gp_Ax1, gp_Ax3, gp_Dir, gp_Pln,
-                         gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec,)
+from OCC.Core.gp import (gp_Ax1, gp_Dir, gp_Pnt, gp_Vec,)
 from OCC.Core.Quantity import Quantity_Color
 from OCC.Display.backend import get_qt_modules
 from OCC.Display.SimpleGui import init_display

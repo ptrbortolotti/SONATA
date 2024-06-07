@@ -6,14 +6,11 @@ Created on Thu Jan 19 11:01:06 2017
 """
 # Core Library modules
 import os
-import datetime
 import math
-import logging
 # Third party modules
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io
-from matplotlib import cm
 from matplotlib.collections import PatchCollection
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Polygon
