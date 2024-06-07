@@ -15,7 +15,7 @@ import csv
 import os
 
 from SONATA.cbm.cbm_utl import trsf_sixbysix
-from SONATA.utl_openfast.utl_sonata2beamdyn import convert_structdef_SONATA_to_beamdyn, write_beamdyn_axis, write_beamdyn_prop
+
 
 # from SONATA.utl.analytical_rectangle.utls_analytical_rectangle import utls_analytical_rectangle
 
@@ -82,33 +82,27 @@ def beam_struct_eval(flags_dict, loads_dict, vabs_path, cs_pos, job, folder_str,
         else:
             job.blade_run_vabs(vabs_path=vabs_path, rm_vabfiles=flags_dict["rm_vabfiles"])  # run VABS
 
-
-        if flags_dict['flag_DeamDyn_def_transform']:
-            beam_prop = convert_structdef_SONATA_to_beamdyn(cs_pos, job.beam_properties)  # convert to BeamDyn coord sys def
-            coordsys = 'BeamDyn'
-            str_ext = '_BeamDyn_def'
-        else: 
-            beam_prop = {}
-            beam_prop['beam_section_mass'] = np.zeros([len(cs_pos), 1])
-            beam_prop['beam_stiff'] = np.zeros([len(cs_pos), 6, 6])
-            beam_prop['beam_inertia'] = np.zeros([len(cs_pos), 6, 6])
-            beam_prop['beam_mass_center'] = np.zeros([len(cs_pos), 2])
-            beam_prop['beam_neutral_axes'] = np.zeros([len(cs_pos), 2])
-            beam_prop['beam_geometric_center'] = np.zeros([len(cs_pos), 2])
-            beam_prop['beam_shear_center'] = np.zeros([len(cs_pos), 2])
-            for i in range(len(cs_pos)):
-                beam_prop['beam_section_mass'][i]       = job.beam_properties[i, 1].m00
-                beam_prop['beam_mass_center'][i]        = np.array(job.beam_properties[i, 1].Xm[:])
-                beam_prop['beam_neutral_axes'][i]       = np.array(job.beam_properties[i, 1].Xt[:])
-                beam_prop['beam_geometric_center'][i]   = np.array(job.beam_properties[i, 1].Xg[:])
-                beam_prop['beam_shear_center'][i]       = np.array(job.beam_properties[i, 1].Xs[:])
-                for j in range(6):
-                    beam_prop['beam_stiff'][i, j, :]    = np.array(job.beam_properties[i, 1].TS[j, :])
-                    beam_prop['beam_inertia'][i, j, :]  = np.array(job.beam_properties[i, 1].MM[j, :])
+        beam_prop = {}
+        beam_prop['beam_section_mass'] = np.zeros([len(cs_pos), 1])
+        beam_prop['beam_stiff'] = np.zeros([len(cs_pos), 6, 6])
+        beam_prop['beam_inertia'] = np.zeros([len(cs_pos), 6, 6])
+        beam_prop['beam_mass_center'] = np.zeros([len(cs_pos), 2])
+        beam_prop['beam_neutral_axes'] = np.zeros([len(cs_pos), 2])
+        beam_prop['beam_geometric_center'] = np.zeros([len(cs_pos), 2])
+        beam_prop['beam_shear_center'] = np.zeros([len(cs_pos), 2])
+        for i in range(len(cs_pos)):
+            beam_prop['beam_section_mass'][i]       = job.beam_properties[i, 1].m00
+            beam_prop['beam_mass_center'][i]        = np.array(job.beam_properties[i, 1].Xm[:])
+            beam_prop['beam_neutral_axes'][i]       = np.array(job.beam_properties[i, 1].Xt[:])
+            beam_prop['beam_geometric_center'][i]   = np.array(job.beam_properties[i, 1].Xg[:])
+            beam_prop['beam_shear_center'][i]       = np.array(job.beam_properties[i, 1].Xs[:])
+            for j in range(6):
+                beam_prop['beam_stiff'][i, j, :]    = np.array(job.beam_properties[i, 1].TS[j, :])
+                beam_prop['beam_inertia'][i, j, :]  = np.array(job.beam_properties[i, 1].MM[j, :])
 
 
-            coordsys = 'VABS/SONATA'
-            str_ext = ''
+        coordsys = 'VABS/SONATA'
+        str_ext = ''
 
 
         # --------------------------------------- #
@@ -121,13 +115,6 @@ def beam_struct_eval(flags_dict, loads_dict, vabs_path, cs_pos, job, folder_str,
                                           beam_geometric_center=beam_prop['beam_geometric_center'], beam_shear_center=beam_prop['beam_shear_center'])
 
         # --------------------------------------- #
-        # write BeamDyn input files
-        if flags_dict['flag_write_BeamDyn'] & flags_dict['flag_DeamDyn_def_transform']:
-            print('STATUS:\t Write BeamDyn input files')
-            refine = int(30/len(cs_pos))  # initiate node refinement parameter
-            write_beamdyn_axis(folder_str, flags_dict, job.yml.get('name'), job.yml.get('components').get('blade'), refine)
-            write_beamdyn_prop(folder_str, flags_dict, job.yml.get('name'), cs_pos, beam_prop['beam_stiff'], beam_prop['beam_inertia'])
-
         # --- Plot VABS 6x6 stiffness and mass matrices --- #
         if flags_dict['flag_plot_vabs_struct_characteristics']:
             # plot inertia matrix
@@ -223,11 +210,6 @@ def beam_struct_eval(flags_dict, loads_dict, vabs_path, cs_pos, job, folder_str,
         # --------------------------------------- #
         # write BeamDyn input files
         np.savetxt('anbax_BAR00.txt', np.array([cs_pos, anbax_beam_stiff[:, 3, 3], anbax_beam_stiff[:, 4, 4], anbax_beam_stiff[:, 5, 5], anbax_beam_stiff[:, 2, 2], anbax_beam_inertia[:, 0, 0]]).T)
-        if flags_dict['flag_write_BeamDyn'] & flags_dict['flag_DeamDyn_def_transform']:
-            print('STATUS:\t Write BeamDyn input files')
-            refine = int(30/len(cs_pos))  # initiate node refinement parameter
-            write_beamdyn_axis(folder_str, flags_dict, job.yml.get('name'), job.blade_ref_axis, job.twist)
-            write_beamdyn_prop(folder_str, flags_dict, job.yml.get('name'), cs_pos, anbax_beam_stiff, anbax_beam_inertia, mu)
 
     # --------------------------------------- #
     # (Optional) - Analytical Rectangle   #
