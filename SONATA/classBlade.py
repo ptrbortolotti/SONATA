@@ -549,7 +549,7 @@ class Blade(Component):
             generated. The default is True.
         mesh_flag : bool, optional
             IF this flag is set true, the discretization of each cross-section 
-            is generated if a topology is generated beforhand. 
+            is generated if a topology is generated beforehand. 
             The default is True.
         **kwargs : TYPE
             keyword arguments can be passed down to the cbm_gen_mesh function
