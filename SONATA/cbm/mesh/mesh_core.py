@@ -182,9 +182,6 @@ if __name__ == "__main__":
         c.MatID = int(seg.CoreMaterial)
         c.calc_theta_1()
 
-    from SONATA.display.display_mesh import plot_cells
-
-    plot_cells(c_cells, c_nodes, "MatID")
 
 #    from OCC.Display.SimpleGui import init_display
 #    display, start_display, add_menu, add_function_to_menu = init_display()
