@@ -21,8 +21,7 @@ from datetime import datetime
 # Third party modules
 import matplotlib.pyplot as plt
 import numpy as np
-from OCC.Core.gp import gp_Ax1, gp_Ax2, gp_Ax3, gp_Dir, gp_Pnt, gp_Trsf
-from OCC.Display.SimpleGui import init_display
+from OCC.Core.gp import gp_Ax2
 
 # First party modules
 from SONATA.cbm.bladegen.blade import Blade
@@ -31,12 +30,7 @@ from SONATA.cbm.classBeamSectionalProps import BeamSectionalProps
 from SONATA.cbm.classCBMConfig import CBMConfig
 from SONATA.cbm.display.display_mesh import plot_cells
 from SONATA.cbm.display.display_utils import (display_config,
-                                              display_custome_shape,
                                               display_SONATA_SegmentLst,
-                                              export_to_BMP, export_to_JPEG,
-                                              export_to_PNG, export_to_TEX,
-                                              export_to_TIFF,
-                                              show_coordinate_system,
                                               transform_wire_2to3d,)
 from SONATA.cbm.fileIO.CADinput import import_2d_stp, import_3d_stp, load_3D
 from SONATA.cbm.fileIO.CADoutput import export_to_step
@@ -45,19 +39,13 @@ from SONATA.cbm.mesh.consolidate_mesh import consolidate_mesh_on_web
 from SONATA.cbm.mesh.mesh_core import gen_core_cells
 from SONATA.cbm.mesh.mesh_intersect import map_mesh_by_intersect_curve2d
 from SONATA.cbm.mesh.mesh_utils import (grab_nodes_of_cells_on_BSplineLst,
-                                        merge_nodes_if_too_close,
                                         sort_and_reassignID,)
 from SONATA.cbm.mesh.node import Node
-from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_from_dct,
-                                              get_BSplineLst_length,
-                                              set_BSplineLst_to_Origin,)
+from SONATA.cbm.topo.BSplineLst_utils import (get_BSplineLst_length,)
 from SONATA.cbm.topo.segment import Segment
 from SONATA.cbm.topo.utils import getID
 from SONATA.cbm.topo.web import Web
 from SONATA.cbm.topo.weight import Weight
-from SONATA.cbm.topo.wire_utils import (discretize_wire, get_wire_length,
-                                        rotate_wire, scale_wire,
-                                        translate_wire, trsf_wire,)
 from SONATA.vabs.classStrain import Strain
 from SONATA.vabs.classStress import Stress
 # from SONATA.vabs.classVABSConfig import VABSConfig

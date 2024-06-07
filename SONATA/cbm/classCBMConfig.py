@@ -13,7 +13,6 @@ import numpy as np
 import yaml
 
 # First party modules
-from SONATA.cbm.fileIO.read_yaml_input import clean_filestring
 from SONATA.classMaterial import find_material, read_materials
 from SONATA.vabs.classVABSConfig import VABSConfig
 from SONATA.anbax.classANBAXConfig import ANBAXConfig
