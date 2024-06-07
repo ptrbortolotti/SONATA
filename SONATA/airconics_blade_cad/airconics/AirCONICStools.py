@@ -61,7 +61,6 @@ from OCC.Core.XCAFDoc import (XCAFDoc_DocumentTool_ShapeTool,
                          XCAFDoc_DocumentTool_MaterialTool)
 
 # Standard Python libraries
-from six.moves import range
 import numpy as np
 
 
@@ -380,58 +379,6 @@ def transform_nonuniformal(brep, factors, vec=[0, 0, 0], copy=False):
     brep_trns.Build()
     return brep_trns.Shape()
 
-
-def FilletFaceCorners(face, radius):
-    """Fillets the corners of the input face
-    
-    Parameters
-    ----------
-    face : TopoDS_Face
-        
-    radius : the Fillet radius
-    
-    Returns
-    -------
-    """
-    vert_explorer = TopExp_Explorer(face, TopAbs_VERTEX)
-    from OCC.BRepFilletAPI import BRepFilletAPI_MakeFillet2d
-    fillet = BRepFilletAPI_MakeFillet2d(face)
-    while vert_explorer.More():
-        vertex = topods_Vertex(vert_explorer.Current())
-        fillet.AddFillet(vertex, radius)
-        # Note: Needed two next statements here as faces have a vertex on
-        # either side
-        vert_explorer.Next()
-        vert_explorer.Next()
-
-    fillet.Build()
-    face = fillet.Shape()
-    return face
-
-
-def ExtrudeFace(face, vec=gp_Vec(1, 0, 0)):
-    """Extrudes a face by input vector
-    
-    Parameters
-    ----------
-    face : TopoDS_Face
-    
-    vec : OCC.gp.gp_Vec
-        The offset vector to extrude through
-
-    Returns
-    -------
-    shape : TopoDS_Shape
-        The extruded shape
-    
-    Notes
-    -----
-    Uses BRepBuilderAPI_MakePrism
-    """
-    from OCC.BRepPrimAPI import BRepPrimAPI_MakePrism
-    builder = BRepPrimAPI_MakePrism(face, vec)
-    builder.Build()
-    return builder.Shape()
 
 
 def SplitShapeFromProjection(shape, wire, direction, return_section=True):
@@ -974,25 +921,6 @@ def make_circle3pt(pt1, pt2, pt3):
     return GC_MakeCircle(pt1, pt2, pt3).Value()
 
 
-def CalculateSurfaceArea(shape):
-    """Calculates the surface area of input shape
-
-    Parameters
-    ----------
-    shape : TopoDS_Shape
-
-    Returns
-    -------
-    Area : scalar
-        Calculated surface area
-    """
-    from OCC.BRepGProp import brepgprop_SurfaceProperties
-    from OCC.GProp import GProp_GProps
-    System = GProp_GProps()
-    brepgprop_SurfaceProperties(shape, System)
-    Area = System.Mass()
-    return Area
-
 
 def PlanarSurf(geomcurve):
     """Adds a planar surface to curve
@@ -1015,67 +943,7 @@ def PlanarSurf(geomcurve):
     face = make_face(wire)
     return face
 
-def project_curve_to_plane(curve, plane, direction):
-    """
-    Computes and returns the cylindrically projected curve onto input plane
 
-    Parameters
-    ----------
-    curve - geom_Curve
-
-    plane - Geom_Plane
-
-    dir - gp_Dir (default None)
-        The cylindrical projection direction. If None, the project will be
-        normal to the plane
-
-    Returns
-    -------
-    Hproj_curve : Handle_Geom_Curve
-    """
-    from OCC.GeomProjLib import geomprojlib_ProjectOnPlane
-
-    hc = coerce_handle(curve)
-    h_pln = coerce_handle(plane)
-
-    Hproj_curve = geomprojlib_ProjectOnPlane(hc,
-                                      h_pln,
-                                      direction,
-                                      True)
-
-    return Hproj_curve
-
-
-def project_curve_to_surface(curve, surface, dir):
-    '''
-    Returns a curve as cylindrically projected onto the surface shape
-
-    Parameters
-    ----------
-    curve : Geom_curve or TopoDS_Edge/Wire
-    
-    surface : TopoDS_Shape
-
-    dir : gp_Dir
-        the direction of projection
-
-    Returns
-    -------
-    res_curve : geom_curve (bspline only?)
-    '''
-    try:
-        edge = make_edge(curve)
-    except:
-#        if converting to edge didn't work, assume curve is already an edge
-        edge = curve
-    
-    wire = make_wire(edge)   # This will return wire is curve is already a wire
-    from OCC.BRepProj import BRepProj_Projection
-    from OCC.BRepAdaptor import BRepAdaptor_CompCurve
-    proj = BRepProj_Projection(wire, surface, dir)
-    res_wire = proj.Current()
-    res_curve = BRepAdaptor_CompCurve(res_wire).BSpline()
-    return res_curve
 
 
 def points_from_intersection(plane, curve):
