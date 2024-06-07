@@ -6,11 +6,9 @@ Created on Fri Dec  4 13:31:35 2015
 
 @author: pchambers
 """
-from OCC.Core.GC import GC_MakeSegment
-from OCC.Core.gp import gp_Pnt, gp_Vec, gp_OX, gp_OY
+
 
 # import AirCONICStools as act
-from pkg_resources import resource_string, resource_exists
 import numpy as np
 
 

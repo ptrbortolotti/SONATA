@@ -24,9 +24,9 @@ from OCC.Core.TopoDS import TopoDS_Shape
 from OCC.Core.StlAPI import StlAPI_Writer
 from OCC.Core.AIS import AIS_Shape
 from OCC.Core.gp import gp_Pnt
-from OCC.Core.STEPControl import STEPControl_Reader, STEPControl_Writer, STEPControl_AsIs
+from OCC.Core.STEPControl import STEPControl_Writer, STEPControl_AsIs
 from OCC.Core.Interface import Interface_Static_SetCVal
-from OCC.Core.IGESControl import IGESControl_Reader, IGESControl_Writer
+from OCC.Core.IGESControl import IGESControl_Writer
 
 
 class AirconicsBase(MutableMapping, object):

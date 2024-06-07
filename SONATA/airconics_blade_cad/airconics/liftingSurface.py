@@ -22,11 +22,10 @@ import numpy as np
 import sys
 sys.path.insert(0,'/Users/rfeil/work/6_SONATA/SONATA')  # import sys path to import 'SONATA' & 'job' modules
 from SONATA.airconics_blade_cad.airconics.base import AirconicsShape
-from SONATA.airconics_blade_cad.airconics.primitives import Airfoil
 import SONATA.airconics_blade_cad.airconics.AirCONICStools as act
 
 
-from OCC.Core.gp import gp_Pnt, gp_Vec, gp_XOY, gp_Ax3, gp_Dir
+from OCC.Core.gp import gp_XOY, gp_Ax3, gp_Dir
 from OCC.Core.GeomAbs import GeomAbs_C2
 from OCC.Core.Geom import Geom_Plane
 
