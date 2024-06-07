@@ -15,8 +15,6 @@ from openmdao.api import ExplicitComponent
 
 # First party modules
 # from SONATA.classAirfoil import Airfoil
-from SONATA.classMaterial import read_materials
-import Pymore.utl.coef as coef
 from SONATA.cbm.fileIO.hiddenprints import HiddenPrints
 from SONATA.classBlade import Blade
 
@@ -59,38 +57,6 @@ class ExplComp_Blade(ExplicitComponent):
 
     #        self.declare_partials('BeamProps', 'rho_mat3', method='fd', step = 2e-2)
     #        self.declare_partials('BeamProps', 't_sparcap1', method='fd', step = 1e-2)
-
-    def compute(self, inputs, outputs):
-        #        elapsed_t = datetime.now() - self.startTime
-        #        m, s = divmod(elapsed_t.seconds, 60)
-        #        h, m = divmod(m, 60)
-        #        if self.counter == 0:
-        #            print('--time',  end=' ')
-        #            for k in inputs:
-        #                print('--%s, ' %k, end=' ')
-        #            print('')
-        #        print(('%2i' % self.counter), end=' ')
-        #        print('%02d:%02d:%02d [' % (h,m,s), end=' ')
-        with HiddenPrints():
-            self.job = Blade(name="UH-60A", filename="jobs/MonteCarlo/UH-60A_adv.yml")
-        self.connect_input_to_config(inputs)
-
-        # SETUP SONATA-CBM JOB:
-        try:
-            with HiddenPrints():
-                self.job.blade_gen_section(mesh_flag=True, split_quads=False)
-            self.job.blade_run_vabs(ramdisk=True)
-            beam = self.job.blade_exp_beam_props(solver="vabs", cosy="local", eta_offset=0.1)
-            beamProps = coef.join_beam_props(beam, coef.refBeamProp())
-            outputs["BeamProps"] = beamProps
-
-        except KeyboardInterrupt:
-            raise Exception
-
-        except:
-            # print(beamProps)
-            print("] [SONATA Unexpected error:", sys.exc_info()[0], "]")
-        self.counter += 1
 
     def connect_input_to_config(self, inputs):
 
