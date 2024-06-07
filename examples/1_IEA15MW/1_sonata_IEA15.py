@@ -1,10 +1,8 @@
 import os
-import time
 import numpy as np
 import matplotlib.pyplot as plt
 from SONATA.classBlade import Blade
 from SONATA.utl.beam_struct_eval import beam_struct_eval
-from SONATA.utl_openfast.utl_run_fast import utl_run_fast
 
 # Path to yaml file
 run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
@@ -36,15 +34,13 @@ flag_wf                 = True      # plot wire-frame
 flag_lft                = True      # plot lofted shape of blade surface (flag_wf=True obligatory); Note: create loft with grid refinement without too many radial_stations; can also export step file of lofted shape
 flag_topo               = True      # plot mesh topology
 c2_axis                 = True
-rm_vabfiles             = False     # Remove or keep VABS input files once generated. It is possible to set the flag to True even without a valid installation of VABS
-
 
 # create flag dictionary
 flags_dict = {"flag_wt_ontology": flag_wt_ontology, "flag_ref_axes_wt": flag_ref_axes_wt,
               "attribute_str": attribute_str,
               "flag_plotDisplacement": flag_plotDisplacement, "flag_plotTheta11": flag_plotTheta11,
               "flag_wf": flag_wf, "flag_lft": flag_lft, "flag_topo": flag_topo, "mesh_resolution": mesh_resolution,
-              "flag_recovery": flag_recovery, "c2_axis": c2_axis, "rm_vabfiles": rm_vabfiles}
+              "flag_recovery": flag_recovery, "c2_axis": c2_axis}
 
 
 # ===== User defined radial stations ===== #
@@ -61,28 +57,18 @@ radial_stations = [0.  , 0.05, 0.1 ,   0.15, 0.2 , 0.25, 0.3 , 0.35, 0.4, 0.45, 
 job = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=radial_stations)  # initialize job with respective yaml input file
 
 # ===== Build & mesh segments ===== #
-job.blade_gen_section(topo_flag=True, mesh_flag = True, split_quads=True)  # split_quads: vabs working with False & True; anbax working with True (only)
+job.blade_gen_section(topo_flag=True, mesh_flag = True)
 
 # ===== VABS / ANBAX combination/verification ===== #
 # Define flags
 flag_3d = False
-flag_run_vabs = False
 flag_run_anbax = True
-flag_verify_vabs_anbax = False                  # needs flag_run_vabs & flag_run_anbax set to True to be valid!
 flag_DeamDyn_def_transform = True               # transform from SONATA to BeamDyn coordinate system
-flag_plot_vabs_struct_characteristics = False   # plots and saves figures of structural characteristics of respective analysis for the range of defined radial stations
 flag_csv_export = False                          # export csv files with structural data
-flag_write_BeamDyn = True                       # write BeamDyn input files for follow-up OpenFAST analysis (requires flag_DeamDyn_def_transform = True)
-flag_write_BeamDyn_unit_convert = ''  #'mm_to_m'     # applied only when exported to BeamDyn files
 # Update flags dictionary
-flags_dict['flag_run_vabs'] = flag_run_vabs
 flags_dict['flag_run_anbax'] = flag_run_anbax
-flags_dict['flag_verify_vabs_anbax'] = flag_verify_vabs_anbax
 flags_dict['flag_DeamDyn_def_transform'] = flag_DeamDyn_def_transform
-flags_dict['flag_plot_vabs_struct_characteristics'] = flag_plot_vabs_struct_characteristics
 flags_dict['flag_csv_export'] = flag_csv_export
-flags_dict['flag_write_BeamDyn'] = flag_write_BeamDyn
-flags_dict['flag_write_BeamDyn_unit_convert'] = flag_write_BeamDyn_unit_convert
 Loads_dict = {}
 
 # Set damping for BeamDyn input file
@@ -104,8 +90,6 @@ job.blade_plot_sections(attribute=attribute_str, plotTheta11=flag_plotTheta11, p
 if flag_3d:
     job.blade_post_3dtopo(flag_wf=flags_dict['flag_wf'], flag_lft=flags_dict['flag_lft'], flag_topo=flags_dict['flag_topo'])
 
-# # ===== RUN BeamDyn or OpenFAST ===== #
-# utl_run_fast(BeamDyn_driver, FAST_driver, analysis_dir, input_file)  # ToDo upate path
 
 
 

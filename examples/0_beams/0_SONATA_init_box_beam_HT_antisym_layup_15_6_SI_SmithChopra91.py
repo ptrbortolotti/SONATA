@@ -51,11 +51,8 @@ radial_stations = [0.0, 1.0]
 
 # Create job structure
 job = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=radial_stations)
-job.blade_gen_section(topo_flag=True, mesh_flag = True, split_quads=True)
+job.blade_gen_section(topo_flag=True, mesh_flag = True)
 
-# Choose between VABS or ANBAX
-# vabs_path = "/Users/rfeil/work/8_VABS/vabs_WIN/AnalySwift/VABS/VABSIII.exe"
-# job.blade_run_vabs(vabs_path)
 job.blade_run_anbax()
 
 # ===== PLOTS ===== #
