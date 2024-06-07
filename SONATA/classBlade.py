@@ -129,7 +129,7 @@ class Blade(Component):
     >>> job.read_yaml(yml.get('components').get('blade'), airfoils, materials)
     
     >>> job.blade_gen_section()
-    >>> job.blade_run_vabs()
+    >>> job.blade_run_anbax()
     >>> job.blade_plot_sections()
     >>> job.blade_post_3dtopo(flag_lft = True, flag_topo = True)
 
@@ -750,70 +750,6 @@ class Blade(Component):
 
         return arr
 
-    def blade_exp_dymore_inpt(self, eta_offset=0):
-        """
-        exports the beam_properties of the blade in the dymore sectional 
-        properties format
-        http://www.dymoresolutions.com/StructuralProperties/BldProp.html
-        
-        Parameters
-        ----------
-            
-        eta_offset : float, optional
-            if the beam eta coordinates from start to end of the beam doesn't 
-            coincide with the global coorinate system of the blade. The unit
-            is in nondimensional r coordinates (x/Radius)
-
-        Returns
-        ----------
-        dym_inpt : str
-            a string that contains the beam properties in the dymore sectional 
-            properties format http://www.dymoresolutions.com/StructuralProperties/BldProp.html
-        """
-
-        dym_inpt = ""
-        for cs in self.sections:
-            R = self.blade_ref_axis[-1, 1]
-            bp = cs[1].BeamProperties
-            eta = "{:+10.8e}".format((cs[0] * R) - (eta_offset * R)).ljust(50)
-            EA = "{:+10.8e}".format(bp.TS[0, 0]).ljust(50)
-            EI = "{:+10.8e}, {:+10.8e}, {:+10.8e}".format(bp.TS[4, 4], bp.TS[5, 5], bp.TS[4, 5]).ljust(50)
-            GJ = "{:+10.8e}".format(bp.TS[3, 3]).ljust(50)
-            K = "{:+10.8e}, {:+10.8e}, {:+10.8e}".format(bp.TS[1, 1], bp.TS[2, 2], bp.TS[1, 2]).ljust(50)
-            m00 = "{:+10.8e}".format(bp.m00).ljust(50)
-            mii = "{:+10.8e}, {:+10.8e}, {:+10.8e}".format(bp.m11, bp.m22, bp.m33).ljust(50)
-            xm = "{:+10.8e}, {:+10.8e}".format(bp.Xm[0], bp.Xm[1]).ljust(50)
-            xs = "{:+10.8e}, {:+10.8e}".format(bp.Xs[0], bp.Xs[1]).ljust(50)
-            xg = "{:+10.8e}, {:+10.8e}".format(bp.Xg[0], bp.Xg[1]).ljust(50)
-            beamstring = """@CURVILINEAR_COORDINATE  {%s} {
-                @AXIAL_STIFFNESS         {%s}
-                @BENDING_STIFFNESSES     {%s}
-                @TORSIONAL_STIFFNESS     {%s}
-                @SHEARING_STIFFNESSES    {%s}
-                @MASS_PER_UNIT_SPAN      {%s}
-                @MOMENTS_OF_INERTIA      {%s}
-                @CENTRE_OF_MASS_LOCATION {%s}
-                @SHEAR_CENTRE_LOCATION   {%s}
-                @CENTROID_LOCATION       {%s} 
-                }""" % (
-                eta,
-                EA,
-                EI,
-                GJ,
-                K,
-                m00,
-                mii,
-                xm,
-                xs,
-                xg,
-            )
-
-            dym_inpt += "\n" + beamstring
-
-        return dym_inpt
-
-    
-
     def blade_plot_attributes(self):
         """
         plot the coordinates, chord, twist and pitch axis location of the blade
@@ -999,6 +935,6 @@ if __name__ == "__main__":
     job.read_yaml(yml.get("components").get("blade"), airfoils, materials, wt_flag=True)
 
     # job.blade_gen_section(mesh_flag = True)
-    # job.blade_run_vabs()
+    # job.blade_run_anbax()
     # job.blade_plot_sections()
     # job.blade_post_3dtopo(flag_lft = False, flag_topo = True)
