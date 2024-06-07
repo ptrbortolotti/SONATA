@@ -49,9 +49,6 @@ from SONATA.cbm.topo.weight import Weight
 from SONATA.vabs.classStrain import Strain
 from SONATA.vabs.classStress import Stress
 # from SONATA.vabs.classVABSConfig import VABSConfig
-from SONATA.vabs.failure_criteria import (hashin_2D, maxstrain_2D,
-                                          maxstress_2D, tsaiwu_2D, von_Mises,)
-from SONATA.vabs.vabs_utl import export_cells_for_VABS
 
 try:
     import dolfin as do
@@ -697,51 +694,6 @@ class CBM(object):
 
 
         return
-
-    def cbm_calc_failurecriteria(self, criteria="tsaiwu_2D", iso_criteria="nocriteria"):
-        """
-        Applies the selected failure criteria for all cells. It is necessary 
-        that the strains and stresses are calculated for all cells and the 
-        strength characteristics are defined for the used materials
-    
-        
-        Notes
-        ----------
-        'von_Mises' can only be applied for isotropic materials and the others
-        can only be applied for orthotropic materials
-        
-        
-        Parameters
-        ----------
-        criteria : string
-            current options are: 'tsaiwu_2D', 'maxstress_2D', 'maxstrain_2D',
-            'hashin_2D', 'von_Mises'
-                
-        """
-
-        for c in self.mesh:
-            sf = 99
-            mode = "nocriteria"
-            mat = self.materials[c.MatID]
-
-            if mat.orth == 0:
-                if iso_criteria == "von_Mises":
-                    (sf, mode) = von_Mises(mat, c.stressM, c.strainM)
-
-            if mat.orth == 1:
-                if criteria == "tsaiwu_2D":
-                    (sf, mode) = tsaiwu_2D(mat, c.stressM, c.strainM)
-                elif criteria == "maxstress_2D":
-                    (sf, mode) = maxstress_2D(mat, c.stressM, c.strainM)
-                elif criteria == "maxstrain_2D":
-                    (sf, mode) = maxstrain_2D(mat, c.stressM, c.strainM)
-                elif criteria == "hashin_2D":
-                    (sf, mode) = hashin_2D(mat, c.stressM, c.strainM)
-
-            c.sf = sf
-            c.failure_mode = mode
-
-        return None
 
     def cbm_post_2dmesh(self, attribute="MatID", title="NOTITLE", **kw):
         """
