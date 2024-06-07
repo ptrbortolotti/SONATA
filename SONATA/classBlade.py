@@ -42,7 +42,6 @@ from SONATA.utl.converter_WT import converter_WT
 from SONATA.utl.interpBSplineLst import interpBSplineLst
 from SONATA.utl.plot import plot_beam_properties
 from SONATA.utl.trsf import trsf_af_to_blfr, trsf_blfr_to_cbm
-from SONATA.vabs.classVABSConfig import VABSConfig
 from SONATA.anbax.classANBAXConfig import ANBAXConfig
 
 
@@ -659,51 +658,7 @@ class Blade(Component):
                 self.wopwop_vecs.append(Vecs)
     
             return self.wopwop_bsplinelst, self.wopwop_pnts, self.wopwop_vecs
-
-    def blade_run_vabs(self, loads=None, **kwargs):
-        """
-        Determines initial twist and curvatures and runs vabs for every section
-
-        Parameters
-        ----------
-        loads : dict, optional
-            dictionary of the following keys and values, (default=None)
-            for detailed information see the VABSConfig documentation or the
-            VABS user manual
-            F : nparray([[grid, F1, F2, F3]])
-            M : nparray([[grid, M1, M2, M3]])
-            f : nparray([[grid, f1, f2, f2]])
-            df : nparray([[grid, f1', f2', f3']])
-            dm :  nparray([[grid, m1', m2', m3']])
-            ddf : nparray([[grid, f1'', f2'', f3'']])
-            ddm : nparray([[grid, m1'', m2'', m3'']])
-            dddf : nparray([[grid, f1''', f2''', f3''']])
-            dddm : nparray([[grid, m1''', m2''', m3''']])
-
-        """
-
-        vc = VABSConfig()
-        lst = []
-        for (x, cs) in self.sections:
-            if loads:
-                vc.recover_flag = 1
-                load = interp_loads(loads, x)
-                for k,v in load.items():
-                    setattr(vc,k,v)
-
-            #set initial twist and curvature
-            vc.curve_flag = 1
-            vc.k1 = float(self.f_curvature_k1(x))
-            (vc.k2, vc.k3) = self.f_beam_ref_axis.interpolate_curvature(x)
-            cs.config.vabs_cfg = vc
-
-            print("STATUS:\t Running VABS at grid location %s" % (x))
-            cs.cbm_run_vabs(**kwargs)
-            lst.append([x, cs.BeamProperties])
-        self.beam_properties = np.asarray(lst)
-        return None
-
-
+    
     def blade_run_anbax(self, loads=None, **kwargs):
         """
         runs anbax for every section

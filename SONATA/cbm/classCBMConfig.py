@@ -14,7 +14,6 @@ import yaml
 
 # First party modules
 from SONATA.classMaterial import find_material, read_materials
-from SONATA.vabs.classVABSConfig import VABSConfig
 from SONATA.anbax.classANBAXConfig import ANBAXConfig
 
 if __name__ == "__main__":
@@ -75,7 +74,6 @@ class CBMConfig(object):
         else:
             print("Input data is not a dictionary. Check yaml input file.")
 
-        self.vabs_cfg = VABSConfig()
         self.anbax_cfg = ANBAXConfig()
         self.flags = {"mesh_core": True}
 
