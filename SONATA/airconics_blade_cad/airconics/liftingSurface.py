@@ -13,7 +13,6 @@ Created on Fri Dec 18 15:52:58 2015
 
 @author: pchambers
 """
-from six.moves import range
 import numpy as np
 # from base import AirconicsShape
 # from primitives import Airfoil
