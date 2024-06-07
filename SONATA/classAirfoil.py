@@ -15,8 +15,7 @@ from urllib.request import urlopen
 import matplotlib.pyplot as plt
 import numpy as np
 # PythonOCC Libraries
-from OCC.Core.gp import gp_Ax1, gp_Dir, gp_Pln, gp_Pnt, gp_Trsf, gp_Vec
-from OCC.Display.SimpleGui import init_display
+from OCC.Core.gp import gp_Pnt, gp_Vec
 
 # First party modules
 from SONATA.cbm.display.display_utils import (display_config,)
