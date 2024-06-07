@@ -6,15 +6,12 @@ Created on Wed Dec 19 09:38:33 2018
 @author: Tobias Pflumm
 """
 # Core Library modules
-import os
 from collections import OrderedDict
 
 # Third party modules
 import numpy as np
 import yaml
 
-# First party modules
-from SONATA.cbm.fileIO.read_yaml_input import clean_filestring
 
 
 class Material(object):

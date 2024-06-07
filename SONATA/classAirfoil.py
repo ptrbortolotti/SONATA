@@ -9,44 +9,24 @@ Created on Wed Dec 19 09:38:49 2018
 import itertools
 import numbers
 import os
-from collections import OrderedDict
 from urllib.request import urlopen
 
 # Third party modules
 import matplotlib.pyplot as plt
 import numpy as np
-from OCC.Core.BRepBuilderAPI import (BRepBuilderAPI_MakeEdge,
-                                     BRepBuilderAPI_MakeWire,)
-from OCC.Core.Geom import Geom_BezierCurve, Geom_Plane
-from OCC.Core.Geom2dAPI import Geom2dAPI_Interpolate
-from OCC.Core.GeomAPI import GeomAPI_Interpolate
 # PythonOCC Libraries
 from OCC.Core.gp import gp_Ax1, gp_Dir, gp_Pln, gp_Pnt, gp_Trsf, gp_Vec
 from OCC.Display.SimpleGui import init_display
 
 # First party modules
-from SONATA.cbm.display.display_utils import (display_config,
-                                              display_custome_shape,
-                                              display_SONATA_SegmentLst,
-                                              export_to_BMP, export_to_JPEG,
-                                              export_to_PNG, export_to_TIFF,
-                                              show_coordinate_system,
-                                              transform_wire_2to3d,)
+from SONATA.cbm.display.display_utils import (display_config,)
 from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_from_dct,
-                                              copy_BSplineLst,
-                                              equidistant_D1_on_BSplineLst,
-                                              BSplineLst_Orientation,)
-from SONATA.cbm.topo.utils import (PntLst_to_npArray,
-                                   TColgp_HArray1OfPnt2d_from_nparray,
-                                   TColgp_HArray1OfPnt_from_nparray,
-                                   point_list_to_TColgp_Array1OfPnt,)
+                                              equidistant_D1_on_BSplineLst,)
+from SONATA.cbm.topo.utils import (PntLst_to_npArray,)
 from SONATA.cbm.topo.wire_utils import (build_wire_from_BSplineLst,
-                                        build_wire_from_BSplineLst2,
                                         equidistant_Points_on_wire,
-                                        get_wire_length, rotate_wire,
-                                        scale_wire, translate_wire, trsf_wire,)
+                                        trsf_wire,)
 
-from SONATA.cbm.fileIO.CADinput import Check_BSplineLst_Head2Tail
 from SONATA.classPolar import Polar
 from SONATA.utl.trsf import trsf_af_to_blfr
 

@@ -24,25 +24,14 @@ from SONATA.cbm.classCBM import CBM
 from SONATA.cbm.classCBMConfig import CBMConfig
 from SONATA.cbm.display.display_utils import (display_Ax2,
                                               display_cbm_SegmentLst,
-                                              display_config,
-                                              display_custome_shape,
-                                              display_SONATA_SegmentLst,
-                                              show_coordinate_system,
-                                              transform_wire_2to3d,)
+                                              display_config,)
 
-from SONATA.cbm.fileIO.CADinput import intersect_shape_pln
 from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_from_dct,
-                                              get_BSplineLst_D2,
-                                              set_BSplineLst_to_Origin,
                                               set_BSplineLst_to_Origin2,)
 from SONATA.cbm.topo.to3d import bsplinelst_to3d, pnt_to3d, vec_to3d
-from SONATA.cbm.topo.utils import (Array_to_PntLst, PntLst_to_npArray,
-                                   lin_pln_intersect,)
+from SONATA.cbm.topo.utils import (Array_to_PntLst, PntLst_to_npArray,)
 from SONATA.cbm.fileIO.CADoutput import export_shape
-from SONATA.cbm.topo.wire_utils import (discretize_wire,
-                                        equidistant_Points_on_wire,
-                                        get_wire_length, rotate_wire,
-                                        scale_wire, translate_wire,)
+from SONATA.cbm.topo.wire_utils import (equidistant_Points_on_wire,)
 from SONATA.classAirfoil import Airfoil
 from SONATA.classComponent import Component
 from SONATA.classMaterial import read_materials
@@ -52,12 +41,12 @@ from SONATA.utl.blade_utl import (array_pln_intersect, check_uniformity,
 from SONATA.utl.converter_WT import converter_WT
 from SONATA.utl.interpBSplineLst import interpBSplineLst
 from SONATA.utl.plot import plot_beam_properties
-from SONATA.utl.trsf import trsf_af_to_blfr, trsf_blfr_to_cbm, trsf_cbm_to_blfr
+from SONATA.utl.trsf import trsf_af_to_blfr, trsf_blfr_to_cbm
 from SONATA.vabs.classVABSConfig import VABSConfig
 from SONATA.anbax.classANBAXConfig import ANBAXConfig
 
 
-from SONATA.utl_openmdao.utl_openmdao import utl_openmdao_apply_gains_web_placement, utl_openmdao_apply_gains_mat_thickness
+from SONATA.utl_openmdao.utl_openmdao import utl_openmdao_apply_gains_mat_thickness
 
 
 # from SONATA.airconics_blade_cad.blade_cst import blade_cst
@@ -1032,30 +1021,6 @@ class Blade(Component):
         self.display.View_Iso()
         self.display.FitAll()
         self.start_display()
-
-    def blade_airconics_iges(self, job_str, flags_dict):
-        """
-        exports lofted blade based on airconics package
-
-        Stand-alone package that simply reads a yaml input file
-        """
-
-        CAD_shape = blade_cst(self.yml, flags_dict)
-        CAD_shape.create_blade_cst()
-
-        NSegments = 100
-        blade = liftingSurface.LiftingSurface(CAD_shape.airfoil_func, NSegments=NSegments)
-        print(["Finished creating loft using " + str(NSegments) + " segments"])
-        blade.Write(job_str[:-5] + '.iges')  # writes step, stl, igs, or iges files depending on chosen extension
-
-        # optional plot that shows wires
-        # fig, ax = plt.subplots()
-        # # ax = fig.gca(projection='3d')
-        # for eta in np.arange(0.0, 1.01, 0.05):
-        #     CAD_shape.blade_af(eta, ax=ax)
-        # plt.show()
-
-        return None
 
 
 
