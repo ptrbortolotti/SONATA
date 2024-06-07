@@ -6,22 +6,18 @@ Created on Tue Mar 28 09:58:14 2017
 """
 # Core Library modules
 import itertools
-import math
 
 # Third party modules
 import numpy as np
 from OCC.Core.Geom2dAPI import (Geom2dAPI_PointsToBSpline,
                                 Geom2dAPI_ProjectPointOnCurve,)
-from OCC.Core.gp import gp_Pnt, gp_Pnt2d, gp_Vec, gp_Vec2d
-from OCC.Display.SimpleGui import init_display
+from OCC.Core.gp import gp_Pnt2d, gp_Vec2d
 
 # First party modules
-from SONATA.cbm.display.display_utils import display_custome_shape
 from SONATA.cbm.mesh.cell import Cell
 from SONATA.cbm.mesh.node import Node
 from SONATA.cbm.topo.BSplineLst_utils import (
-    ProjectPointOnBSplineLst, find_BSplineLst_coordinate, get_BSplineLst_length,
-    get_BSplineLst_Pnt2d, intersect_BSplineLst_with_BSpline,)
+    ProjectPointOnBSplineLst, find_BSplineLst_coordinate, intersect_BSplineLst_with_BSpline,)
 from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
 
 

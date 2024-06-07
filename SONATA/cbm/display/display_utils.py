@@ -101,61 +101,6 @@ def display_config(DeviationAngle=1e-5, DeviationCoefficient=1e-5, bg_c=((20, 6,
     return (display, start_display, add_menu, add_function_to_menu)
 
 
-def export_to_PDF(display, event=None):
-    f = display.View.View()
-    # display.set_bg_gradient_color([255,255,255],[255,255,255])
-    i = 0
-    while os.path.exists("img/capture_pdf%s.pdf" % i):
-        i += 1
-    f.Export("img/capture_pdf%s.pdf" % i, Graphic3d_EF_PDF)
-    print("EXPORT: \t Screencapture exported to img/capture_pdf%s.pdf" % i)
-    # display.set_bg_gradient_color([20,6,111],[200,200,200])
-
-
-def export_to_SVG(display, event=None):
-    f = display.View.View()
-    # display.set_bg_gradient_color([255,255,255],[255,255,255])
-    i = 0
-    while os.path.exists("img/capture_svg%s.svg" % i):
-        i += 1
-    f.Export("img/capture_svg_%s.svg" % i, Graphic3d_EF_SVG)
-    print("EXPORT: \t Screencapture exported to img/capture_svg%s.svg" % i)
-    # display.set_bg_gradient_color([20,6,111],[200,200,200])
-
-
-def export_to_PS(display, event=None):
-    f = display.View.View()
-    # display.set_bg_gradient_color([255,255,255],[255,255,255])
-    i = 0
-    while os.path.exists("img/capture_ps%s.ps" % i):
-        i += 1
-    f.Export("img/capture_ps%s.ps" % i, Graphic3d_EF_PostScript)
-    print("EXPORT: \t Screencapture exported to img/capture_ps%s.ps" % i)
-    # display.set_bg_gradient_color([20,6,111],[200,200,200])
-
-
-def export_to_EnhPS(display, event=None):
-    f = display.View.View()
-    # display.set_bg_gradient_color([255,255,255],[255,255,255])
-    i = 0
-    while os.path.exists("img/capture_Enh_ps%s.ps" % i):
-        i += 1
-    f.Export("img/capture_Enh_ps%s.ps" % i, Graphic3d_EF_EnhPostScript)
-    print("EXPORT: \t Screencapture exported to img/capture_Enh_ps%s.ps" % i)
-    # display.set_bg_gradient_color([20,6,111],[200,200,200])
-
-
-def export_to_TEX(display, event=None):
-    f = display.View.View()
-    display.set_bg_gradient_color([255, 255, 255], [255, 255, 255])
-    i = 0
-    while os.path.exists("img/capture_tex%s.tex" % i):
-        i += 1
-    f.Export("img/capture_tex%s.tex" % i, Graphic3d_EF_TEX)
-    print("EXPORT: \t Screencapture exported to img/capture_tex%s.tex" % i)
-    display.set_bg_gradient_color([20, 6, 111], [200, 200, 200])
-
-
 def export_to_BMP(display, event=None):
     display.set_bg_gradient_color([255, 255, 255], [255, 255, 255])
     i = 0
@@ -226,17 +171,6 @@ def display_points_of_array(array, display):
     for j in range(array.Lower(), array.Upper() + 1):
         p = array.Value(j)
         display.DisplayShape(p, update=False)
-
-
-def display_custome_shape(display, shape, linewidth=1.0, transparency=0.0, RGB=[0, 0, 0]):
-    s = shape
-    ais_shp = AIS_Shape(s)
-    ais_shp.SetWidth(linewidth)
-    ais_shp.SetTransparency(transparency)
-    ais_shp.SetColor(Quantity_Color(RGB[0], RGB[1], RGB[2], 0))
-    ais_context = display.GetContext()
-    ais_context.Display(ais_shp)
-    return None
 
 
 def transform_wire_2to3d(display, wire, coord=(0, 0, 0), alpha=0, beta=0, color="BLACK", show=True):
