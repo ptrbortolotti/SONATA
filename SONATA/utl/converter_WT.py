@@ -286,9 +286,9 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
 
                                     # set_interp = PchipInterpolator(sec['thickness']['grid'],sec['thickness']['values'])
                                     thick_web[i, int(id_seg / 2 - 1)] = thick_web[i, int(id_seg / 2 - 1)] + thick_i
-                                    if thick_web[i, int(id_seg / 2 - 1)] < 0.02:
-                                        thick_web[i, int(id_seg / 2 - 1)] = 0.02
-                                        print('WARNING: web filler cannot be thinner than 20mm. This is adjusted here, but please check the input yaml.')
+                                    if thick_web[i, int(id_seg / 2 - 1)] < 0.01:
+                                        thick_web[i, int(id_seg / 2 - 1)] = 0.01
+                                        print('WARNING: web filler cannot be thinner than 10mm. This is adjusted here, but please check the input yaml.')
                                     web_filler_index = True  #  changes to true as web has now already been filled with material
 
                                 # Orthotropic at trailing edge (_te)
@@ -394,6 +394,17 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
 
                 if np.mean(profile[0:id_le, 1]) < 0:
                     profile     = np.flip(profile,0)
+
+                # checks for flatback airfoils
+                # profile[0,0] = 1.
+                # profile[0,1] = 1.e-4
+                # profile[-1,0] = 1.
+                # profile[-1,1] = -1.e-4
+                if len(np.where(profile[:,0] == 1.)[0]) > 2:
+                    profile = profile[:np.where(profile[:,0]==1.)[0][2] , :]
+
+                # if len(profile[:,0]) != len(np.unique(profile[:,0])):
+                #     raise Exception('Airfoil at station {:d} does not have unique x points'.format(id_profile))
 
                 profile_curve   = arc_length(profile[:,0], profile[:,1]) / arc_length(profile[:,0], profile[:,1])[-1]
 

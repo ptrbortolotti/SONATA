@@ -290,8 +290,8 @@ def plot_cells(cells,nodes, attr1, materials, VABSProperties=None, title='None',
    
     if 'savepath' in kw:
 
-        if not os.path.exists(kw['savepath']+'figures'):  # create 'figures' Folder if not already existing
-            os.mkdir(kw['savepath']+'figures')
+        if not os.path.exists(os.path.join(kw['savepath'],'figures')):  # create 'figures' Folder if not already existing
+            os.makedirs(os.path.join(kw['savepath'],'figures'))
 
         # datestr = datetime.datetime.now().strftime("%Y%m%d_%H%M")
         # fname = kw['savepath'].split('.')[0]+'_'+datestr+'.'+kw['savepath'].split('.')[1]
