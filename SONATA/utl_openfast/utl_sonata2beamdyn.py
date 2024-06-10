@@ -130,7 +130,7 @@ def write_beamdyn_axis(folder, flags_dict, wt_name, ra, twist):
     data = np.vstack((kp_xr, kp_yr, kp_zr, twist_interp)).T
 
     # file = open(folder + '00_analysis/analysis/' + wt_name + '_BeamDyn.dat', 'w')
-    file = open(folder + wt_name + '_BeamDyn.dat', 'w')
+    file = open(os.path.join(folder , wt_name + '_BeamDyn.dat'), 'w')
     file.write('--------- BEAMDYN with OpenFAST INPUT FILE -------------------------------------------\n')
     file.write('%s blade\n' % (wt_name))
     file.write('---------------------- SIMULATION CONTROL --------------------------------------\n')
@@ -198,7 +198,7 @@ def write_beamdyn_prop(folder, flags_dict, wt_name, radial_stations, beam_stiff,
     n_pts = len(radial_stations)
 
     # file = open(folder + '00_analysis/analysis/' + wt_name + '_BeamDyn_Blade.dat', 'w')
-    file = open(folder + wt_name + '_BeamDyn_Blade.dat', 'w')
+    file = open(os.path.join(folder , wt_name + '_BeamDyn_Blade.dat'), 'w')
     file.write(' ------- BEAMDYN V1.00.* INDIVIDUAL BLADE INPUT FILE --------------------------\n')
     file.write(' Test Format 1\n')
     file.write(' ---------------------- BLADE PARAMETERS --------------------------------------\n')
