@@ -110,7 +110,7 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
         else:
             array = np.vstack((nodes[ele[0] - 1], nodes[ele[1] - 1], nodes[ele[2] - 1], nodes[ele[3] - 1]))
             centroids.append(centroid(array))
-        polygon = Polygon(array, True, edgecolor="k")
+        polygon = Polygon(array, closed=True, edgecolor="k")
         patches.append(polygon)
     
     # p = PatchCollection(patches, alpha=alpha, cmap=cmap, edgecolors = 'k')
