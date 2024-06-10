@@ -18,7 +18,6 @@ if __name__ == '__main__':
     os.chdir('../..')
 
 from SONATA.cbm.classCBMConfig import CBMConfig
-from SONATA.utl_openmdao.utl_openmdao import calc_axis_intersection
 
 # from jobs.RFeil.utls.utls_openmdao import calc_axis_intersection
 

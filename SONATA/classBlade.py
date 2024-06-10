@@ -45,8 +45,6 @@ from SONATA.utl.trsf import trsf_af_to_blfr, trsf_blfr_to_cbm
 from SONATA.anbax.classANBAXConfig import ANBAXConfig
 
 
-from SONATA.utl_openmdao.utl_openmdao import utl_openmdao_apply_gains_mat_thickness
-
 
 # from SONATA.airconics_blade_cad.blade_cst import blade_cst
 # import SONATA.airconics_blade_cad.airconics.liftingSurface as liftingSurface
@@ -450,22 +448,6 @@ class Blade(Component):
         self.f_curvature_k1 = interp1d(x, np.gradient(self.twist[:,1],self.beam_ref_axis[:,1]))  # determine twist per unit length, i.e. the twist gradient at a respective location
 
 
-        # =============================== #
-        # openMDAO wrapper (ongoing work)
-        # =============================== #
-        # Apply gains from design variables during openmdao analysis
-
-        if kwargs.get('flag_opt'):
-            opt_vars = kwargs['opt_vars']
-            # yml = utl_openmdao_apply_gains_web_placement(self, yml, opt_vars)
-            yml = utl_openmdao_apply_gains_mat_thickness(self, yml, opt_vars)
-        # else:
-        #     opt_vars = 0.
-        #     yml = utls_openmdao_apply_gains_web_placement(self, yml, opt_vars)
-
-        # =============================== #
-
-
 
         #Generate CBMConfigs
         if kwargs.get('flags',{}).get('flag_wt_ontology'):
@@ -474,11 +456,6 @@ class Blade(Component):
         else:
             lst = [[cs.get("position"), CBMConfig(cs, self.materials)] for cs in yml.get("internal_structure_2d_fem").get("sections")]
             cbmconfigs = np.asarray(lst)
-
-        # # Apply gains from design variables during openmdao analysis
-        # if kwargs.get('flag_opt'):
-        #     opt_vars = kwargs['opt_vars']
-        #     cbmconfigs = utl_openmdao_apply_gains_web_placement(self, cs_pos, yml, cbmconfigs, opt_vars)
 
 
 
