@@ -163,6 +163,16 @@ def display_Ax2(display, Ax2, length=1):
 
     return None
 
+def findMainWindow():
+    # Global function to find the (open) QMainWindow in application
+
+    QtCore, QtGui, QtWidgets, QtOpenGL = get_qt_modules()
+    app = QtWidgets.QApplication.instance()
+    for widget in app.topLevelWidgets():
+        if isinstance(widget, QtWidgets.QMainWindow):
+            return widget
+    return None
+
 def close():
     win = findMainWindow()
     win.close()
