@@ -29,18 +29,6 @@ def centroid(points):
     centroid = (sum(x) / len(points), sum(y) / len(points))
     return centroid
 
-
-def plot_nodes(nodes):
-    fig, ax = plt.subplots()
-    nodes_array = []
-    for n in nodes:
-        nodes_array.append([n.coordinates[0], n.coordinates[1]])
-    nodes_array = np.asarray(nodes_array)
-    plt.plot(nodes_array[:, 0], nodes_array[:, 1], ".-")
-    plt.axis("equal")
-    plt.show()
-
-
 def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None, VABSProperties=None, 
               show_element_number=False, show_node_number=False, invert_xaxis = True, lfactor=0.5e-2, **kw):
     
@@ -215,7 +203,6 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
 
     return (fig,ax)
     
-
 def plot_cells(cells,nodes, attr1, materials, VABSProperties=None, title='None', plotTheta11=False, plotDisplacement=False, **kw):
     """
     
