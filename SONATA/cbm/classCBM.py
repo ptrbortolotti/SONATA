@@ -8,14 +8,9 @@ https://numpydoc.readthedocs.io/en/latest/format.html
 
 # Core Library modules
 import copy
-import getpass
 import math
-import os
 # Basic PYTHON Modules:
 import pickle as pkl
-import platform
-import subprocess
-import time
 from datetime import datetime
 
 # Third party modules
@@ -24,7 +19,6 @@ import numpy as np
 from OCC.Core.gp import gp_Ax2
 
 # First party modules
-from SONATA.cbm.bladegen.blade import Blade
 from SONATA.cbm.cbm_utl import trsf_sixbysix
 from SONATA.cbm.classBeamSectionalProps import BeamSectionalProps
 from SONATA.cbm.classCBMConfig import CBMConfig
@@ -32,7 +26,6 @@ from SONATA.cbm.display.display_mesh import plot_cells
 from SONATA.cbm.display.display_utils import (display_config,
                                               display_SONATA_SegmentLst,
                                               transform_wire_2to3d,)
-from SONATA.cbm.fileIO.CADinput import import_2d_stp, import_3d_stp, load_3D
 from SONATA.cbm.fileIO.CADoutput import export_to_step
 from SONATA.cbm.mesh.cell import Cell
 from SONATA.cbm.mesh.consolidate_mesh import consolidate_mesh_on_web
@@ -209,14 +202,7 @@ class CBM(object):
         self.surface3d = None  # TODO: Remove definition and set it up in classBlade
         self.Blade = None  # TODO: Remove definition and set it up in classBlade
 
-        if self.config.setup["input_type"] == 3:
-            self.surface3d = load_3D(self.config.setup["datasource"])
-
-        elif self.config.setup["input_type"] == 4:
-            self.blade = Blade(self.config.setup["datasource"])
-            self.surface3d = self.blade.surface
-
-        elif self.config.setup["input_type"] == 5:
+        if self.config.setup["input_type"] == 5:
             # wire = kwargs.get('wire') #in the blade reference frame!
             self.Ax2 = kwargs.get("Ax2")
             self.BoundaryBSplineLst = kwargs.get("BSplineLst")
@@ -226,16 +212,7 @@ class CBM(object):
     def __getstate__(self):
         """Return state values to be pickled."""
         return (self.config, self.materials, self.SegmentLst, self.WebLst, self.BW, self.mesh, self.BeamProperties)
-
-    def __setstate__(self, state):
-        """Restore state from the unpickled state values."""
-        (self.config, self.materials, self.SegmentLst, self.WebLst, self.BW, self.mesh, self.BeamProperties) = state
-        if self.config.setup["input_type"] == 3:
-            self.surface3d = load_3D(self.config.setup["datasource"])
-        elif self.config.setup["input_type"] == 4:
-            self.blade = Blade(self.config.setup["datasource"])
-            self.surface3d = self.blade.surface
-
+    
     def cbm_save(self, output_filename=None):
         """ saves the complete CBM instance as pickle
         
@@ -425,35 +402,15 @@ class CBM(object):
         # TODO cleanup this mess!
         for k, seg in self.config.segments.items():
             if k == 0:
-                if self.config.setup["input_type"] == 0:  # 0) Airfoil from UIUC Database  --- naca23012
-                    self.SegmentLst.append(Segment(k, **seg, **self.config.setup, OCC=False, airfoil=self.config.setup["datasource"]))
 
-                elif self.config.setup["input_type"] == 1:  # 1) Geometry from .dat file --- AREA_R250.dat
-                    self.SegmentLst.append(Segment(k, **seg, **self.config.setup, OCC=False, filename=self.config.setup["datasource"]))
-
-                elif self.config.setup["input_type"] == 2:  # 2)2d .step or .iges  --- AREA_R230.stp
-                    BSplineLst = import_2d_stp(self.config.setup["datasource"], self.config.setup["scale_factor"], self.config.setup["Theta"])
-                    self.SegmentLst.append(Segment(k, **seg, **self.config.setup, OCC=True, Boundary=BSplineLst))
-
-                elif self.config.setup["input_type"] == 3:  # 3)3D .step or .iges and radial station of crosssection --- AREA_Blade.stp, R=250
-                    BSplineLst = import_3d_stp(self.config.setup["datasource"], self.config.setup["radial_station"], self.config.setup["scale_factor"], self.config.setup["Theta"])
-                    self.SegmentLst.append(Segment(k, **seg, **self.config.setup, OCC=True, Boundary=BSplineLst))
-
-                elif self.config.setup["input_type"] == 4:  # 4)generate 3D-Shape from twist,taper,1/4-line and airfoils, --- examples/UH-60A, R=4089, theta is given from twist distribution
-                    BSplineLst = self.blade.get_crosssection(self.config.setup["radial_station"], self.config.setup["scale_factor"])
-                    self.SegmentLst.append(Segment(k, **seg, Theta=self.blade.get_Theta(self.config.setup["radial_station"]), OCC=True, Boundary=BSplineLst))
-
-                elif self.config.setup["input_type"] == 5:  # 5) yaml dictionary formulation, everything is passed internally!
+                if self.config.setup["input_type"] == 5:  # 5) yaml dictionary formulation, everything is passed internally!
                     self.SegmentLst.append(Segment(k, **seg, Theta=self.Theta, OCC=True, Boundary=self.BoundaryBSplineLst))
 
                 else:
                     print("ERROR:\t WRONG input_type")
 
             else:
-                if self.config.setup["input_type"] == 4:
-                    self.SegmentLst.append(Segment(k, **seg, Theta=self.blade.get_Theta(self.config.setup["radial_station"])))
-
-                elif self.config.setup["input_type"] == 5:
+                if self.config.setup["input_type"] == 5:
                     self.SegmentLst.append(Segment(k, **seg, Theta=self.Theta))
 
                 else:

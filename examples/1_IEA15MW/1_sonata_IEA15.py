@@ -1,6 +1,5 @@
 import os
 import numpy as np
-import matplotlib.pyplot as plt
 from SONATA.classBlade import Blade
 from SONATA.utl.beam_struct_eval import beam_struct_eval
 
@@ -26,14 +25,14 @@ attribute_str           = 'MatID'  # default: 'MatID' (theta_3 - fiber orientati
                                             #          'strainM.epsilon11'
 
 # 2D cross sectional plots (blade_plot_sections)
-flag_plotTheta11        = False      # plane orientation angle
-flag_recovery           = False
+flag_plotTheta11        = True      # plane orientation angle
+flag_recovery           = True
 flag_plotDisplacement   = True     # Needs recovery flag to be activated - shows displacements from loadings in cross sectional plots
 # 3D plots (blade_post_3dtopo)
 flag_wf                 = True      # plot wire-frame
 flag_lft                = True      # plot lofted shape of blade surface (flag_wf=True obligatory); Note: create loft with grid refinement without too many radial_stations; can also export step file of lofted shape
 flag_topo               = True      # plot mesh topology
-c2_axis                 = False
+c2_axis                 = True
 
 
 # create flag dictionary
@@ -62,15 +61,15 @@ job.blade_gen_section(topo_flag=True, mesh_flag = True)
 
 # ===== VABS / ANBAX combination/verification ===== #
 # Define flags
-flag_3d = False
+flag_3d = True
 flag_run_anbax = True
 flag_DeamDyn_def_transform = True               # transform from SONATA to BeamDyn coordinate system
-flag_csv_export = False                          # export csv files with structural data
+flag_csv_export = True                         # export csv files with structural data
 # Update flags dictionary
 flags_dict['flag_run_anbax'] = flag_run_anbax
 flags_dict['flag_DeamDyn_def_transform'] = flag_DeamDyn_def_transform
 flags_dict['flag_csv_export'] = flag_csv_export
-Loads_dict = {}
+Loads_dict = {"Forces":[1.,1.,1.],"Moments":[1.,1.,1.]}
 
 # Set damping for BeamDyn input file
 delta = np.array([0.03, 0.03, 0.06787]) # logarithmic decrement, natural log of the ratio of the amplitudes of any two successive peaks. 3% flap and edge, 6% torsion

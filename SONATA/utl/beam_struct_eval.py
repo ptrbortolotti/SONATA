@@ -8,13 +8,10 @@ Created on Wednesday Nov 20 13:33:33 2019
 
 
 from builtins import len, range
-from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
 import os
-
-from SONATA.cbm.cbm_utl import trsf_sixbysix
 
 
 # from SONATA.utl.analytical_rectangle.utls_analytical_rectangle import utls_analytical_rectangle
@@ -88,7 +85,7 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str):
     # Export beam structural properties to csv file
     if flags_dict['flag_csv_export']:
         print('STATUS:\t Export csv files with structural blade characeristics from ANBAX to: ' + folder_str + 'csv_export/')
-        anbax_export_beam_struct_properties(folder_str, job_str, cs_pos, coordsys=coordsys, solver='anbax', beam_stiff=anbax_beam_stiff,
+        anbax_export_beam_struct_properties(folder_str, job_str, cs_pos, solver='anbax', beam_stiff=anbax_beam_stiff,
                                         beam_inertia=anbax_beam_inertia, beam_mass_per_length=anbax_beam_section_mass)
 
 
@@ -168,7 +165,7 @@ def plot_vabs_anbax(cs_pos, anbax_data, fig_title, save_path):
 
 # ============================================= #
 
-def anbax_export_beam_struct_properties(folder_str, job_str, radial_stations, coordsys, solver, beam_stiff, beam_inertia, beam_mass_per_length):
+def anbax_export_beam_struct_properties(folder_str, job_str, radial_stations, solver, beam_stiff, beam_inertia, beam_mass_per_length):
 
     if solver=='anbax':
         export_name_general = 'anbax_beam_properties_general.csv'
@@ -183,12 +180,7 @@ def anbax_export_beam_struct_properties(folder_str, job_str, radial_stations, co
         os.mkdir(folder_str + 'csv_export/')
     with open(''.join([folder_str + 'csv_export/' + job_str[0:-5] + '_' + export_name_general]), mode='w') as csv_file:
         beam_prop_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        if coordsys == 'BeamDyn':
-            beam_prop_writer.writerow(['Coordinate system:', 'Beamdyn coordinates'])
-        elif coordsys == 'ANBAX':
-            beam_prop_writer.writerow(['Coordinate system:', 'VABS/SONATA coordinates'])
-        else:
-            beam_prop_writer.writerow(['Coordinate system:', 'to be verified'])
+        beam_prop_writer.writerow(['Coordinate system:', 'VABS/SONATA coordinates'])
 
         beam_prop_writer.writerow(['section in r/R', 'Mass per unit length [kg/m]'])
         for i in range(len(beam_mass_per_length)):  # receive number of radial sections
