@@ -100,53 +100,6 @@ def display_config(DeviationAngle=1e-5, DeviationCoefficient=1e-5, bg_c=((20, 6,
 
     return (display, start_display, add_menu, add_function_to_menu)
 
-
-def export_to_BMP(display, event=None):
-    display.set_bg_gradient_color([255, 255, 255], [255, 255, 255])
-    i = 0
-    while os.path.exists("img/capture_bmp%s.bmp" % i):
-        i += 1
-    display.View.Dump("img/capture_bmp%s.bmp" % i)
-    print("EXPORT: \t Screencapture exported to img/capture_bmp%s.bmp" % i)
-    display.set_bg_gradient_color([20, 6, 111], [200, 200, 200])
-
-
-def export_to_PNG(display, event=None):
-    display.set_bg_gradient_color([255, 255, 255], [255, 255, 255])
-    i = 0
-    while os.path.exists("img/capture_png%s.png" % i):
-        i += 1
-    display.View.Dump("img/capture_png%s.png" % i)
-    print("EXPORT: \t Screencapture exported to img/capture_png%s.bmp" % i)
-    display.set_bg_gradient_color([20, 6, 111], [200, 200, 200])
-
-
-def export_to_JPEG(display, event=None):
-    display.set_bg_gradient_color([255, 255, 255], [255, 255, 255])
-    i = 0
-    while os.path.exists("img/capture_jpeg%s.jpeg" % i):
-        i += 1
-    display.View.Dump("img/capture_jpeg%s.jpeg" % i)
-    print("EXPORT: \t Screencapture exported to img/capture_jpeg%s.jpeg" % i)
-    display.set_bg_gradient_color([20, 6, 111], [200, 200, 200])
-
-
-def export_to_TIFF(display, event=None):
-    display.set_bg_gradient_color([255, 255, 255], [255, 255, 255])
-    i = 0
-    while os.path.exists("img/capture_tiff%s.tiff" % i):
-        i += 1
-    display.View.Dump("img/capture_tiff%s.tiff" % i)
-    print("EXPORT: \t Screencapture exported to img/capture_tiff%s.tiff" % i)
-    display.set_bg_gradient_color([20, 6, 111], [200, 200, 200])
-
-
-def print_xy_click(SHP, *kwargs):
-    for shape in SHP:
-        print(("Shape selected: ", shape))
-    print(kwargs)
-
-
 def show_coordinate_system(display, length=1, event=None):
     """CREATE AXIS SYSTEM for Visualization"""
     O = gp_Pnt(0.0, 0.0, 0.0)
@@ -166,53 +119,7 @@ def show_coordinate_system(display, length=1, event=None):
     display.DisplayMessage(p2, "y", message_color=(0, 0, 0))
     display.DisplayMessage(p3, "z", message_color=(0, 0, 0))
 
-
-def display_points_of_array(array, display):
-    for j in range(array.Lower(), array.Upper() + 1):
-        p = array.Value(j)
-        display.DisplayShape(p, update=False)
-
-
-def transform_wire_2to3d(display, wire, coord=(0, 0, 0), alpha=0, beta=0, color="BLACK", show=True):
-    wire = rotate_wire(wire, gp_Ax1(gp_Pnt(0, 0, 0), gp_Dir(0, 0, 1)), alpha)
-    wire = rotate_wire(wire, gp_Ax1(gp_Pnt(0, 0, 0), gp_Dir(0, 1, 0)), beta)
-    wire = translate_wire(wire, gp_Pnt(0, 0, 0), gp_Pnt(float(coord[0]), float(coord[1]), float(coord[2])))
-    if show:
-        display.DisplayShape(wire, color=color)
-    return wire
-
-
 # =======================SONATA DISPLAY FUCTIONS===================================
-def display_SONATA_SegmentLst(display, SegmentLst, coord=(0, 0, 0), alpha=0, beta=0):
-    # transfer shapes and display them in the viewer
-    if SegmentLst:
-        # transform_wire_2to3d(display,SegmentLst[0].wire,coord,alpha,beta,color='BLACK')
-
-        for i, seg in enumerate(SegmentLst):
-            wire = transform_wire_2to3d(display, seg.wire, coord, alpha, beta,)
-
-            k = 0
-            for j, layer in enumerate(seg.LayerLst):
-                [R, G, B, T] = plt.cm.jet(k * 50)
-
-                wire = transform_wire_2to3d(display, layer.wire, coord, alpha, beta, show=False)
-                display.DisplayColoredShape(wire, Quantity_Color(R, G, B, 0), update=True)
-                # display Start Point
-                #                string = 'Layer:'+str(layer.ID)+'(S1='+str(layer.S1)+')'
-                #                P = gp_Pnt(layer.StartPoint.X(),layer.StartPoint.Y(),0)
-                #                display.DisplayShape(P,color="BLUE")
-                #                display.DisplayMessage(P,string,message_color=(0.0,0.0,0.0))
-                #
-                #                #display End Point
-                #                string = 'Layer:'+str(layer.ID)+'(S1='+str(layer.S2)+')'
-                #                P = gp_Pnt(layer.EndPoint.X(),layer.EndPoint.Y(),0)
-                #                display.DisplayShape(P,color="RED")
-                #                display.DisplayMessage(P,string,message_color=(0.0,0.0,0.0))
-                k = k + 1
-                if k > 5:
-                    k = 0
-    return None
-
 
 def display_cbm_SegmentLst(display, SegmentLst, Ax2_blfr, Ax2_befr):
     """
@@ -271,18 +178,6 @@ def display_Ax2(display, Ax2, length=1):
     display.DisplayShape(e3, color="BLUE")
 
     return None
-
-
-def findMainWindow():
-    # Global function to find the (open) QMainWindow in application
-
-    QtCore, QtGui, QtWidgets, QtOpenGL = get_qt_modules()
-    app = QtWidgets.QApplication.instance()
-    for widget in app.topLevelWidgets():
-        if isinstance(widget, QtWidgets.QMainWindow):
-            return widget
-    return None
-
 
 def close():
     win = findMainWindow()
