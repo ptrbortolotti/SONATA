@@ -202,12 +202,11 @@ class CBM(object):
         self.surface3d = None  # TODO: Remove definition and set it up in classBlade
         self.Blade = None  # TODO: Remove definition and set it up in classBlade
 
-        if self.config.setup["input_type"] == 5:
-            # wire = kwargs.get('wire') #in the blade reference frame!
-            self.Ax2 = kwargs.get("Ax2")
-            self.BoundaryBSplineLst = kwargs.get("BSplineLst")
-            self.Theta = 0
-            self.refL = get_BSplineLst_length(self.BoundaryBSplineLst)
+        # wire = kwargs.get('wire') #in the blade reference frame!
+        self.Ax2 = kwargs.get("Ax2")
+        self.BoundaryBSplineLst = kwargs.get("BSplineLst")
+        self.Theta = 0
+        self.refL = get_BSplineLst_length(self.BoundaryBSplineLst)
 
     def __getstate__(self):
         """Return state values to be pickled."""
@@ -403,18 +402,10 @@ class CBM(object):
         for k, seg in self.config.segments.items():
             if k == 0:
 
-                if self.config.setup["input_type"] == 5:  # 5) yaml dictionary formulation, everything is passed internally!
-                    self.SegmentLst.append(Segment(k, **seg, Theta=self.Theta, OCC=True, Boundary=self.BoundaryBSplineLst))
-
-                else:
-                    print("ERROR:\t WRONG input_type")
+                self.SegmentLst.append(Segment(k, **seg, Theta=self.Theta, OCC=True, Boundary=self.BoundaryBSplineLst))
 
             else:
-                if self.config.setup["input_type"] == 5:
-                    self.SegmentLst.append(Segment(k, **seg, Theta=self.Theta))
-
-                else:
-                    self.SegmentLst.append(Segment(k, **seg, **self.config.setup))
+                self.SegmentLst.append(Segment(k, **seg, Theta=self.Theta))
 
         sorted(self.SegmentLst, key=getID)
         self.refL = get_BSplineLst_length(self.SegmentLst[0].BSplineLst)
@@ -703,19 +694,8 @@ class CBM(object):
 
         # display_custome_shape(self.display,self.SegmentLst[0].wire,2,0,[0,0,0])
 
-        if self.config.setup["input_type"] == 3 or self.config.setup["input_type"] == 4:
-            # self.display.Context.SetDeviationAngle(1e-6)
-            # self.display.Context.SetDeviationCoefficient(1e-6)
-
-            display_SONATA_SegmentLst(self.display, self.SegmentLst, (self.config.setup["radial_station"], 0, 0), -math.pi / 2, -math.pi / 2)
-            self.display.DisplayShape(self.surface3d, color=None, transparency=0.7, update=True)
-
-            if self.config.setup["BalanceWeight"]:
-                transform_wire_2to3d(self.display, self.BW.wire, (self.config.setup["radial_station"], 0, 0), -math.pi / 2, -math.pi / 2)
-
-        else:
-            display_SONATA_SegmentLst(self.display, self.SegmentLst)
-            if self.config.setup["BalanceWeight"]:
+        display_SONATA_SegmentLst(self.display, self.SegmentLst)
+        if self.config.setup["BalanceWeight"]:
                 self.display.DisplayShape(self.BW.Curve, color="BLACK")
 
         self.display.View_Iso()
