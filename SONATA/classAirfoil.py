@@ -19,8 +19,7 @@ from OCC.Core.gp import gp_Pnt, gp_Vec
 
 # First party modules
 from SONATA.cbm.display.display_utils import (display_config,)
-from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_from_dct,
-                                              equidistant_D1_on_BSplineLst,)
+from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_from_dct,)
 from SONATA.cbm.topo.utils import (PntLst_to_npArray,)
 from SONATA.cbm.topo.wire_utils import (build_wire_from_BSplineLst,
                                         equidistant_Points_on_wire,

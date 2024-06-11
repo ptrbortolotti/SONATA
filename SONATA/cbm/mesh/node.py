@@ -10,10 +10,6 @@ from functools import total_ordering
 # Third party modules
 from OCC.Core.gp import gp_Pnt, gp_Pnt2d
 
-# First party modules
-from SONATA.cbm.topo.BSplineLst_utils import (find_BSplineLst_pos,
-                                              findPnt_on_BSplineLst,)
-
 
 @total_ordering
 class Node(object):

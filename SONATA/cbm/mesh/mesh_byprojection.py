@@ -17,7 +17,7 @@ from OCC.Core.gp import gp_Pnt2d, gp_Vec2d
 from SONATA.cbm.mesh.cell import Cell
 from SONATA.cbm.mesh.node import Node
 from SONATA.cbm.topo.BSplineLst_utils import (
-    ProjectPointOnBSplineLst, find_BSplineLst_coordinate, intersect_BSplineLst_with_BSpline,)
+    ProjectPointOnBSplineLst, find_BSplineLst_coordinate,)
 from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
 
 

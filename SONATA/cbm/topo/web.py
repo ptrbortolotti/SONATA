@@ -5,14 +5,12 @@ Created on Mon Jan 16 14:28:42 2017
 @author: TPflumm
 """
 from OCC.Core.Geom2dAPI import Geom2dAPI_PointsToBSpline
-from OCC.Core.gp import gp_Pnt, gp_Pnt2d, gp_Vec2d
+from OCC.Core.gp import gp_Pnt2d, gp_Vec2d
 
-from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_Pnt2d, intersect_BSplineLst_with_BSpline, find_BSplineLst_coordinate, get_BSplineLst_length
+from SONATA.cbm.topo.BSplineLst_utils import find_BSplineLst_coordinate
 from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
 from SONATA.cbm.topo.para_Geom2d_BsplineCurve import ParaLst_from_BSplineLst, BSplineLst_from_ParaLst
 
-from OCC.Core.GCE2d import GCE2d_MakeEllipse
-from OCC.Core.Geom2d import Geom2d_TrimmedCurve
 from OCC.Core.Geom2dConvert import geom2dconvert_CurveToBSplineCurve
 from OCC.Core.Geom2d import Geom2d_BezierCurve
 

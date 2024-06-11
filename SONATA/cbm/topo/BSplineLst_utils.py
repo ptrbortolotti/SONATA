@@ -1,41 +1,30 @@
 # Basic Libraries:
 # Core Library modules
-import math
-import os
 
 # Third party modules
 import matplotlib.pyplot as plt
 import numpy as np
-from OCC.Core.GCPnts import (GCPnts_AbscissaPoint, GCPnts_QuasiUniformAbscissa,
-                             GCPnts_QuasiUniformDeflection,
-                             GCPnts_TangentialDeflection,
-                             GCPnts_UniformDeflection,)
+from OCC.Core.GCPnts import (GCPnts_AbscissaPoint, 
+                             GCPnts_QuasiUniformDeflection,)
 from OCC.Core.Geom import Geom_BSplineCurve, Geom_Curve
 from OCC.Core.Geom2d import (Geom2d_BSplineCurve, Geom2d_Curve, Geom2d_Line,
                              Handle_Geom2d_BSplineCurve_DownCast,)
 from OCC.Core.Geom2dAdaptor import Geom2dAdaptor_Curve
-from OCC.Core.Geom2dAPI import (Geom2dAPI_InterCurveCurve,
-                                Geom2dAPI_Interpolate,
-                                Geom2dAPI_PointsToBSpline,
+from OCC.Core.Geom2dAPI import (Geom2dAPI_Interpolate,
                                 Geom2dAPI_ProjectPointOnCurve,)
 from OCC.Core.GeomAdaptor import GeomAdaptor_Curve
 from OCC.Core.GeomAPI import (GeomAPI_IntCS, GeomAPI_Interpolate,
                               GeomAPI_ProjectPointOnCurve,)
 # PythonOCC Libraries
-from OCC.Core.gp import (gp_Dir, gp_Dir2d, gp_Pln, gp_Pnt,
+from OCC.Core.gp import (gp_Pnt,
                          gp_Pnt2d, gp_Vec, gp_Vec2d,)
-from scipy.optimize import leastsq
 
 # First party modules
-from SONATA.cbm.topo.para_Geom2d_BsplineCurve import Para_Geom2d_BSplineCurve
 # Own Libraries:
-from SONATA.cbm.topo.utils import (P2Pdistance, Pnt2dLst_to_npArray,
-                                   PolygonArea,
-                                   TColgp_Array1OfPnt2d_from_nparray,
+from SONATA.cbm.topo.utils import (Pnt2dLst_to_npArray,
                                    TColgp_HArray1OfPnt2d_from_nparray,
                                    TColgp_HArray1OfPnt_from_nparray,
-                                   calc_DCT_angles, curvature_of_curve,
-                                   discrete_stepsize, fuse_rows, isclose,
+                                   calc_DCT_angles, fuse_rows, isclose,
                                    unique_rows,)
 
 ###############################################################################
@@ -91,6 +80,39 @@ def findPnt_on_curve(Pnt, Curve):
     u = projection.LowerDistanceParameter()
     return u
 
+def isPnt_on_curve(Pnt, Curve, tolerance=1e-6):
+    """
+    checks if a point (either gp_Pnt or gp_Pnt2d) is on a curve (subclass of 
+    Geom2d_Curve or Geom_Curve) by projecting the Point orthogonal on to the 
+    curve and checing ifthe distance is below a tolerance tol.
+    
+    Parameter
+    ---------
+    Pnt : OCC.gp_Pnt or OCC.gp_Pnt2d
+    Curve : OCC.Geom_Curve or OCC.Geom_Curve Handle
+    tolerance : float, optional
+        default tolerance 1e-6
+        
+    Return
+    --------
+    Trigger : bool    
+    """
+    if isinstance(Pnt, gp_Pnt2d) and issubclass(Curve.__class__, Geom2d_Curve):
+        twoD = True
+    elif isinstance(Pnt, gp_Pnt) and issubclass(Curve.__class__, Geom_Curve):
+        twoD = False
+
+    if twoD:
+        projection = Geom2dAPI_ProjectPointOnCurve(Pnt, Curve)
+    else:
+        projection = GeomAPI_ProjectPointOnCurve(Pnt, Curve)
+    Trigger = False
+    for i in range(1, projection.NbPoints() + 1):
+        if projection.Distance(i) <= tolerance:
+            Trigger = True
+        else:
+            None
+    return Trigger
 
 def findPnt_on_BSplineLst(Pnt, BSplineLst):
     for i, item in enumerate(BSplineLst):

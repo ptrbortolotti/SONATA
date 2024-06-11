@@ -5,40 +5,18 @@ import math
 # Third party modules
 import numpy as np
 # from OCC.AIS import AIS_Shape
-from OCC.Core.BRep import BRep_Builder, BRep_Tool
 from OCC.Core.BRepAdaptor import BRepAdaptor_CompCurve
-from OCC.Core.BRepBuilderAPI import (BRepBuilderAPI_MakeEdge,
-                                     BRepBuilderAPI_MakeFace,
-                                     BRepBuilderAPI_MakeWire,)
-from OCC.Core.BRepLib import breplib_BuildCurves3d
 from OCC.Core.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformAbscissa
-from OCC.Core.Geom2d import Geom2d_Line
 from OCC.Core.Geom2dAdaptor import Geom2dAdaptor_Curve
 from OCC.Core.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
-from OCC.Core.gp import gp_Dir2d, gp_Lin2d, gp_Pnt, gp_Pnt2d, gp_Vec2d
-from OCC.Core.Quantity import Quantity_Color
-from OCC.Core.TopoDS import TopoDS_Compound, topods_Edge, topods_Face
-from OCC.Display.SimpleGui import init_display
+from OCC.Core.gp import gp_Pnt2d, gp_Vec2d
 
 # First party modules
-from SONATA.cbm.mesh.cell import Cell
 from SONATA.cbm.mesh.node import Node
-from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_Orientation,
-                                              ProjectPointOnBSplineLst,
+from SONATA.cbm.topo.BSplineLst_utils import (ProjectPointOnBSplineLst,
                                               copy_BSplineLst,
-                                              distance_on_BSplineLst,
-                                              findPnt_on_BSplineLst,
                                               get_BSpline_length,
-                                              get_BSplineLst_length,
-                                              isPnt_on_BSplineLst,
-                                              reverse_BSplineLst,
-                                              set_BSplineLst_to_Origin,
-                                              trim_BSplineLst,
-                                              trim_BSplineLst_by_coordinates,
-                                              trim_BSplineLst_by_Pnt2d,)
-from SONATA.cbm.topo.utils import (Pnt2dLst_to_npArray,
-                                   PolygonArea, calc_angle_between,
-                                   calc_DCT_angles, unique_rows,)
+                                              reverse_BSplineLst,)
 from SONATA.cbm.topo.wire_utils import (build_wire_from_BSplineLst,
                                         get_wire_length,)
 

@@ -23,7 +23,6 @@ from OCC.Core.TopTools import (TopTools_ListIteratorOfListOfShape,
 
 # First party modules
 # Own Libraries:
-from SONATA.cbm.topo.explorer import WireExplorer
 from SONATA.cbm.topo.utils import (P2Pdistance, Pnt2dLst_to_npArray,
                                    PolygonArea, unique_rows,)
 
@@ -179,24 +178,6 @@ def mirror_wire_axe2(brep, axe2, copy=False):
     return topods.Wire(brep_trns.Shape())
 
 
-def find_coordinate_on_ordered_edges(TopoDS_wire, S):
-    WireLength = get_wire_length(TopoDS_wire)
-    CummLength = 0
-    tolerance = 1e-10
-    idx = 0
-    for edg in WireExplorer(TopoDS_wire).ordered_edges():  # Iterate over Wire!
-        Adaptor = BRepAdaptor_Curve(edg)
-        CummLength += GCPnts_AbscissaPoint().Length(Adaptor, tolerance)
-        if S * WireLength <= CummLength:
-            U0 = 0
-            dist = GCPnts_AbscissaPoint().Length(Adaptor, tolerance) - (CummLength - S * WireLength)
-            Test = GCPnts_AbscissaPoint(tolerance, Adaptor, dist, U0)
-            U = Test.Parameter()
-            break
-        idx += 1
-    return [idx, U]  # Return index of edge and parameter U on edge!
-
-
 def discretize_wire(wire, Resolution=500, Deflection=5e-3, refine=True, display=None):
     Pnt2dLst = []
     AdaptorComp = BRepAdaptor_CompCurve(wire, True)
@@ -275,47 +256,6 @@ def discretize_wire(wire, Resolution=500, Deflection=5e-3, refine=True, display=
     return data
 
 
-def trim_wire(TopoDS_wire, S1, S2):
-    twire = BRepBuilderAPI_MakeWire()
-    para1 = find_coordinate_on_ordered_edges(TopoDS_wire, S1)
-    para2 = find_coordinate_on_ordered_edges(TopoDS_wire, S2)
-    idx = 0
-    for edg in WireExplorer(TopoDS_wire).ordered_edges():  # Iterate over Wire!
-        Adaptor = BRepAdaptor_Curve(edg)
-        First = Adaptor.FirstParameter()
-        Last = Adaptor.LastParameter()
-        # CummLength += GCPnts_AbscissaPoint().Length(Adaptor, tolerance)
-        if para1[0] == idx and para2[0] != idx:
-            BSplineCurve = Adaptor.BSpline()
-            BSplineCurve.Segment(
-                para1[1], Last,
-            )
-            tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve)
-            # display.DisplayShape(tmp_edge.Edge(), color='CYAN')
-            twire.Add(tmp_edge.Edge())
-
-        elif (para1[0] != idx and para2[0] != idx) and (para1[0] < idx and para2[0] > idx):
-            BSplineCurve = Adaptor.BSpline()
-            tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve)
-            twire.Add(tmp_edge.Edge())
-
-        elif para1[0] == idx and para2[0] == idx:
-            BSplineCurve = Adaptor.BSpline()
-            BSplineCurve.Segment(para1[1], para2[1])
-            tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve)
-            twire.Add(tmp_edge.Edge())
-            break
-
-        elif para1[0] != idx and para2[0] == idx:
-            BSplineCurve = Adaptor.BSpline()
-            BSplineCurve.Segment(First, para2[1])
-            tmp_edge = BRepBuilderAPI_MakeEdge(BSplineCurve)
-            twire.Add(tmp_edge.Edge())
-            break
-        idx += 1
-    return twire.Wire()
-
-
 def build_wire_from_BSplineLst2(BSplineLst):  # Builds TopoDS_Wire from connecting BSplineSegments and returns it
     tmp_wire = BRepBuilderAPI_MakeWire()
     for i, item in enumerate(BSplineLst):
@@ -345,64 +285,3 @@ def build_wire_from_BSplineLst(BSplineLst, twoD=True):  # Builds TopoDS_Wire fro
     wire.Add(TopTools_EdgeLst)
     wire.Build()
     return wire.Wire()
-
-
-def set_BoundaryWire_to_Origin(TopoDS_wire):
-    """
-    """
-    Face = BRepLib_MakeFace(gp_Pln(gp_Pnt(0, 0, 0), gp_Dir(0, 1, 0)), -2, 2, -2, 2).Face()
-    tolerance = 1e-10
-    intPnts = []
-    idx = 0
-    for edg in WireExplorer(TopoDS_wire).ordered_edges():  # Iterate over Wire!
-        Adaptor = BRepAdaptor_Curve(edg)
-        First = Adaptor.FirstParameter()
-        Last = Adaptor.LastParameter()
-        Adaptor3d_HCurve = Adaptor.Trim(First, Last, tolerance)
-        intersection = IntCurvesFace_Intersector(Face, tolerance)
-        intersection.Perform(Adaptor3d_HCurve, First, Last)
-        if intersection.IsDone():
-            for j in range(1, intersection.NbPnt() + 1):
-                XValue = intersection.Pnt(j).X()
-                W = intersection.WParameter(j)
-                intPnts.append([idx, W, XValue])
-        idx += 1
-
-    # Determine Origin as point
-    IntPntsarray = np.asarray(intPnts)  # idx,W,XValue
-    OriEdgePnt = IntPntsarray[np.argmax(IntPntsarray[:, 2]), :]
-
-    # Reorder Sequence of edges of wire
-    Owire = BRepBuilderAPI_MakeWire()
-    idx = 0
-    for edg in WireExplorer(TopoDS_wire).ordered_edges():  # Iterate over Wire!
-        if idx == OriEdgePnt[0]:
-            Adaptor = BRepAdaptor_Curve(edg)
-            First = Adaptor.FirstParameter()
-            Last = Adaptor.LastParameter()
-            BSplineCurve1 = Adaptor.BSpline()
-            BSplineCurve1.Segment(OriEdgePnt[1], Last)
-            BSplineCurve2 = Adaptor.BSpline()
-            BSplineCurve2.Segment(First, OriEdgePnt[1])
-            tmp_edge1 = BRepBuilderAPI_MakeEdge(BSplineCurve1)
-            tmp_edge2 = BRepBuilderAPI_MakeEdge(BSplineCurve2)
-            Owire.Add(tmp_edge1.Edge())
-
-        elif idx > OriEdgePnt[0]:
-            Owire.Add(edg)
-
-        else:
-            None
-        idx += 1
-
-    idx = 0
-    for edg in WireExplorer(TopoDS_wire).ordered_edges():
-        if idx < OriEdgePnt[0]:
-            Owire.Add(edg)
-        else:
-            None
-        idx += 1
-
-    Owire.Add(tmp_edge2.Edge())
-    Owire.Build()
-    return Owire.Wire()

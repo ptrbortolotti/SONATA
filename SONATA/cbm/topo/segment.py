@@ -1,25 +1,17 @@
 # Third party modules
 import numpy as np
-from OCC.Core.BRepBuilderAPI import (BRepBuilderAPI_MakeEdge,
-                                     BRepBuilderAPI_MakeWire,)
-from OCC.Core.Geom import Geom_Plane
-from OCC.Core.Geom2dAPI import Geom2dAPI_PointsToBSpline
-from OCC.Core.gp import gp_Dir, gp_Pln, gp_Pnt, gp_Pnt2d, gp_Vec, gp_Vec2d
+from OCC.Core.gp import gp_Vec2d
 
 # First party modules
 from SONATA.cbm.mesh.mesh_core import gen_core_cells
 from SONATA.cbm.mesh.mesh_utils import (grab_nodes_of_cells_on_BSplineLst,
     grab_nodes_on_BSplineLst, remove_dublicate_nodes,
     remove_duplicates_from_list_preserving_order,)
-from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_from_dct,
-                                              copy_BSplineLst,
+from SONATA.cbm.topo.BSplineLst_utils import (copy_BSplineLst,
                                               get_BSplineLst_D2,
                                               get_BSplineLst_Pnt2d,
                                               reverse_BSplineLst,
-                                              seg_boundary_from_dct,
-                                              set_BSplineLst_to_Origin,
-                                              trim_BSplineLst,
-                                              trim_BSplineLst_by_Pnt2d,)
+                                              trim_BSplineLst,)
 from SONATA.cbm.topo.layer import Layer
 from SONATA.cbm.topo.layer_utils import get_layer, get_segment, get_web
 from SONATA.cbm.topo.para_Geom2d_BsplineCurve import (BSplineLst_from_ParaLst,
