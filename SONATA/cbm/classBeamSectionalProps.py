@@ -7,13 +7,11 @@ Created on Wed Feb 13 13:59:15 2019
 """
 # Core Library modules
 import os
-from io import StringIO
 
 # Third party modules
 import numpy as np
 
 # First party modules
-from SONATA.cbm.cbm_utl import trsf_coords, trsf_sixbysix
 
 if __name__ == "__main__":
     os.chdir("../..")
@@ -204,61 +202,6 @@ class BeamSectionalProps(object):
     @property
     def VF(self):
         return np.linalg.inv(self.VS)
-
-    def rotate(self, Theta=0, copy=True):
-        """
-        rotates the VabsSectionalProps by angle theta. 
-        if copy
-        
-        Parameters
-        ----------
-        Theta : float
-            angle of rotation about x1 in radians 
-        copy : bool
-            turn true if you want a new copied instance returned,
-            default is False
-
-        Returns
-        ----------
-        tmp : BeamSectionalProps
-            copy and rotated VABSSectionalProps of self,
-        """
-
-        # defuine rotation matrix
-        T = np.array([[1, 0, 0], [0, np.cos(Theta), -np.sin(Theta)], [0, np.sin(Theta), np.cos(Theta)]])
-
-        # transform Stiffness and Mass Matrix
-        if copy:
-            tmp = BeamSectionalProps()
-        else:
-            tmp = self
-
-        tmp.TS = trsf_sixbysix(self.TS, T)
-        tmp.MM = trsf_sixbysix(self.MM, T)
-
-        # transform coordinates
-        try:
-            tmp.Xg = trsf_coords(np.hstack((np.zeros((1,)), self.Xg)), T)
-            tmp.Xt = trsf_coords(np.hstack((np.zeros((1,)), self.Xt)), T)
-            tmp.Xs = trsf_coords(np.hstack((np.zeros((1,)), self.Xs)), T)
-        except:
-            pass
-
-        # TODO: transform PIA
-        tmp.PIA = None
-
-        # TODO: transform Vlasov Stiffness Matrix and Trapez Effect related Matrices
-        tmp.VS = None
-        tmp.Ag = None
-        tmp.Bk = None
-        tmp.Ck = None
-        tmp.Dk = None
-
-        if copy:
-            return tmp
-        else:
-            return None
-
 
 # ======================================================
 #       MAIN

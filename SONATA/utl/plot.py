@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # First party modules
-from SONATA.cbm.cbm_utl import dymore2sixbysix
 
 # from matplotlib2tikz import save as tikz_save
 
@@ -364,69 +363,6 @@ def plot_beam_properties(data, sigma=None, ref=None, x_offset=0, description=Tru
     ax3[2, 1].set_ylim(0, 1.4e7)
 
     plt.show()
-
-
-def plot_beam_properties_histogram(mc_BeamProps, station_idx=[8, 9, 10], ptype="hist", xlim=(-10, 10), **kwargs):
-    ylabel = [(r"m_{00}", "kg/m"), (r"X_{m2}", "kg"), (r"X_{m3}", "kg"), (r"m_{33}", "kg m"), (r"m_{23}", "kg m"), (r"m_{22}", "kg m")]
-    MMlabel = np.asarray([r"$%s \quad [%s]$" % (e[0], e[1]) for e in ylabel]).reshape((3, 2))
-
-    mc_BeamProps = np.copy(mc_BeamProps)
-    mc_BeamProps[:, :, 1] = mc_BeamProps[:, :, 1] / mc_BeamProps[:, :, 0]
-    mc_BeamProps[:, :, 2] = mc_BeamProps[:, :, 2] / mc_BeamProps[:, :, 0]
-
-    mm = mc_BeamProps[:, :, :6].reshape((mc_BeamProps.shape[0], mc_BeamProps.shape[1], 3, 2))
-    for i in station_idx:
-        plot_2dhist(mm[:, i], MMlabel, title=str(i), ptype=ptype, **kwargs)
-
-    # 6x6 Stiffness Properties:
-    TSunits = np.array(
-        [
-            ["N", "N", "N", "Nm", "Nm", "Nm"],
-            ["N", "N", "N", "Nm", "Nm", "Nm"],
-            ["N", "N", "N", "Nm", "Nm", "Nm"],
-            ["Nm", "Nm", "Nm", "Nm^2", "Nm^2", "Nm^2"],
-            ["Nm", "Nm", "Nm", "Nm^2", "Nm^2", "Nm^2"],
-            ["Nm", "Nm", "Nm", "Nm^2", "Nm^2", "Nm^2"],
-        ]
-    )
-    # Ylabels
-    TSlabel = []
-    for i in range(6):
-        tmp = []
-        for j in range(6):
-            tmp.append(r"$k_{%s%s} \quad [%s]$" % (i + 1, j + 1, TSunits[i, j]))
-        TSlabel.append(tmp)
-    TSlabel = np.asarray(TSlabel)
-
-    ts = []
-    for s in mc_BeamProps:
-        tmp = []
-        for csprop in s:
-            tmp.append(dymore2sixbysix(csprop)[1])
-        ts.append(tmp)
-    ts = np.asarray(ts)
-
-    for i in station_idx:
-        plot_2dhist(ts[:, i], TSlabel, title=str(i), upper_tri=True, ptype=ptype, **kwargs)
-
-    tmp = np.delete(ts, [1, 2], axis=2)
-    cs = np.delete(tmp, [1, 2], axis=3)
-    tmp = np.delete(TSlabel, [1, 2], axis=0)
-    CSlabel = np.delete(tmp, [1, 2], axis=1)
-
-    for i in station_idx:
-        plot_2dhist(cs[:, i], CSlabel, upper_tri=True, ptype=ptype, xlim=xlim, **kwargs)
-
-    k44 = ts[:, :, 3, 3]
-    k55 = ts[:, :, 4, 4]
-
-    tmp = np.stack((k44, k55), axis=2)
-    tmp_label = TSlabel.diagonal()[[3, 4]]
-    for i in station_idx:
-        plot_2dhist(tmp[:, i], tmp_label, ptype=ptype, xlim=xlim, **kwargs)
-
-
-
 
 
 def sim_plot(fq_dym, RPM_vec, target_dir):
