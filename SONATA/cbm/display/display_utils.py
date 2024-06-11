@@ -8,6 +8,7 @@ import matplotlib as plt
 
 try:
     from OCC.Display.SimpleGui import init_display
+    from OCC.Display.backend import get_qt_modules
 except:
     pass
 from OCC.Core.gp import gp_Pnt, gp_Vec
@@ -15,6 +16,7 @@ from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
 from OCC.Core.gp import (gp_Pnt, gp_Vec,)
 from OCC.Core.Quantity import Quantity_Color
 from OCC.Display.SimpleGui import init_display
+from OCC.Display.backend import get_qt_modules
 
 # First party modules
 from SONATA.cbm.topo.wire_utils import trsf_wire
@@ -54,14 +56,6 @@ def display_config(DeviationAngle=1e-5, DeviationCoefficient=1e-5, bg_c=((20, 6,
         method
     """
 
-    def export_png(): return export_to_PNG(display)
-
-    def export_jpg(): return export_to_JPEG(display)
-
-    #    def export_pdf(): return export_to_PDF(display)
-    #    def export_svg(): return export_to_SVG(display)
-    #    def export_ps(): return export_to_PS(display)
-
     # ===========DISPLAY CONFIG:===============
     display, start_display, add_menu, add_function_to_menu = init_display()  # (backend_str='qt-pyqt5')
     display.Context.SetDeviationAngle(DeviationAngle)  # 0.001 default. Be careful to scale it to the problem.
@@ -83,8 +77,6 @@ def display_config(DeviationAngle=1e-5, DeviationCoefficient=1e-5, bg_c=((20, 6,
     add_function_to_menu("View", display.View_Iso)
 
     add_menu("Screencapture")
-    add_function_to_menu("Screencapture", export_png)
-    add_function_to_menu("Screencapture", export_jpg)
     #    add_function_to_menu('Screencapture', export_pdf)
     #    add_function_to_menu('Screencapture', export_svg)
     #    add_function_to_menu('Screencapture', export_ps)
@@ -149,7 +141,6 @@ def display_cbm_SegmentLst(display, SegmentLst, Ax2_blfr, Ax2_befr):
                 if k > 5:
                     k = 0
     return None
-
 
 def display_Ax2(display, Ax2, length=1):
     """
