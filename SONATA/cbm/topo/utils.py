@@ -280,20 +280,6 @@ def calc_angle_between(v1, v2):
     return angle
 
 
-##Neccesary functions:
-# def calc_angle_between(v1, v2):
-##    dot = np.dot(v1,v2)
-##    det = np.linalg.det([v1,v2])
-##    angle = -np.degrees(math.atan2(det, dot))
-#    angle = np.degrees(np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))))
-#    if angle < 0:
-#        angle = 360 + angle
-#
-#    '''Returns the angle in degree between vectors 'v1' and 'v2'''
-#    #return np.degrees(math.atan2(np.linalg.norm(np.cross(v1,v2)), np.dot(v1,v2)))
-#    return angle
-
-
 def calc_DCT_angles(DCT_data):
     temp = []
     if np.array_equal(DCT_data[0], DCT_data[-1]):  # closed
