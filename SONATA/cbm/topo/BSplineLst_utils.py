@@ -11,7 +11,7 @@ from OCC.Core.Geom2d import (Geom2d_BSplineCurve, Geom2d_Curve, Geom2d_Line,
                              Handle_Geom2d_BSplineCurve_DownCast,)
 from OCC.Core.Geom2dAdaptor import Geom2dAdaptor_Curve
 from OCC.Core.Geom2dAPI import (Geom2dAPI_Interpolate,
-                                Geom2dAPI_ProjectPointOnCurve,)
+                                Geom2dAPI_ProjectPointOnCurve,Geom2dAPI_InterCurveCurve,)
 from OCC.Core.GeomAdaptor import GeomAdaptor_Curve
 from OCC.Core.GeomAPI import (GeomAPI_IntCS, GeomAPI_Interpolate,
                               GeomAPI_ProjectPointOnCurve,)
@@ -691,6 +691,18 @@ def set_BSplineLst_to_Origin2(BSplineLst, gp_Pnt2d, tol=1e-3):
 
     return BSplineLst
 
+
+def intersect_BSplineLst_with_BSpline(BSplineLst, BSpline, tolerance=1e-10):
+    IntPnts = []
+    IntPnts_Pnt2d = []
+    for i, item in enumerate(BSplineLst):
+        intersection = Geom2dAPI_InterCurveCurve(BSpline, item, tolerance)
+        for j in range(1, intersection.NbPoints() + 1):
+            IntPnt = intersection.Point(j)
+            IntPnts_Pnt2d.append(IntPnt)
+            u = findPnt_on_curve(IntPnt, item)
+            IntPnts.append([i, u])
+    return IntPnts, IntPnts_Pnt2d
 
 if __name__ == "__main__":
     pass
