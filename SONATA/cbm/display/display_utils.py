@@ -3,28 +3,21 @@
 """ This Module describes all displying functionalietes of the code"""
 
 # Core Library modules
-import math
-import os
-import sys
-
 # Third party modules
 import matplotlib as plt
-import numpy as np
 
 try:
     from OCC.Display.SimpleGui import init_display
-    from OCC.Display.backend import get_qt_modules
 except:
     pass
-from OCC.Core.gp import gp_Pnt, gp_Dir, gp_Vec, gp_Ax1
+from OCC.Core.gp import gp_Pnt, gp_Vec
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
-from OCC.Core.gp import (gp_Ax1, gp_Dir, gp_Pnt, gp_Vec,)
+from OCC.Core.gp import (gp_Pnt, gp_Vec,)
 from OCC.Core.Quantity import Quantity_Color
-from OCC.Display.backend import get_qt_modules
 from OCC.Display.SimpleGui import init_display
 
 # First party modules
-from SONATA.cbm.topo.wire_utils import rotate_wire, translate_wire, trsf_wire
+from SONATA.cbm.topo.wire_utils import trsf_wire
 from SONATA.utl.trsf import trsf_cbm_to_blfr
 
 

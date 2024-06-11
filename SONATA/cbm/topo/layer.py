@@ -14,11 +14,9 @@ from SONATA.cbm.mesh.mesh_utils import (
     remove_duplicates_from_list_preserving_order,)
 from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_from_dct,
                                               ProjectPointOnBSplineLst,
-                                              copy_BSpline, copy_BSplineLst,
+                                              copy_BSpline,
                                               discretize_BSplineLst,
                                               findPnt_on_BSplineLst,
-                                              get_BSplineLst_length,
-                                              get_BSplineLst_Pnt2d,
                                               trim_BSplineLst,)
 from SONATA.cbm.topo.cutoff import cutoff_layer
 from SONATA.cbm.topo.layer_utils import get_layer
@@ -107,46 +105,8 @@ class Layer(object):
         self.BSplineLst = BSplineLst_from_ParaLst(self.Para_BSplineLst)
         self.build_wire()
 
-    def copy(self):
-        BSplineLstCopy = copy_BSplineLst(self.BSplineLst)
-        namecopy = self.name + "_Copy"
-        LayerCopy = Layer(self.ID, BSplineLstCopy, self.globalStart, self.globalEnd, self.thickness, self.Orientation, self.MatID, namecopy)
-        return LayerCopy
-
-    def get_length(self):  # Determine and return Legth of Layer self
-        self.length = get_BSplineLst_length(self.BSplineLst)
-        return self.length
-
-    # def get_pnt2d(self,S,start,end): #Return, gp_Pnt2d of argument S of layer self
-    #    return get_BSplineLst_Pnt2d(self.BSplineLst,S,start,end)
-
-    def get_Pnt2d(self, S, LayerLst, WebLst):
-        # print self.ID
-        # print 'cum_ivLst:',self.cumA_ivLst
-        for iv in self.cumA_ivLst:
-            if iv[0] <= S < iv[1]:
-                # print 'Coordinate',S,'is on layer',int(iv[2])
-                break
-
-        print(iv[2])
-        tmp_layer = next((x for x in LayerLst if x.ID == int(iv[2])), None)
-        if not tmp_layer == None:
-            Pnt2d = get_BSplineLst_Pnt2d(tmp_layer.a_BSplineLst, S, tmp_layer.S1, tmp_layer.S2)
-        else:  # Web
-            WebID = -int(iv[2]) - 1
-            Pnt2d = get_BSplineLst_Pnt2d(WebLst[WebID].BSplineLst, S, start=WebLst[WebID].Pos2, end=WebLst[WebID].Pos1)
-
-        return Pnt2d
-
     def build_wire(self):  # Builds TopoDS_Wire from connecting BSplineSegments and returns it
         self.wire = build_wire_from_BSplineLst(self.BSplineLst)
-
-    def trim(self, S1, S2, start, end):  # Trims layer between S1 and S2
-        return trim_BSplineLst(self.BSplineLst, S1, S2, start, end)
-
-    def trim_to_coords(self, start, end):
-        self.BSplineLst = trim_BSplineLst(self.BSplineLst, self.globalStart, self.globalEnd, start, end)
-        return self.BSplineLst
 
     def build_layer(self, l0=1):
         npArray = discretize_BSplineLst(self.Boundary_BSplineLst, 1.2e-6 * l0)

@@ -1,19 +1,16 @@
 # Third party modules
 import numpy as np
-from OCC.Core.gp import gp_Vec2d
-
 # First party modules
 from SONATA.cbm.mesh.mesh_core import gen_core_cells
 from SONATA.cbm.mesh.mesh_utils import (grab_nodes_of_cells_on_BSplineLst,
     grab_nodes_on_BSplineLst, remove_dublicate_nodes,
     remove_duplicates_from_list_preserving_order,)
 from SONATA.cbm.topo.BSplineLst_utils import (copy_BSplineLst,
-                                              get_BSplineLst_D2,
                                               get_BSplineLst_Pnt2d,
                                               reverse_BSplineLst,
                                               trim_BSplineLst,)
 from SONATA.cbm.topo.layer import Layer
-from SONATA.cbm.topo.layer_utils import get_layer, get_segment, get_web
+from SONATA.cbm.topo.layer_utils import get_layer
 from SONATA.cbm.topo.para_Geom2d_BsplineCurve import (BSplineLst_from_ParaLst,
                                                       ParaLst_from_BSplineLst,)
 from SONATA.cbm.topo.projection import (
@@ -211,31 +208,6 @@ class Segment(object):
         (BSplineLst, start, end) = self.get_BsplineLst_plus(lid, SegmentLst, WebLst)
         return get_BSplineLst_Pnt2d(BSplineLst, S, start, end)
 
-    def det_weight_Pnt2d(self, s, t):
-        """
-        determine the position of the 2d Point that describes the balance 
-        weight
-        
-        Parameters
-        --------
-        s : float
-            nondimensional s position between Start S1 and End S2
-        t : float
-            distance in normaldirection left of the boundary_BesplineLst
-        
-        Returns:
-        -------
-        p1 : gp_Pnt2d
-        
-        """
-        p0, v1, v2 = get_BSplineLst_D2(self.BSplineLst, s, 0, 1)
-        # print('det_weight_Pnt2d:', p0.Coord(), 's', s)
-        v = gp_Vec2d(v1.Y(), -v1.X())
-        v.Normalize()
-        v.Multiply(t)
-        p1 = p0.Translated(v)
-        return p1
-
     def build_layers(self, WebLst=None, Segment0=None, display=None, l0=None, **kwargs):
         """The build_layers member function of the class Segment generates all Layer objects and it's associated wires
         and return the relevant_boundary_BSplineLst"""
@@ -418,11 +390,6 @@ class Segment(object):
         self.final_Boundary_ivLst = sort_layup_projection([cum_ivLst])[0]
         self.final_Boundary_BSplineLst = self.ivLst_to_BSplineLst(self.final_Boundary_ivLst)
         return None
-
-    def copy(self):
-        BSplineLstCopy = copy_BSplineLst(self.BSplineLst)
-        SegmentCopy = Segment(self.ID, Layup=self.Layup, CoreMaterial=self.CoreMaterial, OCC=True, Boundary=BSplineLstCopy)
-        return SegmentCopy
 
     def build_wire(self):  # Builds TopoDS_Wire from connecting BSplineSegments and returns it
         self.wire = build_wire_from_BSplineLst(self.BSplineLst)

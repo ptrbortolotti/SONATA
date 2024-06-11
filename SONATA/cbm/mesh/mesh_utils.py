@@ -17,8 +17,6 @@ from SONATA.cbm.topo.BSplineLst_utils import (ProjectPointOnBSplineLst,
                                               copy_BSplineLst,
                                               get_BSpline_length,
                                               reverse_BSplineLst,)
-from SONATA.cbm.topo.wire_utils import (build_wire_from_BSplineLst,
-                                        get_wire_length,)
 
 
 def find_cells_that_contain_node(cells, n2find):
