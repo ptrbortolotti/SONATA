@@ -318,7 +318,6 @@ def plot_beam_properties(data, sigma=None, ref=None, x_offset=0, description=Tru
     if description == True:
         from matplotlib import rcParams
 
-        rcParams["text.latex.preamble"] = r"\usepackage{amsmath}"
         plt.figtext(0.05, 0.05, desc, usetex=True, wrap=True, bbox=dict(ec=(1.0, 0.5, 0.5), fc=(1.0, 0.8, 0.8)))
 
     # ============ ONLY FOR PAPER!

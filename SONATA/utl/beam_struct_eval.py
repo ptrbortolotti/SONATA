@@ -167,12 +167,9 @@ def plot_vabs_anbax(cs_pos, anbax_data, fig_title, save_path):
 
 def anbax_export_beam_struct_properties(folder_str, job_str, radial_stations, solver, beam_stiff, beam_inertia, beam_mass_per_length):
 
-    if solver=='anbax':
-        export_name_general = 'anbax_beam_properties_general.csv'
-        export_name_stiff = 'anbax_beam_properties_stiff_matrices.csv'
-        export_name_mass = 'anbax_beam_properties_mass_matrices.csv'
-    else:
-        print('Define correct solver name (anbax) when calling export_beam_struct_properties')
+    export_name_general = 'anbax_beam_properties_general.csv'
+    export_name_stiff = 'anbax_beam_properties_stiff_matrices.csv'
+    export_name_mass = 'anbax_beam_properties_mass_matrices.csv'
 
     # -------------------------------------------------- #
     # Export mass per unit length for the defined radial stations

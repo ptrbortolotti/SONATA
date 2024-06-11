@@ -411,6 +411,52 @@ class CBM(object):
 
         return
 
+
+    def cbm_exp_dymore_beamprops(self, eta, Theta=0, solver="vabs", units={"mass": "kg", "length": "m", "force": "N"}):
+        """
+        Converts the Units of CBM to DYMORE/PYMORE/MARC units and returns the 
+        array of the beamproperties with Massterms(6), Stiffness(21), 
+        damping(1) and curvilinear coordinate(1)
+
+        Parameters
+        ----------
+        
+        eta : float, 
+            is the beam curvilinear coordinate of the beam from 0 to 1. 
+        
+        Theta: float
+            is the angle of rotation of the coordinate system in "radians"
+
+        Returns
+        ----------
+        arr : ndarray
+            [Massterms(6) (m00, mEta2, mEta3, m33, m23, m22) 
+            Stiffness(21) (k11, k12, k22, k13, k23, k33,... k16, k26, ...k66)
+            Viscous Damping(1) mu, Curvilinear coordinate(1) eta]
+            
+            
+        Notes
+        ----------
+        - Unit Convertion takes sooo much time. Commented out for now!
+        
+        """
+        if solver == "vabs" or solver == "anbax":
+            if Theta != 0:
+                tmp_bp = self.BeamProperties.rotate(Theta)
+            else:
+                tmp_bp = self.BeamProperties
+
+        else:
+            print("Check solver for Dymore Beam Property input.")
+
+
+        MM = tmp_bp.MM
+        MASS = np.array([MM[0, 0], MM[2, 3], MM[0, 4], MM[5, 5], MM[4, 5], MM[4, 4]])
+        STIFF = tmp_bp.TS[np.tril_indices(6)[1], np.tril_indices(6)[0]]
+        mu = 0.0
+        return np.hstack((MASS, STIFF, mu, eta))
+
+
     def cbm_post_2dmesh(self, attribute="MatID", title="NOTITLE", **kw):
         """
         CBM Postprocessing method that displays the mesh with matplotlib.
