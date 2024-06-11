@@ -89,7 +89,6 @@ class CBMConfig(object):
 
         # Setup:
         self.setup = {}
-        self.setup["input_type"] = 5
         self.setup["datasource"] = None
         self.setup["material_db"] = None
         self.setup["radial_station"] = None
