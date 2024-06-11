@@ -23,8 +23,6 @@ from SONATA.cbm.cbm_utl import trsf_sixbysix
 from SONATA.cbm.classBeamSectionalProps import BeamSectionalProps
 from SONATA.cbm.classCBMConfig import CBMConfig
 from SONATA.cbm.display.display_mesh import plot_cells
-from SONATA.cbm.display.display_utils import (display_config)
-from SONATA.cbm.fileIO.CADoutput import export_to_step
 from SONATA.cbm.mesh.cell import Cell
 from SONATA.cbm.mesh.consolidate_mesh import consolidate_mesh_on_web
 from SONATA.cbm.mesh.mesh_core import gen_core_cells

@@ -30,7 +30,6 @@ from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_from_dct,
                                               set_BSplineLst_to_Origin2,)
 from SONATA.cbm.topo.to3d import bsplinelst_to3d, pnt_to3d, vec_to3d
 from SONATA.cbm.topo.utils import (Array_to_PntLst, PntLst_to_npArray,)
-from SONATA.cbm.fileIO.CADoutput import export_shape
 from SONATA.cbm.topo.wire_utils import (equidistant_Points_on_wire,)
 from SONATA.classAirfoil import Airfoil
 from SONATA.classComponent import Component

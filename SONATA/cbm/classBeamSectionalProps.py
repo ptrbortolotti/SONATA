@@ -14,7 +14,6 @@ import numpy as np
 
 # First party modules
 from SONATA.cbm.cbm_utl import trsf_coords, trsf_sixbysix
-from SONATA.cbm.fileIO.readinput import read_FLOATrowSTR
 
 if __name__ == "__main__":
     os.chdir("../..")

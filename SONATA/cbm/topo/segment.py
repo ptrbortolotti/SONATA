@@ -7,18 +7,13 @@ from OCC.Core.Geom2dAPI import Geom2dAPI_PointsToBSpline
 from OCC.Core.gp import gp_Dir, gp_Pln, gp_Pnt, gp_Pnt2d, gp_Vec, gp_Vec2d
 
 # First party modules
-from SONATA.cbm.fileIO.readinput import AirfoilDat2d, UIUCAirfoil2d
 from SONATA.cbm.mesh.mesh_core import gen_core_cells
-from SONATA.cbm.mesh.mesh_utils import (
-    find_cells_that_contain_node, grab_nodes_of_cells_on_BSplineLst,
+from SONATA.cbm.mesh.mesh_utils import (grab_nodes_of_cells_on_BSplineLst,
     grab_nodes_on_BSplineLst, remove_dublicate_nodes,
-    remove_duplicates_from_list_preserving_order, sort_and_reassignID,)
+    remove_duplicates_from_list_preserving_order,)
 from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_from_dct,
                                               copy_BSplineLst,
-                                              find_BSplineLst_coordinate,
-                                              get_BSpline_length,
                                               get_BSplineLst_D2,
-                                              get_BSplineLst_length,
                                               get_BSplineLst_Pnt2d,
                                               reverse_BSplineLst,
                                               seg_boundary_from_dct,
@@ -30,9 +25,7 @@ from SONATA.cbm.topo.layer_utils import get_layer, get_segment, get_web
 from SONATA.cbm.topo.para_Geom2d_BsplineCurve import (BSplineLst_from_ParaLst,
                                                       ParaLst_from_BSplineLst,)
 from SONATA.cbm.topo.projection import (
-    chop_interval_from_layup, cummulated_layup_boundaries,
-    insert_interval_in_layup, inverse_relevant_cummulated_layup_boundaries,
-    plot_layup_projection, relevant_cummulated_layup_boundaries,
+    chop_interval_from_layup,insert_interval_in_layup, inverse_relevant_cummulated_layup_boundaries, relevant_cummulated_layup_boundaries,
     sort_layup_projection,)
 from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst
 
@@ -441,28 +434,6 @@ class Segment(object):
 
     def build_wire(self):  # Builds TopoDS_Wire from connecting BSplineSegments and returns it
         self.wire = build_wire_from_BSplineLst(self.BSplineLst)
-
-    def BSplineLst_from_airfoil_database(self, string, angular_deflection=30, scale_factor=1.0):
-        """
-        string: 'naca23012'
-        angular deflection: allowed angluar deflection in discrete representation before starting to split
-        """
-        DCT_data = UIUCAirfoil2d(string).T
-        DCT_data = np.multiply(DCT_data, scale_factor)
-        self.BSplineLst = seg_boundary_from_dct(DCT_data, angular_deflection)
-        return self.BSplineLst
-
-    def BSplineLst_from_file(self, filename, angular_deflection=30, scale_factor=1.0):
-        """
-        filename: 'naca23012.dat'
-        angular_deflection allowed angular deflection in discrete representation before starting to split default
-        """
-        DCT_data = AirfoilDat2d(filename).T
-        DCT_data = np.multiply(DCT_data, scale_factor)
-        # self.BSplineLst = seg_boundary_from_dct(DCT_data, angular_deflection)
-        self.BSplineLst = BSplineLst_from_dct(DCT_data)
-        # BSplineLst_from_dct
-        return self.BSplineLst
 
     def build_segment_boundary_from_WebLst(self, WebLst, Segment0):
         print("STATUS:\t Building Segment Boundaries %s" % (self.ID))

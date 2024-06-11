@@ -21,8 +21,6 @@ from OCC.Core.TopoDS import TopoDS_Compound, topods_Edge, topods_Face
 from OCC.Display.SimpleGui import init_display
 
 # First party modules
-from SONATA.cbm.fileIO.CADinput import (Check_BSplineLst_Head2Tail,
-                                        order_BSplineLst_Head2Tail,)
 from SONATA.cbm.mesh.cell import Cell
 from SONATA.cbm.mesh.node import Node
 from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_Orientation,

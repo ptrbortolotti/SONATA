@@ -5,7 +5,6 @@ from OCC.Core.gp import gp_Pnt2d
 from scipy.spatial import distance
 
 # First party modules
-from SONATA.cbm.fileIO.CADinput import order_BSplineLst_Head2Tail
 from SONATA.cbm.mesh.mesh_byprojection import \
     mesh_by_projecting_nodes_on_BSplineLst
 from SONATA.cbm.mesh.mesh_improvements import (
