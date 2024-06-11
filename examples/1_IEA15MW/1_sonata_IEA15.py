@@ -61,7 +61,7 @@ job.blade_gen_section(topo_flag=True, mesh_flag = True)
 
 # ===== VABS / ANBAX combination/verification ===== #
 # Define flags
-flag_3d = True
+flag_3d = False
 flag_run_anbax = True
 flag_DeamDyn_def_transform = True               # transform from SONATA to BeamDyn coordinate system
 flag_csv_export = True                         # export csv files with structural data
