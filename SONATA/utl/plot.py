@@ -6,9 +6,7 @@ Created on Tue Dec  4 14:49:51 2018
 @author: gu32kij
 """
 # Third party modules
-import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
-import matplotlib.ticker as mtick
 import numpy as np
 
 # First party modules

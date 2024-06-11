@@ -21,11 +21,11 @@ print('Current working directory is:', os.getcwd())
 
 
 # ===== Provide Path Directory & Yaml Filename ===== #
-folder_str = os.getcwd() + '/'
+run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
 job_str = '0_box_beam_HT_antisym_layup_15_6_SI_SmithChopra91.yaml'  # note: for better meshing convergence, units specified in yaml are in 'mm' instead of 'm'
 job_name = 'box_beam_SmithChopra91'
 
-filename_str = folder_str + job_str
+filename_str = run_dir + job_str
 
 
 # ===== Define flags ===== #

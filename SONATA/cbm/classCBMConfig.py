@@ -149,43 +149,6 @@ class CBMConfig(object):
             self.setup["BalanceWeight"] = True
 
 
-# The following code is commented for cleanup and may be deleted later on if really not needed any longer
-
-    # def _read_yaml_config(self, fname):
-    #     """ read the CBM config file and assign class attributes
-    #
-    #     Parameters:
-    #     ----------
-    #     fname : str
-    #         filename of the yaml style cbm input configuration
-    #
-    #     """
-    #     b_string = clean_filestring(fname, comments="#")
-    #     yDict = yaml.load(b_string)
-    #     self.setup = yDict["Setup"]
-    #
-    #     if "Webs" in yDict.keys():
-    #         D = {int(k.split()[-1]): v for (k, v) in yDict["Webs"].items()}
-    #         self.webs = OrderedDict(sorted(D.items()))
-    #
-    #     # print(self.setup['BalanceWeight'])
-    #     if self.setup["BalanceWeight"] == True:
-    #         self.bw = yDict["BalanceWeight"]
-    #
-    #     # read segments:
-    #     D = {int(k.split()[-1]): v for (k, v) in yDict["Segments"].items()}
-    #
-    #     for k in D:
-    #         if D[k]["Layup"] != None:
-    #             D[k]["Layup_names"] = np.asarray(D[k]["Layup"])[:, 5].tolist()
-    #             D[k]["Layup"] = np.asarray(D[k]["Layup"])[:, :5].astype(np.float)
-    #         else:
-    #             D[k]["Layup"] = np.empty((0, 0))
-    #             D[k]["Layup_names"] = np.empty((0, 0))
-    #
-    #     self.segments = OrderedDict(sorted(D.items()))
-
-
 if __name__ == "__main__":
 
     # classic configuration file:
