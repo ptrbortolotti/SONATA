@@ -1,5 +1,4 @@
 # Third party modules
-import matplotlib.pyplot as plt
 import numpy as np
 from OCC.Core.gp import gp_Pnt2d
 from scipy.spatial import distance
@@ -8,27 +7,21 @@ from scipy.spatial import distance
 from SONATA.cbm.mesh.mesh_byprojection import \
     mesh_by_projecting_nodes_on_BSplineLst
 from SONATA.cbm.mesh.mesh_improvements import (
-    integrate_leftover_interior_nodes, modify_cornerstyle_one,
     modify_sharp_corners, second_stage_improvements,)
 from SONATA.cbm.mesh.mesh_utils import (
-    equidistant_nodes_on_BSplineLst, find_cells_that_contain_node,
-    find_node_by_ID, grab_nodes_of_cells_on_BSplineLst,
+    equidistant_nodes_on_BSplineLst,
     grab_nodes_on_BSplineLst, merge_nodes_if_too_close,
-    remove_duplicates_from_list_preserving_order, sort_and_reassignID,)
+    remove_duplicates_from_list_preserving_order,)
 from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_from_dct,
-                                              BSplineLst_Orientation,
                                               ProjectPointOnBSplineLst,
                                               copy_BSpline, copy_BSplineLst,
                                               discretize_BSplineLst,
-                                              find_BSplineLst_pos,
                                               findPnt_on_BSplineLst,
-                                              get_BSpline_length,
                                               get_BSplineLst_length,
                                               get_BSplineLst_Pnt2d,
-                                              reverse_BSplineLst,
                                               trim_BSplineLst,)
 from SONATA.cbm.topo.cutoff import cutoff_layer
-from SONATA.cbm.topo.layer_utils import get_layer, get_segment, get_web
+from SONATA.cbm.topo.layer_utils import get_layer
 from SONATA.cbm.topo.offset import shp_parallel_offset
 from SONATA.cbm.topo.para_Geom2d_BsplineCurve import (BSplineLst_from_ParaLst,
                                                       ParaLst_from_BSplineLst,)

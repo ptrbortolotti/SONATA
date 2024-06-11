@@ -7,14 +7,12 @@ Created on Fri Dec 22 10:30:01 2017
 
 # Third party modules
 import numpy as np
-from OCC.Core.Geom2dAPI import (Geom2dAPI_PointsToBSpline,
-                                Geom2dAPI_ProjectPointOnCurve,)
-from OCC.Core.gp import gp_Pnt2d, gp_Vec2d
+from OCC.Core.Geom2dAPI import (Geom2dAPI_ProjectPointOnCurve,)
+from OCC.Core.gp import gp_Vec2d
 
 # First party modules
 from SONATA.cbm.mesh.cell import Cell
-from SONATA.cbm.mesh.mesh_utils import (move_node_on_BSplineLst,
-                                        theta_1_from_2nodes,)
+from SONATA.cbm.mesh.mesh_utils import (theta_1_from_2nodes,)
 from SONATA.cbm.mesh.node import Node
 from SONATA.cbm.topo.BSplineLst_utils import ProjectPointOnBSplineLst
 
@@ -184,52 +182,6 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
 
     return enhanced_cells, new_b_nodes
 
-
-def modify_cornerstyle_one(cells, b_BSplineLst, **kwargs):
-
-    # KWARGS:
-    if kwargs.get("display") != None:
-        display = kwargs.get("display")
-
-    enhanced_cells = []
-    for i, c in enumerate(cells):
-        if len(c.nodes) == 4:
-            if c.nodes[0].cornerstyle == 1:
-                # TODO: Wrap into single function that has the variable of affecting neighboring range
-                # =====Neighbor to the Right==============
-                # determine distance between node 0 and 3 and move node 2 by 2/3(y-x) closer to node 1
-                x = c.nodes[0].Pnt2d.Distance(c.nodes[3].Pnt2d)
-                y = c.nodes[1].Pnt2d.Distance(c.nodes[2].Pnt2d)
-                delta = 2 / float(3) * (y - x)
-                move_node_on_BSplineLst(b_BSplineLst, c.nodes[2], -delta)
-
-                # =====Neighbor to the Right +1 ==============
-                x = cells[i + 1].nodes[0].Pnt2d.Distance(cells[i + 1].nodes[3].Pnt2d)
-                y = cells[i + 1].nodes[1].Pnt2d.Distance(cells[i + 1].nodes[2].Pnt2d)
-                delta = 1 / float(3) * (y - x)
-                move_node_on_BSplineLst(b_BSplineLst, cells[i + 1].nodes[2], -delta)
-
-            if c.nodes[3].cornerstyle == 1:
-                # =====Neighbor to the LEFT ==============
-                x = c.nodes[0].Pnt2d.Distance(c.nodes[3].Pnt2d)
-                y = c.nodes[1].Pnt2d.Distance(c.nodes[2].Pnt2d)
-                delta = 2 / float(3) * (y - x)
-                move_node_on_BSplineLst(b_BSplineLst, c.nodes[1], delta)
-
-                # =====Neighbor to the LEFT +1 ==============
-                x = cells[i - 1].nodes[0].Pnt2d.Distance(cells[i - 1].nodes[3].Pnt2d)
-                y = cells[i - 1].nodes[1].Pnt2d.Distance(cells[i - 1].nodes[2].Pnt2d)
-                delta = 1 / float(3) * (y - x)
-                move_node_on_BSplineLst(b_BSplineLst, cells[i - 1].nodes[1], delta)
-
-            else:
-                enhanced_cells.append(c)
-        else:
-            enhanced_cells.append(c)
-
-    return enhanced_cells
-
-
 def second_stage_improvements(cells, b_BSplineLst, global_minLen, LayerID=0, factor1=1.8, factor2=0.15, **kw):
 
     if kw.get("display") != None:
@@ -291,44 +243,3 @@ def second_stage_improvements(cells, b_BSplineLst, global_minLen, LayerID=0, fac
             None
 
     return enhanced_cells2, new_b_nodes
-
-
-def integrate_leftover_interior_nodes(a_nodes, a_BSplineLst, b_nodes, b_BSplineLst, cells, thickness, LayerID, **kw):
-
-    if kw.get("display") != None:
-        display = kw.get("display")
-
-    aglTol = 0.5
-    linTol = 1e-6
-    prjTol = 1e-2
-    celTol = 0.1
-    leftover_exterior_corners = []
-    for i, item in enumerate(b_BSplineLst[:-1]):
-        spline1 = item
-        spline2 = b_BSplineLst[i + 1]
-        u1, p1, v1 = spline1.LastParameter(), gp_Pnt2d(), gp_Vec2d()
-        u2, p2, v2 = spline2.FirstParameter(), gp_Pnt2d(), gp_Vec2d()
-        spline1.D1(u1, p1, v1)
-        spline2.D1(u2, p2, v2)
-
-        Angle = abs(v1.Angle(v2)) * 180 / np.pi
-        if Angle > aglTol and not any(n.Pnt2d.IsEqual(item.EndPoint(), linTol) for n in b_nodes):
-            leftover_exterior_corners.append((item.EndPoint(), [LayerID, i, u1]))
-
-    # reversed projection:
-    for p1 in leftover_exterior_corners:
-        new_b_node = Node(p1[0], p1[1])
-        p2 = ProjectPointOnBSplineLst(a_BSplineLst, p1[0], (1 + prjTol) * thickness)
-
-        if len(p2) > 0:
-            for c in cells:
-                if c.cell_node_distance(new_b_node) < (1 + celTol) * thickness:
-                    print(len(leftover_exterior_corners))
-                    display.DisplayShape(p2[0], color="YELLOW")
-                    display.DisplayShape(c.wire, color="ORANGE")
-
-    if kw.get("display") != None:
-        for p in leftover_exterior_corners:
-            display.DisplayShape(p[0], color="RED")
-
-    return None

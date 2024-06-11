@@ -25,8 +25,6 @@ from SONATA.cbm.classCBMConfig import CBMConfig
 from SONATA.cbm.display.display_mesh import plot_cells
 from SONATA.cbm.mesh.cell import Cell
 from SONATA.cbm.mesh.consolidate_mesh import consolidate_mesh_on_web
-from SONATA.cbm.mesh.mesh_core import gen_core_cells
-from SONATA.cbm.mesh.mesh_intersect import map_mesh_by_intersect_curve2d
 from SONATA.cbm.mesh.mesh_utils import (grab_nodes_of_cells_on_BSplineLst,
                                         sort_and_reassignID,)
 from SONATA.cbm.mesh.node import Node
@@ -336,31 +334,6 @@ class CBM(object):
             else:
                 newcells = consolidate_mesh_on_web(web, web_consolidate_tol, self.display)
                 self.mesh.extend(newcells)
-        
-        #=====================split quad cells into trias:
-        if split_quads == True:
-            print("STATUS:\t Splitting Quads into Trias")
-            tmp = []
-            for c in self.mesh:
-                tmp.extend(c.split_quads())
-            self.mesh = tmp
-
-        # ============= BALANCE WEIGHT - CUTTING HOLE ALGORITHM
-        if self.config.setup["BalanceWeight"] == True:
-            print("STATUS:\t Meshing Balance Weight")
-
-            self.mesh, boundary_nodes = map_mesh_by_intersect_curve2d(self.mesh, self.BW.Curve, self.BW.wire, global_minLen)
-            # boundary_nodes = merge_nodes_if_too_close(boundary_nodes,self.BW.Curve,global_minLen,tol=0.05))
-            [bw_cells, bw_nodes] = gen_core_cells(boundary_nodes, bw_cell_area)
-
-            for c in bw_cells:
-                c.structured = False
-                c.theta_3 = 0
-                c.MatID = self.config.bw["Material"]
-                c.calc_theta_1()
-
-            self.mesh.extend(bw_cells)
-
         # invert nodes list of all cell to make sure they are counterclockwise for vabs in the right coordinate system!
         for c in self.mesh:
             if c.orientation == False:

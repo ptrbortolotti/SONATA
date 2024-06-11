@@ -63,28 +63,6 @@ def triangle_mesh(array, options):
     # plot.compare(plt, poly, mesh)
     return mesh
 
-
-def find_node(nodeLst, ID):
-    """finds the node in the list of nodes (nodeLst) that has the id == ID
-        Args:
-            nodeLst: (list of nodes) this list of objects to search
-            ID: (int) the ID that is to be found
-        
-        Returns: 
-            tmp: the first node with the id==ID       
-        
-        TODO: There might be a quicker way to search for it. 
-                With dictionarys...?
-        """
-    for n in nodeLst:
-        if n.id == ID:
-            tmp = n
-            break
-        else:
-            tmp = None
-    return tmp
-
-
 def gen_core_cells(a_nodes, area=1.0, **kwargs):
     """The gen_core_cells function generates the triagular mesh within the 
     a_nodes polygon.        
