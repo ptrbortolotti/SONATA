@@ -30,7 +30,7 @@ class CBMConfig(object):
         filename, when config filename is given.
         
     setup: dict
-        contains the following fields: input_type, datasource, material_db, 
+        contains the following fields: datasource, material_db, 
         radial_station, Theta, scale_factor, BalanceWeight and mesh_resolution
     
     webs: OrderedDict
