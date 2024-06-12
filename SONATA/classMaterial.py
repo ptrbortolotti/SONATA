@@ -243,9 +243,6 @@ def read_materials(yml):
             materials[ID] = IsotropicMaterial(ID=ID, **mat)
         elif mat.get('orth') == 1:
             materials[ID] = OrthotropicMaterial(ID=ID, flag_mat=flag_materials_vector_input, **mat)
-        elif mat.get('orth') == 2:
-            materials[ID] = AnisotropicMaterial(ID=ID, **mat)
-        
     materials = OrderedDict(sorted(materials.items()))
     return materials
 
@@ -257,7 +254,6 @@ def find_material(materials, attr, value):
 if __name__ == '__main__':
     a = IsotropicMaterial(ID=1, name='iso_mat', rho=0.4, )
     b = OrthotropicMaterial(ID=2, name='orth_mat', rho=0.5)
-    c = AnisotropicMaterial(ID=3, name='aniso_mat', rho=0.6)
 
     #    materials1 = read_yml_materials('examples/mat_db.yml')
     #
