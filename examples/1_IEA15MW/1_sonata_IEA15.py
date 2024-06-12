@@ -61,12 +61,8 @@ job.blade_gen_section(topo_flag=True, mesh_flag = True)
 
 # Define flags
 flag_3d = False
-flag_run_anbax = True
-flag_DeamDyn_def_transform = True               # transform from SONATA to BeamDyn coordinate system
 flag_csv_export = True                         # export csv files with structural data
 # Update flags dictionary
-flags_dict['flag_run_anbax'] = flag_run_anbax
-flags_dict['flag_DeamDyn_def_transform'] = flag_DeamDyn_def_transform
 flags_dict['flag_csv_export'] = flag_csv_export
 Loads_dict = {"Forces":[1.,1.,1.],"Moments":[1.,1.,1.]}
 
