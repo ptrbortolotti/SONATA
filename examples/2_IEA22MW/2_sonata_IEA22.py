@@ -33,6 +33,9 @@ flag_wf                 = True      # plot wire-frame
 flag_lft                = True      # plot lofted shape of blade surface (flag_wf=True obligatory); Note: create loft with grid refinement without too many radial_stations; can also export step file of lofted shape
 flag_topo               = True      # plot mesh topology
 c2_axis                 = False
+flag_DeamDyn_def_transform = True               # transform from SONATA to BeamDyn coordinate system
+flag_write_BeamDyn = True                       # write BeamDyn input files for follow-up OpenFAST analysis (requires flag_DeamDyn_def_transform = True)
+flag_write_BeamDyn_unit_convert = ''  #'mm_to_m'     # applied only when exported to BeamDyn files
 
 
 # create flag dictionary
@@ -64,6 +67,9 @@ flag_3d = False
 flag_csv_export = True                         # export csv files with structural data
 # Update flags dictionary
 flags_dict['flag_csv_export'] = flag_csv_export
+flags_dict['flag_DeamDyn_def_transform'] = flag_DeamDyn_def_transform
+flags_dict['flag_write_BeamDyn'] = flag_write_BeamDyn
+flags_dict['flag_write_BeamDyn_unit_convert'] = flag_write_BeamDyn_unit_convert
 Loads_dict = {"Forces":[1.,1.,1.],"Moments":[1.,1.,1.]}
 
 # Set damping for BeamDyn input file
@@ -74,7 +80,7 @@ mu1 = 2*zeta[0]/omega[0]
 mu2 = 2*zeta[1]/omega[1]
 mu3 = 2*zeta[2]/omega[2]
 mu = np.array([mu1, mu2, mu3, mu2, mu1, mu3])
-beam_struct_eval(flags_dict, Loads_dict, radial_stations, job, run_dir, job_str)
+beam_struct_eval(flags_dict, Loads_dict, radial_stations, job, run_dir, job_str, mu)
 
 # ===== PLOTS ===== #
 # job.blade_plot_attributes()
