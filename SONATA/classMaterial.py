@@ -226,20 +226,6 @@ class OrthotropicMaterial(Material):
         # self.S23 = float(kw.get('S23'))
 
 
-class AnisotropicMaterial(Material):
-    __slots__ = ('C', 'alpha')
-
-    def __init__(self, **kw):
-        kw["orth"] = 2
-        Material.__init__(self, **kw)
-
-        self.C = np.asarray(kw.get('C')).astype(float)
-        self.alpha = np.asarray(kw.get('alpha')).astype(float)
-
-        # TODO: Set Strenght Characteristics according for Anisotropic Material
-        # as second and forth order Strength Tensor Fij, and F
-
-
 def read_materials(yml):
     materials = OrderedDict()
     for i, mat in enumerate(yml):

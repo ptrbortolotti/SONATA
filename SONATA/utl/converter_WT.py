@@ -10,8 +10,6 @@ import numpy as np
 from scipy.interpolate import PchipInterpolator
 from collections import OrderedDict
 import yaml
-# from jsonschema import validate
-import matplotlib.pyplot as plt
 
 
 if __name__ == '__main__':

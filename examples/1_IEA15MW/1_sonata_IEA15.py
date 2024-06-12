@@ -59,7 +59,6 @@ job = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=rad
 # ===== Build & mesh segments ===== #
 job.blade_gen_section(topo_flag=True, mesh_flag = True)
 
-# ===== VABS / ANBAX combination/verification ===== #
 # Define flags
 flag_3d = False
 flag_run_anbax = True

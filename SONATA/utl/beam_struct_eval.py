@@ -8,7 +8,6 @@ Created on Wednesday Nov 20 13:33:33 2019
 
 
 from builtins import len, range
-import matplotlib.pyplot as plt
 import numpy as np
 import csv
 import os
@@ -106,64 +105,6 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str):
     # --------------------------------------- #
     # rect_data_analytical = utls_analytical_rectangle()
 
-
-
-# ============================================= #
-def plot_beam_props_6by6(cs_pos, data, fig_title, save_path):
-    # plots 6x6 matrix
-    k = 1
-    fig = plt.figure(tight_layout=True, figsize=(14, 10), dpi=80, facecolor='w', edgecolor='k')
-    # fig = plt.figure(tight_layout=True, figsize=(9, 6), dpi=80, facecolor='w', edgecolor='k')
-    # fig.suptitle(fig_title)
-    for i in range(len(data[0, :, 0])):
-        for j in range(len(data[0, 0, :])):
-            if j >= i:
-                ax = fig.add_subplot(len(data[0, :, 0]), len(data[0, 0, :]), k)
-                ax.plot(cs_pos, data[:, i, j], '-k')
-                plt.ylim(1.1 * min(-1, min(data[:, i, j])), 1.1 * max(1, max(data[:, i, j])))
-                ax.set_xlabel('r/R')
-                if fig_title == 'Mass matrix':
-                    ax.set_title('$m_{%i %i}$' % ((i + 1), (j + 1)))
-                elif fig_title == 'Stiffness matrix':
-                    ax.set_title('$k_{%i %i}$' % ((i + 1), (j + 1)))
-                ax.grid(True)
-            k = k + 1
-    plt.show()
-    fig.savefig(''.join(save_path), dpi=300)
-
-    return None
-
-
-
-
-
-# ============================================= #
-def plot_vabs_anbax(cs_pos, anbax_data, fig_title, save_path):
-    # plots 6x6 matrix
-    k = 1
-    fig = plt.figure(tight_layout=True, figsize=(14, 10), dpi=80, facecolor='w', edgecolor='k')
-    # fig.suptitle(fig_title)
-    for i in range(len(anbax_data[0, :, 0])):
-        for j in range(len(anbax_data[0, 0, :])):
-            if j >= i:
-                ax = fig.add_subplot(len(anbax_data[0, :, 0]), len(anbax_data[0, 0, :]), k)
-                ax.plot(cs_pos, anbax_data[:, i, j], ':r')
-                plt.ylim(1.1 * min(-1, min(anbax_data[:, i, j]), min(anbax_data[:, i, j])), 1.1 * max(1, max(anbax_data[:, i, j]), max(anbax_data[:, i, j])))
-                ax.set_xlabel('r/R')
-                if fig_title == 'Mass matrix':
-                    ax.set_title('$m_{%i %i}$' % ((i + 1), (j + 1)))
-                elif fig_title == 'Stiffness matrix':
-                    ax.set_title('$k_{%i %i}$' % ((i + 1), (j + 1)))
-                ax.grid(True)
-            k = k + 1
-    plt.show()
-    fig.savefig(''.join(save_path), dpi=300)
-
-    return None
-
-
-
-# ============================================= #
 
 def anbax_export_beam_struct_properties(folder_str, job_str, radial_stations, solver, beam_stiff, beam_inertia, beam_mass_per_length):
 

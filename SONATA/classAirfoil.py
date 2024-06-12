@@ -9,7 +9,6 @@ Created on Wed Dec 19 09:38:49 2018
 import itertools
 import numbers
 import os
-from urllib.request import urlopen
 
 # Third party modules
 import matplotlib.pyplot as plt
@@ -24,8 +23,6 @@ from SONATA.cbm.topo.utils import (PntLst_to_npArray,)
 from SONATA.cbm.topo.wire_utils import (build_wire_from_BSplineLst,
                                         equidistant_Points_on_wire,
                                         trsf_wire,)
-
-from SONATA.classPolar import Polar
 from SONATA.utl.trsf import trsf_af_to_blfr
 
 # SONATA modules:
@@ -85,9 +82,6 @@ class Airfoil(object):
         if isinstance(coordinates, np.ndarray) and coordinates.shape[1] == 2:
             self.coordinates = coordinates
 
-        if isinstance(polars, list) and all(isinstance(p, Polar) for p in polars):
-            self.polars = polars
-
         if isinstance(relative_thickness, numbers.Real) and relative_thickness >= 0:
             self.relative_thickness = relative_thickness
 
@@ -117,33 +111,6 @@ class Airfoil(object):
             self.coordinates = np.asarray([yml["coordinates"]["x"], yml["coordinates"]["y"]], dtype=float).T
         else:
             self.get_UIUCCoordinates()
-
-        if self.polars:
-            self.polars = [Polar(p) for p in yml["polars"]]
-        else:
-            self.polars = None
-
-    def get_UIUCCoordinates(self):
-        url = "http://m-selig.ae.illinois.edu/ads/coord_seligFmt/%s.dat" % self.name
-        try:
-            with urlopen(url) as f:
-                self.coordinates = np.loadtxt(f, skiprows=1)
-        except:
-            print("HTTPError: Not Found")
-
-    def write_yaml_airfoil(self):
-        """
-        writes the airfoil class attributes to a dictionary
-        """
-        tmp = {}
-        tmp["name"] = self.name
-        tmp["coordinates"] = dict(zip(("x", "y"), self.coordinates.T.tolist()))
-        tmp["relative_thickness"] = self.relative_thickness
-        if self.polars != None:
-            tmp["polars"] = [p.write_yaml_airfoil() for p in self.polars]
-        else:
-            tmp["polars"] = None
-        return tmp
 
     def gen_OCCtopo(self, angular_deflection = 30 ):
         """
@@ -202,37 +169,6 @@ class Airfoil(object):
         # print(BSplineLst)
         return (wire, te_pnt)  # bspline, nodes, normals
 
-    def gen_wopwop_dist(self, NbPoints=50, divide_surf=True):
-        """
-        distributes points and normal vectors on the upper and lower part of 
-        the airfoil. Subsequently those points are transformed to the blade 
-        reference frame.
-        
-        
-        Parameters
-        ----------
-        
-        
-        """
-
-        data = self.coordinates
-
-        le_idx = np.argmin(np.linalg.norm(data, axis=1))
-        up_data = data[0 : le_idx + 1]
-        lo_data = data[le_idx:-1]
-
-        up_BSplineLst = BSplineLst_from_dct(up_data, angular_deflection=45, closed=False, tol_interp=1e-5, twoD=True)
-        lo_BSplineLst = BSplineLst_from_dct(lo_data, angular_deflection=45, closed=False, tol_interp=1e-5, twoD=True)
-
-        up_pnts2d, up_vecs2d = equidistant_D1_on_BSplineLst(up_BSplineLst, NbPoints)
-        lo_pnts2d, lo_vecs2d = equidistant_D1_on_BSplineLst(lo_BSplineLst, NbPoints)
-
-        BSplineLst2d = up_BSplineLst + lo_BSplineLst
-        pnts2d = up_pnts2d + lo_pnts2d
-        vecs2d = up_vecs2d + lo_vecs2d
-
-        return (BSplineLst2d, pnts2d, vecs2d)
-
     def transformed(self, airfoil2, k=0.5, n=200):
         """
         Performs and linear interpolation of the airfoil with another airfoil 
@@ -275,89 +211,6 @@ class Airfoil(object):
         trf_af.name = "TRF_" + self.name + "_" + airfoil2.name + "_" + str_k.replace(".", "")
         trf_af.coordinates = PntLst_to_npArray(pres)[:, :2]
         return trf_af
-
-    def plot_polars(
-        self, xlim=(-24, 32), markercycle=".>^+*",
-    ):
-        """
-        plots the airfoil coordinates and the stored polars. 
-        
-        Parameters
-        ----------
-        xlim : tuple
-            The user can define a lower and upper x-axis limit in deg.
-        markercycle : str
-            A string of marker symbols to be used when plotting multiple polars
-            the markers would be repeated, if more polars that markers are set.
-
-        """
-        fig, ax = plt.subplots(2, 2)
-        fig.suptitle(self.name, fontsize=16)
-        fig.subplots_adjust(wspace=0.25, hspace=0.25)
-
-        # plot airfoil coordinates
-        ax[0][0].plot(self.coordinates[:, 0], self.coordinates[:, 1], ".k--")
-        ax[0][0].axis("equal")
-        ax[0][0].set_xlabel("x/c")
-        ax[0][0].set_ylabel("y/c")
-
-        if self.polars:
-            for po, ms in zip(self.polars, itertools.cycle(markercycle)):
-                label = po.configuration + ", Re: " + "{:.2e}".format(po.re) + ", Ma: " + str(po.ma)
-
-                ax[0][1].plot(np.rad2deg(po.c_l[:, 0]), po.c_l[:, 1], label=label, marker=ms)
-                ax[0][1].set_ylabel(r"Section lift coefficient, $c_l$")
-
-                ax[1][0].plot(np.rad2deg(po.c_d[:, 0]), po.c_d[:, 1], label=label, marker=ms)
-                ax[1][0].set_ylabel(r"Section drag coefficient, $c_d$")
-
-                ax[1][1].plot(np.rad2deg(po.c_m[:, 0]), po.c_m[:, 1], label=label, marker=ms)
-                ax[1][1].set_ylabel(r"Section drag coefficient, $c_d$")
-
-                # Formatting
-                for i, j in ((0, 1), (1, 0), (1, 1)):
-                    ax[i][j].set_xlabel(r"Section angle of attack, $\alpha$, deg")
-                    ax[i][j].set_xlim(xlim[0], xlim[1])
-                    ax[i][j].grid(b=True, which="major", color="k", linestyle="-")
-                    ax[i][j].minorticks_on()
-                    ax[i][j].grid(b=True, which="minor", color="k", linestyle=":", alpha=0.4)
-                    ax[i][j].axhline(xmin=xlim[0], xmax=xlim[1], color="k", linestyle="-", linewidth=1.5)
-                    ax[i][j].axvline(ymin=0, ymax=1, color="k", linestyle="-", linewidth=1.5)
-                    ax[i][j].legend()
-
-    def post_3dviewer(self):
-        (self.display, self.start_display, self.add_menu, self.add_function_to_menu) = display_config(cs_size=0.3, DeviationAngle=1e-7, DeviationCoefficient=1e-7)
-        if self.wire == None:
-            self.gen_OCCtopo()
-
-        for s in self.BSplineLst:
-            self.display.DisplayShape(s)
-
-        # self.display.DisplayShape(self.wire)
-        self.display.View_Top()
-        self.display.FitAll()
-        self.start_display()
-
-    def run_mses(self, re, ma):
-        """
-        run mses to calculate the polars.
-        
-        Notes
-        ----------
-        A possiblity in the future.
-        """
-        pass
-
-    def run_xfoil(self, re, ma):
-        """
-        run xfoil to calculate the polars.
-        
-        Notes
-        ----------
-        A possiblity in the future.
-        """
-        pass
-
 
 if __name__ == "__main__":
     plt.close("all")

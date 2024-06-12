@@ -5,16 +5,11 @@ Created on Wed Dec 19 09:38:19 2018
 
 @author: Tobias Pflumm
 """
-# Core Library modules
-import logging
-import os
-
 # Third party modules
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 # from jsonschema import validate
-from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
 from OCC.Core.gp import (gp_Ax1, gp_Ax2, gp_Ax3, gp_Dir, gp_Pln,
                          gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec,)
 from scipy.interpolate import interp1d
@@ -486,21 +481,6 @@ class Blade(Component):
         """
         return np.column_stack((self.blade_ref_axis, self.chord[:, 1], self.twist[:, 1], self.pitch_axis[:, 1]))
 
-    @property
-    def x(self):
-        """
-        getter method for the property grid to retrive only the 
-        nondimensional grid values
-
-        Returns
-        -------
-        float
-            non dimensional grid value (x)
-
-        """
-        return self.blade_ref_axis[:, 0]
-
-
 
     def blade_gen_section(self, topo_flag=True, mesh_flag=True, **kwargs):
         """
@@ -532,109 +512,6 @@ class Blade(Component):
                 cs.cbm_gen_mesh(**kwargs)
         return None
 
-
-    def blade_gen_loft(self, **kwargs):
-        """
-        generates the blade lofting surface. Multiple options can be passed 
-        down to the make_loft functioon such as 
-        ruled=False, tolerance=1e-6, max_degree=16, continuity=1.
-        If a filename="wt.iges" is passed, this is used to save the surface as
-        step, iges oder stl.
-
-        Returns
-        -------
-        None.
-
-        """        
-    
-        self.loft=None
-        wireframe = []
-        
-        for bm, afl in zip(self.blade_matrix, self.airfoils[:, 1]):
-            afl.gen_OCCtopo(angular_deflection=20)  # 160
-            (wire, te_pnt) = afl.trsf_to_blfr(bm[1:4], bm[6], bm[4], bm[5])
-            wireframe.append(wire)
-            
-        self.loft = make_loft(wireframe,  **kwargs)
-        
-        kwargs2 = {}
-        if "filename" in kwargs:
-            kwargs2["filename"]  = kwargs.get("filename")
-        export_shape([self.loft], **kwargs2)
-            #self.display.DisplayShape(loft, transparency=0.5, update=True)
-
-        return None
-
-    def blade_gen_wopwop_mesh(self, xres, cres, deformation=None, normals="2d", minset=False):
-            """
-            method that generates a mesh of the surface that is necessary for 
-            PSU Wopwop. It is a structured mesh of points and their normals. 
-            The normals are currently only impemented that they are within the 
-            crosssectional plane (normals = '2d') and theirfore not normal to the 
-            surface. 
-            
-            Parameters
-            ----------
-            xres : array 
-                radial resolution in the form of an array that specifies the radial 
-                locations
-                
-            cres : int
-                chordwise resolution, how many points per cross-section
-                
-            deformation : array, optional
-                in the futur it shall be possible pass a deformation vector of 3 
-                displacements and 3 rotations to get the mesh of the deformed 
-                rotor-blade. This function is carried out in the trsf_af_to_blfr
-            
-            normals : str, optional
-                currently only '2d' normal vectors are implemented that are in the
-                yz plane.
-                
-            minset : bool, otional
-                if true the minimum set of radial values are superimposed with the 
-                xres array.
-                
-            Returns
-            -------
-            wopwop_bsplinelst : [[Geom_BSplineLst]]
-            wopwop_pnts : [[gp_Pnt]]
-            wopwop_vecs : [[gp_Vec]]
-                
-            """
-    
-            x = xres
-            if minset:
-                minx = self.blade_ref_axis[:, 0]
-                x = np.unique(np.sort(np.hstack((xres, minx))))
-    
-            # BSplineLst, PntLst =self._interpolate_cbm_boundary(x,nPoints=50,return_Pnts = True) #Old
-            airfoil_position = (list(self.airfoils[:, 0]), [af.name for af in self.airfoils[:, 1]])
-            airfoils = list(self.airfoils[:, 1])
-            wopafls = np.asarray([[x, interp_airfoil_position(airfoil_position, airfoils, x)] for x in x])
-    
-            self.wopwop_bsplinelst = []
-            self.wopwop_pnts = []
-            self.wopwop_vecs = []
-    
-            for x, af in wopafls:
-                (BSplineLst2d, pnts2d, vecs2d) = af.gen_wopwop_dist(cres)
-    
-                Pnts = [pnt_to3d(p) for p in pnts2d]
-                Vecs = [vec_to3d(v) for v in vecs2d]
-                BSplineLst = bsplinelst_to3d(BSplineLst2d, gp_Pln(gp_Pnt(0, 0, 0), gp_Dir(0, 0, 1)))
-    
-                Trsf = trsf_af_to_blfr(self.f_blade_ref_axis.interpolate(x)[0][0], float(self.f_pa(x)), float(self.f_chord(x)), float(self.f_twist(x)), deformation=deformation)
-                [s.Transform(Trsf) for s in BSplineLst]
-                Pnts = [p.Transformed(Trsf) for p in Pnts]
-                Vecs = [v.Transformed(Trsf) for v in Vecs]
-    
-                self.wopwop_bsplinelst.append(BSplineLst)
-                self.wopwop_pnts.append(Pnts)
-                self.wopwop_vecs.append(Vecs)
-    
-            return self.wopwop_bsplinelst, self.wopwop_pnts, self.wopwop_vecs
-    
     def blade_run_anbax(self, loads=None, **kwargs):
         """
         runs anbax for every section
@@ -791,29 +668,6 @@ class Blade(Component):
             cs.cbm_post_2dmesh(title=string, section = str(x), **kwargs)
         return None    
     
-    
-    # def blade_post_3dtopo(self, flag_wf = True, flag_lft = False, flag_topo = False, flag_mesh = False, flag_wopwop=False, **kwargs):
-    #     """
-    #     plots the cross-sections of the blade with matplotlib
-    #
-    #     Parameters
-    #     ----------
-    #     **kwargs : TYPE
-    #         multiple keyword arguments can be passed down to the
-    #         cbm_post_2dmesh method.
-    #
-    #     Returns
-    #     -------
-    #     None.
-    #
-    #     """
-    #     for (x, cs) in self.sections:
-    #         string = "Blade: " + str(self.name) + "; Section : " + str(x)
-    #         cs.cbm_post_2dmesh(title=string, **kwargs)
-    #     return None
-
-
-
     def blade_post_3dtopo(self, flag_wf=True, flag_lft=False, flag_topo=False, flag_mesh=False, flag_wopwop=False):
         """
         generates the wireframe and the loft surface of the blade
