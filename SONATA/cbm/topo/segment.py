@@ -59,9 +59,6 @@ class Segment(object):
             if kwargs.get("airfoil") != None:
                 BSplineLst_tmp = self.BSplineLst_from_airfoil_database(kwargs.get("airfoil"), 30, self.scale_factor)
 
-            elif kwargs.get("filename") != None:
-                BSplineLst_tmp = self.BSplineLst_from_file(kwargs.get("filename"), 30, self.scale_factor)
-            self.BSplineLst = set_BSplineLst_to_Origin(BSplineLst_tmp)
 
     def __repr__(self):
         return "{}: {}".format(self.__class__.__name__, self.ID)
@@ -311,27 +308,10 @@ class Segment(object):
                 (BSplineLst, start, end) = self.get_BsplineLst_plus(int(iv[2]), SegmentLst, WebLst, layer_attr="a_BSplineLst")
                 iv_BSplineLst = trim_BSplineLst(BSplineLst, iv[0], iv[1], start, end)
 
-                if iv[2] < 0:
-                    disco_nodes = []
-                    web = get_web(iv[2], WebLst)
-                    # find nodes on the other side of the web interface
-                    # if no other nodes are found on that interface. Raise Error Message
-                    if self.ID == web.ID:  # BACK
-                        disco_nodes = grab_nodes_of_cells_on_BSplineLst(SegmentLst[self.ID + 1].l_cells, iv_BSplineLst)
-
-                    else:  # Front
-                        disco_nodes = grab_nodes_of_cells_on_BSplineLst(SegmentLst[self.ID - 1].l_cells, iv_BSplineLst)
-
-                    if disco_nodes == []:
-                        print("ERROR:\t No nodes are found on the web interface", web.ID)
-                    else:
-                        core_a_nodes.extend(disco_nodes[0][1:-1])
-
-                else:
-                    # print iv, "use nodes a_nodes of layer", int(iv[2])
-                    tmp_layer = get_layer(iv[2], SegmentLst)
-                    disco_nodes = grab_nodes_on_BSplineLst(tmp_layer.a_nodes, iv_BSplineLst)
-                    core_a_nodes.extend(disco_nodes)
+                # print iv, "use nodes a_nodes of layer", int(iv[2])
+                tmp_layer = get_layer(iv[2], SegmentLst)
+                disco_nodes = grab_nodes_on_BSplineLst(tmp_layer.a_nodes, iv_BSplineLst)
+                core_a_nodes.extend(disco_nodes)
 
             core_a_nodes = remove_dublicate_nodes(core_a_nodes)
             core_a_nodes = remove_duplicates_from_list_preserving_order(core_a_nodes)
