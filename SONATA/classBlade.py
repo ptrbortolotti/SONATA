@@ -742,6 +742,68 @@ class Blade(Component):
         self.display.View_Iso()
         self.display.FitAll()
         self.start_display()
+        
+    def blade_exp_beam_props(self, cosy='local', style='DYMORE', eta_offset=0, solver='anbax', filename = None):
+        """
+        Exports the beam_properties in the 
+        
+        Parameters
+        ----------
+        cosy : str, optional
+            either 'global' for the global beam coordinate system or 
+            'local' for a coordinate system that is always pointing with 
+            the chord-line (in the twisted frame)
+        
+        style : str, optional
+            select the style you want the beam_properties to be exported
+            'DYMORE' will return an array of the following form:
+            [[Massterms(6) (m00, mEta2, mEta3, m33, m23, m22)
+            Stiffness(21) (k11, k12, k22, k13, k23, k33,... k16, k26, ...k66)
+            Viscous Damping(1) mu, Curvilinear coordinate(1) eta]]
+            ...
+            
+        eta_offset : float, optional
+            if the beam eta coordinates from start to end of the beam doesn't 
+            coincide with the global coorinate system of the blade. The unit
+            is in nondimensional r coordinates (x/Radius)
+            
+        solver : str, optional
+            solver : if multiple or other solvers than vabs were applied, use 
+            this option
+        
+        filename : str, optional
+            if the user wants to write the output to a file. 
+            
+        Returns
+        ----------
+        arr : ndarray
+            an array that reprensents the beam properties for the 
+        """
+
+        lst = []
+        for cs in self.sections:
+            # collect data for each section
+            R = self.blade_ref_axis[-1, 1]
+            # eta = -eta_offset/(1-eta_offset) + (1/(1-eta_offset))*cs[0]
+            eta = (cs[0] * R) - (eta_offset * R)
+            if style == "DYMORE":
+                lst.append(cs[1].cbm_exp_dymore_beamprops(eta=eta, solver=solver))
+
+            elif style == "BeamDyn":
+                lst.append(cs[1].cbm_exp_BeamDyn_beamprops(eta=eta, solver=solver))
+
+            elif style == "CAMRADII":
+                pass
+
+            elif style == "CPLambda":
+                pass
+
+        arr = np.asarray(lst)
+
+        return arr
+
+
+
 
 
 
