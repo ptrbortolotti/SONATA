@@ -6,14 +6,6 @@ layup boundaries of the SONATA Layup definition.
 
  consits of the following functions:
     
-    - timelines(y, xstart, xstop, c='b'): Plot timelines at y from xstart to 
-            xstop with given color.
-    - datafunc1(interval,islower=None): boolean function that can be used in 
-            the intervaltree slice function 
-    - datafunc2(interval,islower=None): boolean function that can be used in 
-            the intervaltree slice function 
-    - projection_of_layers2(layup,begin,end,idx): Truthfully I currently don't
-            know the exact inded of this funtion.
     - insert_interval_in_layup(layup,begin,end): insert_interval_in_layup 
             generates a intervaltree structure t1 from layup 
             and inserts a new intervaltree set t2 [begin, end] or 
@@ -21,10 +13,6 @@ layup boundaries of the SONATA Layup definition.
     - chop_interval_from_layup(layup,begin,end): chops an intervaltree 
             structure t1 from layup to a given interval [begin, end] or 
             [0,end][begin,1].
-    - cummulated_layup_boundaries(Layup): fuctions generates a interval 
-            structure from the Layup definitions so that for each layer the 
-            information of the underlying layers that create and interval#
-            between zero and one is given.
 
 Created on Mon Dec 19 16:32:15 2016
 @author: TPflumm

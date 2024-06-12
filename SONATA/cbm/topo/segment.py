@@ -169,25 +169,7 @@ class Segment(object):
         start = None
         end = None
 
-        if lid == 0:
-            get_segment(lid, SegmentLst)
-            BSplineLst = SegmentLst[0].BSplineLst
-            start = 0.0
-            end = 1.0
-
-        elif lid < 0:
-            web = get_web(lid, WebLst)
-            if self.ID == web.ID:  # BACK
-                BSplineLst = reverse_BSplineLst(copy_BSplineLst(web.BSplineLst))
-                start = web.Pos2
-                end = web.Pos1
-
-            else:  # FRONT
-                BSplineLst = web.BSplineLst
-                start = web.Pos1
-                end = web.Pos2
-
-        elif lid > 0:
+        if lid > 0:
             layer = get_layer(lid, SegmentLst)
             BSplineLst = getattr(layer, layer_attr)
             start = layer.S1

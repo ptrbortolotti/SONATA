@@ -763,9 +763,3 @@ if __name__ == "__main__":
 
     job = Blade(name="IEAonshoreWT")
     job.read_yaml(yml.get("components").get("blade"), airfoils, materials, wt_flag=True)
-
-    # job.blade_gen_section(mesh_flag = True)
-    # job.blade_run_anbax()
-    # job.blade_plot_sections()
-    # job.blade_post_3dtopo(flag_lft = False, flag_topo = True)
- 

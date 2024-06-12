@@ -106,11 +106,6 @@ def show_coordinate_system(display, length=1, event=None):
     display.DisplayMessage(p2, "y", message_color=(0, 0, 0))
     display.DisplayMessage(p3, "z", message_color=(0, 0, 0))
 
-def display_points_of_array(array, display):
-    for j in range(array.Lower(), array.Upper() + 1):
-        p = array.Value(j)
-        display.DisplayShape(p, update=False)
-
 # =======================SONATA DISPLAY FUCTIONS===================================
 
 def display_cbm_SegmentLst(display, SegmentLst, Ax2_blfr, Ax2_befr):
@@ -168,75 +163,6 @@ def display_Ax2(display, Ax2, length=1):
     display.DisplayShape(e2, color="GREEN")
     display.DisplayShape(e3, color="BLUE")
 
-    return None
-
-def plot_nodes(nodes):
-    fig, ax = plt.subplots()
-    nodes_array = []
-    for n in nodes:
-        nodes_array.append([n.coordinates[0], n.coordinates[1]])
-    nodes_array = np.asarray(nodes_array)
-    plt.plot(nodes_array[:, 0], nodes_array[:, 1], ".-")
-    plt.axis("equal")
-    plt.show()
-
-
-
-def export_to_BMP(display, event=None):
-    display.set_bg_gradient_color([255, 255, 255], [255, 255, 255])
-    i = 0
-    while os.path.exists("img/capture_bmp%s.bmp" % i):
-        i += 1
-    display.View.Dump("img/capture_bmp%s.bmp" % i)
-    print("EXPORT: \t Screencapture exported to img/capture_bmp%s.bmp" % i)
-    display.set_bg_gradient_color([20, 6, 111], [200, 200, 200])
-
-
-def export_to_PNG(display, event=None):
-    display.set_bg_gradient_color([255, 255, 255], [255, 255, 255])
-    i = 0
-    while os.path.exists("img/capture_png%s.png" % i):
-        i += 1
-    display.View.Dump("img/capture_png%s.png" % i)
-    print("EXPORT: \t Screencapture exported to img/capture_png%s.bmp" % i)
-    display.set_bg_gradient_color([20, 6, 111], [200, 200, 200])
-
-
-def export_to_JPEG(display, event=None):
-    display.set_bg_gradient_color([255, 255, 255], [255, 255, 255])
-    i = 0
-    while os.path.exists("img/capture_jpeg%s.jpeg" % i):
-        i += 1
-    display.View.Dump("img/capture_jpeg%s.jpeg" % i)
-    print("EXPORT: \t Screencapture exported to img/capture_jpeg%s.jpeg" % i)
-    display.set_bg_gradient_color([20, 6, 111], [200, 200, 200])
-
-
-def export_to_TIFF(display, event=None):
-    display.set_bg_gradient_color([255, 255, 255], [255, 255, 255])
-    i = 0
-    while os.path.exists("img/capture_tiff%s.tiff" % i):
-        i += 1
-    display.View.Dump("img/capture_tiff%s.tiff" % i)
-    print("EXPORT: \t Screencapture exported to img/capture_tiff%s.tiff" % i)
-    display.set_bg_gradient_color([20, 6, 111], [200, 200, 200])
-
-
-def print_xy_click(SHP, *kwargs):
-    for shape in SHP:
-        print(("Shape selected: ", shape))
-    print(kwargs)
-
-
-
-def findMainWindow():
-    # Global function to find the (open) QMainWindow in application
-
-    QtCore, QtGui, QtWidgets, QtOpenGL = get_qt_modules()
-    app = QtWidgets.QApplication.instance()
-    for widget in app.topLevelWidgets():
-        if isinstance(widget, QtWidgets.QMainWindow):
-            return widget
     return None
 
 def close():

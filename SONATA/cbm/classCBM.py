@@ -73,31 +73,7 @@ class CBM(object):
         outer curve.  
 
     Methods
-    -------
-    cbm_save(output_filename=None)
-         saves the complete cbm instance as pickle
-    
-    cbm_load(input_filename=None)
-        loads the complete cbm instance from pickle
-    
-    cbm_save_topo(output_filename=None)
-        saves the topology (SegmentLst, WebLst, and BW) as pickle
-        
-    cbm_load_topo(input_filename=None)
-        loads the topology (SegmentLst, WebLst, and BW) from pickle
-        
-    cbm_save_mesh(output_filename=None)
-        saves the mesh (self.mesh) as pickle
-        
-    cbm_load_mesh(input_filename=None)
-        loads the mesh (self.mesh) as pickle
-        
-    cbm_save_res(output_filename=None)
-        saves the configuration and the VABS BeamProperties results as pickle
-    
-    cbm_load_res(input_filename=None)
-        saves the configuration and the VABS BeamProperties results from pickle
-        
+    -------     
     cbm_stpexport_topo(export_filename=None)
         exports all Layer wires and the Segment0 Boundary Wire as .step
        

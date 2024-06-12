@@ -48,9 +48,7 @@ class Web(object):
 
         if self.curvature == 0:  # if no curvature is assigned or curvature is assigned to be zero
             self.BSplineLst = BSplineLst_straight
-        else:
-            self.BSplineLst = bend_web_BSplineLst(BSplineLst_straight, self.Pos1_Pnt2d, self.Pos2_Pnt2d, self.curvature)
-            
+
         self.wr_nodes =[] 
         self.wl_nodes = []
         self.wr_cells =[] 
