@@ -50,7 +50,7 @@ flags_dict = {"flag_wt_ontology": flag_wt_ontology, "flag_ref_axes_wt": flag_ref
 
 # ===== User defined radial stations ===== #
 # Define the radial stations for cross sectional analysis (only used for flag_wt_ontology = True -> otherwise, sections from yaml file are used!)
-radial_stations =  [0., 0.05, 0.01, 0.25 ,0.5 ,0.75,1.]
+radial_stations =  [0., 0.05, 0.25 ,0.5, 1.]
 # radial_stations = [0.3]
 
 # ===== Execute SONATA Blade Component Object ===== #
