@@ -3,6 +3,7 @@ import numpy as np
 from SONATA.classBlade import Blade
 from SONATA.utl.beam_struct_eval import beam_struct_eval
 
+
 # Path to yaml file
 run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
 job_str = 'IEA-15-240-RWT.yaml'
@@ -49,7 +50,7 @@ flags_dict = {"flag_wt_ontology": flag_wt_ontology, "flag_ref_axes_wt": flag_ref
 
 # ===== User defined radial stations ===== #
 # Define the radial stations for cross sectional analysis (only used for flag_wt_ontology = True -> otherwise, sections from yaml file are used!)
-radial_stations =  [0.  , 0.01, 0.02, 0.03, 0.04, 0.05, 0.075, 0.1 ,   0.15, 0.2 , 0.25, 0.3 , 0.35, 0.4, 0.45, 0.5 , 0.55, 0.6 , 0.65, 0.7 , 0.75, 0.8 , 0.85, 0.9 , 0.95, 1.]
+radial_stations =  [0.  , 0.01, 0.02, 0.15, 0.2 , 0.25, 0.3 , 0.35, 0.7 , 0.75, 0.95, 1.]
 # radial_stations = [0.3]
 
 # ===== Execute SONATA Blade Component Object ===== #
@@ -91,7 +92,4 @@ beam_struct_eval(flags_dict, Loads_dict, radial_stations, job, run_dir, job_str,
 job.blade_plot_sections(attribute=attribute_str, plotTheta11=flag_plotTheta11, plotDisplacement=flag_plotDisplacement, savepath=run_dir)
 if flag_3d:
     job.blade_post_3dtopo(flag_wf=flags_dict['flag_wf'], flag_lft=flags_dict['flag_lft'], flag_topo=flags_dict['flag_topo'])
-
-
-
 
