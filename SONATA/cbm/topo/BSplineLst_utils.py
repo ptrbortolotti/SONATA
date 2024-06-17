@@ -623,20 +623,18 @@ def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_inter
     return list_of_bsplines
 
 
-def set_BSplineLst_to_Origin2(BSplineLst, gp_Pnt2d, tol=1e-3):
+def set_BSplineLst_to_Origin2(BSplineLst, gp_Pnt2d, tol=1e-1):
     """
-    this procedure reorders the self.BSplineLst to and origin if the layer 
+    this procedure reorders the self.BSplineLst to an origin if the layer 
     is closed. The Origin is detected by searching for an orthogonal 
     projection of the StartPoint of the self.Boundary_BSplineLst. If no 
     projection is found it takes the closest neighbor of the discrete 
     offlinepts (Offset Line Points).
             
     """
-    # print(BSplineLst, gp_Pnt2d)
     # Determine Origin as point
     if BSplineLst[0].StartPoint().IsEqual(BSplineLst[-1].EndPoint(), 1e-5):
         proj = ProjectPointOnBSplineLst(BSplineLst, gp_Pnt2d, tol)
-
         if len(proj) > 0:
             OriPnt = proj[0]
         elif len(proj) == 0:

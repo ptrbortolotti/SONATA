@@ -237,7 +237,7 @@ class Layer(object):
 
     def set_layer_origin(self):
         """
-        this procedure reorders the self.BSplineLst to and origin if the layer 
+        this procedure reorders the self.BSplineLst to an origin if the layer 
         is closed. The Origin is detected by searching for an orthogonal 
         projection of the StartPoint of the self.Boundary_BSplineLst. If no 
         projection is found it takes the closest neighbor of the discrete 

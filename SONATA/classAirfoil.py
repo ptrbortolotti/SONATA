@@ -107,11 +107,7 @@ class Airfoil(object):
         self.name = yml["name"]
         self.relative_thickness = yml.get("relative_thickness")
 
-        if yml["coordinates"]:
-            self.coordinates = np.asarray([yml["coordinates"]["x"], yml["coordinates"]["y"]], dtype=float).T
-        else:
-            self.get_UIUCCoordinates()
-
+        self.coordinates = np.asarray([yml["coordinates"]["x"], yml["coordinates"]["y"]], dtype=float).T
     def gen_OCCtopo(self, angular_deflection = 30 ):
         """
         generates a Opencascade TopoDS_Wire and BSplineLst from the airfoil coordinates.
@@ -162,11 +158,6 @@ class Airfoil(object):
         wire = trsf_wire(self.wire, Trsf)
         tmp_pnt = gp_Pnt(self.te_coordinates[0], self.te_coordinates[1], 0)
         te_pnt = tmp_pnt.Transformed(Trsf)
-        #        print(self.BSplineLst)
-        #        BSplineLst_tmp = copy_BSplineLst(self.BSplineLst)
-        #        print(BSplineLst_tmp)
-        #        [s.Transform(Trsf) for s in BSplineLst_tmp]
-        # print(BSplineLst)
         return (wire, te_pnt)  # bspline, nodes, normals
 
     def transformed(self, airfoil2, k=0.5, n=200):
@@ -210,6 +201,8 @@ class Airfoil(object):
         str_k = "%.3f" % k
         trf_af.name = "TRF_" + self.name + "_" + airfoil2.name + "_" + str_k.replace(".", "")
         trf_af.coordinates = PntLst_to_npArray(pres)[:, :2]
+        max_x_index = max(range(len(trf_af.coordinates)), key = lambda i: trf_af.coordinates[i][0])
+        trf_af.coordinates = np.vstack((trf_af.coordinates[max_x_index:], trf_af.coordinates[: max_x_index]))
         return trf_af
 
 if __name__ == "__main__":

@@ -313,54 +313,6 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
                                         tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['orientation'] = 0.
 
                                     web_filler_index = False  #  after completing the te part (this web is finished now!), prepare for next web
-
-
-
-
-
-
-
-
-
-                            # ========= OLD without split yaml files ========= #
-                            #  NEW YAML FILES INCLUDE ALREADY SEPARATED WEBS  #
-                                #
-                                # if tmp2[i]['segments'][id_seg - 1]['layup'] != [{}]:
-                                #     tmp2[i]['segments'][id_seg - 1]['layup'].append({})
-                                #     id_layer_web_le[i] = id_layer_web_le[i] + 1
-                                #
-                                # if tmp2[i]['segments'][id_seg + 1]['layup'] != [{}]:
-                                #     tmp2[i]['segments'][id_seg + 1]['layup'].append({})
-                                #     id_layer_web_te[i] = id_layer_web_te[i] + 1
-                                #
-                                #
-                                #
-                                # tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['name'] = 'web_' + str(int(id_seg/2)) + '_' + sec['material']  + '_' + str(x[i])
-                                # tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['name'] = 'web_' + str(int(id_seg/2)) + '_' + sec['material']  + '_' + str(x[i])
-                                #
-                                # tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['material_name'] = sec['material']
-                                # tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['material_name'] = sec['material']
-                                #
-                                # set_interp = PchipInterpolator(sec['thickness']['grid'], sec['thickness']['values'])
-                                # tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['thickness'] = set_interp(x[i]) * 0.5
-                                # tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['thickness'] = set_interp(x[i]) * 0.5
-                                #
-                                # flange = 0.01
-                                #
-                                # tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['start'] = id_webs[i][(sec['web'])]['end_nd_arc'] - flange
-                                # tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['end']   = id_webs[i][(sec['web'])]['start_nd_arc'] + flange
-                                #
-                                #
-                                # tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['start'] = id_webs[i][(sec['web'])]['start_nd_arc'] - flange
-                                # tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['end']   = id_webs[i][(sec['web'])]['end_nd_arc'] + flange
-                                #
-                                # if 'fiber_orientation' in sec.keys():
-                                #     set_interp = PchipInterpolator(sec['fiber_orientation']['grid'], sec['fiber_orientation']['values'])
-                                #     tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['orientation'] = set_interp(x[i])
-                                #     tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['orientation'] = set_interp(x[i])
-                                # else:
-                                #     tmp2[i]['segments'][id_seg - 1]['layup'][id_layer_web_le[i]]['orientation'] = 0.
-                                #     tmp2[i]['segments'][id_seg + 1]['layup'][id_layer_web_te[i]]['orientation'] = 0.
         # if x[i] > span_adhesive and n_webs > 0:
         if x[i] > span_adhesive and len(tmp2[i]['segments']) > 1:
             # id_seg = n_webs*2 + 2
@@ -403,8 +355,14 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
 
                 # if len(profile[:,0]) != len(np.unique(profile[:,0])):
                 #     raise Exception('Airfoil at station {:d} does not have unique x points'.format(id_profile))
-
                 profile_curve   = arc_length(profile[:,0], profile[:,1]) / arc_length(profile[:,0], profile[:,1])[-1]
+
+                # Making sure profile_curve is strictly increasing so PchipInterpolator can be used
+                increment = 0.00001
+                for k in range(1,len(profile_curve)):
+                    while profile_curve[k] <= profile_curve[k-1]:
+                        profile_curve[k] += increment
+
 
                 set_interp      = PchipInterpolator(profile_curve, profile[:,0])
                 x_web_start     = set_interp(start)
@@ -422,10 +380,25 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
                 else:
                     offset_edge = 1
 
-                set_interp      = PchipInterpolator(np.flip(profile[offset_edge:id_le - offset_edge,0]), np.flip(profile_curve[offset_edge:id_le - offset_edge]))
+
+                flipped_profile = np.flip(profile[offset_edge:id_le - offset_edge,0])
+                # Making sure flipped_profile is strictly increasing so PchipInterpolator can be used
+                increment = 0.00001
+                for k in range(1,len(flipped_profile)):
+                    while flipped_profile[k] <= flipped_profile[k-1]:
+                        flipped_profile[k] += increment
+
+                set_interp      = PchipInterpolator(flipped_profile, np.flip(profile_curve[offset_edge:id_le - offset_edge]))
                 web_start_le , web_start_te    = set_interp([x_web_start_le , x_web_start_te])
 
-                set_interp      = PchipInterpolator(profile[id_le + offset_edge:-offset_edge,0], profile_curve[id_le + offset_edge:-offset_edge])
+                unflipped_profile = profile[id_le + offset_edge:-offset_edge,0]
+                # Making sure profile_curve is strictly increasing so PchipInterpolator can be used
+                increment = 0.00001
+                for k in range(1,len(unflipped_profile)):
+                    while unflipped_profile[k] <= unflipped_profile[k-1]:
+                        unflipped_profile[k] += increment
+
+                set_interp      = PchipInterpolator(unflipped_profile, profile_curve[id_le + offset_edge:-offset_edge])
                 web_end_le , web_end_te        = set_interp([x_web_end_le , x_web_end_te])
 
 
