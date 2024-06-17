@@ -312,7 +312,7 @@ class Blade(Component):
         x0 = x - (np.sin(beta) * a * fs / self.f_blade_ref_axis.interpolate(1.0)[0][0, 0])
         x1 = x + (np.sin(beta) * b * fs / self.f_blade_ref_axis.interpolate(1.0)[0][0, 0])
 
-        # select all airfoil in the interval between x0 < x1 and their closest neigors
+        # select all airfoil in the interval between x0 < x1 and their closest neighbors
         idx0 = np.searchsorted(self.airfoils[:, 0], x0, side="left") - 1
         idx1 = np.searchsorted(self.airfoils[:, 0], x1, side="right")
 
@@ -338,7 +338,6 @@ class Blade(Component):
                 PntLst = equidistant_Points_on_wire(w, nPoints)
                 tmp.append(PntLst_to_npArray(PntLst))
             array = np.asarray(tmp)
-            # tes = np.asarray([tes]
             te_array = np.expand_dims(PntLst_to_npArray(tes), axis=1)
             result = array_pln_intersect(array, ax2)
             te_res = array_pln_intersect(te_array, ax2)
@@ -350,12 +349,9 @@ class Blade(Component):
             te_res = PntLst_to_npArray(tes)
 
         trsf = trsf_blfr_to_cbm(self.Ax2, ax2)
-
-        #        plt.plot(*result[:,1:].T)
-        #        plt.plot(*te_res[:,1:].T,'s')
-
         PntLst = Array_to_PntLst(result)
         te_pnt = Array_to_PntLst(te_res)[0]
+        # Going from blade frame to cbm frame
         PntLst = [p.Transformed(trsf) for p in PntLst]
         te_pnt = te_pnt.Transformed(trsf)
 
@@ -363,7 +359,6 @@ class Blade(Component):
         # array = np.flipud(array)
         # print(array)
         BSplineLst = BSplineLst_from_dct(array[:, 0:2], angular_deflection=30, tol_interp=1e-6)
-
         BoundaryBSplineLst = set_BSplineLst_to_Origin2(BSplineLst, gp_Pnt2d(te_pnt.Coord()[0], te_pnt.Coord()[1]))
 
         return BoundaryBSplineLst

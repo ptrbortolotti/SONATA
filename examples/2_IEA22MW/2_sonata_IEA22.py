@@ -25,7 +25,7 @@ attribute_str           = 'MatID'  # default: 'MatID' (theta_3 - fiber orientati
                                             #          'strainM.epsilon11'
 
 # 2D cross sectional plots (blade_plot_sections)
-flag_plotTheta11        = True      # plane orientation angle
+flag_plotTheta11        = False      # plane orientation angle
 flag_recovery           = True
 flag_plotDisplacement   = True     # Needs recovery flag to be activated - shows displacements from loadings in cross sectional plots
 # 3D plots (blade_post_3dtopo)
@@ -46,7 +46,7 @@ flags_dict = {"flag_wt_ontology": flag_wt_ontology, "flag_ref_axes_wt": flag_ref
 # ===== User defined radial statiosns ===== #
 # Define the radial stations for cross sectional analysis (only used for flag_wt_ontology = True -> otherwise, sections from yaml file are used!)
 # radial_stations =  [0.  , 0.01, 0.02, 0.03, 0.04, 0.05, 0.075, 0.1 ,   0.15, 0.2 , 0.25, 0.3 , 0.35, 0.4, 0.45, 0.5 , 0.55, 0.6 , 0.65, 0.7 , 0.75, 0.8 , 0.85, 0.9 , 0.95, 1.]
-radial_stations = [0.5]
+radial_stations = [0.070]
 
 # ===== Execute SONATA Blade Component Object ===== #
 # name          - job name of current task
