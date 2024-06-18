@@ -151,7 +151,6 @@ class Airfoil(object):
         
         """
         Trsf = trsf_af_to_blfr(loc, pa_loc, chord, twist)
-
         if self.wire == None or self.BSplineLst == None:
             self.gen_OCCtopo()
 
@@ -201,7 +200,8 @@ class Airfoil(object):
         str_k = "%.3f" % k
         trf_af.name = "TRF_" + self.name + "_" + airfoil2.name + "_" + str_k.replace(".", "")
         trf_af.coordinates = PntLst_to_npArray(pres)[:, :2]
-        max_x_index = max(range(len(trf_af.coordinates)), key = lambda i: trf_af.coordinates[i][0])
+        # Shifting the largest x value coordinate to the first position in the airfoil coordinates so the TE origin can be defined
+        max_x_index = max(range(len(trf_af.coordinates)), key = lambda i: trf_af.coordinates[i][0])+1
         trf_af.coordinates = np.vstack((trf_af.coordinates[max_x_index:], trf_af.coordinates[: max_x_index]))
         return trf_af
 
