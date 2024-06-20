@@ -26,7 +26,7 @@ attribute_str           = 'MatID'  # default: 'MatID' (theta_3 - fiber orientati
                                             #          'strainM.epsilon11'
 
 # 2D cross sectional plots (blade_plot_sections)
-flag_plotTheta11        = True      # plane orientation angle
+flag_plotTheta11        = False      # plane orientation angle
 flag_recovery           = False
 flag_plotDisplacement   = True     # Needs recovery flag to be activated - shows displacements from loadings in cross sectional plots
 # 3D plots (blade_post_3dtopo)
