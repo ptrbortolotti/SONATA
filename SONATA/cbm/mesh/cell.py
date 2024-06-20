@@ -161,6 +161,22 @@ class Cell(object):
                 P_distances.append(projection.Distance(j))
 
         return min(P_distances or [10e6])
+    
+    def split_quads(self):
+        """method that splits quad cells into triangles and returns the list of
+        cells [originalcell, newcell]"""
+
+        if len(self.nodes) == 3:
+            return [self]
+        elif len(self.nodes) == 4:
+            newcell = Cell([self.nodes[0], self.nodes[2], self.nodes[3]])
+            newcell.theta_1 = self.theta_1
+            newcell.theta_3 = self.theta_3
+            newcell.MatID = self.MatID
+            self.nodes = [self.nodes[0], self.nodes[1], self.nodes[2]]
+            return [self, newcell]
+        else:
+            return []
 
     def closest_cell_edge(self, node):
         P_distances = []
