@@ -298,6 +298,12 @@ class CBM(object):
                 # print(core_cell_area)
                 self.mesh.extend(seg.mesh_core(self.SegmentLst, self.WebLst, core_cell_area, display=self.display))
 
+        print("STATUS:\t Splitting Quads into Trias")
+        tmp = []
+        for c in self.mesh:
+            tmp.extend(c.split_quads())
+        self.mesh = tmp
+
         # ===================consolidate mesh on web interface
         for web in self.WebLst:
             #print web.ID,  'Left:', SegmentLst[web.ID].ID, 'Right:', SegmentLst[web.ID+1].ID,
