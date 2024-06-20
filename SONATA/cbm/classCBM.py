@@ -298,12 +298,6 @@ class CBM(object):
                 # print(core_cell_area)
                 self.mesh.extend(seg.mesh_core(self.SegmentLst, self.WebLst, core_cell_area, display=self.display))
 
-        print("STATUS:\t Splitting Quads into Trias")
-        tmp = []
-        for c in self.mesh:
-            tmp.extend(c.split_quads())
-        self.mesh = tmp
-
         # ===================consolidate mesh on web interface
         for web in self.WebLst:
             #print web.ID,  'Left:', SegmentLst[web.ID].ID, 'Right:', SegmentLst[web.ID+1].ID,
@@ -316,6 +310,14 @@ class CBM(object):
             else:
                 newcells = consolidate_mesh_on_web(web, web_consolidate_tol, self.display)
                 self.mesh.extend(newcells)
+
+
+        print("STATUS:\t Splitting Quads into Trias")
+        tmp = []
+        for c in self.mesh:
+            tmp.extend(c.split_quads())
+        self.mesh = tmp
+        
         # invert nodes list of all cell to make sure they are counterclockwise for vabs in the right coordinate system!
         for c in self.mesh:
             if c.orientation == False:
