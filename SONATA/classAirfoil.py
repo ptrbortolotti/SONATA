@@ -164,7 +164,7 @@ class Airfoil(object):
         for x in coords[:,0]:
             if x > 0.98:
                 count +=1
-        if count > 5:
+        if count > 10:
             return True
         else:
             return False
