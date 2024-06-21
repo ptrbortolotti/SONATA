@@ -212,10 +212,7 @@ class Airfoil(object):
         trf_af.coordinates = PntLst_to_npArray(pres)[:, :2]
         flatback = self.check_flatback(trf_af.coordinates)
         if flatback:
-            # Shifting the largest x value coordinate to the first position in the airfoil coordinates so the TE origin can be defined
-            # max_x_index = max(range(len(trf_af.coordinates)), key = lambda i: trf_af.coordinates[i][0])+1
-            
-            # trf_af.coordinates = np.vstack((trf_af.coordinates[max_x_index:], trf_af.coordinates[: max_x_index]))
+            # Shifting the coordinate with the closest y value to 0 to the first position in the airfoil coordinates so the TE origin can be defined
             # Filter pairs with x values larger than 0.9
             filtered_indices = np.where(trf_af.coordinates[:, 0] > 0.9)[0]
             filtered_pairs = trf_af.coordinates[filtered_indices]
