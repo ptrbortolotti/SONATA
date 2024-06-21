@@ -162,9 +162,9 @@ class Airfoil(object):
     def check_flatback(self, coords):
         count = 0
         for x in coords[:,0]:
-            if x > 0.98:
+            if x > 0.9:
                 count +=1
-        if count > 7:
+        if count > 22:
             return True
         else:
             return False
@@ -213,8 +213,22 @@ class Airfoil(object):
         flatback = self.check_flatback(trf_af.coordinates)
         if flatback:
             # Shifting the largest x value coordinate to the first position in the airfoil coordinates so the TE origin can be defined
-            max_x_index = max(range(len(trf_af.coordinates)), key = lambda i: trf_af.coordinates[i][0])+1
-            trf_af.coordinates = np.vstack((trf_af.coordinates[max_x_index:], trf_af.coordinates[: max_x_index]))
+            # max_x_index = max(range(len(trf_af.coordinates)), key = lambda i: trf_af.coordinates[i][0])+1
+            
+            # trf_af.coordinates = np.vstack((trf_af.coordinates[max_x_index:], trf_af.coordinates[: max_x_index]))
+            # Filter pairs with x values larger than 0.9
+            filtered_indices = np.where(trf_af.coordinates[:, 0] > 0.9)[0]
+            filtered_pairs = trf_af.coordinates[filtered_indices]
+
+            # Find the index of the pair in the filtered list with the y value closest to the origin
+            min_y_index_filtered = np.argmin(np.abs(filtered_pairs[:, 1]))
+
+            # Find the index of this pair in the original array
+            min_y_index_original = filtered_indices[min_y_index_filtered]+1
+
+            # Shift the array such that the pair with the closest y value is at the start
+            trf_af.coordinates = np.concatenate((trf_af.coordinates[min_y_index_original:], trf_af.coordinates[:min_y_index_original]))
+
         return trf_af
 
 if __name__ == "__main__":
