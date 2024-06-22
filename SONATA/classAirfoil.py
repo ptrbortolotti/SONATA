@@ -164,11 +164,45 @@ class Airfoil(object):
         for x in coords[:,0]:
             if x > 0.9:
                 count +=1
-        if count > 22:
+        if count > 18:
+            print("\n\n\nFLATBACK\n\n\n")
             return True
         else:
+            print("\n\n\nNOT A FLATBACK\n\n\n")
             return False
 
+    def normalize_points(self, shape, num_points):
+        """Normalize the number of points in the shape to num_points."""
+        x = shape[:, 0]
+        y = shape[:, 1]
+        
+        # Parameterize the original shape
+        t = np.linspace(0, 1, len(x))
+        t_new = np.linspace(0, 1, num_points)
+        
+        # Interpolate x and y coordinates
+        x_new = np.interp(t_new, t, x)
+        y_new = np.interp(t_new, t, y)
+        
+        return np.vstack((x_new, y_new)).T
+
+    def interpolate_shapes(self, af1, af2, t):
+        """Interpolate between shape1 and shape2 based on parameter t (0 <= t <= 1)."""
+        # Ensure both shapes have the same number of points
+        num_points = max(len(af1), len(af2))
+        af1 = self.normalize_points(af1, num_points)
+        af2 = self.normalize_points(af2, num_points)
+
+        # Interpolate between shapes
+        interpolated_shape = (1 - t) * af1 + t * af2
+
+        # Adjust to maintain the property that the first and last y values average to 0
+        avg_y = (interpolated_shape[0, 1] + interpolated_shape[-1, 1]) / 2
+        interpolated_shape[0, 1] -= avg_y
+        interpolated_shape[-1, 1] -= avg_y
+
+        return interpolated_shape
+    
     def transformed(self, airfoil2, k=0.5, n=200):
         """
         Performs and linear interpolation of the airfoil with another airfoil 
@@ -210,23 +244,30 @@ class Airfoil(object):
         str_k = "%.3f" % k
         trf_af.name = "TRF_" + self.name + "_" + airfoil2.name + "_" + str_k.replace(".", "")
         trf_af.coordinates = PntLst_to_npArray(pres)[:, :2]
-        flatback = self.check_flatback(trf_af.coordinates)
-        if flatback:
-            # Shifting the coordinate with the closest y value to 0 to the first position in the airfoil coordinates so the TE origin can be defined
-            # Filter pairs with x values larger than 0.9
-            filtered_indices = np.where(trf_af.coordinates[:, 0] > 0.9)[0]
-            filtered_pairs = trf_af.coordinates[filtered_indices]
+        trf_af.coordinates = self.interpolate_shapes(self.coordinates, airfoil2.coordinates, k)
+        # flatback = self.check_flatback(trf_af.coordinates)
+        # if flatback:
+        #     # Shifting the coordinate with the closest y value to 0 to the first position in the airfoil coordinates so the TE origin can be defined
+        #     # Filter pairs with x values larger than 0.9
+        #     filtered_indices = np.where(trf_af.coordinates[:, 0] > 0.97)[0]
+        #     filtered_pairs = trf_af.coordinates[filtered_indices]
 
-            # Find the index of the pair in the filtered list with the y value closest to the origin
-            min_y_index_filtered = np.argmin(np.abs(filtered_pairs[:, 1]))
+        #     # Find the index of the pair in the filtered list with the y value closest to the origin
+        #     min_y_index_filtered = np.argmin(np.abs(filtered_pairs[:, 1]))+1
 
-            # Find the index of this pair in the original array
-            min_y_index_original = filtered_indices[min_y_index_filtered]+1
+        #     # Find the index of this pair in the original array
+        #     min_y_index_original = filtered_indices[min_y_index_filtered]
 
-            # Shift the array such that the pair with the closest y value is at the start
-            trf_af.coordinates = np.concatenate((trf_af.coordinates[min_y_index_original:], trf_af.coordinates[:min_y_index_original]))
+        #     # Shift the array such that the pair with the closest y value is at the start
+        #     trf_af.coordinates = np.concatenate((trf_af.coordinates[min_y_index_original:], trf_af.coordinates[:min_y_index_original]))
+        #     trf_af.coordinates[0,1] = 0.
+        #     print(trf_af.coordinates)
+        #     # np.append((trf_af.coordinates[0,:]+trf_af.coordinates[1,:])/2,trf_af.coordinates)
+        #     # trf_af.coordinates[0,:] = (trf_af.coordinates[0,:]+trf_af.coordinates[-1,:])/2
 
         return trf_af
+
+
 
 if __name__ == "__main__":
     plt.close("all")

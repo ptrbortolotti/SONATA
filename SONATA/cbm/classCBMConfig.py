@@ -57,17 +57,6 @@ class CBMConfig(object):
         self.setup, self.webs, self.segments, self.bw = {}, {}, {}, {}
         self.filename = ""
 
-        # The following code is commented for cleanup and may be deleted later on if really not needed any longer
-
-        # if isinstance(inputdata, str) and iea37 == False:
-        #     self.filename = inputdata
-        #     self._read_yaml_config(self.filename)
-        #
-        # elif isinstance(inputdata, dict) and iea37 == True:
-        #     yml = inputdata
-        #     self.read_cbm_yaml(yml, materials)
-
-
         if isinstance(inputdata, dict):
             yml = inputdata
             self.read_yaml_cbm(yml, materials)
