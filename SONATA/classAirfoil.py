@@ -203,12 +203,13 @@ class Airfoil(object):
 
         return interpolated_shape
     
-    def transformed(self, airfoil2, k=0.5, n=200):
+    def transformed(self, airfoil2, k=0.5):
         """
         Performs and linear interpolation of the airfoil with another airfoil 
-        by translating equidistant points in the direction of vector v. 
-        The magnitude of the translation is the vector's magnitude multiplied 
-        by factor k.
+        by adding points to the airfoil with less coordinate pairs until the 
+        airfoils have the same number of points. A condition is then applied 
+        forcing the first and last y values of the interpolated coordinates
+        to average to 0.
     
         Parameters
         ----------
@@ -217,8 +218,6 @@ class Airfoil(object):
         k : float
             the vectors magnitude factor. k=0: the transformed airfoil remains 
             the airfoil. k=1: the transformed airfoil will become airfoil2
-        n : int
-            number of discretization points.
         
         Returns:
         ----------
@@ -226,44 +225,11 @@ class Airfoil(object):
             with the name = TRF_airfoil1_airfoil2_k
             
         """
-        # check if wire exists, else create it
-        if self.wire == None:
-            self.gen_OCCtopo()
-        if airfoil2.wire == None:
-            airfoil2.gen_OCCtopo()
-
-        p1_lst = equidistant_Points_on_wire(self.wire, n)
-        p2_lst = equidistant_Points_on_wire(airfoil2.wire, n)
-        v_lst = [gp_Vec(p1, p2) for p1, p2 in zip(p1_lst, p2_lst)]
-
-        pres = []
-        for i, p in enumerate(p1_lst):
-            pres.append(p.Translated(v_lst[i].Multiplied(k)))
 
         trf_af = Airfoil()
         str_k = "%.3f" % k
         trf_af.name = "TRF_" + self.name + "_" + airfoil2.name + "_" + str_k.replace(".", "")
-        trf_af.coordinates = PntLst_to_npArray(pres)[:, :2]
         trf_af.coordinates = self.interpolate_shapes(self.coordinates, airfoil2.coordinates, k)
-        # flatback = self.check_flatback(trf_af.coordinates)
-        # if flatback:
-        #     # Shifting the coordinate with the closest y value to 0 to the first position in the airfoil coordinates so the TE origin can be defined
-        #     # Filter pairs with x values larger than 0.9
-        #     filtered_indices = np.where(trf_af.coordinates[:, 0] > 0.97)[0]
-        #     filtered_pairs = trf_af.coordinates[filtered_indices]
-
-        #     # Find the index of the pair in the filtered list with the y value closest to the origin
-        #     min_y_index_filtered = np.argmin(np.abs(filtered_pairs[:, 1]))+1
-
-        #     # Find the index of this pair in the original array
-        #     min_y_index_original = filtered_indices[min_y_index_filtered]
-
-        #     # Shift the array such that the pair with the closest y value is at the start
-        #     trf_af.coordinates = np.concatenate((trf_af.coordinates[min_y_index_original:], trf_af.coordinates[:min_y_index_original]))
-        #     trf_af.coordinates[0,1] = 0.
-        #     print(trf_af.coordinates)
-        #     # np.append((trf_af.coordinates[0,:]+trf_af.coordinates[1,:])/2,trf_af.coordinates)
-        #     # trf_af.coordinates[0,:] = (trf_af.coordinates[0,:]+trf_af.coordinates[-1,:])/2
 
         return trf_af
 
