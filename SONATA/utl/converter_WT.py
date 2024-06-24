@@ -341,7 +341,6 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
                 id_profile      = np.argmin(np.abs(blade.blade_ref_axis[:,0]-x[i]))
                 profile         = blade.airfoils[id_profile,1].coordinates
                 id_le           = np.argmin(profile[:,0])
-                print(profile)
 
                 if np.mean(profile[0:id_le, 1]) < 0:
                     profile     = np.flip(profile,0)
