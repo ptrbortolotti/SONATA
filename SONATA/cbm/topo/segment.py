@@ -190,7 +190,6 @@ class Segment(object):
     def build_layers(self, WebLst=None, Segment0=None, display=None, l0=None, **kwargs):
         """The build_layers member function of the class Segment generates all Layer objects and it's associated wires
         and return the relevant_boundary_BSplineLst"""
-        # plot_layup_projection(self.Layup)
         cum_ivLst = self.boundary_ivLst
 
         if self.Layup.size != 0:

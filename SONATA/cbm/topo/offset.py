@@ -56,8 +56,6 @@ def shp_parallel_offset(arrPts, dist, join_style=1, side="right", res=16):
         if Orientation == True:
             data = np.flipud(data)
 
-    # if closed == False:
-    #     data = np.flipud(data)
     # ==============Interpolate large linear spaces=============================
     seg_P2Plength = []
     cumm_length = 0
@@ -100,39 +98,6 @@ def shp_parallel_offset(arrPts, dist, join_style=1, side="right", res=16):
             Refinement = True
         else:
             Refinement = False
-
-    # Make sure there are unique rows
-    #    if np.allclose(data[0],data[-1]):
-    #        closed = True
-    #
-    #    else:
-    #        closed = False
-    #        before = len(data)
-    #        data = unique_rows(data.round(decimals=9))
-    #        after = len(data)
-    #        if after<before:
-    #            print 'non unique elements found',len(data)
-
-    # ======PLOTTING for debugging
-    #    fig = plt.figure()
-    #    fig.add_subplot(111)
-    #    plt.clf()
-    #    plt.plot(*arrPts.T, color='black', marker='.')
-    #    plt.plot(*arrPts[0].T, color='green', marker='o')
-    #    plt.plot(*arrPts[-1].T, color='purple', marker='o')
-    #
-    #    for i, item in enumerate(arrPts):
-    #        plt.annotate(i, (item[0],item[1]), color='black')
-    #
-    #    plt.plot(*data.T, color='red', marker='.')
-    #    plt.plot(*data[0].T, color='green', marker='>')
-    #    plt.plot(*data[-1].T, color='purple', marker='>')
-    #
-    #    for i, item in enumerate(data):
-    #        plt.annotate(i, (item[0],item[1]), color='red')
-    #
-    #    plt.axis('equal')
-    #    plt.show()
 
     return data
 
