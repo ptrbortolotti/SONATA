@@ -17,8 +17,6 @@ if __name__ == '__main__':
 
 from SONATA.cbm.classCBMConfig import CBMConfig
 
-# from jobs.RFeil.utls.utls_openmdao import calc_axis_intersection
-
 
 def arc_length(x, y):
     """
@@ -71,15 +69,20 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
     """
 
     # Segments and webs
-
-    tmp0        = byml.get('internal_structure_2d_fem').get('webs')
+    unordered_webs        = byml.get('internal_structure_2d_fem').get('webs')
     x           = cs_pos # Non dimensional span position of the stations
 
-    if tmp0 == None:
+    if unordered_webs == None:
         n_webs = 0
     else:
-        n_webs  = len(tmp0) # Max number of webs along span
+        n_webs  = len(unordered_webs) # Max number of webs along span
     web_exist  = np.zeros((len(x), n_webs), dtype=int) # Flag to set whether webs have non zero thickness, initialized at 0
+
+    # Webs need to be defined from LE to TE
+    # Sorting webs to correct order
+    values_to_sort = [web['start_nd_arc']['values'][0] for web in unordered_webs]
+    web_order = sorted(range(len(values_to_sort)), key=lambda i: values_to_sort[i], reverse=True)
+    tmp0 = [unordered_webs[i] for i in web_order]
 
     tmp2    = [dict([('position', x[n])]) for n in range(len(x))]
     id_webs = [dict() for n in range(len(x))]
@@ -173,10 +176,6 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
                 if 'end_nd_arc' in sec.keys():
                     set_interp = PchipInterpolator(sec['end_nd_arc']['grid'], sec['end_nd_arc']['values'])
                     end_i     = float(set_interp(x[i]))
-                    # if end_i>0.9 and id_layer>0:
-                    #     for kk in range(len(tmp2[i]['segments'][0]['layup'])):
-                    #         if end_i == tmp2[i]['segments'][0]['layup'][kk]['start']:
-                    #             start_i -= 1.e-2
                 else:
                     end_i = 1
 
@@ -205,40 +204,18 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
                             tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = 0.
                             
                         # # Check consistency
-                        # if tmp2[i]['segments'][0]['layup'][id_layer]['end'] < tmp2[i]['segments'][0]['layup'][id_layer]['start']:
-                        #     exit('WARNING: Layer ' + tmp2[i]['segments'][0]['layup'][id_layer]['name'] + ' ends before it starts. Check the yaml input file!!')
                         ch = np.interp(x[i], blade.chord[:,0], blade.chord[:,1])
                         adhesive_extent[i] = min([0.04, 0.04 / ch])
                         if x[i] > span_adhesive and tmp2[i]['segments'][0]['layup'][id_layer]['start'] < adhesive_extent[i] and tmp2[i]['segments'][0]['layup'][id_layer]['end'] < 0.5:
                             tmp2[i]['segments'][0]['layup'][id_layer]['start'] = adhesive_extent[i] 
                         elif x[i] > span_adhesive and tmp2[i]['segments'][0]['layup'][id_layer]['end'] > 1. - adhesive_extent[i] and tmp2[i]['segments'][0]['layup'][id_layer]['start'] > 0.5:
                             tmp2[i]['segments'][0]['layup'][id_layer]['end'] = 1. - adhesive_extent[i]
-
-                            # old_start = tmp2[i]['segments'][0]['layup'][id_layer]['start']
-                            # old_end   = tmp2[i]['segments'][0]['layup'][id_layer]['end']
-                            # if old_start < 1. - adhesive_extent[i]:
-                            #     tmp2[i]['segments'][0]['layup'][id_layer]['end']   = old_end
-                            #     tmp2[i]['segments'][0]['layup'][id_layer]['start'] = adhesive_extent[i]
-                            # else:
-                            #     exit('ERROR: The converter is not modeling well the trailing edge')
-
-                            # tmp2[i]['segments'][0]['layup'].append({})
-                            # tmp2[i]['segments'][0]['layup'][id_layer + 1]['name']      = tmp2[i]['segments'][0]['layup'][id_layer]['name'] + '_2'
-                            # tmp2[i]['segments'][0]['layup'][id_layer + 1]['material_name'] = tmp2[i]['segments'][0]['layup'][id_layer]['material_name']
-                            # tmp2[i]['segments'][0]['layup'][id_layer + 1]['thickness']     = tmp2[i]['segments'][0]['layup'][id_layer]['thickness']
-                            # tmp2[i]['segments'][0]['layup'][id_layer + 1]['orientation'] = tmp2[i]['segments'][0]['layup'][id_layer]['orientation']
-                            # if old_end > adhesive_extent[i]:
-                            #     tmp2[i]['segments'][0]['layup'][id_layer + 1]['start'] = old_start
-                            #     tmp2[i]['segments'][0]['layup'][id_layer + 1]['end']   = 1. - adhesive_extent[i]
-                            # else:
-                            #     exit('ERROR: The converter is not modeling well the trailing edge')
-                            # id_layer = id_layer + 1
                         
                         id_layer = id_layer + 1
                     else:  # if web in sec.keys():
 
 
-                        id_seg          = id_webs[i][(sec['web'])]['id']
+                        id_seg = id_webs[i][(sec['web'])]['id']
                         for id_mat in range(1,len(materials)+1):
                             if sec['material'] == materials[id_mat].name:
 
