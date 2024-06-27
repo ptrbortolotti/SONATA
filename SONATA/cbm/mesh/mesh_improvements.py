@@ -30,15 +30,7 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
     for i, c in enumerate(cells):
         if len(c.nodes) == 4:
 
-            # cs4_counter = 0
             if c.nodes[0].cornerstyle == 2 or c.nodes[0].cornerstyle == 3:
-                # display.DisplayShape(c.nodes[0].Pnt2d,color='RED')
-
-                # v1 = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[1].Pnt2d)
-                # v2 = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[3].Pnt2d)
-                # angle = (180-abs(v1.Angle(v2)*180/np.pi))
-                # if v2.Magnitude() == 0:
-                # print c.nodes[0].coordinates, c.nodes[3].coordinates
 
                 v21 = gp_Vec2d(c.nodes[2].Pnt2d, c.nodes[1].Pnt2d)
                 v23 = gp_Vec2d(c.nodes[2].Pnt2d, c.nodes[3].Pnt2d)
@@ -46,15 +38,13 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
 
                 # print c,angle
                 if angle < alpha_crit:
-                    #                    display.DisplayShape(c.nodes[0].Pnt2d,color='RED')
-                    #                    display.DisplayShape(c.nodes[2].Pnt2d,color='GREEN')
                     L = c.nodes[0].Pnt2d.Distance(c.nodes[2].Pnt2d) * 1.5
                     BS_Vec2d = gp_Vec2d(c.nodes[0].Pnt2d, c.nodes[2].Pnt2d)
                     MiddleNodes = []
-                    for i in range(0, int(L // global_minLen) - 1):
-                        P = c.nodes[0].Pnt2d.Translated(BS_Vec2d.Multiplied((1 + i) / float(int(L // global_minLen))))
-                        MiddleNodes.append(Node(P))
-                        # display.DisplayShape(P)
+                    if int(L // global_minLen)-1 >= 2:
+                        for i in range(0, int(L // global_minLen) - 1):
+                            P = c.nodes[0].Pnt2d.Translated(BS_Vec2d.Multiplied((1 + i) / float(int(L // global_minLen))))
+                            MiddleNodes.append(Node(P))
 
                     FrontNodes = []
                     BackNodes = []
@@ -79,7 +69,6 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
                         trigger_b = True
                         for i, P in enumerate(pPnts):
                             v01 = gp_Vec2d(c.nodes[0].Pnt2d, c.nodes[1].Pnt2d)
-                            # v03 = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[3].Pnt2d)
                             vnP = gp_Vec2d(n.Pnt2d, P)
 
                             if len(pPnts) > 2:
@@ -96,22 +85,6 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
                             else:
                                 print("ERROR: cannot determine FRONT and BACK nodes @ ", c.nodes[0], "because vnp and v01 are orthogonal")
                                 print(pPara)
-                    #                            if c.nodes[1].Pnt2d.Distance(P)<c.nodes[3].Pnt2d.Distance(P):
-                    #                                FrontNodes.append(Node(P,['',pIdx[i],pPara[i]]))
-                    #                            else:
-                    #                                BackNodes.append(Node(P,['',pIdx[i],pPara[i]]))
-
-                    #                        for mn in MiddleNodes:
-                    #                              display.DisplayShape(mn.Pnt2d,color='BLUE')
-                    #                              display.DisplayMessage(mn.Pnt,str(mn.id),message_color=(1,1,1))
-                    #
-                    #                        for fn in FrontNodes:
-                    #                              display.DisplayShape(fn.Pnt2d,color='ORANGE')
-                    #                              display.DisplayMessage(fn.Pnt,str(fn.id),message_color=(1,1,1))
-                    #
-                    #                        for bn in BackNodes:
-                    #                              display.DisplayShape(bn.Pnt2d,color='RED')
-                    #                              display.DisplayMessage(bn.Pnt,str(bn.id),message_color=(1,1,1))
 
                     # =====================CREATE FRONT CELLS
                     FrontCellLst = []
@@ -150,25 +123,6 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
                         enhanced_cells.append(c)
                 else:
                     enhanced_cells.append(c)
-
-            # elif c.nodes[0].cornerstyle == 4 and c.nodes[0].id != trigger_id_cs4:
-            # print('modify_sharp_corners has not been implemented for cornerstyle = 4')
-            # print c.nodes[0].id
-            #               trigger_id_cs4 = c.nodes[0].id
-            #
-            #                display.DisplayShape(c.nodes[0].Pnt2d,color='RED')
-            #                display.DisplayShape(c.nodes[2].Pnt2d,color='ORANGE')
-            #                display.DisplayShape(c.nodes[3].Pnt2d,color='YELLOW')
-            #                L = c.nodes[0].Pnt2d.Distance(c.nodes[2].Pnt2d)*1.5
-            #                BS_Vec2d = gp_Vec2d(c.nodes[0].Pnt2d,c.nodes[2].Pnt2d)
-            #                MiddleNodes = []
-            #                for i in range(0,int(L//global_minLen)-1):
-            #                    P = c.nodes[0].Pnt2d.Translated(BS_Vec2d.Multiplied((1+i)/float(int(L//global_minLen))))
-            #                    MiddleNodes.append(Node(P))
-            #        #                for P in PntLst:
-            #        #                    display.DisplayShape(P)
-
-            # enhanced_cells.append(c)
 
             else:
                 enhanced_cells.append(c)
