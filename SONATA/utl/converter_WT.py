@@ -402,7 +402,8 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
     for (seg,w,x) in zip(tmp2, webs, x):
         tmp = {'webs':list(w.values()), 'segments':seg['segments'], 'position':x, 'mesh_resolution':mesh_resolution}
         lst.append([x, CBMConfig(tmp, materials)])
-
+    lst[0][1].segments[0]['Layup'][0][0] = 0.
+    lst[0][1].segments[0]['Layup'][0][1] = 1.
     return np.asarray(lst)
 
 
