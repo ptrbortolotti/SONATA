@@ -200,7 +200,6 @@ def find_BSplineLst_coordinate(BSplineLst, S, start, end):
     x = BSplineLstLength * (S - start) / (end - start)
     CummLength = 0
     tolerance = 1e-8
-    # print 'S: '+ str(S)
     for i, item in enumerate(BSplineLst):
         first = item.FirstParameter()
         last = item.LastParameter()
@@ -216,7 +215,6 @@ def find_BSplineLst_coordinate(BSplineLst, S, start, end):
             tmp = GCPnts_AbscissaPoint(tolerance, Adaptor, dist, first)
             U = tmp.Parameter()
             break
-    # print 'idx: '+ str(i) + '     U: '+ str(U)
     return [i, U]
 
 

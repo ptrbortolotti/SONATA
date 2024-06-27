@@ -398,10 +398,6 @@ class Blade(Component):
         if c2_axis:
             tmp_pa[:,1]=0.5
         self.f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1], bounds_error=False, fill_value='extrapolate')
-
-        # if kwargs.get('flags',{}).get('flag_wt_ontology'):  # correct twist rate sign as yaml twist is defined according to BeamDyn Definition (WTF)
-        #     self.f_twist = interp1d(tmp_tw[:,0], -tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
-        # else:
         self.f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
         self.f_pa = interp1d(tmp_pa[:,0], tmp_pa[:,1], bounds_error=False, fill_value='extrapolate')
         

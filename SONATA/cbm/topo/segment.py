@@ -53,7 +53,6 @@ class Segment(object):
 
         if self.OCC == True:
             self.BSplineLst = kwargs.get("Boundary")
-            # self.BSplineLst = set_BSplineLst_to_Origin(BSplineLst_tmp)
 
         elif self.OCC == False:
             if kwargs.get("airfoil") != None:
@@ -123,7 +122,6 @@ class Segment(object):
 
         iv_BSplineLst = []
         for iv in ivLst:
-            # print iv[0],iv[1],iv[2]
             if int(iv[2]) == 0:
                 BSplineLst = self.BSplineLst
                 start = 0.0
@@ -135,7 +133,6 @@ class Segment(object):
                     BSplineLst = reverse_BSplineLst(copy_BSplineLst(self.WebLst[WebID].BSplineLst))
                     start = self.WebLst[WebID].Pos2
                     end = self.WebLst[WebID].Pos1
-                    # print '(',start,end,')',' (',iv[0],iv[1],')'
 
                 else:  # FRONT
                     BSplineLst = self.WebLst[WebID].BSplineLst
@@ -144,7 +141,6 @@ class Segment(object):
 
             elif self.ID * 1000 < int(iv[2]) < self.ID * 1000 + 1000:
                 lid = iv[2] - (self.ID * 1000)
-                # print iv[2],(self.ID*1000)
                 layer = self.LayerLst[int(lid) - 1]
                 BSplineLst = layer.BSplineLst
                 start = layer.S1
@@ -381,8 +377,6 @@ class Segment(object):
             ivLst2 = insert_interval_in_layup(ivLst2, WebLst[i].Pos2, WebLst[i].Pos1, value=-WebLst[i].ID)
             ivLst = np.vstack((ivLst1, ivLst2))
             self.boundary_ivLst = sort_layup_projection([ivLst])[0]
-
-        # print self.boundary_ivLst
         self.BSplineLst = self.ivLst_to_BSplineLst(self.boundary_ivLst)
         self.build_wire()
 
