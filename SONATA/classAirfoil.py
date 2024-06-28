@@ -108,6 +108,14 @@ class Airfoil(object):
         self.relative_thickness = yml.get("relative_thickness")
 
         self.coordinates = np.asarray([yml["coordinates"]["x"], yml["coordinates"]["y"]], dtype=float).T
+        # Shifting coordinates such that the y values of the first and last coordinate average to 0
+        yshift = (self.coordinates[0][1]+self.coordinates[-1][1])/2
+        for i in range(self.coordinates.shape[0]):
+            self.coordinates[i][1] = self.coordinates[i][1]-yshift
+        print(" ")
+
+
+
     def gen_OCCtopo(self, angular_deflection = 30 ):
         """
         generates a Opencascade TopoDS_Wire and BSplineLst from the airfoil coordinates.
