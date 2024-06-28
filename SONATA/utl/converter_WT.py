@@ -410,12 +410,16 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
         ends = [lst[i][1].segments[0]['Layup'][j][1] for j in range(len(lst[i][1].segments[0]['Layup']))]
         min_start = min(starts)
         max_end = max(ends)
-        tolerance = 1e-4
-        for j in range(len(lst[i][1].segments[0]['Layup'])):
-            if lst[i][1].segments[0]['Layup'][j][0] <= min_start + tolerance:
-                lst[i][1].segments[0]['Layup'][j][0] = 0
-            if lst[i][1].segments[0]['Layup'][j][1] >= max_end - tolerance:
-                lst[i][1].segments[0]['Layup'][j][1] = 1
+        if min_start != 0 or max_end != 1:
+            if lst[i][0]<0.6 or lst[i][0] == 1:
+                tolerance = 1e-4
+            else:
+                tolerance = .05
+            for j in range(len(lst[i][1].segments[0]['Layup'])):
+                if lst[i][1].segments[0]['Layup'][j][0] <= min_start + tolerance:
+                    lst[i][1].segments[0]['Layup'][j][0] = 0
+                if lst[i][1].segments[0]['Layup'][j][1] >= max_end - tolerance:
+                    lst[i][1].segments[0]['Layup'][j][1] = 1
     
     return np.asarray(lst)
 

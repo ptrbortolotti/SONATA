@@ -85,6 +85,9 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
                             else:
                                 print("ERROR: cannot determine FRONT and BACK nodes @ ", c.nodes[0], "because vnp and v01 are orthogonal")
                                 print(pPara)
+                                MiddleNodes = []
+                                FrontNodes = []
+                                BackNodes = []
 
                     # =====================CREATE FRONT CELLS
                     FrontCellLst = []
