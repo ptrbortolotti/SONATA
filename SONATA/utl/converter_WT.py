@@ -402,8 +402,21 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
     for (seg,w,x) in zip(tmp2, webs, x):
         tmp = {'webs':list(w.values()), 'segments':seg['segments'], 'position':x, 'mesh_resolution':mesh_resolution}
         lst.append([x, CBMConfig(tmp, materials)])
-    lst[0][1].segments[0]['Layup'][0][0] = 0.
-    lst[0][1].segments[0]['Layup'][0][1] = 1.
+
+    # Finding the minimum start and maximum end value for the layers in each starting segment and assigning starts
+    # and ends within a tolerance to 0 or 1 respectively
+    for i in range(len(lst)):
+        starts = [lst[i][1].segments[0]['Layup'][j][0] for j in range(len(lst[i][1].segments[0]['Layup']))]
+        ends = [lst[i][1].segments[0]['Layup'][j][1] for j in range(len(lst[i][1].segments[0]['Layup']))]
+        min_start = min(starts)
+        max_end = max(ends)
+        tolerance = 1e-4
+        for j in range(len(lst[i][1].segments[0]['Layup'])):
+            if lst[i][1].segments[0]['Layup'][j][0] <= min_start + tolerance:
+                lst[i][1].segments[0]['Layup'][j][0] = 0
+            if lst[i][1].segments[0]['Layup'][j][1] >= max_end - tolerance:
+                lst[i][1].segments[0]['Layup'][j][1] = 1
+    
     return np.asarray(lst)
 
 
