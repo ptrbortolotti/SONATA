@@ -119,9 +119,8 @@ class CBMConfig(object):
             if layerlst and all(isinstance(l, list) for l in layerlst):
                 layerlst = s.get("layup")
                 d["Layup_names"] = np.asarray(layerlst)[:, 5].tolist()
-                d["Layup"] = np.asarray(layerlst)[:, :5].astype(float)
-
-            elif layerlst and all(isinstance(l, dict) for l in layerlst):
+                d["Layup"] = np.asarray(layerlst)[:, :5].astype(float)               
+            elif layerlst and all(isinstance(l, dict) and l for l in layerlst):
                 d["Layup"] = np.asarray([[l.get("start"), l.get("end"), l.get("thickness"), l.get("orientation"), find_material(materials, "name", l.get("material_name")).id] for l in layerlst])
                 d["Layup_names"] = [l.get("name") for l in layerlst]
 

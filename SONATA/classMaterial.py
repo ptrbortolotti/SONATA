@@ -248,8 +248,7 @@ def read_materials(yml):
 
 
 def find_material(materials, attr, value):
-    return next((x for x in materials.values() if getattr(x, attr) == value), None)
-
+    return next((x for x in materials.values() if getattr(x, attr).lower() == value.lower()), None)
 
 if __name__ == '__main__':
     a = IsotropicMaterial(ID=1, name='iso_mat', rho=0.4, )
