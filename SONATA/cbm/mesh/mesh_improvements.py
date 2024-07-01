@@ -92,38 +92,39 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
                     # =====================CREATE FRONT CELLS
                     FrontCellLst = []
                     # print '@', c.nodes[0],'  len(Middle):',len(MiddleNodes),'len(Front):',len(FrontNodes),'len(Back):',len(BackNodes)
+                    if MiddleNodes and FrontNodes and BackNodes:
+                            
+                        for i in range(0, len(MiddleNodes)):
 
-                    for i in range(0, len(MiddleNodes)):
+                            if i == 0:  # FIRST
+                                nodeLst = [c.nodes[0], c.nodes[1], FrontNodes[i], MiddleNodes[i]]
+                            else:
+                                nodeLst = [MiddleNodes[i - 1], FrontNodes[i - 1], FrontNodes[i], MiddleNodes[i]]
+                            FrontCellLst.append(Cell(nodeLst))
 
-                        if i == 0:  # FIRST
-                            nodeLst = [c.nodes[0], c.nodes[1], FrontNodes[i], MiddleNodes[i]]
-                        else:
-                            nodeLst = [MiddleNodes[i - 1], FrontNodes[i - 1], FrontNodes[i], MiddleNodes[i]]
-                        FrontCellLst.append(Cell(nodeLst))
+                        if len(MiddleNodes) > 0:  # LAST
+                            nodeLst = [MiddleNodes[-1], FrontNodes[-1], c.nodes[2]]
+                            FrontCellLst.append(Cell(nodeLst))
 
-                    if len(MiddleNodes) > 0:  # LAST
-                        nodeLst = [MiddleNodes[-1], FrontNodes[-1], c.nodes[2]]
-                        FrontCellLst.append(Cell(nodeLst))
+                        # =====================CREATE BACK CELLS
+                        BackCellLst = []
+                        for i in range(0, len(MiddleNodes)):
 
-                    # =====================CREATE BACK CELLS
-                    BackCellLst = []
-                    for i in range(0, len(MiddleNodes)):
+                            if i == 0:  # FIRST
+                                nodeLst = [MiddleNodes[i], BackNodes[i], c.nodes[3], c.nodes[0]]
+                            else:
+                                nodeLst = [MiddleNodes[i], BackNodes[i], BackNodes[i - 1], MiddleNodes[i - 1]]
+                            BackCellLst.append(Cell(nodeLst))
 
-                        if i == 0:  # FIRST
-                            nodeLst = [MiddleNodes[i], BackNodes[i], c.nodes[3], c.nodes[0]]
-                        else:
-                            nodeLst = [MiddleNodes[i], BackNodes[i], BackNodes[i - 1], MiddleNodes[i - 1]]
-                        BackCellLst.append(Cell(nodeLst))
+                        if len(MiddleNodes) > 0:  # LAST
+                            nodeLst = [MiddleNodes[-1], c.nodes[2], BackNodes[-1]]
+                            BackCellLst.append(Cell(nodeLst))
 
-                    if len(MiddleNodes) > 0:  # LAST
-                        nodeLst = [MiddleNodes[-1], c.nodes[2], BackNodes[-1]]
-                        BackCellLst.append(Cell(nodeLst))
+                        enhanced_cells.extend(FrontCellLst)
+                        enhanced_cells.extend(reversed(BackCellLst))
 
-                    enhanced_cells.extend(FrontCellLst)
-                    enhanced_cells.extend(reversed(BackCellLst))
-
-                    if len(MiddleNodes) == 0:
-                        enhanced_cells.append(c)
+                        if len(MiddleNodes) == 0:
+                            enhanced_cells.append(c)
                 else:
                     enhanced_cells.append(c)
 

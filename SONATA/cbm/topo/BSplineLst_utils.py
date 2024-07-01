@@ -476,74 +476,21 @@ def discretize_BSplineLst(BSplineLst, Deflection=2e-4, AngularDeflection=0.02, C
         npArray = np.vstack((npArray, b[0]))
     else:
         None
-    # print len(npArray)
-
-    #    #new Interpolate Large spaces!
-    #    refine = True
-    #    Resolution = 1000
-    #    seg_P2Plength = []
-    #    cumm_length = 0
-    #    data = npArray
-    #
-    #    for j in range(0,len(data)-1):
-    #        seg_P2Plength.append(P2Pdistance(data[j],data[j+1]))
-    #        cumm_length += P2Pdistance(data[j],data[j+1])
-    #
-    #    #Check if Refinement is necessary:
-    #    if len(seg_P2Plength) > 0 and max(seg_P2Plength) > cumm_length/Resolution :
-    #        Refinement = True
-    #    else:
-    #        Refinement = False
-    #
-    #
-    #    while Refinement == True:
-    #        print(Refinement)
-    #
-    #        temp_data = []
-    #        for i in range(0,len(data)-1):
-    #            if P2Pdistance(data[i],data[i+1]) > (cumm_length/Resolution):
-    #                p0 = data[i]
-    #                p1 = data[i+1]
-    #                v1 = p1-p0
-    #                p05 = p0+v1/2
-    #                temp_data.append(p0)
-    #                temp_data.append(p05)
-    #            else:
-    #                temp_data.append(data[i])
-    #
-    #        temp_data.append(data[-1])
-    #        data = np.vstack(temp_data)
-    #
-    #        #Check if further Refinement is necessary
-    #        seg_P2Plength = []
-    #        cumm_length = 0
-    #        for j in range(0,len(data)-1):
-    #            seg_P2Plength.append(P2Pdistance(data[j],data[j+1]))
-    #            cumm_length += P2Pdistance(data[j],data[j+1])
-    #
-    #        if max(seg_P2Plength) > cumm_length/Resolution:
-    #            Refinement = True
-    #        else:
-    #            Refinement = False
     return npArray
 
 
-
-# return data
-
-
-def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_interp=1e-6, twoD=True):
-    # Close DCT_date if closed == True
+def BSplineLst_from_dct(DCT_data, angular_deflection=15,  cutoff_style = 2, closed=False, tol_interp=1e-6, twoD=True):
     if closed and not np.allclose(DCT_data[0], DCT_data[-1]):
         print("INFO:\t Closing open discrete definition")
         DCT_data = np.concatenate((DCT_data, DCT_data[0:1, :]), axis=0)
 
-    DCT_data = fuse_rows(DCT_data, 1e-6)  # check all datapoints and merge if allclose is true
+    if cutoff_style == 0:
+        DCT_data = fuse_rows(DCT_data, 1e-3)  # check all datapoints and merge if allclose is true
+    else:
+        DCT_data = fuse_rows(DCT_data,1e-6)
 
     # Find corners and edges of data
-    # print(DCT_data)
     DCT_angles = calc_DCT_angles(DCT_data)
-    # print(DCT_angles)
     corners = []
     for i in range(0, DCT_angles.shape[0]):
         if DCT_angles[i] < (180 - angular_deflection) or DCT_angles[i] > (180 + angular_deflection):
@@ -615,7 +562,6 @@ def BSplineLst_from_dct(DCT_data, angular_deflection=15, closed=False, tol_inter
 
         tmp_interpolation.Perform()
         tmp_bspline = tmp_interpolation.Curve()
-        # print(tmp_bspline.Degree(), tmp_bspline.NbKnots())
         list_of_bsplines.append(tmp_bspline)
 
     return list_of_bsplines

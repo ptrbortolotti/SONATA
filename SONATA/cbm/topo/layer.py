@@ -159,7 +159,7 @@ class Layer(object):
         self.offlinepts = shp_parallel_offset(npArray, self.thickness, self.join_style)
         if self.shape_intersects_itself(self.offlinepts):
             print("WARNING: THERE IS AN INTERSECTION IN THE STRUCTURE")
-        OffsetBSplineLst = BSplineLst_from_dct(self.offlinepts, angular_deflection=15, tol_interp=1e-8 * l0)
+        OffsetBSplineLst = BSplineLst_from_dct(self.offlinepts, angular_deflection=15, tol_interp=1e-8 * l0, cutoff_style = 2)
         OffsetBSplineLst = cutoff_layer(self.Boundary_BSplineLst, OffsetBSplineLst, self.S1, self.S2, self.cutoff_style)
         self.BSplineLst = OffsetBSplineLst
 

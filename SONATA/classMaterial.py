@@ -254,13 +254,6 @@ if __name__ == '__main__':
     a = IsotropicMaterial(ID=1, name='iso_mat', rho=0.4, )
     b = OrthotropicMaterial(ID=2, name='orth_mat', rho=0.5)
 
-    #    materials1 = read_yml_materials('examples/mat_db.yml')
-    #
-    #    with open('jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
-    #        inputs  = myfile.read()
-    #    wt_data     = yaml.load(inputs)
-    #    materials2 = read_materials(wt_data['materials'])
-
     with open('jobs/MonteCarlo/UH-60A_adv.yml', 'r') as myfile:
         inputs = myfile.read()
     data = yaml.load(inputs)['materials']

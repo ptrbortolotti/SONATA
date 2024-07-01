@@ -182,21 +182,23 @@ class Segment(object):
 
         (BSplineLst, start, end) = self.get_BsplineLst_plus(lid, SegmentLst, WebLst)
         return get_BSplineLst_Pnt2d(BSplineLst, S, start, end)
-
     def build_layers(self, WebLst=None, Segment0=None, display=None, l0=None, **kwargs):
         """The build_layers member function of the class Segment generates all Layer objects and it's associated wires
         and return the relevant_boundary_BSplineLst"""
+        # ivLst is a list of the each layer start, end, and id
+        # cum_ivLst is the cumulative list of ivLsts
         cum_ivLst = self.boundary_ivLst
 
         if self.Layup.size != 0:
             for i in range(1, len(self.Layup) + 1):
                 print("STATUS:\t Building Segment %d, Layer: %d" % (self.ID, i))
-
                 begin = float(self.Layup[i - 1][0])
                 end = float(self.Layup[i - 1][1])
-                # print cum_ivLst, begin, end
+                # Deleting all ivs from the ivLst inside of the current layer's begin and end and storing
+                # the deleted ivs in ivLst to use for the reference layer.
                 ivLst = chop_interval_from_layup(cum_ivLst, begin, end)
                 ivLst = sort_layup_projection([ivLst])[0]
+                # Creating reference layer from the chopped ivLst
                 relevant_boundary_BSplineLst = self.ivLst_to_BSplineLst(ivLst)
 
                 # CREATE LAYER Object
@@ -227,7 +229,6 @@ class Segment(object):
                 cum_ivLst = sort_layup_projection([cum_ivLst])[0]
                 # tmp_Layer.cumA_ivLst = cummulated_layup_boundaries(self.Layup)[i]
                 tmp_Layer.cumA_ivLst = cum_ivLst
-
                 tmp_Layer.inverse_ivLst = inverse_relevant_cummulated_layup_boundaries(self.Layup)[i - 1]
 
                 tmp_Layer.build_wire()

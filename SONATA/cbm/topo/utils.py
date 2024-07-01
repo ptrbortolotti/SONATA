@@ -67,7 +67,7 @@ def fuse_rows(a, tol=1e-5, keep_closed=True):
     """
     tree = cKDTree(a)
     # print(a)
-    rows_to_fuse = tree.query_pairs(r=1e-5, output_type="ndarray")
+    rows_to_fuse = tree.query_pairs(tol, output_type="ndarray")
     # print(rows_to_fuse)
     # to delete but respect first and last rows:
     b = np.unique(rows_to_fuse[:, 1])
