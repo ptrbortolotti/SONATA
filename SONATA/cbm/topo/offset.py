@@ -56,8 +56,6 @@ def shp_parallel_offset(arrPts, dist, join_style=1, side="right", res=16):
         if Orientation == True:
             data = np.flipud(data)
 
-    # if closed == False:
-    #     data = np.flipud(data)
     # ==============Interpolate large linear spaces=============================
     seg_P2Plength = []
     cumm_length = 0
@@ -101,75 +99,9 @@ def shp_parallel_offset(arrPts, dist, join_style=1, side="right", res=16):
         else:
             Refinement = False
 
-    # Make sure there are unique rows
-    #    if np.allclose(data[0],data[-1]):
-    #        closed = True
-    #
-    #    else:
-    #        closed = False
-    #        before = len(data)
-    #        data = unique_rows(data.round(decimals=9))
-    #        after = len(data)
-    #        if after<before:
-    #            print 'non unique elements found',len(data)
-
-    # ======PLOTTING for debugging
-    #    fig = plt.figure()
-    #    fig.add_subplot(111)
-    #    plt.clf()
-    #    plt.plot(*arrPts.T, color='black', marker='.')
-    #    plt.plot(*arrPts[0].T, color='green', marker='o')
-    #    plt.plot(*arrPts[-1].T, color='purple', marker='o')
-    #
-    #    for i, item in enumerate(arrPts):
-    #        plt.annotate(i, (item[0],item[1]), color='black')
-    #
-    #    plt.plot(*data.T, color='red', marker='.')
-    #    plt.plot(*data[0].T, color='green', marker='>')
-    #    plt.plot(*data[-1].T, color='purple', marker='>')
-    #
-    #    for i, item in enumerate(data):
-    #        plt.annotate(i, (item[0],item[1]), color='red')
-    #
-    #    plt.axis('equal')
-    #    plt.show()
-
     return data
 
 
 # ==============================================================================
 if __name__ == "__main__":
     exec(compile(open("SONATA.py").read(), "SONATA.py", "exec"))
-#    for i,item in enumerate(projection):
-#        timelines(0,item[0],item[1],color[int(item[2])])
-
-#    plt.figure(2)
-#    plt.plot(*arrPts.T, color='black', marker='.')
-# plt.plot(*data.T, color='red', marker='.')
-
-
-#    #Find corners and edges of original data
-#    DCT_angles1 = calc_DCT_angles(arrPts)
-#    angular_deflection = 30
-#    concave1 = []
-#    for i in range(0,DCT_angles1.shape[0]):
-#        if DCT_angles1[i] > (180 + angular_deflection):
-#            concave1.append(i)
-#    NbConcave1 = np.size(concave1)
-#
-#    for i,idx in enumerate(concave1):
-#        ConcavePt = arrPts[idx]
-#        v1 = arrPts[idx]-arrPts[idx-1]
-#        n1 = np.array([-v1[1],v1[0]])
-#        n1 = n1/np.linalg.norm(n1)
-#        P1 = ConcavePt+n1*distt
-#        v2 = arrPts[idx+1]-arrPts[idx]
-#        n2 = np.array([-v2[1],v2[0]])
-#        n2 = n2/np.linalg.norm(n2)
-#        P2 = ConcavePt+n2*dist
-#
-#        plt.plot(*P1.T, color='GREEN', marker='o')
-#        plt.plot(*P2.T, color='BLUE', marker='o')
-
-#
-#    plt.show()

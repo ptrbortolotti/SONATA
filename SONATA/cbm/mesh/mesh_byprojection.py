@@ -6,23 +6,20 @@ Created on Tue Mar 28 09:58:14 2017
 """
 # Core Library modules
 import itertools
-import math
 
 # Third party modules
 import numpy as np
 from OCC.Core.Geom2dAPI import (Geom2dAPI_PointsToBSpline,
                                 Geom2dAPI_ProjectPointOnCurve,)
-from OCC.Core.gp import gp_Pnt, gp_Pnt2d, gp_Vec, gp_Vec2d
-from OCC.Display.SimpleGui import init_display
+from OCC.Core.gp import gp_Pnt2d, gp_Vec2d
 
 # First party modules
-from SONATA.cbm.display.display_utils import display_custome_shape
 from SONATA.cbm.mesh.cell import Cell
 from SONATA.cbm.mesh.node import Node
 from SONATA.cbm.topo.BSplineLst_utils import (
-    ProjectPointOnBSplineLst, find_BSplineLst_coordinate, get_BSplineLst_length,
-    get_BSplineLst_Pnt2d, intersect_BSplineLst_with_BSpline,)
+    ProjectPointOnBSplineLst, find_BSplineLst_coordinate, intersect_BSplineLst_with_BSpline,)
 from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
+
 
 
 def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst, layer_thickness, tol=1e-2, crit_angle=95, LayerID=0, refL=1.0, **kw):
@@ -127,14 +124,6 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst, 
         # ==================DETECT CORNERS======================================
         if len(pPnts) == 0:
             print("ERROR:\t No Projection found for node,", node.id)
-        #            for j in range(1,projection.NbPoints()+1):
-        #                if projection.Distance(j)<=distance:
-        #                    pPnts.append(projection.Point(j))
-        #                    pPara.append(projection.Parameter(j))
-        #                    pIdx.append(idx)
-        #                else:
-        #                    print(projection.Distance(j), distance, node.Pnt2d.Coord())
-        #                    print(Umin, Umax)
 
         elif len(pPnts) == 1:
             b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
@@ -292,16 +281,6 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst, 
             # ===CORNERSTYLE 4======
             elif len(exterior_corners) == 2 and node.corner == True:
                 node.cornerstyle = 4
-                # print node, Angle
-                #                display.DisplayShape(node.Pnt2d)
-                #                display.DisplayShape(pPnts[0], color='GREEN')
-                #                display.DisplayShape(pPnts[1], color='ORANGE')
-                #                display.DisplayShape(exterior_corners[0],color='RED')
-                #                display.DisplayShape(exterior_corners[1],color='CYAN')
-                # print 'exterior_corners_para0:', exterior_corners_para[0]
-                # print 'exterior_corners_para1:', exterior_corners_para[1]
-                # print ' pIdx[0]:', pIdx[0],pPara[0]
-                # print ' pIdx[1]:', pIdx[1],pPara[1]
 
                 if node.regular_corner == True:
                     # print 'R',[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]
@@ -315,7 +294,6 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst, 
                     newIdx = exterior_corners_para[0][1] + 1 + tmp_idx
                     newPara = tmp_u
                     b_BSplineLst[newIdx].D0(newPara, newPnt)
-                    # display.DisplayShape(newPnt,color='RED')
 
                     b_nodes.append(Node(newPnt, [LayerID, newIdx, newPara]))
                     b_nodes.append(Node(exterior_corners[1], [exterior_corners_para[1][0], exterior_corners_para[1][1], exterior_corners_para[1][2]]))
@@ -323,8 +301,6 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst, 
                     b_nodes.append(Node(pPnts[1], [LayerID, pIdx[1], pPara[1]]))
 
                 else:
-                    # display.DisplayShape(node.Pnt2d)
-                    # print 'IR',[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]
                     b_nodes.append(Node(pPnts[1], [LayerID, pIdx[1], pPara[1]]))
                     b_nodes.append(Node(exterior_corners[0], [exterior_corners_para[0][0], exterior_corners_para[0][1], exterior_corners_para[0][2]]))
                     b_nodes[-1].corner = True
